@@ -1,82 +1,111 @@
-# LumiLivre - Aplicação Frontend
+<div align="center">
+  <!-- Banner -->
+  <a href="https://n33miaz.github.io/n33miaz-links/#lumitcc">
+    <img width="100%" src="https://github-stats-api-fmwm.onrender.com/api/banner?title=LumiLivre&subtitle=Library%20Management%20System&tag=(TCC)%20Bachelor%27s%20Thesis&title_color=762075&text_color=c9d1d9&v=1" alt="LumiLivre Banner" />
+  </a>
 
-Repositório do frontend da aplicação LumiLivre, desenvolvido para a interface de administração do sistema bibliotecário.
+  <!-- Pins dos Repositórios -->
+  <a href="https://n33miaz.github.io/n33miaz-links/#lumiweb"><img src="https://github-stats-api-fmwm.onrender.com/api/pin?username=n33miaz&repo=lumilivre-web&custom_title=WebSite&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270" height="140" /></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://n33miaz.github.io/n33miaz-links/#lumiapp"><img src="https://github-stats-api-fmwm.onrender.com/api/pin?username=n33miaz&repo=lumilivre-app&custom_title=Application&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270" height="140" /></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://n33miaz.github.io/n33miaz-links/#lumiapi"><img src="https://github-stats-api-fmwm.onrender.com/api/pin?username=n33miaz&repo=lumilivre-api&custom_title=API%20Restfull&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270" height="140" /></a>
+</div>
 
-## Visão Geral da Tecnologia
+<br/>
 
-- **Framework**: React 19
-- **Linguagem**: TypeScript
-- **Build Tool**: Vite
-- **Estilização**: Tailwind CSS
-- **Roteamento**: React Router
-- **Cliente HTTP**: Axios
-- **Gerenciamento de Estado**: React Context API
+<div align="center">
+  <h1>Sobre o Projeto</h1>
+</div>
 
----
+O **LumiLivre Web** é o painel administrativo central do ecossistema, voltado para **bibliotecários e gestores**. Desenvolvido em **React** com **TypeScript**, ele oferece uma interface robusta e responsiva para o gerenciamento completo do acervo, usuários e fluxo de empréstimos.
 
-## 🚀 Como Rodar o Projeto Localmente
+A aplicação foi construída com foco em produtividade, utilizando **TailwindCSS** para estilização moderna e **React Query** para gerenciamento eficiente de estado e cache, garantindo que os dados administrativos estejam sempre sincronizados com o backend.
 
-Siga estes passos para configurar e executar o frontend na sua máquina.
+<br/>
 
-### 1. Pré-requisitos
+<div align="center">
+  <h1>Screenshots</h1>
+</div>
 
-Garanta que você tenha as seguintes ferramentas instaladas:
+<div align="center">
+  <img src="src/assets/images/prints/login.png" width="45%" alt="Dashboard" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Livros" style="border-radius: 10px; margin: 5px;">
+</div>
 
-| Ferramenta | Versão Mínima | Instalação (Windows - via [Chocolatey](https://chocolatey.org/)) | Instalação (Linux - via apt/dnf)                                |
-| ---------- | ------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
-| **Node.js**| `^18.x`        | `choco install nodejs-lts`                                      | Gerenciado via `nvm` (Node Version Manager) é o recomendado. |
-| **Git**    | `^2.x`         | `choco install git`                                             | `sudo apt-get install git` ou `sudo dnf install git`           |
+<br/>
 
-**Verificação:**
-Após a instalação, abra um novo terminal e verifique as versões com:
-```bash
-node -v
-npm -v
-git --version
+<div align="center">
+  <h1>Funcionalidades Principais</h1>
+</div>
+
+### 📊 Dashboard & Gestão
+- **Visão Geral:** Métricas em tempo real sobre empréstimos ativos, atrasos e solicitações pendentes.
+- **Controle de Acervo:** Cadastro completo de livros (com busca automática de metadados via ISBN), exemplares físicos e TCCs.
+- **Gestão de Usuários:** Administração de alunos, cursos, turnos e módulos, com histórico detalhado de cada leitor.
+
+### 🔄 Fluxo de Empréstimos
+- **Solicitações:** Aprovação ou rejeição de pedidos de empréstimo feitos pelo aplicativo mobile.
+- **Movimentação:** Registro de retiradas e devoluções, com cálculo automático de datas de vencimento.
+- **Penalidades:** Sistema automático de bloqueio para alunos com devoluções em atraso.
+
+### 📑 Relatórios & Ferramentas
+- **Relatórios PDF:** Geração de documentos detalhados sobre acervo, alunos e movimentações para fins administrativos.
+- **Ranking:** Visualização dos alunos que mais leem (Gamificação vista pelo lado do gestor).
+- **Importação em Massa:** Ferramenta para carga de dados via planilhas Excel.
+
+### ⚙️ Recursos Técnicos
+- **Dark Mode:** Suporte nativo a temas claro e escuro (`ThemeContext`).
+- **Performance:** Paginação dinâmica e cache de requisições com TanStack Query.
+- **Responsividade:** Layout adaptável para desktops e tablets.
+
+<br/>
+
+<div align="center">
+  <h1>Arquitetura do Sistema</h1>
+</div>
+
+Utilizamos uma arquitetura cliente-servidor moderna baseada em microsserviços e nuvem para garantir escalabilidade.
+
+```mermaid
+flowchart TD
+    classDef mobile fill:#02569B,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef web fill:#61DAFB,stroke:#fff,stroke-width:2px,color:#000;
+    classDef api fill:#762075,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef db fill:#336791,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef storage fill:#3ECF8E,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef external fill:#ddd,stroke:#333,stroke-width:1px,color:#000,stroke-dasharray: 5 5;
+
+    UserMobile["Application (Aluno)"]:::mobile
+    UserWeb["WebSite (Bibliotecário)"]:::web
+    
+    subgraph Cloud["-"]
+        direction TB
+        API["API RestFull"]:::api
+        DB[("PostgreSQL")]:::db
+        Storage["Supabase Storage"]:::storage
+    end
+    
+    External["Google Books / BrasilAPI"]:::external
+
+    UserMobile -->|REST API / JSON| API
+    UserWeb -->|REST API / JSON| API
+    
+    API -->|JPA / Hibernate| DB
+    API -->|Upload Capas e PDF's| Storage
+    API -.->|Consulta Metadados| External
 ```
 
-### 2. Configuração do Ambiente
+<br/>
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone https://github.com/TCC-DS-2025/lumilivre-web
-    cd lumilivre-web
-    ```
+<div align="center">
+  <h1>Segurança</h1>
+</div>
 
-2.  **Instale as dependências:**
-    Bibliotecas listadas no `package.json` para a pasta `node_modules`.
-    ```bash
-    npm install
-    ```
+- **Rotas Protegidas:** Implementação de `ProtectedRoute` para impedir acesso não autorizado às páginas administrativas.
+- **Gestão de Sessão:** Controle de autenticação via Context API (`AuthContext`) com persistência segura e logout automático.
+- **Validação de Dados:** Tratamento rigoroso de formulários e respostas da API para prevenir injeção de dados inválidos.
 
-3.  **Configure a Conexão com a API:**
-    A aplicação precisa saber onde o backend está rodando.
-    *   Crie um arquivo na raiz do projeto chamado `.env.local`.
-    *   Adicione a seguinte linha a este arquivo, apontando para a URL do seu backend (exemplo local):
-        ```
-        VITE_API_BASE_URL=http://localhost:8080
-        ```
-    *O arquivo `.env.local` é ignorado pelo Git para não expor URLs ou chaves sensíveis.*
+<br/>
 
-### 3. Executando a Aplicação
-
-Com tudo configurado, inicie o servidor de desenvolvimento:
-
-```bash
-npm run dev
-```
-
-O servidor iniciará e a aplicação estará disponível, geralmente no endereço **[http://localhost:5173](http://localhost:5173)**. O terminal indicará a URL exata. A página abrirá automaticamente no seu navegador e será recarregada a cada alteração.
-
----
-
-## 🏗️ Estrutura do Projeto
-
-O código-fonte está organizado na pasta `src/` da seguinte maneira:
-
-- **/assets**: Contém todos os arquivos estáticos, como imagens e ícones SVG.
-- **/components**: Componentes React reutilizáveis em toda a aplicação (ex: `Sidebar`, `Header`, `Icon`).
-- **/contexts**: Gerenciadores de estado global, como `AuthContext` (autenticação) e `ThemeContext` (modo claro/escuro).
-- **/layouts**: Componentes que definem a estrutura de layout das páginas (ex: `MainLayout` com header e sidebar).
-- **/pages**: Componentes que representam as páginas completas da aplicação (ex: `LoginPage`, `DashboardPage`).
-- **/services**: Camada de comunicação com a API. Contém a lógica do Axios para fazer as requisições ao backend.
+<div align="center">
+  <sub>LumiLivre © 2025 - Todos os direitos reservados.</sub>
+</div>
