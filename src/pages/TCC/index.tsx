@@ -55,7 +55,7 @@ export function TccPage() {
   } = useTccs(termoBuscaAtivo, activeFilters);
 
   const filteredData = useMemo(() => {
-    let data = [...tccs];
+    const data = [...tccs];
     data.sort((a, b) => {
       const valA = a[sortConfig.key] || '';
       const valB = b[sortConfig.key] || '';
@@ -122,7 +122,7 @@ export function TccPage() {
     {
       key: 'titulo',
       header: 'Título',
-      width: '35%',
+      width: '30%',
       render: (item) => (
         <span
           className="font-bold dark:text-white truncate"
@@ -135,7 +135,7 @@ export function TccPage() {
     {
       key: 'alunos',
       header: 'Alunos',
-      width: '25%',
+      width: '30%',
       render: (item) => (
         <span className="dark:text-gray-300 truncate" title={item.alunos}>
           {item.alunos}

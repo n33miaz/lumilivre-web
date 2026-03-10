@@ -298,7 +298,7 @@ export function ClassificacaoPage() {
             Classificação dos Leitores
           </h1>
           <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-            Acompanhe o desempenho de leitura dos alunos e cursos.
+            Acompanhe o desempenho de leitura dos alunos.
           </p>
         </div>
       </div>
@@ -310,7 +310,7 @@ export function ClassificacaoPage() {
             <div className="flex flex-col h-full min-h-[350px] lg:min-h-[400px] lg:col-span-5">
               <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2 shrink-0">
                 <span className="w-1 h-6 bg-lumi-primary dark:bg-lumi-label rounded-full"></span>
-                Pódio dos Maiores Leitores
+                Pódio dos Maiores
               </h3>
               <div className="flex-grow bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-4 flex items-end justify-center h-96">
                 <div className="flex items-end justify-center w-full max-w-lg gap-2 md:gap-4 h-full">
@@ -357,7 +357,7 @@ export function ClassificacaoPage() {
             <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6">
               <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
                 <span className="w-1 h-6 bg-lumi-primary dark:bg-lumi-label rounded-full"></span>
-                Top Alunos com Mais Empréstimos
+                Top Alunos (Geral)
               </h3>
 
               {/* Filtros */}
