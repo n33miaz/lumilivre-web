@@ -11,7 +11,7 @@ import LockIcon from '../assets/icons/lock.svg?react';
 export function MandatoryPasswordChangeModal() {
   const { user, completePasswordChange } = useAuth();
   const { addToast } = useToast();
-  
+
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
@@ -23,12 +23,20 @@ export function MandatoryPasswordChangeModal() {
     e.preventDefault();
 
     if (novaSenha.length < 6) {
-      addToast({ type: 'warning', title: 'Senha curta', description: 'A nova senha deve ter no mínimo 6 caracteres.' });
+      addToast({
+        type: 'warning',
+        title: 'Senha curta',
+        description: 'A nova senha deve ter no mínimo 6 caracteres.',
+      });
       return;
     }
 
     if (novaSenha !== confirmarSenha) {
-      addToast({ type: 'warning', title: 'Erro', description: 'As novas senhas não conferem.' });
+      addToast({
+        type: 'warning',
+        title: 'Erro',
+        description: 'As novas senhas não conferem.',
+      });
       return;
     }
 
@@ -38,10 +46,14 @@ export function MandatoryPasswordChangeModal() {
       await api.put('/usuarios/alterar-senha', {
         matricula: '',
         senhaAtual: senhaAtual,
-        novaSenha: novaSenha
+        novaSenha: novaSenha,
       });
 
-      addToast({ type: 'success', title: 'Sucesso', description: 'Senha alterada com sucesso!' });
+      addToast({
+        type: 'success',
+        title: 'Sucesso',
+        description: 'Senha alterada com sucesso!',
+      });
       completePasswordChange();
     } catch (error: any) {
       console.error(error);
@@ -62,7 +74,8 @@ export function MandatoryPasswordChangeModal() {
       <div className="space-y-4">
         <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
           <p className="text-sm text-yellow-800 dark:text-yellow-200">
-            Por motivos de segurança, você deve alterar sua senha inicial antes de continuar utilizando o sistema.
+            Por motivos de segurança, você deve alterar sua senha inicial antes
+            de continuar utilizando o sistema.
           </p>
         </div>
 
@@ -76,7 +89,7 @@ export function MandatoryPasswordChangeModal() {
             icon={LockIcon}
             required
           />
-          
+
           <InputFloatingLabel
             id="novaSenha"
             label="Nova Senha"
@@ -101,8 +114,11 @@ export function MandatoryPasswordChangeModal() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-lumi-primary hover:bg-lumi-primary-hover text-white font-bold py-3 px-4 rounded-lg shadow-md disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full bg-lumi-primary hover:bg-lumi-primary-hover text-white font-bold py-3 px-4 rounded-lg shadow-md disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
+              {isLoading && (
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
               {isLoading ? 'SALVANDO...' : 'SALVAR'}
             </button>
           </div>

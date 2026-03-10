@@ -238,8 +238,11 @@ export function NovoEmprestimo({ onClose, onSuccess }: NewLoanProps) {
           type="submit"
           form="form-novo-emprestimo"
           disabled={isLoading}
-          className={buttonClass}
+          className={`${buttonClass} flex items-center justify-center gap-2`}
         >
+          {isLoading && (
+            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          )}
           {isLoading ? 'PROCESSANDO...' : 'CONFIRMAR EMPRÉSTIMO'}
         </button>
       </div>
