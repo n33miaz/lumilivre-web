@@ -185,7 +185,7 @@ export function TccPage() {
           searchPlaceholder="Pesquise por título, aluno ou curso"
           onAddNew={() => setIsModalOpen(true)}
           addNewButtonLabel="NOVO TCC"
-          showFilterButton={true} // Habilita botão de filtro
+          showFilterButton={true}
           isFilterOpen={isFilterOpen}
           onFilterToggle={() => setIsFilterOpen((prev) => !prev)}
           filterComponent={

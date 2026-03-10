@@ -39,21 +39,21 @@ interface Option {
 }
 
 const ReportItem = ({ title, description, onGenerate }: ReportItemProps) => (
-  <div className="flex items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0">
-    <div className="flex items-center">
-      <div className="p-2 rounded-lg mr-4 bg-gray-100 dark:bg-gray-700">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0 gap-4">
+    <div className="flex items-start sm:items-center">
+      <div className="p-2 rounded-lg mr-3 sm:mr-4 bg-gray-100 dark:bg-gray-700 shrink-0 mt-1 sm:mt-0">
         <AddIcon className="w-6 h-6 text-lumi-primary dark:text-lumi-label" />
       </div>
       <div>
         <h3 className="font-semibold text-gray-800 dark:text-white">{title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">
           {description}
         </p>
       </div>
     </div>
     <button
       onClick={onGenerate}
-      className="flex items-center gap-2 font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-lumi-primary hover:bg-lumi-primary-hover transform hover:scale-105 active:scale-95"
+      className="flex items-center justify-center gap-2 font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-lumi-primary hover:bg-lumi-primary-hover transform hover:scale-105 active:scale-95 w-full sm:w-auto shrink-0"
     >
       <span>Gerar</span>
     </button>
@@ -630,15 +630,16 @@ export function RelatoriosPage() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-3 mb-6 shrink-0 select-none">
-        <div className="p-2 bg-lumi-primary/10 dark:bg-lumi-primary/20 rounded-full">
+        <div className="p-2 bg-lumi-primary/10 dark:bg-lumi-primary/20 rounded-full shrink-0">
           <ReportPaperIcon className="w-8 h-8 text-lumi-primary dark:text-lumi-label" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
             Central de Relatórios
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Selecione um tipo de relatório, aplique filtros e baixe o PDF.
+          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+            Escolha um tipo de relatório, aplique filtros (caso necessário) e
+            baixe o PDF.
           </p>
         </div>
       </div>

@@ -448,7 +448,7 @@ export function LivrosPage() {
           onSearchChange={setTermoBusca}
           onSearchSubmit={handleSearchSubmit}
           onReset={handleResetSearch}
-          inputWidth={isExemplarView ? 'w-[300px]' : 'w-[500px]'}
+          inputWidth={isExemplarView ? 'md:w-[300px]' : 'md:w-[500px]'}
           searchPlaceholder={
             isExemplarView
               ? 'Pesquise pelo tombo do exemplar'
@@ -473,20 +473,20 @@ export function LivrosPage() {
           }
         >
           {isExemplarView && selectedBook && (
-            <div className="flex justify-between items-center bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <div className="flex w-full md:w-auto justify-between items-center bg-white dark:bg-gray-800 rounded-lg shadow-md">
               <button
                 onClick={handleVoltarParaLivros}
-                className="p-2 rounded-l-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                className="p-2 md:p-2 rounded-l-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 shrink-0"
               >
-                <BackIcon className="m-0.5 mx-1.5 w-5 h-5 text-lumi-primary dark:text-lumi-label" />
+                <BackIcon className="m-0.5 mx-1 md:mx-1.5 w-5 h-5 text-lumi-primary dark:text-lumi-label" />
               </button>
 
-              <div className="flex items-center overflow-hidden mr-4">
-                <span className="text-lg font-bold text-gray-800 dark:text-white whitespace-nowrap mx-2 ml-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center overflow-hidden px-3 flex-1">
+                <span className="text-[11px] md:text-lg font-bold text-gray-500 md:text-gray-800 dark:text-gray-400 md:dark:text-white whitespace-nowrap md:mx-2 md:ml-4 leading-tight">
                   Exemplares de:
                 </span>
                 <span
-                  className="text-lg font-bold text-lumi-primary dark:text-lumi-label max-w-[400px] truncate"
+                  className="text-sm md:text-lg font-bold text-lumi-primary dark:text-lumi-label max-w-full md:max-w-[400px] truncate leading-tight"
                   title={selectedBook.nome}
                 >
                   {selectedBook.nome}
@@ -495,9 +495,10 @@ export function LivrosPage() {
 
               <button
                 onClick={() => handleAbrirDetalhes(selectedBook!)}
-                className="bg-lumi-label text-white text-xs font-bold py-1 px-3 mr-4 rounded hover:bg-opacity-75 hover:scale-105 shadow-md"
+                className="bg-lumi-label text-white text-[10px] md:text-xs font-bold py-1.5 px-2 md:py-1 md:px-3 mr-2 md:mr-4 rounded hover:bg-opacity-75 hover:scale-105 shadow-md shrink-0"
               >
-                DETALHES LIVRO
+                <span className="hidden md:inline">DETALHES LIVRO</span>
+                <span className="md:hidden">DETALHES</span>
               </button>
             </div>
           )}

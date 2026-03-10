@@ -467,7 +467,7 @@ export function DashboardPage() {
         solicitacao={selectedRequest}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6 shrink-0">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 shrink-0">
         <StatCard
           to="/livros"
           Icon={BookIcon}
@@ -510,9 +510,9 @@ export function DashboardPage() {
         ref={dashboardContainerRef}
         className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0"
       >
-        <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-md flex flex-col min-h-0 will-change-transform">
+        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[300px] md:min-h-0 will-change-transform overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
-            Solicitações de Empréstimo
+            Solicitações
           </h3>
 
           <DataTable
@@ -550,9 +550,9 @@ export function DashboardPage() {
           />
         </div>
 
-        <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-md flex flex-col min-h-0 will-change-transform">
+        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[300px] md:min-h-0 will-change-transform overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
-            Empréstimos Atrasados e a Vencer
+            Atrasados e a Vencer
           </h3>
 
           <DataTable

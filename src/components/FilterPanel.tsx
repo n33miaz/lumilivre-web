@@ -67,7 +67,7 @@ export function FilterPanel({
   return (
     <div
       ref={panelRef}
-      className={`absolute top-full left-20 mt-2 origin-top-left bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 select-none
+      className={`absolute top-full left-0 md:left-20 mt-2 origin-top-left bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 select-none w-[calc(100vw-2rem)] md:${width} max-w-[95vw]
         ${width}
         ${isClosing ? 'animate-slide-up' : 'animate-slide-down'}
         `}

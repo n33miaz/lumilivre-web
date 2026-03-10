@@ -34,7 +34,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
     ? isSidebarExpanded
       ? 'md:ml-48'
       : 'md:ml-20'
-    : 'ml-20';
+    : 'md:ml-20';
 
   const variants: Variants = {
     enter: (direction: number) => ({
@@ -80,6 +80,14 @@ export function MainLayout({ children }: { children: ReactNode }) {
       />
 
       <div className="flex flex-1 overflow-hidden relative">
+        {/* Backdrop para Mobile */}
+        {isSidebarExpanded && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+            onClick={() => setIsSidebarExpanded(false)}
+          />
+        )}
+
         <Sidebar
           isExpanded={isSidebarExpanded}
           setExpanded={setIsSidebarExpanded}

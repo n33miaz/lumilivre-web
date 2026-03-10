@@ -55,7 +55,7 @@ export function Modal({
 
       <div
         className={`
-          relative bg-white dark:bg-dark-card rounded-lg shadow-2xl w-full max-w-3xl m-4 
+          relative bg-white dark:bg-dark-card rounded-lg shadow-2xl w-[95%] md:w-full max-w-3xl m-2 md:m-4 max-h-[95vh] flex flex-col
           ${isAnimatingOut ? 'animate-shrink-out' : 'animate-grow-in'}
         `}
         onClick={(e) => e.stopPropagation()}

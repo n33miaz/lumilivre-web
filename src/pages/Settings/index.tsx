@@ -1,7 +1,6 @@
 import {
   useContext,
   useEffect,
-  useRef,
   useState,
   type ReactNode,
   type SVGProps,
@@ -10,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-// import { useToast } from '../../contexts/ToastContext';
+import { useToast } from '../../contexts/ToastContext';
 
 import UploadIcon from '../../assets/icons/download.svg?react';
 import LockIcon from '../../assets/icons/lock.svg?react';
@@ -36,21 +35,21 @@ const SettingItem = ({
   children,
   iconClassName = 'w-6 h-6',
 }: SettingItemProps) => (
-  <div className="flex items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0">
-    <div className="flex items-center">
-      <div className="p-2 rounded-lg mr-4 bg-gray-100 dark:bg-gray-700">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0 gap-4">
+    <div className="flex items-start sm:items-center">
+      <div className="p-2 rounded-lg mr-3 sm:mr-4 bg-gray-100 dark:bg-gray-700 shrink-0 mt-1 sm:mt-0">
         <Icon
           className={`${iconClassName} text-lumi-primary dark:text-lumi-label select-none`}
         />
       </div>
       <div>
         <h3 className="font-semibold text-gray-800 dark:text-white">{title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">
           {description}
         </p>
       </div>
     </div>
-    <div>{children}</div>
+    <div className="w-full sm:w-auto flex justify-end">{children}</div>
   </div>
 );
 
@@ -77,8 +76,7 @@ const SubPageHeader = ({
 export function ConfiguracoesPage() {
   const { theme, setTheme } = useContext(ThemeContext);
   const { user, logoutWithAnimation } = useAuth();
-  // const { addToast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement | null>(null); // retirar depois
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const isAdmin = user?.role === 'ADMIN';
@@ -102,74 +100,50 @@ export function ConfiguracoesPage() {
     }
   }, [theme]);
 
-  // const handleFeatureNotImplemented = () => {
-  //   addToast({
-  //     type: 'info',
-  //     title: 'Em desenvolvimento',
-  //     description: 'Esta funcionalidade estará disponível em breve.',
-  //   });
-  // };
-
-  // retirar depois
-  function handleClick() {
-    fileInputRef.current?.click();
-  }
-
-  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    console.log('Arquivo selecionado:', file);
-  }
+  const handleFeatureNotImplemented = () => {
+    addToast({
+      type: 'info',
+      title: 'Em desenvolvimento',
+      description: 'Esta funcionalidade estará disponível em breve.',
+    });
+  };
 
   const renderImportView = () => (
     <div className="p-6">
-      <SubPageHeader
-        title="Importar Dados"
-        onBack={() => setCurrentView('main')}
-      />
+      <SubPageHeader title="Importar" onBack={() => setCurrentView('main')} />
       <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-        {/* INPUT ESCONDIDO */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          style={{ display: 'none' }}
-        />
-
         <SettingItem
           Icon={UploadIcon}
-          title="Importar Alunos"
+          title="Alunos"
           description="Adicione um arquivo CSV ou XLSX com a relação de alunos"
         >
           <button
-            // onClick={handleFeatureNotImplemented}
-            onChange={handleClick}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none"
+            onClick={handleFeatureNotImplemented}
+            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto"
           >
             Selecionar
           </button>
         </SettingItem>
         <SettingItem
           Icon={UploadIcon}
-          title="Importar Livros"
+          title="Livros"
           description="Adicione um arquivo CSV ou XLSX com a relação de livros"
         >
           <button
-            // onClick={handleFeatureNotImplemented}
-            onClick={handleClick}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none"
+            onClick={handleFeatureNotImplemented}
+            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto"
           >
             Selecionar
           </button>
         </SettingItem>
         <SettingItem
           Icon={UploadIcon}
-          title="Importar Exemplares"
+          title="Exemplares"
           description="Adicione um arquivo CSV ou XLSX com a relação de exemplares dos livros"
         >
           <button
-            // onClick={handleFeatureNotImplemented}
-            onClick={handleClick}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none"
+            onClick={handleFeatureNotImplemented}
+            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto"
           >
             Selecionar
           </button>
@@ -180,31 +154,27 @@ export function ConfiguracoesPage() {
 
   const renderMainView = () => (
     <>
-      {isAdmin && (
-        <div className="p-6">
-          <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-            Gerenciamento de Dados
-          </h2>
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-            <SettingItem
-              Icon={UploadIcon}
-              title="Importar Dados"
-              description="Importe dados de alunos ou livros a partir de um arquivo."
+      {/* <div className="p-6">
+        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
+          Gerenciamento de Dados
+        </h2>
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
+          <SettingItem
+            Icon={UploadIcon}
+            title="Importações"
+            description="Trazer dados a partir de arquivos."
+          >
+            <button
+              onClick={() => setCurrentView('import')}
+              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px]"
             >
-              <button
-                onClick={() => setCurrentView('import')}
-                className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none"
-              >
-                Mais Opções
-              </button>
-            </SettingItem>
-          </div>
+              Opções
+            </button>
+          </SettingItem>
         </div>
-      )}
+      </div> */}
 
-      <div
-        className={`p-6 ${isAdmin ? 'border-t' : ''} border-gray-200 dark:border-gray-700`}
-      >
+      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
           Aparência
         </h2>
@@ -223,29 +193,29 @@ export function ConfiguracoesPage() {
                 : 'w-6 h-6'
             }
             title="Tema"
-            description="Escolha entre o tema claro, escuro ou o padrão seu sistema."
+            description="Escolha sua preferência de tons na plataforma."
           >
-            <div className="flex items-center space-x-2 p-1 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 select-none">
+            <div className="flex items-center space-x-1 sm:space-x-2 p-1 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start">
               <button
                 onClick={() => setTheme('light')}
-                className={`p-2 rounded-md ${theme === 'light' ? 'bg-white shadow text-lumi-primary' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
+                className={`flex-1 sm:flex-none text-xs sm:text-sm p-2 rounded-md ${theme === 'light' ? 'bg-white shadow text-lumi-primary' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
                 title="Claro"
               >
                 Claro
               </button>
               <button
-                onClick={() => setTheme('dark')}
-                className={`p-2 rounded-md ${theme === 'dark' ? 'bg-gray-800 shadow text-lumi-label' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
-                title="Escuro"
-              >
-                Escuro
-              </button>
-              <button
                 onClick={() => setTheme('system')}
-                className={`p-2 rounded-md ${theme === 'system' ? 'bg-lumi-primary shadow text-white' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
+                className={`flex-1 sm:flex-none text-xs sm:text-sm p-2 rounded-md ${theme === 'system' ? 'bg-lumi-primary shadow text-white' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
                 title="Automático"
               >
                 Automático
+              </button>
+              <button
+                onClick={() => setTheme('dark')}
+                className={`flex-1 sm:flex-none text-xs sm:text-sm p-2 rounded-md ${theme === 'dark' ? 'bg-gray-800 shadow text-lumi-label' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
+                title="Escuro"
+              >
+                Escuro
               </button>
             </div>
           </SettingItem>
@@ -254,20 +224,33 @@ export function ConfiguracoesPage() {
 
       <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          Aplicativo Mobile
+          Aplicativo
         </h2>
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
           <SettingItem
-            Icon={UploadIcon} // Reutilizando o ícone de download que você já importou
-            title="Download do App (Android)"
-            description="Baixe a versão mais recente do aplicativo para alunos."
+            Icon={UploadIcon}
+            title="Android"
+            description="Baixe a versão mais recente (APK) do aplicativo para alunos."
           >
             <a
               href="/lumilivre.apk"
               download="LumiLivre.apk"
-              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none text-sm"
+              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px]"
             >
-              Baixar APK
+              Baixar
+            </a>
+          </SettingItem>
+          {/* TODO: Melhorar Opção Para Acessar Outro Site */}
+          <SettingItem
+            Icon={UploadIcon}
+            title="iOS"
+            description="Acesse a versão mais recente (site) da plataforma para alunos."
+          >
+            <a
+              onClick={handleFeatureNotImplemented}
+              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px]"
+            >
+              Acessar
             </a>
           </SettingItem>
         </div>
@@ -281,11 +264,11 @@ export function ConfiguracoesPage() {
           <SettingItem
             Icon={LockIcon}
             title="Mudar Senha"
-            description="Altere sua senha de acesso ao sistema."
+            description="Altere sua senha de acesso."
           >
             <button
               onClick={() => navigate('/mudar-senha')}
-              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none"
+              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px]"
             >
               Alterar
             </button>
@@ -297,22 +280,24 @@ export function ConfiguracoesPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 mb-6 shrink-0 select-none">
-        <div className="p-2 bg-lumi-primary/10 dark:bg-lumi-primary/20 rounded-full">
-          <ToolsIcon className="w-8 h-8 text-lumi-primary dark:text-lumi-label" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-            {isAdmin ? 'Olá, Administrador!' : 'Olá, Bibliotecário!'}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Gerencie suas preferências do sistema.
-          </p>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 shrink-0 select-none">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="p-2 bg-lumi-primary/10 dark:bg-lumi-primary/20 rounded-full shrink-0">
+            <ToolsIcon className="w-8 h-8 text-lumi-primary dark:text-lumi-label" />
+          </div>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
+              {isAdmin ? 'Olá, Administrador!' : 'Olá, Bibliotecário!'}
+            </h1>
+            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+              Gerencie suas preferências do sistema.
+            </p>
+          </div>
         </div>
 
         <button
           onClick={logoutWithAnimation}
-          className="flex items-center space-x-2 py-2 pl-4 pr-2 rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 ml-auto"
+          className="flex items-center justify-center space-x-2 py-2 px-4 rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 w-full sm:w-auto sm:ml-auto"
         >
           <span className="font-bold">Sair da Conta</span>
           <LogoutIcon className="w-6 h-6 text-white" />
