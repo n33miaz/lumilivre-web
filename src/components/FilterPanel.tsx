@@ -15,7 +15,7 @@ export function FilterPanel({
   onApply,
   onClear,
   onClose,
-  width = 'w-[600px]',
+  width = 'md:w-[600px]', // Valor padrão agora inclui o prefixo md:
 }: FilterPanelProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isClosing, setIsClosing] = useState(false);
@@ -67,12 +67,12 @@ export function FilterPanel({
   return (
     <div
       ref={panelRef}
-      className={`absolute top-full left-0 md:left-20 mt-2 origin-top-left bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 select-none w-[calc(100vw-2rem)] md:${width} max-w-[95vw]
-        ${width}
+      className={`absolute top-full -right-2 mt-2 origin-top-right bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 select-none 
+        w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-[95vw] ${width}
         ${isClosing ? 'animate-slide-up' : 'animate-slide-down'}
         `}
     >
-      <div className="p-6 space-y-4">
+      <div className="p-4 md:p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
         {children}
 
         <div className="flex justify-end space-x-2 pt-4 border-t border-gray-200 dark:border-gray-700">

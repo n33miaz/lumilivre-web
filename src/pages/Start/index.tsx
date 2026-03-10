@@ -360,7 +360,7 @@ export function DashboardPage() {
     {
       key: 'aluno',
       header: 'Aluno',
-      width: '25%',
+      width: '30%', 
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {formatarNome(item.aluno)}
@@ -370,7 +370,7 @@ export function DashboardPage() {
     {
       key: 'livro',
       header: 'Livro',
-      width: '30%',
+      width: '40%', 
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {item.livro}
@@ -379,8 +379,8 @@ export function DashboardPage() {
     },
     {
       key: 'solicitacao',
-      header: 'Solicitação',
-      width: '25%',
+      header: 'Solicitado',
+      width: '16%', 
       render: (item) => (
         <span className="dark:text-white font-bold">
           {item.solicitacao.toLocaleDateString('pt-BR')}
@@ -390,7 +390,7 @@ export function DashboardPage() {
     {
       key: 'acoes',
       header: 'Ações',
-      width: '20%',
+      width: '14%', 
       isSortable: false,
       render: (item) => (
         <button
@@ -407,7 +407,7 @@ export function DashboardPage() {
     {
       key: 'aluno',
       header: 'Aluno',
-      width: '25%',
+      width: '30%', 
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {formatarNome(item.aluno)}
@@ -417,7 +417,7 @@ export function DashboardPage() {
     {
       key: 'livro',
       header: 'Livro',
-      width: '30%',
+      width: '40%', 
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {item.livro}
@@ -427,7 +427,7 @@ export function DashboardPage() {
     {
       key: 'devolucao',
       header: 'Devolução',
-      width: '25%',
+      width: '16%', 
       render: (item) => (
         <span className="dark:text-white font-bold">{item.devolucao}</span>
       ),
@@ -435,7 +435,7 @@ export function DashboardPage() {
     {
       key: 'acoes',
       header: 'Ações',
-      width: '20%',
+      width: '14%', 
       isSortable: false,
       render: (item) => (
         <button
@@ -510,7 +510,7 @@ export function DashboardPage() {
         ref={dashboardContainerRef}
         className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0"
       >
-        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[300px] md:min-h-0 will-change-transform overflow-hidden">
+        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[350px] md:min-h-0 will-change-transform overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
             Solicitações
           </h3>
@@ -528,6 +528,7 @@ export function DashboardPage() {
             headerTextClassName={dashboardHeaderTextClass}
             hoverHeaderClassName={dashboardHoverClass}
             hasRoundedBorderTop={false}
+            minWidth="min-w-[700px]"
           />
 
           <TableFooter
@@ -550,7 +551,7 @@ export function DashboardPage() {
           />
         </div>
 
-        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[300px] md:min-h-0 will-change-transform overflow-hidden">
+        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[350px] md:min-h-0 will-change-transform overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
             Atrasados e a Vencer
           </h3>
@@ -569,6 +570,7 @@ export function DashboardPage() {
             headerTextClassName={dashboardHeaderTextClass}
             hoverHeaderClassName={dashboardHoverClass}
             hasRoundedBorderTop={false}
+            minWidth="min-w-[700px]"
           />
 
           <TableFooter

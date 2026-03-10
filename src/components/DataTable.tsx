@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 
 import { LoadingIcon } from './LoadingIcon';
 import { SortableTh } from './SortableTh';
@@ -25,6 +25,7 @@ interface DataTableProps<T> {
   headerTextClassName?: string;
   hoverHeaderClassName?: string;
   hasRoundedBorderTop?: boolean;
+  minWidth?: string;
 }
 
 export function DataTable<T>({
@@ -37,38 +38,13 @@ export function DataTable<T>({
   getRowKey,
   getRowClass,
   emptyStateMessage = 'Nenhum item encontrado.',
-  headerClassName = 'h-12 bg-lumi-primary shadow-md',
+  headerClassName = 'bg-lumi-primary shadow-md',
   headerTextClassName = 'text-white',
   hoverHeaderClassName = 'hover:bg-white/20',
   hasRoundedBorderTop = true,
+  minWidth = 'min-w-[1024px]',
 }: DataTableProps<T>) {
   const tableBodyRef = useRef<HTMLDivElement>(null);
-  const [hasScroll, setHasScroll] = useState(false);
-
-  useEffect(() => {
-    const element = tableBodyRef.current;
-    if (!element) return;
-
-    const checkForScroll = () => {
-      const hasVerticalScroll =
-        element.scrollHeight > Math.ceil(element.clientHeight);
-      setHasScroll(hasVerticalScroll);
-    };
-
-    checkForScroll();
-
-    const observer = new ResizeObserver(() => {
-      checkForScroll();
-    });
-
-    observer.observe(element);
-    window.addEventListener('resize', checkForScroll);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', checkForScroll);
-    };
-  }, [data]);
 
   return (
     <div
@@ -77,75 +53,77 @@ export function DataTable<T>({
       }`}
     >
       <div
-        className={`flex items-stretch shrink-0 z-10 min-w-[800px] lg:min-w-full ${headerClassName}`}
-      >
-        {columns.map((col, index) => {
-          const isLast = index === columns.length - 1;
-          const scrollPaddingClass = isLast && hasScroll ? 'mr-[14px]' : '';
-
-          return col.isSortable === false ? (
-            <div
-              key={col.key}
-              className={`h-full px-2 text-sm font-bold tracking-wider text-center flex items-center justify-center ${headerTextClassName} ${scrollPaddingClass}`}
-              style={{ width: col.width }}
-            >
-              {col.header}
-            </div>
-          ) : (
-            <SortableTh
-              key={col.key}
-              onClick={() => onSort(col.key)}
-              sortConfig={sortConfig}
-              sortKey={col.key}
-              className={`text-sm font-bold tracking-wider ${headerTextClassName} ${hoverHeaderClassName} ${scrollPaddingClass}`}
-              style={{ width: col.width }}
-            >
-              {col.header}
-            </SortableTh>
-          );
-        })}
-      </div>
-
-      <div
         ref={tableBodyRef}
-        className="flex-1 overflow-y-auto custom-scrollbar"
+        className="flex-1 overflow-auto custom-scrollbar relative"
       >
-        {isLoading ? (
-          <div className="flex items-center justify-center h-48">
-            <LoadingIcon />
+        {/* Usando a propriedade minWidth aqui */}
+        <div className={`${minWidth} w-full flex flex-col`}>
+          <div
+            className={`sticky top-0 z-20 flex items-stretch shrink-0 min-h-[48px] ${headerClassName}`}
+          >
+            {columns.map((col) => {
+              return col.isSortable === false ? (
+                <div
+                  key={col.key}
+                  className={`h-full px-4 py-3 text-sm font-bold tracking-wider text-center flex items-center justify-center ${headerTextClassName}`}
+                  style={{ width: col.width }}
+                >
+                  {col.header}
+                </div>
+              ) : (
+                <SortableTh
+                  key={col.key}
+                  onClick={() => onSort(col.key)}
+                  sortConfig={sortConfig}
+                  sortKey={col.key}
+                  className={`px-4 py-3 text-sm font-bold tracking-wider ${headerTextClassName} ${hoverHeaderClassName}`}
+                  style={{ width: col.width }}
+                >
+                  {col.header}
+                </SortableTh>
+              );
+            })}
           </div>
-        ) : error ? (
-          <div className="p-8 text-red-500 text-center">{error}</div>
-        ) : data.length === 0 ? (
-          <div className="p-8 text-gray-500 text-center">
-            {emptyStateMessage}
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {data.map((item) => (
-              <div
-                key={getRowKey(item)}
-                className={`flex items-center min-w-[800px] lg:min-w-full ${
-                  getRowClass
-                    ? getRowClass(item)
-                    : 'hover:bg-gray-300 dark:hover:bg-gray-600 hover:duration-0'
-                }`}
-              >
-                {columns.map((col) => (
+
+          <div className="flex-1">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-48">
+                <LoadingIcon />
+              </div>
+            ) : error ? (
+              <div className="p-8 text-red-500 text-center">{error}</div>
+            ) : data.length === 0 ? (
+              <div className="p-8 text-gray-500 text-center">
+                {emptyStateMessage}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                {data.map((item) => (
                   <div
-                    key={`${getRowKey(item)}-${col.key}`}
-                    className="px-2 py-3 whitespace-nowrap flex justify-center items-center overflow-hidden"
-                    style={{ width: col.width }}
+                    key={getRowKey(item)}
+                    className={`flex items-center w-full ${
+                      getRowClass
+                        ? getRowClass(item)
+                        : 'hover:bg-gray-300 dark:hover:bg-gray-600 hover:duration-0'
+                    }`}
                   >
-                    <div className="w-full flex justify-center">
-                      {col.render(item)}
-                    </div>
+                    {columns.map((col) => (
+                      <div
+                        key={`${getRowKey(item)}-${col.key}`}
+                        className="px-4 py-3 whitespace-nowrap flex justify-center items-center overflow-hidden"
+                        style={{ width: col.width }}
+                      >
+                        <div className="w-full flex justify-center">
+                          {col.render(item)}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
-            ))}
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

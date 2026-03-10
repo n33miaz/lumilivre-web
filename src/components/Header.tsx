@@ -10,18 +10,9 @@ interface HeaderProps {
   isSidebarPinned: boolean;
 }
 
-export function Header({
-  isSidebarExpanded,
-  setSidebarExpanded,
-  isSidebarPinned,
-}: HeaderProps) {
+export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
   const location = useLocation();
   const isHomePage = ['/dashboard', '/'].includes(location.pathname);
-
-  const getHeaderSpacingClass = () => {
-    if (!isSidebarPinned) return 'pl-4 md:pl-28';
-    return isSidebarExpanded ? 'pl-4 md:pl-52' : 'pl-4 md:pl-28';
-  };
 
   const LogoContent = (
     <div className="flex items-center gap-3">
@@ -34,12 +25,7 @@ export function Header({
 
   return (
     <header className="sticky top-0 left-0 w-full z-50 bg-white dark:bg-dark-header shadow-md">
-      <div
-        className={`
-          flex items-center justify-between h-14 px-4 sm:px-6 select-none
-          ${getHeaderSpacingClass()}
-        `}
-      >
+      <div className="flex items-center justify-between h-14 px-4 sm:px-6 select-none pl-4 md:pl-7">
         <div className="flex items-center">
           <button
             type="button"
