@@ -9,6 +9,7 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   preventClose?: boolean;
+  maxWidth?: string;
 }
 
 export function Modal({
@@ -17,6 +18,7 @@ export function Modal({
   title,
   children,
   preventClose = false,
+  maxWidth = 'max-w-3xl',
 }: ModalProps) {
   const [shouldRender, setShouldRender] = useState(isOpen);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
@@ -55,7 +57,7 @@ export function Modal({
 
       <div
         className={`
-          relative bg-white dark:bg-dark-card rounded-lg shadow-2xl w-[95%] md:w-full max-w-3xl m-2 md:m-4 max-h-[95vh] flex flex-col
+          relative bg-white dark:bg-dark-card rounded-lg shadow-2xl w-[95%] md:w-full ${maxWidth} m-2 md:m-4 max-h-[95vh] flex flex-col
           ${isAnimatingOut ? 'animate-shrink-out' : 'animate-grow-in'}
         `}
         onClick={(e) => e.stopPropagation()}

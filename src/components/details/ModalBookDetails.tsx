@@ -16,6 +16,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { CustomSelect } from '../CustomSelect';
 import { SearchableSelect } from '../SearchableSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
+import { ConfirmModal } from '../ConfirmModal';
 
 import uploadIconUrl from '../../assets/icons/download.svg';
 import closeIcon from '../../assets/icons/close.svg';
@@ -51,6 +52,8 @@ export function DetalhesLivroModal({
 
   const [isNovoAutor, setIsNovoAutor] = useState(false);
   const [isNovaEditora, setIsNovaEditora] = useState(false);
+
+  const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
   const { data: cddData } = useCdds();
   const { data: classificacaoData } = useEnum('CLASSIFICACAO_ETARIA');
@@ -251,32 +254,27 @@ export function DetalhesLivroModal({
     }
   };
 
-  const handleExcluirClick = async () => {
-    if (
-      window.confirm(
-        `Tem certeza que deseja excluir o livro "${livroVisualizado.nome}" e TODOS os seus exemplares? Esta ação não pode ser desfeita.`,
-      )
-    ) {
-      setIsLoading(true);
-      try {
-        await excluirLivroComExemplares(livroVisualizado.isbn);
-        addToast({
-          type: 'success',
-          title: 'Sucesso',
-          description: 'Livro e exemplares excluídos com sucesso!',
-        });
-        setFoiAtualizado(true);
-        handleClose();
-      } catch (error: any) {
-        addToast({
-          type: 'error',
-          title: 'Erro ao excluir',
-          description:
-            error.response?.data?.mensagem || 'Erro desconhecido ao excluir.',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const executarExclusao = async () => {
+    setIsLoading(true);
+    try {
+      await excluirLivroComExemplares(livroVisualizado!.isbn);
+      addToast({
+        type: 'success',
+        title: 'Sucesso',
+        description: 'Livro e exemplares excluídos com sucesso!',
+      });
+      setFoiAtualizado(true);
+      handleClose();
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: 'Erro ao excluir',
+        description:
+          error.response?.data?.mensagem || 'Erro desconhecido ao excluir.',
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -678,19 +676,27 @@ export function DetalhesLivroModal({
 
         <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
           <button
-            onClick={handleExcluirClick}
+            onClick={() => setConfirmAction('excluir')}
             disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md"
+            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
           >
+            {isLoading && confirmAction === 'excluir' && (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
             Excluir
           </button>
           {isEditMode ? (
             <button
               onClick={handleSalvarClick}
               disabled={isLoading}
-              className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md"
+              className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
             >
-              {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+              {isLoading && confirmAction === null && (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
+              {isLoading && confirmAction === null
+                ? 'Salvando...'
+                : 'Salvar Alterações'}
             </button>
           ) : (
             <button
@@ -702,6 +708,15 @@ export function DetalhesLivroModal({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction === 'excluir'}
+        title="Excluir Livro"
+        message={`Tem certeza que deseja excluir o livro "${livroVisualizado.nome}" e TODOS os seus exemplares junto?\nEsta ação não pode ser desfeita.`}
+        isDestructive={true}
+        onConfirm={executarExclusao}
+        onCancel={() => setConfirmAction(null)}
+      />
     </Modal>
   );
 }

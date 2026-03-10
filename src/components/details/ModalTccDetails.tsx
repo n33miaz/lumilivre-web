@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 
 import { Modal } from '../Modal';
+import { ConfirmModal } from '../ConfirmModal';
 import { useToast } from '../../contexts/ToastContext';
 import {
   excluirTcc,
@@ -33,6 +34,8 @@ export function ModalTccDetails({
 
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+
+  const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
   const { data: cursosList } = useCursos();
 
@@ -135,28 +138,25 @@ export function ModalTccDetails({
     }
   };
 
-  const handleExcluir = async () => {
-    if (
-      window.confirm(`Tem certeza que deseja excluir o TCC "${tcc.titulo}"?`)
-    ) {
-      setIsLoading(true);
-      try {
-        await excluirTcc(tcc.id);
-        addToast({
-          type: 'success',
-          title: 'Sucesso',
-          description: 'TCC excluído!',
-        });
-        onClose(true);
-      } catch (error: any) {
-        addToast({
-          type: 'error',
-          title: 'Erro',
-          description: 'Erro ao excluir TCC.',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const executarExclusao = async () => {
+    setIsLoading(true);
+    try {
+      await excluirTcc(tcc!.id);
+      addToast({
+        type: 'success',
+        title: 'Sucesso',
+        description: 'TCC excluído!',
+      });
+      onClose(true);
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: 'Erro',
+        description: 'Erro ao excluir TCC.',
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -387,10 +387,13 @@ export function ModalTccDetails({
 
         <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
           <button
-            onClick={handleExcluir}
+            onClick={() => setConfirmAction('excluir')}
             disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 shadow-md"
+            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 shadow-md flex items-center gap-2"
           >
+            {isLoading && confirmAction === 'excluir' && (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
             Excluir
           </button>
 
@@ -406,9 +409,12 @@ export function ModalTccDetails({
               <button
                 onClick={handleSalvar}
                 disabled={isLoading}
-                className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md"
+                className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
               >
-                {isLoading ? 'Salvando...' : 'Salvar'}
+                {isLoading && confirmAction === null && (
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                )}
+                {isLoading && confirmAction === null ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           ) : (
@@ -421,6 +427,15 @@ export function ModalTccDetails({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction === 'excluir'}
+        title="Excluir TCC"
+        message={`Tem certeza que deseja excluir o TCC "${tcc.titulo}"?`}
+        isDestructive={true}
+        onConfirm={executarExclusao}
+        onCancel={() => setConfirmAction(null)}
+      />
     </Modal>
   );
 }

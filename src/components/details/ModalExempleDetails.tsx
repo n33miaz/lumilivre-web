@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 
 import { Modal } from '../Modal';
+import { ConfirmModal } from '../ConfirmModal';
+import { useToast } from '../../contexts/ToastContext';
+
 import { type ListaLivro } from '../../services/livroService';
 import {
   atualizarExemplar,
   excluirExemplar,
 } from '../../services/exemplarService';
-import { useToast } from '../../contexts/ToastContext';
 
 interface ModalExemplarDetailsProps {
   exemplar: ListaLivro | null;
@@ -26,6 +28,8 @@ export function ModalExemplarDetails({
 
   const [tombo, setTombo] = useState('');
   const [localizacao, setLocalizacao] = useState('');
+
+  const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
   const { addToast } = useToast();
 
@@ -94,30 +98,25 @@ export function ModalExemplarDetails({
     }
   };
 
-  const handleExcluir = async () => {
-    if (
-      window.confirm(
-        `Tem certeza que deseja excluir o exemplar de tombo "${exemplar.tomboExemplar}"?`,
-      )
-    ) {
-      setIsLoading(true);
-      try {
-        await excluirExemplar(exemplar.tomboExemplar);
-        addToast({
-          type: 'success',
-          title: 'Sucesso',
-          description: 'Exemplar excluído com sucesso!',
-        });
-        onClose(true);
-      } catch (error: any) {
-        addToast({
-          type: 'error',
-          title: 'Erro ao excluir',
-          description: error.response?.data?.mensagem || 'Erro desconhecido',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const executarExclusao = async () => {
+    setIsLoading(true);
+    try {
+      await excluirExemplar(exemplar!.tomboExemplar);
+      addToast({
+        type: 'success',
+        title: 'Sucesso',
+        description: 'Exemplar excluído com sucesso!',
+      });
+      onClose(true);
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: 'Erro ao excluir',
+        description: error.response?.data?.mensagem || 'Erro desconhecido',
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -180,10 +179,13 @@ export function ModalExemplarDetails({
 
         <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
           <button
-            onClick={handleExcluir}
+            onClick={() => setConfirmAction('excluir')}
             disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md"
+            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
           >
+            {isLoading && confirmAction === 'excluir' && (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
             Excluir
           </button>
 
@@ -191,9 +193,12 @@ export function ModalExemplarDetails({
             <button
               onClick={handleSalvar}
               disabled={isLoading}
-              className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md"
+              className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
             >
-              {isLoading ? 'Salvando...' : 'Salvar'}
+              {isLoading && confirmAction === null && (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
+              {isLoading && confirmAction === null ? 'Salvando...' : 'Salvar'}
             </button>
           ) : (
             <button
@@ -205,6 +210,15 @@ export function ModalExemplarDetails({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction === 'excluir'}
+        title="Excluir Exemplar"
+        message={`Tem certeza que deseja excluir o exemplar de tombo "${exemplar.tomboExemplar}"?`}
+        isDestructive={true}
+        onConfirm={executarExclusao}
+        onCancel={() => setConfirmAction(null)}
+      />
     </Modal>
   );
 }

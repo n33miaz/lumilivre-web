@@ -4,6 +4,7 @@ import { Modal } from '../Modal';
 import { SearchableSelect } from '../SearchableSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
 import { useToast } from '../../contexts/ToastContext';
+import { ConfirmModal } from '../ConfirmModal';
 
 import { buscarAlunosParaAdmin } from '../../services/alunoService';
 import { buscarLivrosAgrupados } from '../../services/livroService';
@@ -57,6 +58,8 @@ export function ModalLoanDetails({
   const [alunosOptions, setAlunosOptions] = useState<Option[]>([]);
   const [livrosOptions, setLivrosOptions] = useState<Option[]>([]);
   const [exemplaresOptions, setExemplaresOptions] = useState<Option[]>([]);
+
+  const [confirmAction, setConfirmAction] = useState<'devolucao' | 'excluir' | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -218,8 +221,6 @@ export function ModalLoanDetails({
 
   const handleDevolucao = async () => {
     if (!emprestimo) return;
-    if (!window.confirm('Confirmar a devolução deste livro?')) return;
-
     setIsLoading(true);
     try {
       await concluirEmprestimo(Number(emprestimo.id));
@@ -230,7 +231,6 @@ export function ModalLoanDetails({
       });
       onClose(true);
     } catch (error: any) {
-      console.error('Erro na devolução:', error);
       addToast({
         type: 'error',
         title: 'Erro na devolução',
@@ -244,13 +244,6 @@ export function ModalLoanDetails({
 
   const handleExcluir = async () => {
     if (!emprestimo) return;
-    if (
-      !window.confirm(
-        'Tem certeza que deseja EXCLUIR este registro de empréstimo? Essa ação não pode ser desfeita.',
-      )
-    )
-      return;
-
     setIsLoading(true);
     try {
       await excluirEmprestimo(Number(emprestimo.id));
@@ -261,7 +254,6 @@ export function ModalLoanDetails({
       });
       onClose(true);
     } catch (error: any) {
-      console.error('Erro ao excluir:', error);
       addToast({
         type: 'error',
         title: 'Erro ao excluir',
@@ -396,10 +388,13 @@ export function ModalLoanDetails({
 
         <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
           <button
-            onClick={handleExcluir}
+            onClick={() => setConfirmAction('excluir')}
             disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md"
+            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
           >
+            {isLoading && confirmAction === 'excluir' && (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
             Excluir
           </button>
 
@@ -416,9 +411,14 @@ export function ModalLoanDetails({
                 <button
                   onClick={handleSalvar}
                   disabled={isLoading}
-                  className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md"
+                  className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
                 >
-                  {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+                  {isLoading && confirmAction === null && (
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  )}
+                  {isLoading && confirmAction === null
+                    ? 'Salvando...'
+                    : 'Salvar Alterações'}
                 </button>
               </>
             ) : (
@@ -430,17 +430,41 @@ export function ModalLoanDetails({
                   Editar
                 </button>
                 <button
-                  onClick={handleDevolucao}
+                  onClick={() => setConfirmAction('devolucao')}
                   disabled={isLoading}
-                  className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 shadow-md"
+                  className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 shadow-md flex items-center gap-2"
                 >
-                  {isLoading ? 'Processando...' : 'Registrar Devolução'}
+                  {isLoading && confirmAction === 'devolucao' && (
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  )}
+                  {isLoading && confirmAction === 'devolucao'
+                    ? 'Processando...'
+                    : 'Registrar Devolução'}
                 </button>
               </>
             )}
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction !== null}
+        title={
+          confirmAction === 'devolucao'
+            ? 'Registro de Devolução'
+            : 'Exclução de Empréstimo'
+        }
+        message={
+          confirmAction === 'devolucao'
+            ? 'Deseja confirmar a devolução deste livro?'
+            : 'Tem certeza que deseja excluir este empréstimo?\nEssa ação não pode ser desfeita.'
+        }
+        isDestructive={confirmAction === 'excluir'}
+        onConfirm={
+          confirmAction === 'devolucao' ? handleDevolucao : handleExcluir
+        }
+        onCancel={() => setConfirmAction(null)}
+      />
     </Modal>
   );
 }

@@ -3,11 +3,12 @@ import { useState, useEffect } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import { Modal } from '../Modal';
 import { SearchableSelect } from '../SearchableSelect';
+import { ConfirmModal } from '../ConfirmModal';
+
 import {
   processarSolicitacao,
   type SolicitacaoPendente,
 } from '../../services/solicitacaoEmprestimoService';
-
 import { buscarLivrosAgrupados } from '../../services/livroService';
 import { buscarExemplaresPorLivroId } from '../../services/exemplarService';
 
@@ -37,6 +38,8 @@ export function ModalLoanRequestDetails({
 
   const [selectedTombo, setSelectedTombo] = useState('');
   const [exemplarOptions, setExemplarOptions] = useState<Option[]>([]);
+
+  const [confirmAction, setConfirmAction] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (solicitacao && isOpen) {
@@ -97,9 +100,32 @@ export function ModalLoanRequestDetails({
     }
   };
 
-  const handleProcessar = async (aceitar: boolean) => {
+  const executarProcessamento = async (aceitar: boolean) => {
     if (!solicitacao) return;
+    setIsLoading(true);
+    try {
+      await processarSolicitacao(solicitacao.id, aceitar);
+      addToast({
+        type: 'success',
+        title: 'Sucesso',
+        description: `Solicitação ${aceitar ? 'aceita' : 'recusada'} com sucesso!`,
+      });
+      onClose(true);
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: 'Atenção',
+        description:
+          error.response?.data?.mensagem ||
+          `Erro ao ${aceitar ? 'aceitar' : 'recusar'} solicitação.`,
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
+    }
+  };
 
+  const handleProcessarClick = (aceitar: boolean) => {
     if (aceitar && !selectedTombo) {
       addToast({
         type: 'warning',
@@ -109,45 +135,7 @@ export function ModalLoanRequestDetails({
       });
       return;
     }
-
-    const acao = aceitar ? 'aceitar' : 'recusar';
-    if (!window.confirm(`Tem certeza que deseja ${acao} esta solicitação?`)) {
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await processarSolicitacao(solicitacao.id, aceitar);
-
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: `Solicitação ${aceitar ? 'aceita' : 'recusada'} com sucesso!`,
-      });
-      onClose(true);
-    } catch (error: any) {
-      console.error(`Erro ao ${acao} solicitação:`, error);
-
-      let mensagemErro = `Erro ao ${acao} solicitação.`;
-
-      if (error.response?.data) {
-        if (typeof error.response.data.mensagem === 'string') {
-          mensagemErro = error.response.data.mensagem;
-        } else if (typeof error.response.data.message === 'string') {
-          mensagemErro = error.response.data.message;
-        } else if (typeof error.response.data === 'string') {
-          mensagemErro = error.response.data;
-        }
-      }
-
-      addToast({
-        type: 'error',
-        title: 'Atenção',
-        description: mensagemErro,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    setConfirmAction(aceitar);
   };
 
   const labelStyles =
@@ -203,22 +191,39 @@ export function ModalLoanRequestDetails({
 
         <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0 gap-4">
           <button
-            onClick={() => handleProcessar(false)}
+            onClick={() => handleProcessarClick(false)}
             disabled={isLoading}
             className="flex-1 flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Processando...' : 'Recusar'}
+            {isLoading && confirmAction === false && (
+              <span className="w-5 h-5 border-2 border-red-700/30 border-t-red-700 dark:border-red-400/30 dark:border-t-red-400 rounded-full animate-spin" />
+            )}
+            {isLoading && confirmAction === false
+              ? 'Processando...'
+              : 'Recusar'}
           </button>
 
           <button
-            onClick={() => handleProcessar(true)}
+            onClick={() => handleProcessarClick(true)}
             disabled={isLoading}
             className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
-            {isLoading ? 'Processando...' : 'Aceitar'}
+            {isLoading && confirmAction === true && (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
+            {isLoading && confirmAction === true ? 'Processando...' : 'Aceitar'}
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction !== null}
+        title={confirmAction ? 'Aceitar Solicitação' : 'Recusar Solicitação'}
+        message={`Tem certeza que deseja ${confirmAction ? 'aceitar' : 'recusar'} esta solicitação?`}
+        isDestructive={!confirmAction}
+        onConfirm={() => executarProcessamento(confirmAction!)}
+        onCancel={() => setConfirmAction(null)}
+      />
     </Modal>
   );
 }

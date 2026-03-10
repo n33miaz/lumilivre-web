@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Modal } from '../Modal';
 import { CustomSelect } from '../CustomSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
+import { ConfirmModal } from '../ConfirmModal';
 import { useToast } from '../../contexts/ToastContext';
 
 import { LoadingIcon } from '../LoadingIcon';
@@ -48,6 +49,10 @@ export function ModalStudentDetails({
   const [isCepLoading, setIsCepLoading] = useState(false);
 
   const [formData, setFormData] = useState<Partial<AlunoDetalhado>>({});
+
+  const [confirmAction, setConfirmAction] = useState<
+    'excluir' | 'resetSenha' | null
+  >(null);
 
   const { addToast } = useToast();
 
@@ -245,61 +250,49 @@ export function ModalStudentDetails({
     }
   };
 
-  const handleResetSenha = async () => {
+  const executarResetSenha = async () => {
     if (!aluno) return;
-
-    const confirmacao = window.confirm(
-      `Tem certeza que deseja resetar a senha do aluno ${aluno.nomeCompleto}?\n\nA senha voltará a ser a matrícula: ${aluno.matricula}`,
-    );
-
-    if (confirmacao) {
-      setIsLoading(true);
-      try {
-        await resetarSenhaAluno(aluno.matricula);
-        addToast({
-          type: 'success',
-          title: 'Senha Resetada',
-          description: `A senha do aluno foi redefinida para: ${aluno.matricula}`,
-        });
-      } catch (error: any) {
-        console.error('Erro ao resetar senha:', error);
-        addToast({
-          type: 'error',
-          title: 'Erro',
-          description:
-            error.response?.data?.mensagem || 'Erro ao resetar senha.',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    setIsLoading(true);
+    try {
+      await resetarSenhaAluno(aluno.matricula);
+      addToast({
+        type: 'success',
+        title: 'Senha Resetada',
+        description: `A senha do aluno foi redefinida para: ${aluno.matricula}`,
+      });
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: 'Erro',
+        description: error.response?.data?.mensagem || 'Erro ao resetar senha.',
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
     }
   };
 
-  const handleExcluir = async () => {
-    if (
-      window.confirm(
-        `Tem certeza que deseja excluir o aluno ${aluno.nomeCompleto}?`,
-      )
-    ) {
-      setIsLoading(true);
-      try {
-        await excluirAluno(aluno.matricula);
-        addToast({
-          type: 'success',
-          title: 'Sucesso',
-          description: 'Aluno excluído com sucesso!',
-        });
-        onClose(true);
-      } catch (error: any) {
-        addToast({
-          type: 'error',
-          title: 'Erro ao excluir',
-          description:
-            error.response?.data?.mensagem || 'Erro desconhecido ao excluir.',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const executarExclusao = async () => {
+    if (!aluno) return;
+    setIsLoading(true);
+    try {
+      await excluirAluno(aluno.matricula);
+      addToast({
+        type: 'success',
+        title: 'Sucesso',
+        description: 'Aluno excluído com sucesso!',
+      });
+      onClose(true);
+    } catch (error: any) {
+      addToast({
+        type: 'error',
+        title: 'Erro ao excluir',
+        description:
+          error.response?.data?.mensagem || 'Erro desconhecido ao excluir.',
+      });
+    } finally {
+      setIsLoading(false);
+      setConfirmAction(null);
     }
   };
 
@@ -667,10 +660,13 @@ export function ModalStudentDetails({
 
         <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
           <button
-            onClick={handleExcluir}
+            onClick={() => setConfirmAction('excluir')}
             disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md"
+            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
           >
+            {isLoading && confirmAction === 'excluir' && (
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            )}
             Excluir
           </button>
 
@@ -678,18 +674,28 @@ export function ModalStudentDetails({
             <button
               onClick={handleSalvar}
               disabled={isLoading}
-              className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md"
+              className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
             >
-              {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+              {isLoading && confirmAction === null && (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
+              {isLoading && confirmAction === null
+                ? 'Salvando...'
+                : 'Salvar Alterações'}
             </button>
           ) : (
             <div className="flex gap-3">
               <button
-                onClick={handleResetSenha}
-                className="flex items-center gap-2 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 shadow-md"
+                onClick={() => setConfirmAction('resetSenha')}
+                disabled={isLoading}
+                className="flex items-center gap-2 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 shadow-md disabled:opacity-70"
                 title="Resetar senha para a matrícula"
               >
-                <LockIcon className="w-5 h-5" />
+                {isLoading && confirmAction === 'resetSenha' ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <LockIcon className="w-5 h-5" />
+                )}
                 <span className="hidden sm:inline">Resetar Senha</span>
               </button>
 
@@ -703,6 +709,21 @@ export function ModalStudentDetails({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmAction !== null}
+        title={confirmAction === 'excluir' ? 'Excluir Aluno' : 'Resetar Senha'}
+        message={
+          confirmAction === 'excluir'
+            ? `Tem certeza que deseja excluir o aluno ${aluno.nomeCompleto}?`
+            : `Tem certeza que deseja resetar a senha do aluno ${aluno.nomeCompleto}?\n\nA senha voltará a ser a matrícula: ${aluno.matricula}`
+        }
+        isDestructive={confirmAction === 'excluir'}
+        onConfirm={
+          confirmAction === 'excluir' ? executarExclusao : executarResetSenha
+        }
+        onCancel={() => setConfirmAction(null)}
+      />
     </Modal>
   );
 }

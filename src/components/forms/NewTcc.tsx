@@ -317,8 +317,11 @@ export function NovoTcc({ onClose, onSuccess }: NewTccProps) {
           type="submit"
           form="form-novo-tcc"
           disabled={isLoading}
-          className={buttonClass}
+          className={`${buttonClass} flex items-center justify-center gap-2`}
         >
+          {isLoading && (
+            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          )}
           {isLoading ? 'SALVANDO...' : 'CADASTRAR TCC'}
         </button>
       </div>
