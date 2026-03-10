@@ -19,7 +19,6 @@ import PinActiveIcon from '../assets/icons/pin-active.svg?react';
 import EducationCap from '../assets/icons/education-cap.svg?react';
 import EducationCapActive from '../assets/icons/education-cap-active.svg?react';
 
-
 const prefetchSettings = () => import('../pages/Settings');
 
 const navLinks = [
@@ -102,9 +101,9 @@ export function Sidebar({
 
   return (
     <aside
-      className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-lumi-primary text-gray-200 flex flex-col shrink-0 duration-300 shadow-[8px_0_15px_rgba(0,0,0,0.2)] select-none z-40 ${
-        isExpanded ? 'w-48' : 'w-20'
-      }`}
+      className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-lumi-primary text-gray-200 flex flex-col shrink-0 duration-300 shadow-[8px_0_15px_rgba(0,0,0,0.2)] select-none z-40 
+      ${isExpanded ? 'w-48 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'} 
+      `}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

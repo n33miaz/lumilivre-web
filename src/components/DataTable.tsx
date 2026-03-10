@@ -50,7 +50,8 @@ export function DataTable<T>({
     if (!element) return;
 
     const checkForScroll = () => {
-      const hasVerticalScroll = element.scrollHeight > Math.ceil(element.clientHeight);
+      const hasVerticalScroll =
+        element.scrollHeight > Math.ceil(element.clientHeight);
       setHasScroll(hasVerticalScroll);
     };
 
@@ -59,7 +60,7 @@ export function DataTable<T>({
     const observer = new ResizeObserver(() => {
       checkForScroll();
     });
-    
+
     observer.observe(element);
     window.addEventListener('resize', checkForScroll);
 
@@ -75,7 +76,9 @@ export function DataTable<T>({
         hasRoundedBorderTop ? 'rounded-t-lg' : ''
       }`}
     >
-      <div className={`flex items-stretch shrink-0 z-10 ${headerClassName}`}>
+      <div
+        className={`flex items-stretch shrink-0 z-10 min-w-[800px] lg:min-w-full ${headerClassName}`}
+      >
         {columns.map((col, index) => {
           const isLast = index === columns.length - 1;
           const scrollPaddingClass = isLast && hasScroll ? 'mr-[14px]' : '';
@@ -122,7 +125,7 @@ export function DataTable<T>({
             {data.map((item) => (
               <div
                 key={getRowKey(item)}
-                className={`flex items-center ${
+                className={`flex items-center min-w-[800px] lg:min-w-full ${
                   getRowClass
                     ? getRowClass(item)
                     : 'hover:bg-gray-300 dark:hover:bg-gray-600 hover:duration-0'

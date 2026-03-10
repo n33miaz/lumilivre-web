@@ -19,21 +19,21 @@ export function Header({
   const isHomePage = ['/dashboard', '/'].includes(location.pathname);
 
   const getHeaderSpacingClass = () => {
-    if (!isSidebarPinned) return 'pl-28';
-    return isSidebarExpanded ? 'pl-52' : 'pl-28';
+    if (!isSidebarPinned) return 'pl-4 md:pl-28';
+    return isSidebarExpanded ? 'pl-4 md:pl-52' : 'pl-4 md:pl-28';
   };
 
   const LogoContent = (
     <div className="flex items-center gap-3">
       <LogoIcon className="h-10 w-10 shrink-0 text-lumi-primary" />
-      <span className="hidden sm:block text-xl font-bold text-gray-800 dark:text-white">
+      <span className="text-xl font-bold text-gray-800 dark:text-white">
         LumiLivre
       </span>
     </div>
   );
 
   return (
-    <header className="sticky top-0 left-0 w-full z-30 bg-white dark:bg-dark-header shadow-md">
+    <header className="sticky top-0 left-0 w-full z-50 bg-white dark:bg-dark-header shadow-md">
       <div
         className={`
           flex items-center justify-between h-14 px-4 sm:px-6 select-none

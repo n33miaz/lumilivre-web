@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import ArrowLeftIcon from '../assets/icons/arrow-left.svg?react';
 import ArrowRightIcon from '../assets/icons/arrow-right.svg?react';
+import InfoIcon from '../assets/icons/info.svg?react';
 import { CustomSelect } from './CustomSelect';
 
 interface LegendItem {
@@ -26,18 +27,68 @@ interface TableFooterProps {
   selectClassName?: string;
 }
 
-const StatusLegend: React.FC<{ items: LegendItem[] }> = ({ items }) => (
-  <div className="flex items-center space-x-4 pl-2">
-    {items.map((item) => (
-      <div key={item.label} className="flex items-center space-x-2">
-        <div className={`w-3 h-3 rounded-full shadow-md ${item.color}`} />
-        <span className="text-xs text-gray-600 dark:text-gray-400">
-          {item.label}
-        </span>
+const StatusLegend: React.FC<{ items: LegendItem[] }> = ({ items }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        popoverRef.current &&
+        !popoverRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  return (
+    <div className="relative flex items-center pl-2" ref={popoverRef}>
+      {/* Mobile: Ícone de Informação */}
+      <button
+        type="button"
+        className="md:hidden p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+        title="Ver legendas"
+      >
+        <InfoIcon className="w-5 h-5 fill-current" />
+      </button>
+
+      {/* Desktop: Legendas em linha */}
+      <div className="hidden md:flex items-center space-x-4">
+        {items.map((item) => (
+          <div key={item.label} className="flex items-center space-x-2">
+            <div className={`w-3 h-3 rounded-full shadow-md ${item.color}`} />
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              {item.label}
+            </span>
+          </div>
+        ))}
       </div>
-    ))}
-  </div>
-);
+
+      {/* Mobile: Popover de Legendas */}
+      {isOpen && (
+        <div className="absolute bottom-full left-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl rounded-lg p-3 z-50 flex flex-col gap-3 min-w-[160px] md:hidden animate-fade-in">
+          <div className="text-xs font-bold text-gray-800 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-1 mb-1">
+            Legendas
+          </div>
+          {items.map((item) => (
+            <div key={item.label} className="flex items-center space-x-2">
+              <div
+                className={`w-3 h-3 rounded-full shadow-md shrink-0 ${item.color}`}
+              />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                {item.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export function TableFooter({
   legendItems,
@@ -45,7 +96,7 @@ export function TableFooter({
   onPageChange,
   onItemsPerPageChange,
   viewMode = 'normal',
-  className = '', 
+  className = '',
   selectClassName,
 }: TableFooterProps) {
   const { currentPage, totalPages, itemsPerPage, totalItems } = pagination;
@@ -119,7 +170,9 @@ export function TableFooter({
   const isException = viewMode === 'exception';
 
   return (
-    <div className={`flex items-center justify-between p-1.5 border-t border-gray-200 dark:border-gray-700 shrink-0 select-none bg-white dark:bg-dark-card rounded-b-lg ${className}`}>
+    <div
+      className={`flex items-center justify-between p-1.5 border-t border-gray-200 dark:border-gray-700 shrink-0 select-none bg-white dark:bg-dark-card rounded-b-lg ${className}`}
+    >
       <div className={isException ? 'pl-2' : 'flex-1'}>
         {isException
           ? PageSizeControl
