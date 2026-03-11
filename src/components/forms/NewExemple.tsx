@@ -5,6 +5,11 @@ import {
   type ExemplarPayload,
 } from '../../services/exemplarService';
 import { useToast } from '../../contexts/ToastContext';
+import { getErrorMessage } from '../../utils/errorHandler';
+
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 
 interface NewExemplarProps {
   livroId: number;
@@ -37,6 +42,7 @@ export function NovoExemplar({
       });
       return;
     }
+
     setIsLoading(true);
 
     const payload: ExemplarPayload = {
@@ -55,28 +61,20 @@ export function NovoExemplar({
       });
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao cadastrar exemplar:', error);
       addToast({
         type: 'error',
         title: 'Erro ao cadastrar',
-        description:
-          error.response?.data?.mensagem ||
+        description: getErrorMessage(
+          error,
           'Erro ao cadastrar exemplar. Verifique se o tombo já existe.',
+        ),
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1';
-  const inputStyles =
-    'w-full h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary outline-none text-sm';
-  const disabledInputStyles =
-    'w-full h-[38px] px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none text-sm';
-  const buttonClass =
-    'w-full bg-lumi-primary hover:bg-lumi-primary-hover active:bg-purple-900 text-white text-[17px] font-bold py-3.5 px-4 border-2 border-transparent rounded-lg shadow-md transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none tracking-wide';
 
   return (
     <div className="flex flex-col h-full">
@@ -87,28 +85,12 @@ export function NovoExemplar({
       >
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-4">
-            <label htmlFor="livroIsbn" className={labelStyles}>
-              ISBN
-            </label>
-            <input
-              id="livroIsbn"
-              type="text"
-              value={livroIsbn}
-              disabled
-              className={disabledInputStyles}
-            />
+            <Label htmlFor="livroIsbn">ISBN</Label>
+            <Input id="livroIsbn" value={livroIsbn} disabled />
           </div>
           <div className="col-span-8">
-            <label htmlFor="livroNome" className={labelStyles}>
-              Livro
-            </label>
-            <input
-              id="livroNome"
-              type="text"
-              value={livroNome}
-              disabled
-              className={disabledInputStyles}
-            />
+            <Label htmlFor="livroNome">Livro</Label>
+            <Input id="livroNome" value={livroNome} disabled />
           </div>
         </div>
 
@@ -116,31 +98,27 @@ export function NovoExemplar({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="tombo" className={labelStyles}>
-              Tombo do Exemplar*
-            </label>
-            <input
+            <Label htmlFor="tombo" requiredIndicator>
+              Tombo do Exemplar
+            </Label>
+            <Input
               id="tombo"
-              type="text"
               value={tombo}
               onChange={(e) => setTombo(e.target.value)}
               required
-              className={inputStyles}
               placeholder="Ex: 001234"
               autoFocus
             />
           </div>
           <div>
-            <label htmlFor="localizacao" className={labelStyles}>
-              Localização Física*
-            </label>
-            <input
+            <Label htmlFor="localizacao" requiredIndicator>
+              Localização Física
+            </Label>
+            <Input
               id="localizacao"
-              type="text"
               value={localizacao}
               onChange={(e) => setLocalizacao(e.target.value)}
               required
-              className={inputStyles}
               placeholder="Ex: Corredor B, Prateleira 2"
             />
           </div>
@@ -148,17 +126,15 @@ export function NovoExemplar({
       </form>
 
       <div className="pt-3 mt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-        <button
+        <Button
           type="submit"
           form="form-novo-exemplar"
-          disabled={isLoading}
-          className={`${buttonClass} flex items-center justify-center gap-2`}
+          isLoading={isLoading}
+          loadingText="CADASTRANDO..."
+          className="w-full py-3.5 text-[17px]"
         >
-          {isLoading && (
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          )}
-          {isLoading ? 'CADASTRANDO...' : 'CADASTRAR EXEMPLAR'}
-        </button>
+          CADASTRAR EXEMPLAR
+        </Button>
       </div>
     </div>
   );

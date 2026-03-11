@@ -108,7 +108,6 @@ export function NovoAluno({
       setIsCepLoading(true);
       try {
         const endereco = await buscarEnderecoPorCep(cleanCep);
-        // @ts-ignore
         if (endereco.erro) {
           addToast({
             type: 'warning',
