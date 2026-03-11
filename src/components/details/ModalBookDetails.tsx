@@ -165,16 +165,13 @@ export function DetalhesLivroModal({
               autor: dadosCompletos.autor || '',
             };
 
-            // @ts-ignore
             setInitialData(dadosParaForm);
-            // @ts-ignore
             setFormData(dadosParaForm);
 
             setImagemPreview(dadosCompletos.imagem || null);
           }
         } catch (error) {
           console.error('Erro ao buscar detalhes do livro:', error);
-          // @ts-ignore
           const fallbackData = {
             ...livroVisualizado,
             generos: [],

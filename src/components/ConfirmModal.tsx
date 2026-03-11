@@ -1,4 +1,5 @@
 import { Modal } from './Modal';
+import { Button } from './ui/Button';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -22,33 +23,29 @@ export function ConfirmModal({
   isDestructive = false,
 }: ConfirmModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onCancel} title={title} maxWidth="max-w-md">
-      <div className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={onCancel} maxWidth="max-w-md">
+      <Modal.Header title={title} />
+
+      <Modal.Body>
         <p className="text-gray-700 dark:text-gray-300 text-lg whitespace-pre-line">
           {message}
         </p>
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold"
-          >
-            {cancelText}
-          </button>
-          <button
-            onClick={() => {
-              onConfirm();
-              onCancel();
-            }}
-            className={`px-6 py-2 rounded-lg text-white font-bold shadow-md ${
-              isDestructive
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-lumi-primary hover:bg-lumi-primary-hover'
-            }`}
-          >
-            {confirmText}
-          </button>
-        </div>
-      </div>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <Button variant="ghost" onClick={onCancel}>
+          {cancelText}
+        </Button>
+        <Button
+          variant={isDestructive ? 'danger' : 'primary'}
+          onClick={() => {
+            onConfirm();
+            onCancel();
+          }}
+        >
+          {confirmText}
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 }

@@ -4,6 +4,8 @@ import { InputFloatingLabel } from './InputFloatingLabel';
 import { useToast } from '../contexts/ToastContext';
 import api from '../services/api';
 import LockIcon from '../assets/icons/lock.svg?react';
+import { getErrorMessage } from '../utils/errorHandler';
+import { Button } from './ui/Button';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -57,81 +59,78 @@ export function ChangePasswordModal({
         description: 'Senha alterada com sucesso!',
       });
 
-      // Limpa os campos e fecha o modal
       setSenhaAtual('');
       setNovaSenha('');
       setConfirmarSenha('');
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      const msg =
-        error.response?.data?.mensagem ||
-        'Erro ao alterar senha. Verifique sua senha atual.';
-      addToast({ type: 'error', title: 'Erro', description: msg });
+      addToast({
+        type: 'error',
+        title: 'Erro',
+        description: getErrorMessage(
+          error,
+          'Erro ao alterar senha. Verifique sua senha atual.',
+        ),
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Alterar Senha"
-      maxWidth="max-w-lg"
-    >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <InputFloatingLabel
-          id="senhaAtual"
-          label="Senha Atual"
-          type="password"
-          value={senhaAtual}
-          onChange={(e) => setSenhaAtual(e.target.value)}
-          icon={LockIcon}
-          required
-        />
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-lg">
+      <Modal.Header title="Alterar Senha" />
 
-        <InputFloatingLabel
-          id="novaSenha"
-          label="Nova Senha"
-          type="password"
-          value={novaSenha}
-          onChange={(e) => setNovaSenha(e.target.value)}
-          icon={LockIcon}
-          required
-        />
+      <Modal.Body>
+        <form
+          id="change-password-form"
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
+          <InputFloatingLabel
+            id="senhaAtual"
+            label="Senha Atual"
+            type="password"
+            value={senhaAtual}
+            onChange={(e) => setSenhaAtual(e.target.value)}
+            icon={LockIcon}
+            required
+          />
+          <InputFloatingLabel
+            id="novaSenha"
+            label="Nova Senha"
+            type="password"
+            value={novaSenha}
+            onChange={(e) => setNovaSenha(e.target.value)}
+            icon={LockIcon}
+            required
+          />
+          <InputFloatingLabel
+            id="confirmarSenha"
+            label="Confirmar Nova Senha"
+            type="password"
+            value={confirmarSenha}
+            onChange={(e) => setConfirmarSenha(e.target.value)}
+            icon={LockIcon}
+            required
+          />
+        </form>
+      </Modal.Body>
 
-        <InputFloatingLabel
-          id="confirmarSenha"
-          label="Confirmar Nova Senha"
-          type="password"
-          value={confirmarSenha}
-          onChange={(e) => setConfirmarSenha(e.target.value)}
-          icon={LockIcon}
-          required
-        />
-
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isLoading}
-            className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-lumi-primary hover:bg-lumi-primary-hover text-white font-bold py-2 px-6 rounded-lg shadow-md disabled:opacity-70 flex items-center gap-2"
-          >
-            {isLoading && (
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-            {isLoading ? 'Salvando...' : 'Salvar'}
-          </button>
-        </div>
-      </form>
+      <Modal.Footer>
+        <Button variant="ghost" onClick={onClose} disabled={isLoading}>
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          form="change-password-form"
+          isLoading={isLoading}
+          loadingText="Salvando..."
+        >
+          Salvar
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 }

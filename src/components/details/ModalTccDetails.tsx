@@ -57,7 +57,6 @@ export function ModalTccDetails({
       setPdfFile(null);
       setFotoFile(null);
 
-      // @ts-ignore
       setFotoPreview(tcc.foto || null);
 
       const cursoEncontrado = cursosList?.find((c) => c.nome === tcc.curso);
