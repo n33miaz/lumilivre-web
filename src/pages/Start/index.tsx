@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { StatCard } from '../../components/StatCard';
 import { DataTable, type ColumnDef } from '../../components/DataTable';
@@ -8,32 +9,15 @@ import { ModalLoanRequestDetails } from '../../components/details/ModalLoanReque
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 
-import { getContagemLivros } from '../../services/livroService';
-import { getContagemAlunos } from '../../services/alunoService';
 import {
-  getContagemAtrasados,
-  getContagemEmprestimosTotais,
-  buscarEmprestimosAtivosEAtrasados,
-} from '../../services/emprestimoService';
-import { buscarSolicitacoesPendentes } from '../../services/solicitacaoEmprestimoService';
+  useDashboardStats,
+  useDashboardListas,
+} from '../../hooks/useDashboardQueries';
 
 import BookIcon from '../../assets/icons/books-active.svg?react';
 import UsersIcon from '../../assets/icons/users-active.svg?react';
 import AlertIcon from '../../assets/icons/alert.svg?react';
 import LoansIcon from '../../assets/icons/loans-active.svg?react';
-
-interface DataState<T> {
-  data: T;
-  isLoading: boolean;
-  error: string | null;
-}
-
-interface StatsData {
-  livros: number;
-  alunos: number;
-  emprestimosAtivos: number;
-  atrasados: number;
-}
 
 interface EmprestimoVencer {
   id: number;
@@ -59,27 +43,23 @@ interface SolicitacaoDisplay {
 }
 
 export function DashboardPage() {
-  const [statsState, setStatsState] = useState<DataState<StatsData | null>>({
-    data: null,
-    isLoading: true,
-    error: null,
-  });
+  const queryClient = useQueryClient();
 
-  const [solicitacoesState, setSolicitacoesState] = useState<
-    DataState<SolicitacaoDisplay[]>
-  >({
-    data: [],
-    isLoading: true,
-    error: null,
-  });
+  const {
+    data: statsData,
+    isLoading: isStatsLoading,
+    error: statsError,
+  } = useDashboardStats();
+  const { solicitacoes, emprestimos } = useDashboardListas();
 
-  const [emprestimosState, setEmprestimosState] = useState<
-    DataState<EmprestimoVencer[]>
-  >({
-    data: [],
-    isLoading: true,
-    error: null,
-  });
+  // Estado para controlar se a animação deve ocorrer
+  const [shouldAnimateStats, setShouldAnimateStats] = useState(false);
+
+  useEffect(() => {
+    if (isStatsLoading) {
+      setShouldAnimateStats(true);
+    }
+  }, [isStatsLoading]);
 
   const dashboardContainerRef = useRef<HTMLDivElement>(null);
   const dynamicPageSize = useDynamicPageSize(dashboardContainerRef, {
@@ -105,6 +85,7 @@ export function DashboardPage() {
     dataEmprestimo: string;
     dataDevolucao: string;
   } | null>(null);
+
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<{
     id: number;
@@ -130,9 +111,21 @@ export function DashboardPage() {
     direction: 'asc' | 'desc';
   }>({ key: 'devolucao', direction: 'asc' });
 
-  // Solicitações
+  const solicitacoesProcessadas = useMemo(() => {
+    if (!solicitacoes.data) return [];
+    return solicitacoes.data.map((s) => ({
+      id: s.id,
+      aluno: s.alunoNome,
+      alunoMatricula: s.alunoMatricula,
+      livro: s.livroNome,
+      exemplarTombo: s.exemplarTombo,
+      solicitacao: new Date(s.dataSolicitacao),
+      rawDataSolicitacao: s.dataSolicitacao,
+    }));
+  }, [solicitacoes.data]);
+
   const sortedSolicitacoes = useMemo(() => {
-    const items = [...solicitacoesState.data];
+    const items = [...solicitacoesProcessadas];
     items.sort((a, b) => {
       const key = solicitacaoSort.key as keyof SolicitacaoDisplay;
 
@@ -150,16 +143,51 @@ export function DashboardPage() {
       return 0;
     });
     return items;
-  }, [solicitacoesState.data, solicitacaoSort]);
+  }, [solicitacoesProcessadas, solicitacaoSort]);
 
   const paginatedSolicitacoes = useMemo(() => {
     const start = (solicitacaoPage - 1) * solicitacaoPerPage;
     return sortedSolicitacoes.slice(start, start + solicitacaoPerPage);
   }, [sortedSolicitacoes, solicitacaoPage, solicitacaoPerPage]);
 
-  // Empréstimos
+  const emprestimosProcessados = useMemo(() => {
+    if (!emprestimos.data) return [];
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    return emprestimos.data
+      .map((e: any) => {
+        const dataDevolucao = new Date(e.dataDevolucao + 'T00:00:00');
+        dataDevolucao.setHours(0, 0, 0, 0);
+
+        let statusVencimento: EmprestimoVencer['statusVencimento'] = 'ativo';
+
+        if (e.statusEmprestimo === 'ATRASADO') {
+          statusVencimento = 'atrasado';
+        } else if (dataDevolucao.getTime() < hoje.getTime()) {
+          statusVencimento = 'atrasado';
+        } else if (dataDevolucao.getTime() === hoje.getTime()) {
+          statusVencimento = 'vence-hoje';
+        }
+
+        return {
+          id: e.id,
+          livro: e.livroNome,
+          isbn: '-',
+          aluno: e.alunoNome,
+          alunoMatricula: e.alunoMatricula,
+          tombo: e.tombo,
+          rawDevolucao: e.dataDevolucao,
+          retirada: e.dataEmprestimo || '-',
+          devolucao: dataDevolucao.toLocaleDateString('pt-BR'),
+          statusVencimento,
+        };
+      })
+      .filter((item) => item.statusVencimento !== 'ativo');
+  }, [emprestimos.data]);
+
   const sortedEmprestimos = useMemo(() => {
-    const items = [...emprestimosState.data];
+    const items = [...emprestimosProcessados];
     items.sort((a, b) => {
       const key = emprestimoSort.key as keyof EmprestimoVencer;
       if (key === 'devolucao') {
@@ -174,7 +202,7 @@ export function DashboardPage() {
       return 0;
     });
     return items;
-  }, [emprestimosState.data, emprestimoSort]);
+  }, [emprestimosProcessados, emprestimoSort]);
 
   const paginatedEmprestimos = useMemo(() => {
     const start = (emprestimoPage - 1) * emprestimoPerPage;
@@ -197,7 +225,6 @@ export function DashboardPage() {
     setEmprestimoSort({ key, direction });
   };
 
-  // Handlers do Modal
   const handleAbrirDetalhesEmprestimo = (item: EmprestimoVencer) => {
     setSelectedLoan({
       id: item.id,
@@ -214,7 +241,8 @@ export function DashboardPage() {
   const handleFecharDetalhesEmprestimo = (foiAtualizado?: boolean) => {
     setIsLoanModalOpen(false);
     if (foiAtualizado) {
-      carregarDados();
+      emprestimos.refetch();
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     }
   };
 
@@ -233,115 +261,11 @@ export function DashboardPage() {
   const handleFecharDetalhesSolicitacao = (foiProcessado?: boolean) => {
     setIsRequestModalOpen(false);
     if (foiProcessado) {
-      carregarDados();
+      solicitacoes.refetch();
+      emprestimos.refetch();
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     }
   };
-
-  const carregarDados = async () => {
-    setStatsState((prev) => ({ ...prev, isLoading: true }));
-    setSolicitacoesState((prev) => ({ ...prev, isLoading: true }));
-    setEmprestimosState((prev) => ({ ...prev, isLoading: true }));
-
-    try {
-      const [
-        livrosCount,
-        alunosCount,
-        emprestimosCount,
-        atrasadosCount,
-        solicitacoesList,
-        emprestimosList,
-      ] = await Promise.all([
-        getContagemLivros(),
-        getContagemAlunos(),
-        getContagemEmprestimosTotais(),
-        getContagemAtrasados(),
-        buscarSolicitacoesPendentes(),
-        buscarEmprestimosAtivosEAtrasados(),
-      ]);
-
-      setStatsState({
-        data: {
-          livros: livrosCount,
-          alunos: alunosCount,
-          emprestimosAtivos: emprestimosCount,
-          atrasados: atrasadosCount,
-        },
-        isLoading: false,
-        error: null,
-      });
-
-      const solicitacoesProcessadas = solicitacoesList.map((s) => ({
-        id: s.id,
-        aluno: s.alunoNome,
-        alunoMatricula: s.alunoMatricula,
-        livro: s.livroNome,
-        exemplarTombo: s.exemplarTombo,
-        solicitacao: new Date(s.dataSolicitacao),
-        rawDataSolicitacao: s.dataSolicitacao,
-      }));
-      setSolicitacoesState({
-        data: solicitacoesProcessadas,
-        isLoading: false,
-        error: null,
-      });
-
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-
-      const emprestimosProcessados = emprestimosList
-        .map((e: any) => {
-          const dataDevolucao = new Date(e.dataDevolucao + 'T00:00:00');
-          dataDevolucao.setHours(0, 0, 0, 0);
-
-          let statusVencimento: EmprestimoVencer['statusVencimento'] = 'ativo';
-
-          if (e.statusEmprestimo === 'ATRASADO') {
-            statusVencimento = 'atrasado';
-          } else if (dataDevolucao.getTime() < hoje.getTime()) {
-            statusVencimento = 'atrasado';
-          } else if (dataDevolucao.getTime() === hoje.getTime()) {
-            statusVencimento = 'vence-hoje';
-          }
-
-          return {
-            id: e.id,
-            livro: e.livroNome,
-            isbn: '-',
-            aluno: e.alunoNome,
-            alunoMatricula: e.alunoMatricula,
-            tombo: e.tombo,
-            rawDevolucao: e.dataDevolucao,
-            retirada: e.dataEmprestimo || '-',
-            devolucao: dataDevolucao.toLocaleDateString('pt-BR'),
-            statusVencimento,
-          };
-        })
-        .filter((item) => item.statusVencimento !== 'ativo');
-
-      setEmprestimosState({
-        data: emprestimosProcessados,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      console.error('Erro ao carregar dashboard:', error);
-      setStatsState((prev) => ({ ...prev, isLoading: false, error: 'Erro' }));
-      setSolicitacoesState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: 'Erro',
-      }));
-      setEmprestimosState((prev) => ({
-        ...prev,
-        isLoading: false,
-        error: 'Erro',
-      }));
-    }
-  };
-
-  useEffect(() => {
-    carregarDados();
-  }, []);
 
   const getRowClass = (item: EmprestimoVencer) => {
     const baseHover = 'hover:duration-0';
@@ -360,7 +284,7 @@ export function DashboardPage() {
     {
       key: 'aluno',
       header: 'Aluno',
-      width: '30%', 
+      width: '30%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {formatarNome(item.aluno)}
@@ -370,7 +294,7 @@ export function DashboardPage() {
     {
       key: 'livro',
       header: 'Livro',
-      width: '40%', 
+      width: '40%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {item.livro}
@@ -380,7 +304,7 @@ export function DashboardPage() {
     {
       key: 'solicitacao',
       header: 'Solicitado',
-      width: '16%', 
+      width: '16%',
       render: (item) => (
         <span className="dark:text-white font-bold">
           {item.solicitacao.toLocaleDateString('pt-BR')}
@@ -390,7 +314,7 @@ export function DashboardPage() {
     {
       key: 'acoes',
       header: 'Ações',
-      width: '14%', 
+      width: '14%',
       isSortable: false,
       render: (item) => (
         <button
@@ -407,7 +331,7 @@ export function DashboardPage() {
     {
       key: 'aluno',
       header: 'Aluno',
-      width: '30%', 
+      width: '30%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {formatarNome(item.aluno)}
@@ -417,7 +341,7 @@ export function DashboardPage() {
     {
       key: 'livro',
       header: 'Livro',
-      width: '40%', 
+      width: '40%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
           {item.livro}
@@ -427,7 +351,7 @@ export function DashboardPage() {
     {
       key: 'devolucao',
       header: 'Devolução',
-      width: '16%', 
+      width: '16%',
       render: (item) => (
         <span className="dark:text-white font-bold">{item.devolucao}</span>
       ),
@@ -435,7 +359,7 @@ export function DashboardPage() {
     {
       key: 'acoes',
       header: 'Ações',
-      width: '14%', 
+      width: '14%',
       isSortable: false,
       render: (item) => (
         <button
@@ -472,37 +396,41 @@ export function DashboardPage() {
           to="/livros"
           Icon={BookIcon}
           title="LIVROS"
-          value={statsState.data?.livros ?? 0}
-          isLoading={statsState.isLoading}
-          hasError={!!statsState.error}
+          value={statsData?.livros ?? 0}
+          isLoading={isStatsLoading}
+          hasError={!!statsError}
+          animate={shouldAnimateStats}
         />
 
         <StatCard
           to="/alunos"
           Icon={UsersIcon}
           title="ALUNOS"
-          value={statsState.data?.alunos ?? 0}
-          isLoading={statsState.isLoading}
-          hasError={!!statsState.error}
+          value={statsData?.alunos ?? 0}
+          isLoading={isStatsLoading}
+          hasError={!!statsError}
+          animate={shouldAnimateStats}
         />
 
         <StatCard
           to="/emprestimos"
           Icon={LoansIcon}
           title="EMPRÉSTIMOS"
-          value={statsState.data?.emprestimosAtivos ?? 0}
-          isLoading={statsState.isLoading}
-          hasError={!!statsState.error}
+          value={statsData?.emprestimosAtivos ?? 0}
+          isLoading={isStatsLoading}
+          hasError={!!statsError}
+          animate={shouldAnimateStats}
         />
 
         <StatCard
           to="/emprestimos?filtro=atrasados"
           Icon={AlertIcon}
           title="PENDÊNCIAS"
-          value={statsState.data?.atrasados ?? 0}
+          value={statsData?.atrasados ?? 0}
           variant="danger"
-          isLoading={statsState.isLoading}
-          hasError={!!statsState.error}
+          isLoading={isStatsLoading}
+          hasError={!!statsError}
+          animate={shouldAnimateStats}
         />
       </div>
 
@@ -518,8 +446,8 @@ export function DashboardPage() {
           <DataTable
             data={paginatedSolicitacoes}
             columns={solicitacoesColumns}
-            isLoading={solicitacoesState.isLoading}
-            error={solicitacoesState.error}
+            isLoading={solicitacoes.isLoading}
+            error={solicitacoes.error ? 'Erro ao carregar' : null}
             sortConfig={solicitacaoSort}
             onSort={requestSolicitacaoSort}
             getRowKey={(item) => item.id}
@@ -559,8 +487,8 @@ export function DashboardPage() {
           <DataTable
             data={paginatedEmprestimos}
             columns={emprestimosColumns}
-            isLoading={emprestimosState.isLoading}
-            error={emprestimosState.error}
+            isLoading={emprestimos.isLoading}
+            error={emprestimos.error ? 'Erro ao carregar' : null}
             sortConfig={emprestimoSort}
             onSort={requestEmprestimoSort}
             getRowKey={(item) => item.id}
