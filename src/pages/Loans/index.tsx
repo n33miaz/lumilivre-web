@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { ActionHeader } from '../../components/ActionHeader';
-import { DataTable, type ColumnDef } from '../../components/DataTable';
-import { TableFooter } from '../../components/TableFooter';
-import { LoanFilter } from '../../components/filters/LoanFilter';
-import { Modal } from '../../components/Modal';
-import { NovoEmprestimo } from '../../components/forms/NewLoan';
-import { ModalLoanDetails } from '../../components/details/ModalLoanDetails';
+import { ActionHeader } from '../../components/ui/ActionHeader';
+import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
+import { TableFooter } from '../../components/ui/TableFooter';
+import { LoanFilter } from '../../features/loans/LoanFilter';
+import { Modal } from '../../components/ui/Modal';
+import { LoanModalNew } from '../../features/loans/LoanModalNew';
+import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 
-import { useEmprestimos } from '../../hooks/useDomainQueries';
+import { useEmprestimos } from '../../hooks/queries/useLoanQueries';
 import { type EmprestimoListagemDTO } from '../../services/emprestimoService';
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
@@ -431,9 +431,10 @@ export function EmprestimosPage() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title="Novo Empréstimo" />
         <Modal.Body>
-          <NovoEmprestimo
+          <LoanModalNew
+            isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            onSuccess={() => refetch()}
+            onSuccess={() => {}}
           />
         </Modal.Body>
       </Modal>

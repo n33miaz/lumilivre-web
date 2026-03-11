@@ -8,6 +8,10 @@ export function getErrorMessage(
   error: unknown,
   defaultMessage = 'Ocorreu um erro inesperado.',
 ): string {
+  if (error === null || error === undefined) {
+    return defaultMessage;
+  }
+
   if (axios.isAxiosError(error)) {
     return (
       error.response?.data?.mensagem ||
@@ -20,5 +24,9 @@ export function getErrorMessage(
     return error.message;
   }
 
-  return String(error) || defaultMessage;
+  if (typeof error === 'string') {
+    return error || defaultMessage;
+  }
+
+  return defaultMessage;
 }

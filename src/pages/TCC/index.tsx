@@ -1,14 +1,14 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 
-import { ActionHeader } from '../../components/ActionHeader';
-import { DataTable, type ColumnDef } from '../../components/DataTable';
-import { TableFooter } from '../../components/TableFooter';
-import { Modal } from '../../components/Modal';
-import { NovoTcc } from '../../components/forms/NewTcc';
-import { ModalTccDetails } from '../../components/details/ModalTccDetails';
-import { TccFilter } from '../../components/filters/TccFilter';
+import { ActionHeader } from '../../components/ui/ActionHeader';
+import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
+import { TableFooter } from '../../components/ui/TableFooter';
+import { Modal } from '../../components/ui/Modal';
+import { TccModalNew } from '../../features/tcc/TccModalNew';
+import { TccModalDetails } from '../../features/tcc/TccModalDetails';
+import { TccFilter } from '../../features/tcc/TccFilter';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
-import { useTccs } from '../../hooks/useTccQueries';
+import { useTccs } from '../../hooks/queries/useTccQueries';
 import { type TccResponse } from '../../services/tccService';
 
 export function TccPage() {
@@ -206,11 +206,15 @@ export function TccPage() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title="Cadastrar Novo TCC" />
         <Modal.Body>
-          <NovoTcc onClose={() => setIsModalOpen(false)} onSuccess={refetch} />
+          <TccModalNew
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => {}}
+          />
         </Modal.Body>
       </Modal>
 
-      <ModalTccDetails
+      <TccModalDetails
         isOpen={isDetalhesOpen}
         onClose={handleCloseDetalhes}
         tcc={selectedTcc}

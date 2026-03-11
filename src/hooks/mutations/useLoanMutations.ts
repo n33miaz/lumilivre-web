@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createMutationHook } from '../useGenericMutation';
 import {
   cadastrarEmprestimo,
   atualizarEmprestimo,
@@ -6,118 +6,54 @@ import {
   excluirEmprestimo,
   type EmprestimoPayload,
 } from '../../services/emprestimoService';
-import { useToast } from '../../contexts/ToastContext';
-import { getErrorMessage } from '../../utils/errorHandler';
+import { processarSolicitacao } from '../../services/solicitacaoEmprestimoService';
 
-export function useCreateLoan() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
+const LOAN_QUERY_KEY = ['emprestimos'];
+const DASHBOARD_SOLICITACOES_KEY = ['dashboard-solicitacoes'];
 
-  return useMutation({
-    mutationFn: (payload: EmprestimoPayload) => cadastrarEmprestimo(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      queryClient.invalidateQueries({
-        queryKey: ['dashboard-emprestimos-lista'],
-      });
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Empréstimo realizado com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao realizar empréstimo.'),
-      });
-    },
-  });
+interface UpdateLoanVariables {
+  id: number;
+  payload: EmprestimoPayload;
+}
+interface ProcessRequestVariables {
+  id: number;
+  aceitar: boolean;
 }
 
-export function useUpdateLoan() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
+export const useCreateLoan = createMutationHook<unknown, EmprestimoPayload>({
+  mutationFn: (payload) => cadastrarEmprestimo(payload),
+  queryKey: LOAN_QUERY_KEY,
+  successMessage: 'Empréstimo realizado com sucesso!',
+  errorMessage: 'Erro ao realizar empréstimo.',
+});
 
-  return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: EmprestimoPayload }) =>
-      atualizarEmprestimo(id, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      queryClient.invalidateQueries({
-        queryKey: ['dashboard-emprestimos-lista'],
-      });
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Empréstimo atualizado com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao atualizar empréstimo.'),
-      });
-    },
-  });
-}
+export const useUpdateLoan = createMutationHook<unknown, UpdateLoanVariables>({
+  mutationFn: ({ id, payload }) => atualizarEmprestimo(id, payload),
+  queryKey: LOAN_QUERY_KEY,
+  successMessage: 'Empréstimo atualizado com sucesso!',
+  errorMessage: 'Erro ao atualizar empréstimo.',
+});
 
-export function useCompleteLoan() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
+export const useCompleteLoan = createMutationHook<unknown, number>({
+  mutationFn: (id) => concluirEmprestimo(id),
+  queryKey: LOAN_QUERY_KEY,
+  successMessage: 'Devolução registrada com sucesso!',
+  errorMessage: 'Erro ao registrar devolução.',
+});
 
-  return useMutation({
-    mutationFn: (id: number) => concluirEmprestimo(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      queryClient.invalidateQueries({
-        queryKey: ['dashboard-emprestimos-lista'],
-      });
-      addToast({
-        type: 'success',
-        title: 'Devolução registrada',
-        description: 'Devolução registrada com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao registrar devolução.'),
-      });
-    },
-  });
-}
+export const useDeleteLoan = createMutationHook<unknown, number>({
+  mutationFn: (id) => excluirEmprestimo(id),
+  queryKey: LOAN_QUERY_KEY,
+  successMessage: 'Empréstimo excluído com sucesso!',
+  errorMessage: 'Erro ao excluir empréstimo.',
+});
 
-export function useDeleteLoan() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
-
-  return useMutation({
-    mutationFn: (id: number) => excluirEmprestimo(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
-      queryClient.invalidateQueries({
-        queryKey: ['dashboard-emprestimos-lista'],
-      });
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Empréstimo excluído com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao excluir empréstimo.'),
-      });
-    },
-  });
-}
+export const useProcessLoanRequest = createMutationHook<
+  unknown,
+  ProcessRequestVariables
+>({
+  mutationFn: ({ id, aceitar }) => processarSolicitacao(id, aceitar),
+  queryKey: DASHBOARD_SOLICITACOES_KEY,
+  successMessage: 'Solicitação processada com sucesso!',
+  errorMessage: 'Falha ao processar solicitação.',
+});

@@ -9,7 +9,7 @@ import {
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { ChangePasswordModal } from '../../components/ChangePasswordModal';
+import { ChangePasswordModal } from '../Auth/components/ChangePasswordModal';
 
 import UploadIcon from '../../assets/icons/download.svg?react';
 import LockIcon from '../../assets/icons/lock.svg?react';

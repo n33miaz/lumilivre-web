@@ -5,7 +5,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { Toast, type ToastMessage } from '../components/Toast';
+import { Toast, type ToastMessage } from '../components/ui/Toast';
 
 // Omitimos o ID na hora de chamar a função, pois geramos ele automaticamente
 type ToastInput = Omit<ToastMessage, 'id'>;

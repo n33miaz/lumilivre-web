@@ -6,8 +6,8 @@ import {
   mudarSenhaComToken,
 } from '../../../services/authService';
 import { useToast } from '../../../contexts/ToastContext';
-import { InputFloatingLabel } from '../../../components/InputFloatingLabel';
-import { ThemeToggle } from '../../../components/ThemeToggle';
+import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
+import { ThemeToggle } from '../../../layouts/components/ThemeToggle';
 
 import LogoIcon from '../../../assets/icons/logo.svg?react';
 import LockIcon from '../../../assets/icons/lock.svg?react';

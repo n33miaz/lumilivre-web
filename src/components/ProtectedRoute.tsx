@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { type ReactNode } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
-import { LoadingIcon } from './LoadingIcon';
+import { LoadingIcon } from './ui/LoadingIcon';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();

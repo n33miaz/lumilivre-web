@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 
-import { ActionHeader } from '../../components/ActionHeader';
-import { DataTable, type ColumnDef } from '../../components/DataTable';
-import { TableFooter } from '../../components/TableFooter';
-import { Modal } from '../../components/Modal';
-import { NovoAluno } from '../../components/forms/NewStudent';
-import { StudentFilter } from '../../components/filters/StudentFilter';
-import { ModalStudentDetails } from '../../components/details/ModalStudentDetails';
+import { ActionHeader } from '../../components/ui/ActionHeader';
+import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
+import { TableFooter } from '../../components/ui/TableFooter';
+import { Modal } from '../../components/ui/Modal';
+import { StudentModalNew } from '../../features/students/StudentModalNew';
+import { StudentFilter } from '../../features/students/StudentFilter';
+import { ModalStudentDetails } from '../../features/students/StudentModalDetails';
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
-import { useAlunos } from '../../hooks/useDomainQueries';
+import { useAlunos } from '../../hooks/queries/useStudentQueries';
 
 import { type ListaAluno } from '../../services/alunoService';
 
@@ -301,7 +301,11 @@ export function AlunosPage() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title="Cadastrar Novo Aluno" />
         <Modal.Body>
-          <NovoAluno onClose={() => setIsModalOpen(false)} />
+          <StudentModalNew
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => {}}
+          />
         </Modal.Body>
       </Modal>
 
