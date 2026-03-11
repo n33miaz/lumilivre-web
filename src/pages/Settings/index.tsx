@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { ChangePasswordModal } from '../../components/ChangePasswordModal';
 
 import UploadIcon from '../../assets/icons/download.svg?react';
 import LockIcon from '../../assets/icons/lock.svg?react';
@@ -78,6 +79,8 @@ export function ConfiguracoesPage() {
   const { user, logoutWithAnimation } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
 
@@ -267,7 +270,7 @@ export function ConfiguracoesPage() {
             description="Altere sua senha de acesso."
           >
             <button
-              onClick={() => navigate('/mudar-senha')}
+              onClick={() => setIsPasswordModalOpen(true)}
               className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px]"
             >
               Alterar
@@ -308,6 +311,11 @@ export function ConfiguracoesPage() {
         {currentView === 'main' && renderMainView()}
         {currentView === 'import' && renderImportView()}
       </div>
+
+      <ChangePasswordModal
+        isOpen={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
     </div>
   );
 }
