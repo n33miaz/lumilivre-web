@@ -51,8 +51,8 @@ const formatarDataIso = (dataIso: string): string => {
   return `${dia}/${mes}/${ano}`;
 };
 
-const cleanFilters = (filters: any) => {
-  const cleaned: any = {};
+const cleanFilters = (filters: Record<string, unknown>) => {
+  const cleaned: Record<string, unknown> = {};
   Object.keys(filters).forEach((key) => {
     if (
       filters[key] !== '' &&
@@ -65,17 +65,17 @@ const cleanFilters = (filters: any) => {
   return cleaned;
 };
 
+const filtroAtrasadosObj = {
+  statusEmprestimo: 'ATRASADO',
+  dataEmprestimo: '',
+  dataDevolucao: '',
+  tombo: '',
+  livroNome: '',
+  alunoNome: '',
+};
+
 export function EmprestimosPage() {
   const [searchParams] = useSearchParams();
-
-  const filtroAtrasadosObj = {
-    statusEmprestimo: 'ATRASADO',
-    dataEmprestimo: '',
-    dataDevolucao: '',
-    tombo: '',
-    livroNome: '',
-    alunoNome: '',
-  };
 
   const [sortConfig, setSortConfig] = useState<{
     key: string;
@@ -167,7 +167,7 @@ export function EmprestimosPage() {
   }, [sortConfig]);
 
   const filtersForHook = useMemo(() => {
-    const filtrosParaApi = { ...activeFilters } as any;
+    const filtrosParaApi: Record<string, unknown> = { ...activeFilters };
 
     if (filtrosParaApi.statusEmprestimo === 'VENCE_HOJE') {
       const hoje = new Date().toISOString().split('T')[0];
@@ -428,15 +428,14 @@ export function EmprestimosPage() {
         }
       />
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Novo Empréstimo"
-      >
-        <NovoEmprestimo
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={() => refetch()}
-        />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal.Header title="Novo Empréstimo" />
+        <Modal.Body>
+          <NovoEmprestimo
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => refetch()}
+          />
+        </Modal.Body>
       </Modal>
 
       <ModalLoanDetails

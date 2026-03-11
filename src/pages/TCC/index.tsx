@@ -97,7 +97,7 @@ export function TccPage() {
 
   const handleSearchSubmit = () => {
     setTermoBuscaAtivo(termoBusca);
-    setActiveFilters({}); 
+    setActiveFilters({});
     setCurrentPage(1);
   };
 
@@ -203,12 +203,11 @@ export function TccPage() {
         />
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Cadastrar Novo TCC"
-      >
-        <NovoTcc onClose={() => setIsModalOpen(false)} onSuccess={refetch} />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal.Header title="Cadastrar Novo TCC" />
+        <Modal.Body>
+          <NovoTcc onClose={() => setIsModalOpen(false)} onSuccess={refetch} />
+        </Modal.Body>
       </Modal>
 
       <ModalTccDetails

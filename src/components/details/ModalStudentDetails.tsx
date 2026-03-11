@@ -1,42 +1,45 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
 
 import { Modal } from '../Modal';
+import { ConfirmModal } from '../ConfirmModal';
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import { CustomSelect } from '../CustomSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
-import { ConfirmModal } from '../ConfirmModal';
-import { useToast } from '../../contexts/ToastContext';
-
 import { LoadingIcon } from '../LoadingIcon';
+
 import LockIcon from '../../assets/icons/lock.svg?react';
 
 import {
-  atualizarAluno,
-  excluirAluno,
   buscarAlunoPorMatricula,
-  resetarSenhaAluno,
   type AlunoPayload,
   type ListaAluno,
 } from '../../services/alunoService';
 import { buscarEnderecoPorCep } from '../../services/cepService';
-
 import {
   useCursos,
   useModulos,
   useTurnos,
   useEnum,
 } from '../../hooks/useCommonQueries';
+import {
+  useUpdateStudent,
+  useDeleteStudent,
+  useResetStudentPassword,
+} from '../../hooks/mutations/useStudentMutations';
+import {
+  studentSchema,
+  type StudentFormData,
+} from '../../schemas/studentSchema';
 
 interface ModalStudentDetailsProps {
   aluno: ListaAluno | null;
   isOpen: boolean;
   onClose: (foiAtualizado?: boolean) => void;
-}
-
-interface AlunoDetalhado extends AlunoPayload {
-  penalidade?: string;
-  cursoNome?: string;
-  turnoNome?: string;
-  moduloNome?: string;
 }
 
 export function ModalStudentDetails({
@@ -45,37 +48,56 @@ export function ModalStudentDetails({
   onClose,
 }: ModalStudentDetailsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isCepLoading, setIsCepLoading] = useState(false);
-
-  const [formData, setFormData] = useState<Partial<AlunoDetalhado>>({});
-
   const [confirmAction, setConfirmAction] = useState<
     'excluir' | 'resetSenha' | null
   >(null);
-
-  const { addToast } = useToast();
 
   const { data: cursosData } = useCursos();
   const { data: modulosData } = useModulos();
   const { data: turnosData } = useTurnos();
   const { data: penalidadesData } = useEnum('PENALIDADE');
 
+  const { mutateAsync: updateStudent, isPending: isUpdating } =
+    useUpdateStudent();
+  const { mutateAsync: deleteStudent, isPending: isDeleting } =
+    useDeleteStudent();
+  const { mutateAsync: resetPassword, isPending: isResetting } =
+    useResetStudentPassword();
+
+  const { data: alunoDetalhes, isLoading: isLoadingDetalhes } = useQuery({
+    queryKey: ['aluno', aluno?.matricula],
+    queryFn: () =>
+      buscarAlunoPorMatricula(aluno!.matricula).then((res) => res.data),
+    enabled: !!aluno?.matricula && isOpen,
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<StudentFormData>({
+    resolver: zodResolver(studentSchema),
+  });
+
+  const penalidadeAtual = watch('penalidade');
+
   const cursosOptions = useMemo(
     () => cursosData?.map((c) => ({ label: c.nome, value: c.id })) || [],
     [cursosData],
   );
-
   const modulosOptions = useMemo(
     () => modulosData?.map((m) => ({ label: m.nome, value: m.id })) || [],
     [modulosData],
   );
-
   const turnoOptions = useMemo(
     () => turnosData?.map((t) => ({ label: t.nome, value: t.id })) || [],
     [turnosData],
   );
-
   const penalidadeOptions = useMemo(
     () => [
       { label: 'Sem Penalidade', value: '' },
@@ -86,445 +108,325 @@ export function ModalStudentDetails({
   );
 
   useEffect(() => {
-    const carregarDetalhes = async () => {
-      if (!isOpen || !aluno) return;
-
-      setIsLoading(true);
-      try {
-        const alunoRes = await buscarAlunoPorMatricula(aluno.matricula);
-
-        if (alunoRes.success && alunoRes.data) {
-          const dados = alunoRes.data;
-
-          let cursoIdFinal = dados.cursoId;
-          if (!cursoIdFinal && dados.cursoNome) {
-            const found = cursosOptions.find(
-              (c) => c.label === dados.cursoNome,
-            );
-            if (found) cursoIdFinal = Number(found.value);
-          }
-
-          let turnoIdFinal = dados.turnoId;
-          if (!turnoIdFinal && dados.turnoNome) {
-            const found = turnoOptions.find(
-              (t) => t.label.toUpperCase() === dados.turnoNome?.toUpperCase(),
-            );
-            if (found) turnoIdFinal = Number(found.value);
-          }
-
-          let moduloIdFinal = dados.moduloId;
-          if (!moduloIdFinal && dados.moduloNome) {
-            const found = modulosOptions.find(
-              (m) => m.label === dados.moduloNome,
-            );
-            if (found) moduloIdFinal = Number(found.value);
-          }
-
-          setFormData({
-            ...dados,
-            cursoId: cursoIdFinal,
-            turno: turnoIdFinal ? String(turnoIdFinal) : '',
-            modulo: moduloIdFinal ? String(moduloIdFinal) : '',
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao carregar dados do modal:', error);
-        addToast({
-          type: 'error',
-          title: 'Erro ao carregar',
-          description: 'Erro ao carregar dados. Tente novamente.',
-        });
-        onClose();
-      } finally {
-        setIsLoading(false);
-        setIsEditMode(false);
+    if (alunoDetalhes && isOpen) {
+      let cursoIdFinal = alunoDetalhes.cursoId;
+      if (!cursoIdFinal && alunoDetalhes.cursoNome) {
+        const found = cursosOptions.find(
+          (c) => c.label === alunoDetalhes.cursoNome,
+        );
+        if (found) cursoIdFinal = Number(found.value);
       }
-    };
 
-    carregarDetalhes();
-  }, [isOpen, aluno, cursosOptions, turnoOptions, modulosOptions]);
+      let turnoIdFinal = alunoDetalhes.turnoId;
+      if (!turnoIdFinal && alunoDetalhes.turnoNome) {
+        const found = turnoOptions.find(
+          (t) =>
+            t.label.toUpperCase() === alunoDetalhes.turnoNome?.toUpperCase(),
+        );
+        if (found) turnoIdFinal = Number(found.value);
+      }
+
+      let moduloIdFinal = alunoDetalhes.moduloId;
+      if (!moduloIdFinal && alunoDetalhes.moduloNome) {
+        const found = modulosOptions.find(
+          (m) => m.label === alunoDetalhes.moduloNome,
+        );
+        if (found) moduloIdFinal = Number(found.value);
+      }
+
+      reset({
+        ...alunoDetalhes,
+        cursoId: cursoIdFinal ? String(cursoIdFinal) : '',
+        turnoId: turnoIdFinal ? String(turnoIdFinal) : '',
+        moduloId: moduloIdFinal ? String(moduloIdFinal) : '',
+        numero_casa: alunoDetalhes.numero_casa || '',
+      });
+      setIsEditMode(false);
+    }
+  }, [
+    alunoDetalhes,
+    isOpen,
+    reset,
+    cursosOptions,
+    turnoOptions,
+    modulosOptions,
+  ]);
 
   if (!isOpen || !aluno) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    setFormData((prev) => ({ ...prev, cep: rawValue }));
-
-    const cleanCep = rawValue.replace(/\D/g, '');
-
-    if (cleanCep.length === 8) {
+  const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, '');
+    if (cep.length === 8) {
       setIsCepLoading(true);
       try {
-        const endereco = await buscarEnderecoPorCep(cleanCep);
-        setFormData((prev) => ({
-          ...prev,
-          logradouro: endereco.logradouro,
-          bairro: endereco.bairro,
-          localidade: endereco.localidade,
-          uf: endereco.uf,
-        }));
+        const endereco = await buscarEnderecoPorCep(cep);
+        setValue('logradouro', endereco.logradouro || '');
+        setValue('bairro', endereco.bairro || '');
+        setValue('localidade', endereco.localidade || '');
+        setValue('uf', endereco.uf || '');
       } catch (error) {
-        console.error('Erro ao buscar CEP', error);
+        console.error(error);
       } finally {
         setIsCepLoading(false);
       }
     }
   };
 
-  const handleSalvar = async () => {
-    setIsLoading(true);
+  const onSubmit = async (data: StudentFormData) => {
     try {
-      const cursoIdNumber = Number(formData.cursoId);
-      const turnoIdNumber = Number(formData.turno);
-      const moduloIdNumber = Number(formData.modulo);
-
-      if (!cursoIdNumber || !turnoIdNumber || !moduloIdNumber) {
-        addToast({
-          type: 'warning',
-          title: 'Campos obrigatórios',
-          description:
-            'Por favor, verifique se Curso, Turno e Módulo estão selecionados.',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const rawCep = (formData.cep || '').replace(/\D/g, '');
-      const cepFinal = rawCep.length === 0 ? null : rawCep;
-
-      const payload: any = {
-        matricula: formData.matricula!,
-        nomeCompleto: formData.nomeCompleto!,
-        cpf: formData.cpf ? formData.cpf.replace(/\D/g, '') : null,
-        celular:
-          formData.celular && formData.celular.trim() !== ''
-            ? formData.celular.replace(/\D/g, '')
-            : null,
-        email:
-          formData.email && formData.email.trim() !== ''
-            ? formData.email
-            : null,
-        data_nascimento: formData.dataNascimento,
-        curso_id: cursoIdNumber,
-        turno_id: turnoIdNumber,
-        modulo_id: moduloIdNumber,
-        cep: cepFinal,
-        logradouro: formData.logradouro,
-        bairro: formData.bairro,
-        localidade: formData.localidade,
-        uf: formData.uf,
-        numero_casa: Number(formData.numero_casa) || 0,
-        complemento: formData.complemento,
-        penalidade: formData.penalidade,
+      const payload = {
+        ...data,
+        cpf: data.cpf ? data.cpf.replace(/\D/g, '') : undefined,
+        celular: data.celular ? data.celular.replace(/\D/g, '') : undefined,
+        cep: data.cep ? data.cep.replace(/\D/g, '') : undefined,
+        curso_id: Number(data.cursoId),
+        turno_id: Number(data.turnoId),
+        modulo_id: Number(data.moduloId),
+        numero_casa: Number(data.numero_casa) || 0,
+        penalidade: data.penalidade,
       };
 
-      await atualizarAluno(aluno.matricula, payload);
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Aluno atualizado com sucesso!',
+      await updateStudent({
+        matricula: aluno.matricula,
+        payload: payload as unknown as AlunoPayload,
       });
+      setIsEditMode(false);
       onClose(true);
-    } catch (error: any) {
-      console.error('Erro ao atualizar:', error);
-      const msg =
-        error.response?.data?.message ||
-        error.response?.data?.mensagem ||
-        'Erro desconhecido';
-      addToast({
-        type: 'error',
-        title: 'Erro ao atualizar',
-        description: msg,
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const executarResetSenha = async () => {
-    if (!aluno) return;
-    setIsLoading(true);
     try {
-      await resetarSenhaAluno(aluno.matricula);
-      addToast({
-        type: 'success',
-        title: 'Senha Resetada',
-        description: `A senha do aluno foi redefinida para: ${aluno.matricula}`,
-      });
-    } catch (error: any) {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: error.response?.data?.mensagem || 'Erro ao resetar senha.',
-      });
-    } finally {
-      setIsLoading(false);
+      await resetPassword(aluno.matricula);
       setConfirmAction(null);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const executarExclusao = async () => {
-    if (!aluno) return;
-    setIsLoading(true);
     try {
-      await excluirAluno(aluno.matricula);
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Aluno excluído com sucesso!',
-      });
-      onClose(true);
-    } catch (error: any) {
-      addToast({
-        type: 'error',
-        title: 'Erro ao excluir',
-        description:
-          error.response?.data?.mensagem || 'Erro desconhecido ao excluir.',
-      });
-    } finally {
-      setIsLoading(false);
+      await deleteStudent(aluno.matricula);
       setConfirmAction(null);
+      onClose(true);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1 flex justify-between items-center';
-  const inputStyles =
-    'w-full h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary outline-none text-sm';
-  const disabledInputStyles =
-    'w-full h-[38px] px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none text-sm flex items-center';
-
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={() => onClose(false)}
-      title={isEditMode ? 'Editar Aluno' : 'Detalhes do Aluno'}
-    >
-      <div className="flex flex-col h-full max-h-[70vh]">
-        {isLoading && !formData.matricula ? (
+    <Modal isOpen={isOpen} onClose={() => onClose(false)}>
+      <Modal.Header title={isEditMode ? 'Editar Aluno' : 'Detalhes do Aluno'} />
+
+      <Modal.Body>
+        {isLoadingDetalhes ? (
           <LoadingIcon />
         ) : (
-          <div className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2 space-y-4">
-            {formData.penalidade && formData.penalidade !== 'REGISTRO' && (
+          <form
+            id="form-edit-aluno"
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
+            {penalidadeAtual && penalidadeAtual !== 'REGISTRO' && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-md mb-2">
                 <p className="text-red-700 dark:text-red-400 text-sm font-bold">
-                  Status: {formData.penalidade}
+                  Status: {penalidadeAtual}
                 </p>
               </div>
             )}
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-12 gap-4">
-                <div className="col-span-8 md:col-span-9">
-                  <div>
-                    <label htmlFor="nomeCompleto" className={labelStyles}>
-                      Nome Completo
-                    </label>
-                    <input
-                      id="nomeCompleto"
-                      name="nomeCompleto"
-                      type="text"
-                      value={formData.nomeCompleto || ''}
-                      onChange={handleChange}
-                      disabled={!isEditMode}
-                      className={isEditMode ? inputStyles : disabledInputStyles}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-4 md:col-span-3">
-                  <div>
-                    <label className={labelStyles}>Status de Penalidade</label>
-                    {isEditMode ? (
-                      <CustomSelect
-                        value={formData.penalidade || ''}
-                        onChange={(val) =>
-                          handleSelectChange('penalidade', val)
-                        }
-                        options={penalidadeOptions}
-                        placeholder="Selecione a situação"
-                      />
-                    ) : (
-                      <div
-                        className={`${disabledInputStyles} ${
-                          formData.penalidade
-                            ? 'text-red-600 font-bold bg-red-50 border-red-200'
-                            : 'text-green-600 font-bold bg-green-50 border-green-200'
-                        }`}
-                      >
-                        {penalidadeOptions.find(
-                          (p) => p.value === formData.penalidade,
-                        )?.label || 'Sem Penalidade'}
-                      </div>
-                    )}
-                  </div>
-                </div>
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-8 md:col-span-9">
+                <Label htmlFor="nomeCompleto" requiredIndicator={isEditMode}>
+                  Nome Completo
+                </Label>
+                <Input
+                  id="nomeCompleto"
+                  disabled={!isEditMode}
+                  {...register('nomeCompleto')}
+                  error={errors.nomeCompleto?.message}
+                />
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label htmlFor="matricula" className={labelStyles}>
-                    Matrícula
-                  </label>
-                  <input
-                    id="matricula"
-                    name="matricula"
-                    type="text"
-                    value={formData.matricula || ''}
-                    disabled
-                    className={disabledInputStyles}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cpf" className={labelStyles}>
-                    CPF
-                  </label>
-                  <input
-                    id="cpf"
-                    name="cpf"
-                    type="text"
-                    value={formData.cpf || ''}
-                    onChange={handleChange}
-                    disabled={!isEditMode}
-                    className={isEditMode ? inputStyles : disabledInputStyles}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="celular" className={labelStyles}>
-                    Celular
-                  </label>
-                  <input
-                    id="celular"
-                    name="celular"
-                    type="text"
-                    value={formData.celular || ''}
-                    onChange={handleChange}
-                    disabled={!isEditMode}
-                    className={isEditMode ? inputStyles : disabledInputStyles}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="col-span-4 md:col-span-3">
+                <Label>Status de Penalidade</Label>
                 {isEditMode ? (
-                  <CustomDatePicker
-                    label="Data de Nascimento"
-                    value={formData.dataNascimento || ''}
-                    onChange={(e) =>
-                      handleSelectChange('dataNascimento', e.target.value)
-                    }
+                  <Controller
+                    name="penalidade"
+                    control={control}
+                    render={({ field }) => (
+                      <CustomSelect
+                        value={field.value || ''}
+                        onChange={field.onChange}
+                        options={penalidadeOptions}
+                        placeholder="Selecione"
+                      />
+                    )}
                   />
                 ) : (
-                  <div>
-                    <label className={labelStyles}>Data de Nascimento</label>
-                    <div className={disabledInputStyles}>
-                      {formData.dataNascimento
-                        ? new Date(formData.dataNascimento).toLocaleDateString(
-                            'pt-BR',
-                          )
-                        : '-'}
-                    </div>
+                  <div
+                    className={`w-full h-[38px] px-3 border rounded-md text-sm flex items-center ${penalidadeAtual ? 'text-red-600 font-bold bg-red-50 border-red-200' : 'text-green-600 font-bold bg-green-50 border-green-200'}`}
+                  >
+                    {penalidadeOptions.find((p) => p.value === penalidadeAtual)
+                      ?.label || 'Sem Penalidade'}
                   </div>
                 )}
-
-                <div>
-                  <label htmlFor="email" className={labelStyles}>
-                    E-mail
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email || ''}
-                    onChange={handleChange}
-                    disabled={!isEditMode}
-                    className={isEditMode ? inputStyles : disabledInputStyles}
-                  />
-                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className={labelStyles}>Curso</label>
+                <Label htmlFor="matricula">Matrícula</Label>
+                <Input id="matricula" disabled {...register('matricula')} />
+              </div>
+              <div>
+                <Label htmlFor="cpf">CPF</Label>
+                <Input id="cpf" disabled={!isEditMode} {...register('cpf')} />
+              </div>
+              <div>
+                <Label htmlFor="celular">Celular</Label>
+                <Input
+                  id="celular"
+                  disabled={!isEditMode}
+                  {...register('celular')}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Controller
+                  name="dataNascimento"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      label="Data de Nascimento"
+                      value={field.value}
+                      onChange={field.onChange}
+                      disabled={!isEditMode}
+                    />
+                  )}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">E-mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  disabled={!isEditMode}
+                  {...register('email')}
+                  error={errors.email?.message}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label requiredIndicator={isEditMode}>Curso</Label>
                 {isEditMode ? (
-                  <CustomSelect
-                    value={formData.cursoId || ''}
-                    onChange={(val) => handleSelectChange('cursoId', val)}
-                    placeholder="Selecione o Curso"
-                    options={cursosOptions}
+                  <Controller
+                    name="cursoId"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <CustomSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={cursosOptions}
+                          placeholder="Selecione"
+                        />
+                        {errors.cursoId && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {errors.cursoId.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   />
                 ) : (
-                  <input
-                    type="text"
+                  <Input
+                    disabled
                     value={
                       cursosOptions.find(
-                        (c) => String(c.value) === String(formData.cursoId),
+                        (c) =>
+                          String(c.value) === String(alunoDetalhes?.cursoId),
                       )?.label ||
-                      formData.cursoId ||
+                      alunoDetalhes?.cursoNome ||
                       ''
                     }
-                    disabled
-                    className={disabledInputStyles}
                   />
                 )}
               </div>
-
               <div>
-                <label className={labelStyles}>Turno</label>
+                <Label requiredIndicator={isEditMode}>Turno</Label>
                 {isEditMode ? (
-                  <CustomSelect
-                    value={formData.turno || ''}
-                    onChange={(val) => handleSelectChange('turno', val)}
-                    placeholder="Selecione o Turno"
-                    options={turnoOptions}
+                  <Controller
+                    name="turnoId"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <CustomSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={turnoOptions}
+                          placeholder="Selecione"
+                        />
+                        {errors.turnoId && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {errors.turnoId.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   />
                 ) : (
-                  <input
-                    type="text"
+                  <Input
+                    disabled
                     value={
                       turnoOptions.find(
-                        (t) => String(t.value) === String(formData.turno),
+                        (t) =>
+                          String(t.value) === String(alunoDetalhes?.turnoId),
                       )?.label ||
-                      formData.turno ||
+                      alunoDetalhes?.turnoNome ||
                       ''
                     }
-                    disabled
-                    className={disabledInputStyles}
                   />
                 )}
               </div>
-
               <div>
-                <label className={labelStyles}>Módulo</label>
+                <Label requiredIndicator={isEditMode}>Módulo</Label>
                 {isEditMode ? (
-                  <CustomSelect
-                    value={formData.modulo || ''}
-                    onChange={(val) => handleSelectChange('modulo', val)}
-                    placeholder="Selecione o Módulo"
-                    options={modulosOptions}
+                  <Controller
+                    name="moduloId"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <CustomSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={modulosOptions}
+                          placeholder="Selecione"
+                        />
+                        {errors.moduloId && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {errors.moduloId.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   />
                 ) : (
-                  <input
-                    type="text"
+                  <Input
+                    disabled
                     value={
                       modulosOptions.find(
-                        (m) => String(m.value) === String(formData.modulo),
+                        (m) =>
+                          String(m.value) === String(alunoDetalhes?.moduloId),
                       )?.label ||
-                      formData.modulo ||
+                      alunoDetalhes?.moduloNome ||
                       ''
                     }
-                    disabled
-                    className={disabledInputStyles}
                   />
                 )}
               </div>
@@ -534,181 +436,124 @@ export function ModalStudentDetails({
 
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-4 md:col-span-3">
-                <label htmlFor="cep" className={labelStyles}>
-                  CEP
-                </label>
-                <input
+                <Label htmlFor="cep">CEP</Label>
+                <Input
                   id="cep"
-                  name="cep"
-                  type="text"
-                  value={formData.cep || ''}
-                  onChange={handleCepChange}
                   maxLength={9}
                   disabled={!isEditMode}
-                  className={isEditMode ? inputStyles : disabledInputStyles}
+                  {...register('cep')}
+                  onBlur={handleCepBlur}
                 />
               </div>
               <div className="col-span-8 md:col-span-9">
-                <label htmlFor="logradouro" className={labelStyles}>
-                  Logradouro
-                </label>
-                <input
+                <Label htmlFor="logradouro">Logradouro</Label>
+                <Input
                   id="logradouro"
-                  name="logradouro"
-                  type="text"
-                  value={formData.logradouro || ''}
-                  onChange={handleChange}
                   disabled={!isEditMode || isCepLoading}
-                  className={
-                    !isEditMode || isCepLoading
-                      ? disabledInputStyles
-                      : inputStyles
-                  }
+                  {...register('logradouro')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-5">
-                <label htmlFor="bairro" className={labelStyles}>
-                  Bairro
-                </label>
-                <input
+                <Label htmlFor="bairro">Bairro</Label>
+                <Input
                   id="bairro"
-                  name="bairro"
-                  type="text"
-                  value={formData.bairro || ''}
-                  onChange={handleChange}
                   disabled={!isEditMode || isCepLoading}
-                  className={
-                    !isEditMode || isCepLoading
-                      ? disabledInputStyles
-                      : inputStyles
-                  }
+                  {...register('bairro')}
                 />
               </div>
               <div className="col-span-5">
-                <label htmlFor="localidade" className={labelStyles}>
-                  Cidade
-                </label>
-                <input
+                <Label htmlFor="localidade">Cidade</Label>
+                <Input
                   id="localidade"
-                  name="localidade"
-                  type="text"
-                  value={formData.localidade || ''}
-                  onChange={handleChange}
                   disabled={!isEditMode || isCepLoading}
-                  className={
-                    !isEditMode || isCepLoading
-                      ? disabledInputStyles
-                      : inputStyles
-                  }
+                  {...register('localidade')}
                 />
               </div>
               <div className="col-span-2">
-                <label htmlFor="uf" className={labelStyles}>
-                  UF
-                </label>
-                <input
+                <Label htmlFor="uf">UF</Label>
+                <Input
                   id="uf"
-                  name="uf"
-                  type="text"
-                  value={formData.uf || ''}
-                  onChange={handleChange}
                   disabled={!isEditMode || isCepLoading}
-                  className={
-                    !isEditMode || isCepLoading
-                      ? disabledInputStyles
-                      : inputStyles
-                  }
+                  {...register('uf')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-4">
-                <label htmlFor="numero_casa" className={labelStyles}>
-                  Número
-                </label>
-                <input
+                <Label htmlFor="numero_casa">Número</Label>
+                <Input
                   id="numero_casa"
-                  name="numero_casa"
                   type="number"
-                  value={formData.numero_casa || ''}
-                  onChange={handleChange}
                   disabled={!isEditMode}
-                  className={isEditMode ? inputStyles : disabledInputStyles}
+                  {...register('numero_casa')}
                 />
               </div>
               <div className="col-span-8">
-                <label htmlFor="complemento" className={labelStyles}>
-                  Complemento
-                </label>
-                <input
+                <Label htmlFor="complemento">Complemento</Label>
+                <Input
                   id="complemento"
-                  name="complemento"
-                  type="text"
-                  value={formData.complemento || ''}
-                  onChange={handleChange}
                   disabled={!isEditMode}
-                  className={isEditMode ? inputStyles : disabledInputStyles}
+                  {...register('complemento')}
                 />
               </div>
             </div>
+          </form>
+        )}
+      </Modal.Body>
+
+      <Modal.Footer className="justify-between w-full">
+        <Button
+          variant="danger"
+          onClick={() => setConfirmAction('excluir')}
+          disabled={isUpdating || isEditMode || isLoadingDetalhes}
+          isLoading={isDeleting}
+        >
+          Excluir
+        </Button>
+
+        {isEditMode ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditMode(false)}
+              disabled={isUpdating}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              form="form-edit-aluno"
+              variant="success"
+              isLoading={isUpdating}
+            >
+              Salvar Alterações
+            </Button>
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => setConfirmAction('resetSenha')}
+              disabled={isLoadingDetalhes}
+              isLoading={isResetting}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white"
+            >
+              <LockIcon className="w-5 h-5 mr-2" />
+              <span className="hidden sm:inline">Resetar Senha</span>
+            </Button>
+            <Button
+              onClick={() => setIsEditMode(true)}
+              disabled={isLoadingDetalhes}
+            >
+              Editar Cadastro
+            </Button>
           </div>
         )}
-
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-          <button
-            onClick={() => setConfirmAction('excluir')}
-            disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
-          >
-            {isLoading && confirmAction === 'excluir' && (
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-            Excluir
-          </button>
-
-          {isEditMode ? (
-            <button
-              onClick={handleSalvar}
-              disabled={isLoading}
-              className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
-            >
-              {isLoading && confirmAction === null && (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              )}
-              {isLoading && confirmAction === null
-                ? 'Salvando...'
-                : 'Salvar Alterações'}
-            </button>
-          ) : (
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmAction('resetSenha')}
-                disabled={isLoading}
-                className="flex items-center gap-2 bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 shadow-md disabled:opacity-70"
-                title="Resetar senha para a matrícula"
-              >
-                {isLoading && confirmAction === 'resetSenha' ? (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <LockIcon className="w-5 h-5" />
-                )}
-                <span className="hidden sm:inline">Resetar Senha</span>
-              </button>
-
-              <button
-                onClick={() => setIsEditMode(true)}
-                className="bg-lumi-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-lumi-primary-hover shadow-md"
-              >
-                Editar Cadastro
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      </Modal.Footer>
 
       <ConfirmModal
         isOpen={confirmAction !== null}

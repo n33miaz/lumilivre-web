@@ -128,10 +128,6 @@ export function AlunosPage() {
     }));
   }, [pageData]);
 
-  const handleCadastroSucesso = () => {
-    refetch();
-  };
-
   const handleApplyFilters = () => {
     setCurrentPage(1);
     setActiveFilters(filterParams);
@@ -302,15 +298,11 @@ export function AlunosPage() {
         }
       />
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Cadastrar Novo Aluno"
-      >
-        <NovoAluno
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={handleCadastroSucesso}
-        />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal.Header title="Cadastrar Novo Aluno" />
+        <Modal.Body>
+          <NovoAluno onClose={() => setIsModalOpen(false)} />
+        </Modal.Body>
       </Modal>
 
       <ModalStudentDetails

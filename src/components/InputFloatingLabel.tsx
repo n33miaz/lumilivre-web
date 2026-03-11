@@ -28,8 +28,12 @@ export function InputFloatingLabel({
   const shouldFloatLabel = isFocused || hasContent;
 
   const isPasswordType = type === 'password';
-  
-  const currentType = isPasswordType ? (showPassword ? 'text' : 'password') : type;
+
+  const currentType = isPasswordType
+    ? showPassword
+      ? 'text'
+      : 'password'
+    : type;
 
   return (
     <div className={`relative group ${className}`}>
@@ -65,11 +69,7 @@ export function InputFloatingLabel({
               : 'top-1/2 left-10 -translate-y-1/2 text-base'
           }
 
-          ${
-            error
-              ? 'text-red-500'
-              : 'text-lumi-label'
-          }
+          ${error ? 'text-red-500' : 'text-lumi-label'}
         `}
       >
         {label}

@@ -106,20 +106,20 @@ export function LivrosPage() {
     data: exemplaresData,
     isLoading: isExemplaresLoading,
     error: exemplaresError,
-    refetch: refetchExemplares,
   } = useExemplares(selectedBook?.id || null);
 
   const { data: emprestimosAtivos } = useEmprestimosAtivosEAtrasados();
 
-  const handleLivroCriado = (livroResponse: any) => {
+  const handleLivroCriado = (livroResponse: unknown) => {
     refetchLivros();
 
+    const response = livroResponse as LivroAgrupado;
     const novoLivro: LivroAgrupado = {
-      id: livroResponse.id,
-      isbn: livroResponse.isbn,
-      nome: livroResponse.nome,
-      autor: livroResponse.autor,
-      editora: livroResponse.editora,
+      id: response.id,
+      isbn: response.isbn,
+      nome: response.nome,
+      autor: response.autor,
+      editora: response.editora,
       quantidade: 0,
     };
 
@@ -178,7 +178,7 @@ export function LivrosPage() {
     return exemplaresProcessados.filter((ex) =>
       ex.tomboExemplar.toLowerCase().includes(termoBusca.toLowerCase()),
     );
-  }, [exemplaresProcessados, isExemplarView, termoBuscaAtivo, termoBusca]);
+  }, [exemplaresProcessados, isExemplarView, termoBusca]);
 
   const dadosPaginados = useMemo(() => {
     if (isExemplarView) {
@@ -273,13 +273,9 @@ export function LivrosPage() {
     }
   };
 
-  const handleFecharDetalhesExemplar = (foiAtualizado?: boolean) => {
+  const handleFecharDetalhesExemplar = () => {
     setIsDetalhesExemplarOpen(false);
     setExemplarSelecionado(null);
-    if (foiAtualizado) {
-      refetchExemplares();
-      refetchLivros();
-    }
   };
 
   const StatusIndicator = ({ status }: { status: string }) => {
@@ -505,55 +501,56 @@ export function LivrosPage() {
         </ActionHeader>
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={
-          isExemplarView ? 'Cadastrar Novo Exemplar' : 'Cadastrar Novo Livro'
-        }
-      >
-        {isExemplarView && selectedBook ? (
-          <NovoExemplar
-            livroId={selectedBook.id}
-            livroIsbn={selectedBook.isbn}
-            livroNome={selectedBook.nome}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={refetchExemplares}
-          />
-        ) : (
-          <NovoLivro
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={handleLivroCriado}
-          />
-        )}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal.Header
+          title={
+            isExemplarView ? 'Cadastrar Novo Exemplar' : 'Cadastrar Novo Livro'
+          }
+        />
+        <Modal.Body>
+          {isExemplarView && selectedBook ? (
+            <NovoExemplar
+              livroId={selectedBook.id}
+              livroIsbn={selectedBook.isbn}
+              livroNome={selectedBook.nome}
+              onClose={() => setIsModalOpen(false)}
+            />
+          ) : (
+            <NovoLivro
+              onClose={() => setIsModalOpen(false)}
+              onSuccess={handleLivroCriado}
+            />
+          )}
+        </Modal.Body>
       </Modal>
 
       <Modal
         isOpen={isConfirmModalOpen}
         onClose={handleRecusarCadastroExemplar}
-        title="Cadastro de Exemplar"
       >
-        <div className="flex flex-col gap-4">
-          <p className="text-gray-700 dark:text-gray-300 text-lg">
-            Livro cadastrado com sucesso! <br />
-            <strong>Deseja cadastrar um exemplar físico agora?</strong>
-          </p>
-
-          <div className="flex justify-end gap-3 mt-4">
-            <button
-              onClick={handleRecusarCadastroExemplar}
-              className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold"
-            >
-              Não, fazer depois
-            </button>
-            <button
-              onClick={handleConfirmarCadastroExemplar}
-              className="px-6 py-2 rounded-lg bg-lumi-primary text-white hover:bg-lumi-primary-hover font-bold shadow-md"
-            >
-              Sim, cadastrar
-            </button>
+        <Modal.Header title="Cadastro de Exemplar" />
+        <Modal.Body>
+          <div className="flex flex-col gap-4">
+            <p className="text-gray-700 dark:text-gray-300 text-lg">
+              Livro cadastrado com sucesso! <br />
+              <strong>Deseja cadastrar um exemplar físico agora?</strong>
+            </p>
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={handleRecusarCadastroExemplar}
+                className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold"
+              >
+                Não, fazer depois
+              </button>
+              <button
+                onClick={handleConfirmarCadastroExemplar}
+                className="px-6 py-2 rounded-lg bg-lumi-primary text-white hover:bg-lumi-primary-hover font-bold shadow-md"
+              >
+                Sim, cadastrar
+              </button>
+            </div>
           </div>
-        </div>
+        </Modal.Body>
       </Modal>
 
       <DetalhesLivroModal

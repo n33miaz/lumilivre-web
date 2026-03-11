@@ -11,6 +11,7 @@ import {
 } from '../../services/solicitacaoEmprestimoService';
 import { buscarLivrosAgrupados } from '../../services/livroService';
 import { buscarExemplaresPorLivroId } from '../../services/exemplarService';
+import { getErrorMessage } from '../../utils/errorHandler';
 
 interface ModalLoanRequestDetailsProps {
   solicitacao: SolicitacaoPendente | null;
@@ -111,13 +112,14 @@ export function ModalLoanRequestDetails({
         description: `Solicitação ${aceitar ? 'aceita' : 'recusada'} com sucesso!`,
       });
       onClose(true);
-    } catch (error: any) {
+    } catch (error) {
       addToast({
         type: 'error',
         title: 'Atenção',
-        description:
-          error.response?.data?.mensagem ||
+        description: getErrorMessage(
+          error,
           `Erro ao ${aceitar ? 'aceitar' : 'recusar'} solicitação.`,
+        ),
       });
     } finally {
       setIsLoading(false);
@@ -146,84 +148,85 @@ export function ModalLoanRequestDetails({
   if (!solicitacao) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={() => onClose(false)}
-      title="Solicitação de Empréstimo"
-    >
-      <div className="flex flex-col h-full max-h-[600px] overflow-hidden">
-        <div className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={labelStyles}>Data da Solicitação</label>
-              <div className={disabledInputStyles}>{dataSolicitacao}</div>
+    <Modal isOpen={isOpen} onClose={() => onClose(false)}>
+      <Modal.Header title="Solicitação de Empréstimo" />
+      <Modal.Body>
+        <div className="flex flex-col h-full max-h-[600px] overflow-hidden">
+          <div className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelStyles}>Data da Solicitação</label>
+                <div className={disabledInputStyles}>{dataSolicitacao}</div>
+              </div>
+
+              <div>
+                <label className={labelStyles}>Aluno</label>
+                <div className={disabledInputStyles} title={alunoInfo}>
+                  {alunoInfo}
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className={labelStyles}>Aluno</label>
-              <div className={disabledInputStyles} title={alunoInfo}>
-                {alunoInfo}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelStyles}>Livro</label>
+                <div className={disabledInputStyles} title={livroInfo}>
+                  {livroInfo}
+                </div>
+              </div>
+
+              <div>
+                <label className={labelStyles}>Exemplar</label>
+                <SearchableSelect
+                  value={selectedTombo}
+                  onChange={setSelectedTombo}
+                  options={exemplarOptions}
+                  placeholder="Selecione o exemplar..."
+                  isLoading={isLoadingExemplares}
+                  disabled={isLoading}
+                />
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={labelStyles}>Livro</label>
-              <div className={disabledInputStyles} title={livroInfo}>
-                {livroInfo}
-              </div>
-            </div>
+          <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0 gap-4">
+            <button
+              onClick={() => handleProcessarClick(false)}
+              disabled={isLoading}
+              className="flex-1 flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading && confirmAction === false && (
+                <span className="w-5 h-5 border-2 border-red-700/30 border-t-red-700 dark:border-red-400/30 dark:border-t-red-400 rounded-full animate-spin" />
+              )}
+              {isLoading && confirmAction === false
+                ? 'Processando...'
+                : 'Recusar'}
+            </button>
 
-            <div>
-              <label className={labelStyles}>Exemplar</label>
-              <SearchableSelect
-                value={selectedTombo}
-                onChange={setSelectedTombo}
-                options={exemplarOptions}
-                placeholder="Selecione o exemplar..."
-                isLoading={isLoadingExemplares}
-                disabled={isLoading}
-              />
-            </div>
+            <button
+              onClick={() => handleProcessarClick(true)}
+              disabled={isLoading}
+              className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+            >
+              {isLoading && confirmAction === true && (
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              )}
+              {isLoading && confirmAction === true
+                ? 'Processando...'
+                : 'Aceitar'}
+            </button>
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0 gap-4">
-          <button
-            onClick={() => handleProcessarClick(false)}
-            disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading && confirmAction === false && (
-              <span className="w-5 h-5 border-2 border-red-700/30 border-t-red-700 dark:border-red-400/30 dark:border-t-red-400 rounded-full animate-spin" />
-            )}
-            {isLoading && confirmAction === false
-              ? 'Processando...'
-              : 'Recusar'}
-          </button>
-
-          <button
-            onClick={() => handleProcessarClick(true)}
-            disabled={isLoading}
-            className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            {isLoading && confirmAction === true && (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-            {isLoading && confirmAction === true ? 'Processando...' : 'Aceitar'}
-          </button>
-        </div>
-      </div>
-
-      <ConfirmModal
-        isOpen={confirmAction !== null}
-        title={confirmAction ? 'Aceitar Solicitação' : 'Recusar Solicitação'}
-        message={`Tem certeza que deseja ${confirmAction ? 'aceitar' : 'recusar'} esta solicitação?`}
-        isDestructive={!confirmAction}
-        onConfirm={() => executarProcessamento(confirmAction!)}
-        onCancel={() => setConfirmAction(null)}
-      />
+        <ConfirmModal
+          isOpen={confirmAction !== null}
+          title={confirmAction ? 'Aceitar Solicitação' : 'Recusar Solicitação'}
+          message={`Tem certeza que deseja ${confirmAction ? 'aceitar' : 'recusar'} esta solicitação?`}
+          isDestructive={!confirmAction}
+          onConfirm={() => executarProcessamento(confirmAction!)}
+          onCancel={() => setConfirmAction(null)}
+        />
+      </Modal.Body>
     </Modal>
   );
 }

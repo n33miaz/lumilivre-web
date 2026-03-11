@@ -5,6 +5,7 @@ interface Endereco {
   bairro: string;
   localidade: string;
   uf: string;
+  error?: boolean | string;
 }
 
 export const buscarEnderecoPorCep = async (cep: string): Promise<Endereco> => {

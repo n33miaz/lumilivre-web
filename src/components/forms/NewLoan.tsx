@@ -1,21 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
 
-import {
-  cadastrarEmprestimo,
-  type EmprestimoPayload,
-} from '../../services/emprestimoService';
 import { buscarAlunosParaAdmin } from '../../services/alunoService';
 import { buscarLivrosAgrupados } from '../../services/livroService';
 import { buscarExemplaresPorLivroId } from '../../services/exemplarService';
+import { type EmprestimoPayload } from '../../services/emprestimoService';
 
-import { useToast } from '../../contexts/ToastContext';
+import { useCreateLoan } from '../../hooks/mutations/useLoanMutations';
+import { loanSchema, type LoanFormData } from '../../schemas/loanSchema';
+
+import { Label } from '../ui/Label';
+import { Button } from '../ui/Button';
 import { SearchableSelect } from '../SearchableSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
-
-interface Option {
-  label: string;
-  value: string | number;
-}
 
 interface NewLoanProps {
   onClose: () => void;
@@ -23,95 +22,78 @@ interface NewLoanProps {
 }
 
 export function NovoEmprestimo({ onClose, onSuccess }: NewLoanProps) {
-  const { addToast } = useToast(); // Hook instanciado
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingExemplares, setIsLoadingExemplares] = useState(false);
-
-  const [alunoMatricula, setAlunoMatricula] = useState('');
-  const [livroId, setLivroId] = useState('');
-  const [exemplarTombo, setExemplarTombo] = useState('');
+  const { mutateAsync: createLoan, isPending } = useCreateLoan();
 
   const hoje = new Date().toISOString().split('T')[0];
   const dataDevolucaoPadrao = new Date();
   dataDevolucaoPadrao.setDate(dataDevolucaoPadrao.getDate() + 7);
   const devolucaoStr = dataDevolucaoPadrao.toISOString().split('T')[0];
 
-  const [dataEmprestimo, setDataEmprestimo] = useState(hoje);
-  const [dataDevolucao, setDataDevolucao] = useState(devolucaoStr);
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<LoanFormData>({
+    resolver: zodResolver(loanSchema),
+    defaultValues: {
+      data_emprestimo: hoje,
+      data_devolucao: devolucaoStr,
+      aluno_matricula: '',
+      livro_id: '',
+      exemplar_tombo: '',
+    },
+  });
 
-  const [alunosOptions, setAlunosOptions] = useState<Option[]>([]);
-  const [livrosOptions, setLivrosOptions] = useState<Option[]>([]);
-  const [exemplaresOptions, setExemplaresOptions] = useState<Option[]>([]);
+  const livroIdSelecionado = watch('livro_id');
 
-  useEffect(() => {
-    const carregarDadosIniciais = async () => {
-      try {
-        const [alunosRes, livrosRes] = await Promise.all([
-          buscarAlunosParaAdmin('', 0, 1000),
-          buscarLivrosAgrupados('', 0, 1000),
-        ]);
+  const { data: alunosData } = useQuery({
+    queryKey: ['alunos-options'],
+    queryFn: () =>
+      buscarAlunosParaAdmin('', 0, 1000).then((res) => res.content),
+    staleTime: 1000 * 60 * 5,
+  });
 
-        // Mapeia Alunos
-        setAlunosOptions(
-          alunosRes.content.map((a) => ({
-            label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
-            value: a.matricula,
-          })),
-        );
+  const { data: livrosData } = useQuery({
+    queryKey: ['livros-options'],
+    queryFn: () =>
+      buscarLivrosAgrupados('', 0, 1000).then((res) => res.content),
+    staleTime: 1000 * 60 * 5,
+  });
 
-        // Mapeia Livros
-        setLivrosOptions(
-          livrosRes.content.map((l) => ({
-            label: `${l.nome} (ISBN: ${l.isbn || 'S/N'})`,
-            value: l.id,
-          })),
-        );
-      } catch (error) {
-        console.error('Erro ao carregar dados iniciais', error);
-      }
-    };
-    carregarDadosIniciais();
-  }, []);
+  const { data: exemplaresData, isLoading: isLoadingExemplares } = useQuery({
+    queryKey: ['exemplares-options', livroIdSelecionado],
+    queryFn: () => buscarExemplaresPorLivroId(Number(livroIdSelecionado)),
+    enabled: !!livroIdSelecionado,
+  });
 
-  useEffect(() => {
-    if (!livroId) {
-      setExemplaresOptions([]);
-      setExemplarTombo('');
-      return;
-    }
+  const alunosOptions = useMemo(
+    () =>
+      alunosData?.map((a) => ({
+        label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
+        value: a.matricula,
+      })) || [],
+    [alunosData],
+  );
+  const livrosOptions = useMemo(
+    () =>
+      livrosData?.map((l) => ({
+        label: `${l.nome} (ISBN: ${l.isbn || 'S/N'})`,
+        value: String(l.id),
+      })) || [],
+    [livrosData],
+  );
 
-    const carregarExemplares = async () => {
-      setIsLoadingExemplares(true);
-      try {
-        const lista = await buscarExemplaresPorLivroId(Number(livroId));
-
-        const disponiveis = lista.filter((ex) => ex.status === 'DISPONIVEL');
-
-        if (disponiveis.length === 0) {
-          addToast({
-            type: 'warning',
-            title: 'Indisponível',
-            description:
-              'Este livro não possui exemplares disponíveis para empréstimo.',
-          });
-        }
-
-        setExemplaresOptions(
-          disponiveis.map((ex) => ({
-            label: `${ex.tomboExemplar} - Local: ${ex.localizacao_fisica}`,
-            value: ex.tomboExemplar,
-          })),
-        );
-      } catch (error) {
-        console.error('Erro ao buscar exemplares', error);
-        setExemplaresOptions([]);
-      } finally {
-        setIsLoadingExemplares(false);
-      }
-    };
-
-    carregarExemplares();
-  }, [livroId, addToast]);
+  const exemplaresOptions = useMemo(() => {
+    if (!exemplaresData) return [];
+    return exemplaresData
+      .filter((ex) => ex.status === 'DISPONIVEL')
+      .map((ex) => ({
+        label: `${ex.tomboExemplar} - Local: ${ex.localizacao_fisica}`,
+        value: ex.tomboExemplar,
+      }));
+  }, [exemplaresData]);
 
   const formatarDataParaBackend = (dataIso: string): string => {
     if (!dataIso) return '';
@@ -120,131 +102,147 @@ export function NovoEmprestimo({ onClose, onSuccess }: NewLoanProps) {
     return `${dia}/${mes}/${ano} ${horaAtual}`;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (
-      !alunoMatricula ||
-      !exemplarTombo ||
-      !dataEmprestimo ||
-      !dataDevolucao
-    ) {
-      addToast({
-        type: 'warning',
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha todos os campos obrigatórios.',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
+  const onSubmit = async (data: LoanFormData) => {
     try {
       const payload: EmprestimoPayload = {
-        aluno_matricula: alunoMatricula,
-        exemplar_tombo: exemplarTombo,
-        data_emprestimo: formatarDataParaBackend(dataEmprestimo),
-        data_devolucao: formatarDataParaBackend(dataDevolucao),
+        aluno_matricula: data.aluno_matricula,
+        exemplar_tombo: data.exemplar_tombo,
+        data_emprestimo: formatarDataParaBackend(data.data_emprestimo),
+        data_devolucao: formatarDataParaBackend(data.data_devolucao),
       };
 
-      await cadastrarEmprestimo(payload);
-
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Empréstimo realizado com sucesso!',
-      });
-
+      await createLoan(payload);
       onSuccess();
       onClose();
-    } catch (error: any) {
-      console.error('Erro ao cadastrar empréstimo:', error);
-      addToast({
-        type: 'error',
-        title: 'Erro ao cadastrar',
-        description:
-          error.response?.data?.mensagem || 'Erro ao realizar empréstimo.',
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
     }
   };
-
-  // Estilos
-  const buttonClass =
-    'w-full bg-lumi-primary hover:bg-lumi-primary-hover active:bg-purple-900 text-white text-[17px] font-bold py-3.5 px-4 border-2 border-transparent rounded-lg shadow-md transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none tracking-wide';
 
   return (
     <div className="flex flex-col h-full max-h-[600px] overflow-hidden">
       <form
         id="form-novo-emprestimo"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2 space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CustomDatePicker
-            label="Data do Empréstimo*"
-            value={dataEmprestimo}
-            onChange={(e) => setDataEmprestimo(e.target.value)}
+          <Controller
+            name="data_emprestimo"
+            control={control}
+            render={({ field }) => (
+              <CustomDatePicker
+                label="Data do Empréstimo*"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.data_emprestimo?.message}
+              />
+            )}
           />
-
-          <CustomDatePicker
-            label="Data de Devolução*"
-            value={dataDevolucao}
-            onChange={(e) => setDataDevolucao(e.target.value)}
+          <Controller
+            name="data_devolucao"
+            control={control}
+            render={({ field }) => (
+              <CustomDatePicker
+                label="Data de Devolução*"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.data_devolucao?.message}
+              />
+            )}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <SearchableSelect
-              label="Aluno*"
-              value={alunoMatricula}
-              onChange={setAlunoMatricula}
-              options={alunosOptions}
+            <Label requiredIndicator>Aluno</Label>
+            <Controller
+              name="aluno_matricula"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <SearchableSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={alunosOptions}
+                    placeholder="Selecione o aluno"
+                  />
+                  {errors.aluno_matricula && (
+                    <span className="text-xs text-red-500 mt-1">
+                      {errors.aluno_matricula.message}
+                    </span>
+                  )}
+                </div>
+              )}
             />
           </div>
 
           <div>
-            <SearchableSelect
-              label="Livro*"
-              value={livroId}
-              onChange={(val) => {
-                setLivroId(val);
-                setExemplarTombo('');
-              }}
-              options={livrosOptions}
+            <Label requiredIndicator>Livro</Label>
+            <Controller
+              name="livro_id"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <SearchableSelect
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      setValue('exemplar_tombo', '');
+                    }}
+                    options={livrosOptions}
+                    placeholder="Selecione o livro"
+                  />
+                  {errors.livro_id && (
+                    <span className="text-xs text-red-500 mt-1">
+                      {errors.livro_id.message}
+                    </span>
+                  )}
+                </div>
+              )}
             />
           </div>
 
           <div>
-            <SearchableSelect
-              label="Exemplar Disponível*"
-              value={exemplarTombo}
-              onChange={setExemplarTombo}
-              options={exemplaresOptions}
-              placeholder={
-                !livroId ? 'Selecione um livro' : 'Selecione um exemplar'
-              }
-              disabled={!livroId || isLoadingExemplares}
-              isLoading={isLoadingExemplares}
+            <Label requiredIndicator>Exemplar Disponível</Label>
+            <Controller
+              name="exemplar_tombo"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <SearchableSelect
+                    value={field.value}
+                    onChange={field.onChange}
+                    options={exemplaresOptions}
+                    placeholder={
+                      !livroIdSelecionado
+                        ? 'Selecione um livro'
+                        : 'Selecione um exemplar'
+                    }
+                    disabled={!livroIdSelecionado || isLoadingExemplares}
+                    isLoading={isLoadingExemplares}
+                  />
+                  {errors.exemplar_tombo && (
+                    <span className="text-xs text-red-500 mt-1">
+                      {errors.exemplar_tombo.message}
+                    </span>
+                  )}
+                </div>
+              )}
             />
           </div>
         </div>
       </form>
 
       <div className="pt-3 mt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-        <button
+        <Button
           type="submit"
           form="form-novo-emprestimo"
-          disabled={isLoading}
-          className={`${buttonClass} flex items-center justify-center gap-2`}
+          isLoading={isPending}
+          className="w-full py-3.5 text-[17px]"
         >
-          {isLoading && (
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          )}
-          {isLoading ? 'PROCESSANDO...' : 'CONFIRMAR EMPRÉSTIMO'}
-        </button>
+          CONFIRMAR EMPRÉSTIMO
+        </Button>
       </div>
     </div>
   );

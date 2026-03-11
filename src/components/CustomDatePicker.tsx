@@ -5,6 +5,7 @@ import React, {
   useLayoutEffect,
   forwardRef,
   useImperativeHandle,
+  useCallback,
 } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -51,7 +52,7 @@ export const CustomDatePicker = forwardRef<
   }, [value]);
 
   // --- Lógica de Posicionamento do Portal ---
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (containerRef.current && isOpen) {
       const rect = containerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
@@ -77,7 +78,7 @@ export const CustomDatePicker = forwardRef<
         left: rect.left,
       });
     }
-  };
+  }, [isOpen]);
 
   // Listeners para reposicionar ao rolar ou redimensionar
   useLayoutEffect(() => {
@@ -90,7 +91,7 @@ export const CustomDatePicker = forwardRef<
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   // --- Fechar ao clicar fora ---
   useEffect(() => {

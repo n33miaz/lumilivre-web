@@ -1,59 +1,59 @@
 import { useState, useMemo } from 'react';
+import { useForm, Controller, type Resolver } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { useToast } from '../../contexts/ToastContext';
 import { useCursos } from '../../hooks/useCommonQueries';
-import { cadastrarTcc, type TccPayload } from '../../services/tccService';
+import { useCreateTcc } from '../../hooks/mutations/useTccMutations';
+import { tccSchema, type TccFormData } from '../../schemas/tccSchema';
+
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import { CustomSelect } from '../CustomSelect';
 
 import uploadIconUrl from '../../assets/icons/upload.svg';
+import type { TccPayload } from '../../services/tccService';
 
 interface NewTccProps {
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const estadoInicial: TccPayload = {
-  titulo: '',
-  alunos: '',
-  orientadores: '',
-  curso_id: 0,
-  anoConclusao: new Date().getFullYear().toString(),
-  semestreConclusao: '1',
-  linkExterno: '',
-  ativo: true,
-};
-
 export function NovoTcc({ onClose, onSuccess }: NewTccProps) {
-  const [formData, setFormData] = useState<TccPayload>(estadoInicial);
-  const [isLoading, setIsLoading] = useState(false);
-
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
 
   const { addToast } = useToast();
   const { data: cursosList } = useCursos();
+  const { mutateAsync: createTcc, isPending } = useCreateTcc();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<TccFormData>({
+    resolver: zodResolver(tccSchema) as unknown as Resolver<TccFormData>,
+    defaultValues: {
+      anoConclusao: new Date().getFullYear().toString(),
+      semestreConclusao: '1',
+      ativo: true,
+      curso_id: 0,
+      titulo: '',
+      alunos: '',
+    },
+  });
 
   const cursosOptions = useMemo(() => {
-    return (cursosList || []).map((c) => ({
-      label: c.nome,
-      value: c.id,
-    }));
+    return (cursosList || []).map((c) => ({ label: c.nome, value: c.id }));
   }, [cursosList]);
 
   const semestreOptions = [
     { label: '1º Semestre', value: '1' },
     { label: '2º Semestre', value: '2' },
   ];
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
 
   const handlePdfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -78,71 +78,29 @@ export function NovoTcc({ onClose, onSuccess }: NewTccProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.titulo?.trim() || !formData.alunos?.trim()) {
-      addToast({
-        type: 'warning',
-        title: 'Campos obrigatórios',
-        description: 'Preencha Título e Alunos.',
-      });
-      return;
-    }
-
-    if (!formData.curso_id || Number(formData.curso_id) === 0) {
-      addToast({
-        type: 'warning',
-        title: 'Curso obrigatório',
-        description: 'Selecione um curso válido.',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
+  const onSubmit = async (data: TccFormData) => {
     try {
-      const payload = {
-        ...formData,
-        curso_id: Number(formData.curso_id),
-      };
-
-      await cadastrarTcc(payload, pdfFile, fotoFile);
-
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'TCC cadastrado com sucesso!',
+      await createTcc({
+        payload: data as unknown as TccPayload,
+        filePdf: pdfFile,
+        fileFoto: fotoFile,
       });
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       console.error(error);
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: error.response?.data?.message || 'Erro ao cadastrar TCC.',
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
-
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1';
-  const inputStyles =
-    'w-full h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary outline-none text-sm';
-  const buttonClass =
-    'w-full bg-lumi-primary hover:bg-lumi-primary-hover text-white font-bold py-3.5 px-4 rounded-lg shadow-md disabled:opacity-70 disabled:cursor-not-allowed';
 
   return (
     <div className="flex flex-col h-full max-h-[600px] overflow-hidden">
       <form
         id="form-novo-tcc"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2 space-y-4"
       >
         <div className="flex flex-col md:flex-row gap-6">
+          {/* Coluna Esquerda (Capa) */}
           <div className="w-full md:w-[28%] flex flex-col items-center space-y-4 pt-1">
             <div className="w-[9.5rem] h-[14rem] bg-gray-200 dark:bg-gray-700 rounded-lg shadow-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600 relative group shrink-0">
               {fotoPreview ? (
@@ -179,103 +137,99 @@ export function NovoTcc({ onClose, onSuccess }: NewTccProps) {
             </div>
           </div>
 
+          {/* Coluna Direita (Dados) */}
           <div className="w-full md:w-[72%] space-y-4">
             <div>
-              <label htmlFor="titulo" className={labelStyles}>
-                Título do Trabalho*
-              </label>
-              <input
+              <Label htmlFor="titulo" requiredIndicator>
+                Título do Trabalho
+              </Label>
+              <Input
                 id="titulo"
-                name="titulo"
-                type="text"
-                value={formData.titulo}
-                onChange={handleChange}
-                className={inputStyles}
-                placeholder="Ex: Sistema de Gerenciamento Bibliotecário (LumiLivre)"
+                placeholder="Ex: Sistema de Gerenciamento..."
+                {...register('titulo')}
+                error={errors.titulo?.message}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="alunos" className={labelStyles}>
-                  Alunos*
-                </label>
-                <input
+                <Label htmlFor="alunos" requiredIndicator>
+                  Alunos
+                </Label>
+                <Input
                   id="alunos"
-                  name="alunos"
-                  type="text"
-                  value={formData.alunos}
-                  onChange={handleChange}
-                  className={inputStyles}
                   placeholder="João, Maria, José"
+                  {...register('alunos')}
+                  error={errors.alunos?.message}
                 />
               </div>
               <div>
-                <label htmlFor="orientadores" className={labelStyles}>
-                  Orientadores
-                </label>
-                <input
+                <Label htmlFor="orientadores">Orientadores</Label>
+                <Input
                   id="orientadores"
-                  name="orientadores"
-                  type="text"
-                  value={formData.orientadores}
-                  onChange={handleChange}
-                  className={inputStyles}
                   placeholder="Prof. Adriano, Jacques"
+                  {...register('orientadores')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className={labelStyles}>Curso*</label>
-                <CustomSelect
-                  value={formData.curso_id}
-                  onChange={(val) =>
-                    handleSelectChange('curso_id', Number(val))
-                  }
-                  options={cursosOptions}
-                  placeholder="Selecione"
+                <Label requiredIndicator>Curso</Label>
+                <Controller
+                  name="curso_id"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <CustomSelect
+                        value={field.value || ''}
+                        onChange={field.onChange}
+                        options={cursosOptions}
+                        placeholder="Selecione"
+                      />
+                      {errors.curso_id && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.curso_id.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               </div>
               <div>
-                <label htmlFor="anoConclusao" className={labelStyles}>
-                  Ano de Conclusão
-                </label>
-                <input
+                <Label htmlFor="anoConclusao">Ano de Conclusão</Label>
+                <Input
                   id="anoConclusao"
-                  name="anoConclusao"
                   type="number"
-                  value={formData.anoConclusao}
-                  onChange={handleChange}
-                  className={inputStyles}
+                  {...register('anoConclusao')}
+                  error={errors.anoConclusao?.message}
                 />
               </div>
               <div>
-                <label className={labelStyles}>Semestre de Conclusão</label>
-                <CustomSelect
-                  value={formData.semestreConclusao}
-                  onChange={(val) =>
-                    handleSelectChange('semestreConclusao', val)
-                  }
-                  options={semestreOptions}
-                  placeholder="Selecione"
+                <Label>Semestre</Label>
+                <Controller
+                  name="semestreConclusao"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      options={semestreOptions}
+                      placeholder="Selecione"
+                    />
+                  )}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="linkExterno" className={labelStyles}>
+              <Label htmlFor="linkExterno">
                 Link Externo (Repositório/Drive)
-              </label>
-              <input
+              </Label>
+              <Input
                 id="linkExterno"
-                name="linkExterno"
-                type="text"
-                value={formData.linkExterno}
-                onChange={handleChange}
-                className={inputStyles}
                 placeholder="https://..."
+                {...register('linkExterno')}
               />
             </div>
 
@@ -313,17 +267,14 @@ export function NovoTcc({ onClose, onSuccess }: NewTccProps) {
       </form>
 
       <div className="pt-3 mt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-        <button
+        <Button
           type="submit"
           form="form-novo-tcc"
-          disabled={isLoading}
-          className={`${buttonClass} flex items-center justify-center gap-2`}
+          isLoading={isPending}
+          className="w-full py-3.5 text-[17px]"
         >
-          {isLoading && (
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          )}
-          {isLoading ? 'SALVANDO...' : 'CADASTRAR TCC'}
-        </button>
+          CADASTRAR TCC
+        </Button>
       </div>
     </div>
   );

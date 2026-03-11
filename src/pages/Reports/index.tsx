@@ -26,6 +26,7 @@ import { LoadingIcon } from '../../components/LoadingIcon';
 import AddIcon from '../../assets/icons/add.svg?react';
 import DownloadIcon from '../../assets/icons/upload.svg';
 import ReportPaperIcon from '../../assets/icons/report-paper.svg?react';
+import axios from 'axios';
 
 interface ReportItemProps {
   title: string;
@@ -305,14 +306,17 @@ function ModalFiltrosRelatorio({
       await new Promise((resolve) => setTimeout(resolve, 600));
 
       onClose();
-    } catch (error: any) {
-      if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') {
+    } catch (error) {
+      if (
+        axios.isCancel(error) ||
+        (error instanceof Error && error.name === 'CanceledError')
+      ) {
         console.log('Download cancelado pelo usuário');
         return;
       }
 
       console.error(error);
-      if (error.response?.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         addToast({
           type: 'warning',
           title: 'Sem dados',
@@ -606,8 +610,9 @@ function ModalFiltrosRelatorio({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={titulo}>
-      {renderContent()}
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal.Header title={titulo} />
+      <Modal.Body>{renderContent()}</Modal.Body>
     </Modal>
   );
 }

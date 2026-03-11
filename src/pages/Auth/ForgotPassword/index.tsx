@@ -8,6 +8,7 @@ import { ThemeToggle } from '../../../components/ThemeToggle';
 
 import LogoIcon from '../../../assets/icons/logo.svg?react';
 import UserIcon from '../../../assets/icons/users.svg?react';
+import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function EsqueciSenhaPage() {
   const [email, setEmail] = useState('');
@@ -37,13 +38,14 @@ export function EsqueciSenhaPage() {
         description: data.mensagem || 'Verifique sua caixa de entrada.',
         duration: 5000,
       });
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         type: 'error',
         title: 'Erro ao enviar',
-        description:
-          err.response?.data?.mensagem ||
+        description: getErrorMessage(
+          err,
           'Ocorreu um erro ao processar sua solicitação.',
+        ),
       });
     } finally {
       setIsLoading(false);

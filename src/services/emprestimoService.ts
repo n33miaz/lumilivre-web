@@ -19,6 +19,7 @@ export interface EmprestimoAtivoDTO {
   alunoNome: string;
   alunoMatricula: string;
   tombo: string;
+  dataEmprestimo: string;
   dataDevolucao: string;
   statusEmprestimo: 'ATIVO' | 'ATRASADO' | 'CONCLUIDO';
 }
@@ -140,7 +141,8 @@ export const buscarRanking = async (
   moduloId?: number,
   turnoId?: number,
 ): Promise<AlunoRanking[]> => {
-  const params: any = { top };
+  const params: Record<string, number> = { top };
+
   if (cursoId) params.cursoId = cursoId;
   if (moduloId) params.moduloId = moduloId;
   if (turnoId) params.turnoId = turnoId;

@@ -68,7 +68,7 @@ const PieChartCard = ({
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data as any[]}
+              data={data as unknown as Record<string, unknown>[]}
               dataKey="total"
               nameKey="nome"
               cx="50%"

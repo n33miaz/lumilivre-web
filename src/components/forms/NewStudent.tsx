@@ -1,65 +1,35 @@
 import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { cadastrarAluno } from '../../services/alunoService';
 import { buscarEnderecoPorCep } from '../../services/cepService';
 import { cadastrarCurso } from '../../services/cursoService';
 import { cadastrarModulo } from '../../services/moduloService';
 import { cadastrarTurno } from '../../services/turnoService';
-
 import { useCursos, useModulos, useTurnos } from '../../hooks/useCommonQueries';
-
+import { useCreateStudent } from '../../hooks/mutations/useStudentMutations';
+import {
+  studentSchema,
+  type StudentFormData,
+} from '../../schemas/studentSchema';
 import { useToast } from '../../contexts/ToastContext';
+
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import { CustomSelect } from '../CustomSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
+import type { AlunoPayload } from '../../services/alunoService';
 
-interface FormData {
-  matricula: string;
-  nomeCompleto: string;
-  cpf: string;
-  celular: string;
-  dataNascimento: string;
-  email: string;
-  cursoId: string | number;
-  turnoId: string | number;
-  moduloId: string | number;
-  cep: string;
-  logradouro: string;
-  bairro: string;
-  localidade: string;
-  uf: string;
-  numero_casa: string;
-  complemento: string;
-}
+export function NovoAluno({ onClose }: { onClose: () => void }) {
+  const { addToast } = useToast();
+  const { mutateAsync: createStudent, isPending: isCreating } =
+    useCreateStudent();
 
-const estadoInicial: FormData = {
-  matricula: '',
-  nomeCompleto: '',
-  cpf: '',
-  celular: '',
-  dataNascimento: '',
-  email: '',
-  cursoId: '',
-  turnoId: '',
-  moduloId: '',
-  cep: '',
-  logradouro: '',
-  bairro: '',
-  localidade: '',
-  uf: '',
-  numero_casa: '',
-  complemento: '',
-};
-
-export function NovoAluno({
-  onClose,
-  onSuccess,
-}: {
-  onClose: () => void;
-  onSuccess: () => void;
-}) {
-  const [formData, setFormData] = useState<FormData>(estadoInicial);
-  const [isLoading, setIsLoading] = useState(false);
   const [isCepLoading, setIsCepLoading] = useState(false);
+  const [isNovoCurso, setIsNovoCurso] = useState(false);
+  const [isNovoTurno, setIsNovoTurno] = useState(false);
+  const [isNovoModulo, setIsNovoModulo] = useState(false);
 
   const { data: cursosList } = useCursos();
   const { data: modulosList } = useModulos();
@@ -69,66 +39,45 @@ export function NovoAluno({
     label: c.nome,
     value: c.id,
   }));
-
   const modulosOptions = (modulosList || []).map((m) => ({
     label: m.nome,
     value: m.id,
   }));
-
   const turnoOptions = (turnosList || []).map((t) => ({
     label: t.nome,
     value: t.id,
   }));
 
-  const [isNovoCurso, setIsNovoCurso] = useState(false);
-  const [novoCursoInput, setNovoCursoInput] = useState('');
-  const [isNovoTurno, setIsNovoTurno] = useState(false);
-  const [novoTurnoInput, setNovoTurnoInput] = useState('');
-  const [isNovoModulo, setIsNovoModulo] = useState(false);
-  const [novoModuloInput, setNovoModuloInput] = useState('');
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors },
+  } = useForm<StudentFormData>({
+    resolver: zodResolver(studentSchema),
+    defaultValues: {
+      cursoId: '',
+      turnoId: '',
+      moduloId: '',
+    },
+  });
 
-  const { addToast } = useToast();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (field: string, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    setFormData((prev) => ({ ...prev, cep: rawValue }));
-
-    const cleanCep = rawValue.replace(/\D/g, '');
-
-    if (cleanCep.length === 8) {
+  const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const cep = e.target.value.replace(/\D/g, '');
+    if (cep.length === 8) {
       setIsCepLoading(true);
       try {
-        const endereco = await buscarEnderecoPorCep(cleanCep);
-        if (endereco.erro) {
-          addToast({
-            type: 'warning',
-            title: 'CEP não encontrado',
-            description: 'Verifique o número digitado.',
-          });
-        } else {
-          setFormData((prev) => ({
-            ...prev,
-            logradouro: endereco.logradouro || '',
-            bairro: endereco.bairro || '',
-            localidade: endereco.localidade || '',
-            uf: endereco.uf || '',
-          }));
-        }
-      } catch (error) {
-        console.error('Erro ao buscar CEP', error);
+        const endereco = await buscarEnderecoPorCep(cep);
+        setValue('logradouro', endereco.logradouro || '');
+        setValue('bairro', endereco.bairro || '');
+        setValue('localidade', endereco.localidade || '');
+        setValue('uf', endereco.uf || '');
+      } catch {
         addToast({
-          type: 'error',
-          title: 'Erro na busca',
-          description: 'Não foi possível buscar o endereço.',
+          type: 'warning',
+          title: 'CEP não encontrado',
+          description: 'Verifique o número digitado.',
         });
       } finally {
         setIsCepLoading(false);
@@ -136,233 +85,123 @@ export function NovoAluno({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const onSubmit = async (data: StudentFormData) => {
     try {
-      let finalCursoId = formData.cursoId ? Number(formData.cursoId) : null;
-      let finalTurnoId = formData.turnoId ? Number(formData.turnoId) : null;
-      let finalModuloId = formData.moduloId ? Number(formData.moduloId) : null;
+      let finalCursoId = Number(data.cursoId);
+      let finalTurnoId = Number(data.turnoId);
+      let finalModuloId = Number(data.moduloId);
 
+      // Lógica de criação
       if (isNovoTurno) {
-        if (!novoTurnoInput.trim()) {
-          addToast({
-            type: 'warning',
-            title: 'Campo obrigatório',
-            description: 'Digite o nome do novo turno.',
-          });
-          setIsLoading(false);
-          return;
-        }
-        const novoTurno = await cadastrarTurno({ nome: novoTurnoInput });
+        const novoTurno = await cadastrarTurno({ nome: String(data.turnoId) });
         finalTurnoId = novoTurno.id;
       }
-
       if (isNovoModulo) {
-        if (!novoModuloInput.trim()) {
-          addToast({
-            type: 'warning',
-            title: 'Campo obrigatório',
-            description: 'Digite o nome do novo módulo.',
-          });
-          setIsLoading(false);
-          return;
-        }
-        const novoModulo = await cadastrarModulo({ nome: novoModuloInput });
+        const novoModulo = await cadastrarModulo({
+          nome: String(data.moduloId),
+        });
         finalModuloId = novoModulo.id;
       }
-
       if (isNovoCurso) {
-        if (!novoCursoInput.trim()) {
-          addToast({
-            type: 'warning',
-            title: 'Campo obrigatório',
-            description: 'Digite o nome do novo curso.',
-          });
-          setIsLoading(false);
-          return;
-        }
-        if (!finalTurnoId || !finalModuloId) {
-          addToast({
-            type: 'warning',
-            title: 'Dados incompletos',
-            description:
-              'Para criar um curso, Turno e Módulo são obrigatórios.',
-          });
-          setIsLoading(false);
-          return;
-        }
-
         const novoCurso = await cadastrarCurso({
-          nome: novoCursoInput,
+          nome: String(data.cursoId),
           turno: String(finalTurnoId),
           modulo: String(finalModuloId),
         });
         finalCursoId = novoCurso.id;
       }
 
-      if (!finalCursoId || !finalTurnoId || !finalModuloId) {
-        addToast({
-          type: 'warning',
-          title: 'Campos obrigatórios',
-          description: 'Por favor, preencha Curso, Turno e Módulo.',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const dataParaApi = {
-        matricula: formData.matricula,
-        nomeCompleto: formData.nomeCompleto,
-        cpf: formData.cpf ? formData.cpf.replace(/\D/g, '') : null,
-        celular:
-          formData.celular && formData.celular.trim() !== ''
-            ? formData.celular.replace(/\D/g, '')
-            : null,
-        email:
-          formData.email && formData.email.trim() !== ''
-            ? formData.email
-            : null,
-        dataNascimento: formData.dataNascimento,
-        curso_id: finalCursoId,
-        turno_id: finalTurnoId,
-        modulo_id: finalModuloId,
-        cep: formData.cep ? formData.cep.replace(/\D/g, '') : null,
-        logradouro: formData.logradouro,
-        bairro: formData.bairro,
-        localidade: formData.localidade,
-        uf: formData.uf,
-        numero_casa: Number(formData.numero_casa) || 0,
-        complemento: formData.complemento,
+      const payload = {
+        ...data,
+        cpf: data.cpf ? data.cpf.replace(/\D/g, '') : undefined,
+        celular: data.celular ? data.celular.replace(/\D/g, '') : undefined,
+        cep: data.cep ? data.cep.replace(/\D/g, '') : undefined,
+        cursoId: finalCursoId,
+        turnoId: finalTurnoId,
+        moduloId: finalModuloId,
+        numero_casa: Number(data.numero_casa) || 0,
       };
 
-      await cadastrarAluno(dataParaApi as any);
-
-      addToast({
-        type: 'success',
-        title: 'Aluno Cadastrado',
-        description: `O aluno ${formData.nomeCompleto} foi salvo com sucesso!`,
-      });
-
-      onSuccess();
+      await createStudent(payload as unknown as AlunoPayload);
       onClose();
-    } catch (error: any) {
-      console.error('Erro ao cadastrar:', error);
-      const msg =
-        error.response?.data?.mensagem || 'Erro desconhecido ao salvar aluno.';
-
-      addToast({
-        type: 'error',
-        title: 'Falha no cadastro',
-        description: msg,
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error('Erro ao processar formulário:', error);
     }
   };
 
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1 flex justify-between items-center';
   const linkActionStyles =
     'text-xs text-lumi-primary dark:text-lumi-label cursor-pointer hover:underline font-bold ml-2';
-  const inputStyles =
-    'w-full h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary outline-none text-sm';
-  const disabledInputStyles =
-    'w-full h-[38px] px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none text-sm flex items-center';
-  const buttonClass =
-    'w-full bg-lumi-primary hover:bg-lumi-primary-hover active:bg-purple-900 text-white text-[17px] font-bold py-3.5 px-4 border-2 border-transparent rounded-lg shadow-md transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none tracking-wide';
 
   return (
     <div className="flex flex-col h-full max-h-[70vh]">
       <div className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2">
         <form
           id="form-novo-aluno"
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
         >
           <div className="space-y-4">
             <div>
-              <label htmlFor="nomeCompleto" className={labelStyles}>
-                Nome Completo*
-              </label>
-              <input
+              <Label htmlFor="nomeCompleto" requiredIndicator>
+                Nome Completo
+              </Label>
+              <Input
                 id="nomeCompleto"
-                name="nomeCompleto"
-                type="text"
-                value={formData.nomeCompleto}
-                onChange={handleChange}
-                className={inputStyles}
-                required
+                {...register('nomeCompleto')}
+                error={errors.nomeCompleto?.message}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="matricula" className={labelStyles}>
-                  Matrícula*
-                </label>
-                <input
+                <Label htmlFor="matricula" requiredIndicator>
+                  Matrícula
+                </Label>
+                <Input
                   id="matricula"
-                  name="matricula"
-                  type="text"
-                  value={formData.matricula}
-                  onChange={handleChange}
                   placeholder="Ex: 24777"
-                  className={inputStyles}
-                  required
+                  {...register('matricula')}
+                  error={errors.matricula?.message}
                 />
               </div>
               <div>
-                <label htmlFor="cpf" className={labelStyles}>
-                  CPF
-                </label>
-                <input
+                <Label htmlFor="cpf">CPF</Label>
+                <Input
                   id="cpf"
-                  name="cpf"
-                  type="text"
-                  value={formData.cpf}
-                  onChange={handleChange}
                   placeholder="000.000.000-00"
-                  className={inputStyles}
+                  {...register('cpf')}
                 />
               </div>
               <div>
-                <label htmlFor="celular" className={labelStyles}>
-                  Celular
-                </label>
-                <input
+                <Label htmlFor="celular">Celular</Label>
+                <Input
                   id="celular"
-                  name="celular"
-                  type="text"
-                  value={formData.celular}
-                  onChange={handleChange}
                   placeholder="(00) 00000-0000"
-                  className={inputStyles}
+                  {...register('celular')}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <CustomDatePicker
-                label="Data de Nascimento"
-                value={formData.dataNascimento}
-                onChange={(e) =>
-                  handleSelectChange('dataNascimento', e.target.value)
-                }
+              <Controller
+                name="dataNascimento"
+                control={control}
+                render={({ field }) => (
+                  <CustomDatePicker
+                    label="Data de Nascimento"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <div>
-                <label htmlFor="email" className={labelStyles}>
-                  E-mail
-                </label>
-                <input
+                <Label htmlFor="email">E-mail</Label>
+                <Input
                   id="email"
-                  name="email"
                   type="email"
-                  value={formData.email}
-                  onChange={handleChange}
                   placeholder="exemplo@etec.sp.gov.br"
-                  className={inputStyles}
+                  {...register('email')}
+                  error={errors.email?.message}
                 />
               </div>
             </div>
@@ -370,8 +209,10 @@ export function NovoAluno({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <div className={labelStyles}>
-                <span>Curso*</span>
+              <div className="flex justify-between items-center mb-1">
+                <Label className="mb-0" requiredIndicator>
+                  Curso
+                </Label>
                 <span
                   onClick={() => setIsNovoCurso(!isNovoCurso)}
                   className={linkActionStyles}
@@ -380,26 +221,39 @@ export function NovoAluno({
                 </span>
               </div>
               {isNovoCurso ? (
-                <input
-                  type="text"
-                  value={novoCursoInput}
-                  onChange={(e) => setNovoCursoInput(e.target.value)}
-                  className={inputStyles}
+                <Input
                   placeholder="Nome do novo curso"
+                  {...register('cursoId')}
+                  error={errors.cursoId?.message}
                 />
               ) : (
-                <CustomSelect
-                  value={formData.cursoId}
-                  onChange={(val) => handleSelectChange('cursoId', val)}
-                  options={cursosOptions}
-                  placeholder="Selecione o Curso"
+                <Controller
+                  name="cursoId"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <CustomSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={cursosOptions}
+                        placeholder="Selecione o Curso"
+                      />
+                      {errors.cursoId && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.cursoId.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               )}
             </div>
 
             <div>
-              <div className={labelStyles}>
-                <span>Turno*</span>
+              <div className="flex justify-between items-center mb-1">
+                <Label className="mb-0" requiredIndicator>
+                  Turno
+                </Label>
                 <span
                   onClick={() => setIsNovoTurno(!isNovoTurno)}
                   className={linkActionStyles}
@@ -408,26 +262,39 @@ export function NovoAluno({
                 </span>
               </div>
               {isNovoTurno ? (
-                <input
-                  type="text"
-                  value={novoTurnoInput}
-                  onChange={(e) => setNovoTurnoInput(e.target.value)}
-                  className={inputStyles}
+                <Input
                   placeholder="Nome do novo turno"
+                  {...register('turnoId')}
+                  error={errors.turnoId?.message}
                 />
               ) : (
-                <CustomSelect
-                  value={formData.turnoId}
-                  onChange={(val) => handleSelectChange('turnoId', val)}
-                  options={turnoOptions}
-                  placeholder="Selecione o turno"
+                <Controller
+                  name="turnoId"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <CustomSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={turnoOptions}
+                        placeholder="Selecione o Turno"
+                      />
+                      {errors.turnoId && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.turnoId.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               )}
             </div>
 
             <div>
-              <div className={labelStyles}>
-                <span>Módulo*</span>
+              <div className="flex justify-between items-center mb-1">
+                <Label className="mb-0" requiredIndicator>
+                  Módulo
+                </Label>
                 <span
                   onClick={() => setIsNovoModulo(!isNovoModulo)}
                   className={linkActionStyles}
@@ -436,19 +303,30 @@ export function NovoAluno({
                 </span>
               </div>
               {isNovoModulo ? (
-                <input
-                  type="text"
-                  value={novoModuloInput}
-                  onChange={(e) => setNovoModuloInput(e.target.value)}
-                  className={inputStyles}
+                <Input
                   placeholder="Nome do novo módulo"
+                  {...register('moduloId')}
+                  error={errors.moduloId?.message}
                 />
               ) : (
-                <CustomSelect
-                  value={formData.moduloId}
-                  onChange={(val) => handleSelectChange('moduloId', val)}
-                  options={modulosOptions}
-                  placeholder="Selecione o módulo"
+                <Controller
+                  name="moduloId"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <CustomSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={modulosOptions}
+                        placeholder="Selecione o Módulo"
+                      />
+                      {errors.moduloId && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.moduloId.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               )}
             </div>
@@ -458,128 +336,75 @@ export function NovoAluno({
 
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-4 md:col-span-3">
-              <label htmlFor="cep" className={labelStyles}>
-                CEP
-              </label>
-              <input
+              <Label htmlFor="cep">CEP</Label>
+              <Input
                 id="cep"
-                name="cep"
-                type="text"
-                value={formData.cep}
-                onChange={handleCepChange}
                 maxLength={9}
                 placeholder="00000-000"
-                className={inputStyles}
+                {...register('cep')}
+                onBlur={handleCepBlur}
               />
             </div>
             <div className="col-span-8 md:col-span-9">
-              <label htmlFor="logradouro" className={labelStyles}>
-                Logradouro
-              </label>
-              <input
+              <Label htmlFor="logradouro">Logradouro</Label>
+              <Input
                 id="logradouro"
-                name="logradouro"
-                type="text"
-                value={formData.logradouro}
-                onChange={handleChange}
                 disabled={isCepLoading}
-                className={isCepLoading ? disabledInputStyles : inputStyles}
+                {...register('logradouro')}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-5">
-              <label htmlFor="bairro" className={labelStyles}>
-                Bairro
-              </label>
-              <input
+              <Label htmlFor="bairro">Bairro</Label>
+              <Input
                 id="bairro"
-                name="bairro"
-                type="text"
-                value={formData.bairro}
-                onChange={handleChange}
                 disabled={isCepLoading}
-                className={isCepLoading ? disabledInputStyles : inputStyles}
+                {...register('bairro')}
               />
             </div>
             <div className="col-span-5">
-              <label htmlFor="localidade" className={labelStyles}>
-                Cidade
-              </label>
-              <input
+              <Label htmlFor="localidade">Cidade</Label>
+              <Input
                 id="localidade"
-                name="localidade"
-                type="text"
-                value={formData.localidade}
-                onChange={handleChange}
                 disabled={isCepLoading}
-                className={isCepLoading ? disabledInputStyles : inputStyles}
+                {...register('localidade')}
               />
             </div>
             <div className="col-span-2">
-              <label htmlFor="uf" className={labelStyles}>
-                UF
-              </label>
-              <input
-                id="uf"
-                name="uf"
-                type="text"
-                value={formData.uf}
-                onChange={handleChange}
-                disabled={isCepLoading}
-                className={isCepLoading ? disabledInputStyles : inputStyles}
-              />
+              <Label htmlFor="uf">UF</Label>
+              <Input id="uf" disabled={isCepLoading} {...register('uf')} />
             </div>
           </div>
 
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-4">
-              <label htmlFor="numero_casa" className={labelStyles}>
-                Número
-              </label>
-              <input
+              <Label htmlFor="numero_casa">Número</Label>
+              <Input
                 id="numero_casa"
-                name="numero_casa"
                 type="number"
-                value={formData.numero_casa}
-                onChange={handleChange}
-                className={inputStyles}
+                {...register('numero_casa')}
               />
             </div>
             <div className="col-span-8">
-              <label htmlFor="complemento" className={labelStyles}>
-                Complemento
-              </label>
-              <input
-                id="complemento"
-                name="complemento"
-                type="text"
-                value={formData.complemento}
-                onChange={handleChange}
-                className={inputStyles}
-              />
+              <Label htmlFor="complemento">Complemento</Label>
+              <Input id="complemento" {...register('complemento')} />
             </div>
           </div>
         </form>
       </div>
 
       <div className="pt-3 mt-2 border-t border-gray-200 dark:border-gray-700 shrink-0">
-        <button
+        <Button
           type="submit"
           form="form-novo-aluno"
-          disabled={isLoading || isCepLoading}
-          className={`${buttonClass} flex items-center justify-center gap-2`}
+          isLoading={isCreating || isCepLoading}
+          loadingText={isCepLoading ? 'BUSCANDO CEP...' : 'SALVANDO...'}
+          className="w-full py-3.5 text-[17px]"
         >
-          {(isLoading || isCepLoading) && (
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          )}
-          {isLoading
-            ? 'SALVANDO...'
-            : isCepLoading
-              ? 'BUSCANDO CEP...'
-              : 'CADASTRAR ALUNO'}
-        </button>
+          CADASTRAR ALUNO
+        </Button>
       </div>
     </div>
   );
