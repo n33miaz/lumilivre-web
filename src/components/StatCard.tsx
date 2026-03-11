@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { FunctionComponent, SVGProps } from 'react';
 
@@ -9,6 +10,51 @@ interface StatCardProps {
   to: string;
   isLoading?: boolean;
   hasError?: boolean;
+  animate?: boolean;
+}
+
+// Componente auxiliar para animar os números
+function AnimatedNumber({
+  value,
+  animate,
+}: {
+  value: number;
+  animate: boolean;
+}) {
+  const [displayValue, setDisplayValue] = useState(animate ? 0 : value);
+
+  useEffect(() => {
+    if (!animate) {
+      setDisplayValue(value);
+      return;
+    }
+
+    let startTimestamp: number | null = null;
+    const duration = 1500;
+    let animationFrame: number;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+
+      // Efeito easeOutQuart para desacelerar no final
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+
+      setDisplayValue(Math.floor(easeOutQuart * value));
+
+      if (progress < 1) {
+        animationFrame = window.requestAnimationFrame(step);
+      } else {
+        setDisplayValue(value);
+      }
+    };
+
+    animationFrame = window.requestAnimationFrame(step);
+
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [value, animate]);
+
+  return <>{displayValue}</>;
 }
 
 export function StatCard({
@@ -19,12 +65,9 @@ export function StatCard({
   to,
   isLoading = false,
   hasError = false,
+  animate = false,
 }: StatCardProps) {
   const isDanger = variant === 'danger';
-
-  let displayValue: string | number = value;
-  if (isLoading) displayValue = '...';
-  if (hasError) displayValue = '-';
 
   return (
     <Link
@@ -48,9 +91,17 @@ export function StatCard({
         <p
           className={`text-xl md:text-3xl font-bold truncate mt-0.5 md:mt-1
             ${isDanger ? 'text-red-500' : 'text-gray-800 dark:text-white'}`}
-          title={String(displayValue)}
+          title={String(value)}
         >
-          {displayValue}
+          {isLoading ? (
+            '...'
+          ) : hasError ? (
+            '-'
+          ) : typeof value === 'number' ? (
+            <AnimatedNumber value={value} animate={animate} />
+          ) : (
+            value
+          )}
         </p>
       </div>
     </Link>
