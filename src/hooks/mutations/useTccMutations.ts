@@ -1,12 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createMutationHook } from '../useGenericMutation';
 import {
   cadastrarTcc,
   atualizarTcc,
   excluirTcc,
   type TccPayload,
 } from '../../services/tccService';
-import { useToast } from '../../contexts/ToastContext';
-import { getErrorMessage } from '../../utils/errorHandler';
+
+const TCC_QUERY_KEY = ['tccs'];
 
 interface CreateTccVariables {
   payload: TccPayload;
@@ -21,76 +21,25 @@ interface UpdateTccVariables {
   fileFoto?: File | null;
 }
 
-export function useCreateTcc() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
+export const useCreateTcc = createMutationHook<unknown, CreateTccVariables>({
+  mutationFn: ({ payload, filePdf, fileFoto }) =>
+    cadastrarTcc(payload, filePdf, fileFoto),
+  queryKey: TCC_QUERY_KEY,
+  successMessage: 'TCC cadastrado com sucesso!',
+  errorMessage: 'Erro ao cadastrar TCC.',
+});
 
-  return useMutation({
-    mutationFn: ({ payload, filePdf, fileFoto }: CreateTccVariables) =>
-      cadastrarTcc(payload, filePdf, fileFoto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tccs'] });
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'TCC cadastrado com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao cadastrar TCC.'),
-      });
-    },
-  });
-}
+export const useUpdateTcc = createMutationHook<unknown, UpdateTccVariables>({
+  mutationFn: ({ id, payload, filePdf, fileFoto }) =>
+    atualizarTcc(id, payload, filePdf, fileFoto),
+  queryKey: TCC_QUERY_KEY,
+  successMessage: 'TCC atualizado com sucesso!',
+  errorMessage: 'Erro ao atualizar TCC.',
+});
 
-export function useUpdateTcc() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
-
-  return useMutation({
-    mutationFn: ({ id, payload, filePdf, fileFoto }: UpdateTccVariables) =>
-      atualizarTcc(id, payload, filePdf, fileFoto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tccs'] });
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'TCC atualizado com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao atualizar TCC.'),
-      });
-    },
-  });
-}
-
-export function useDeleteTcc() {
-  const queryClient = useQueryClient();
-  const { addToast } = useToast();
-
-  return useMutation({
-    mutationFn: (id: number) => excluirTcc(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tccs'] });
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'TCC excluído com sucesso!',
-      });
-    },
-    onError: (error) => {
-      addToast({
-        type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao excluir TCC.'),
-      });
-    },
-  });
-}
+export const useDeleteTcc = createMutationHook<unknown, number>({
+  mutationFn: (id) => excluirTcc(id),
+  queryKey: TCC_QUERY_KEY,
+  successMessage: 'TCC excluído com sucesso!',
+  errorMessage: 'Erro ao excluir TCC.',
+});

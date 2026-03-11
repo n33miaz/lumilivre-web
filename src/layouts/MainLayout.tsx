@@ -3,10 +3,10 @@ import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
-import { Sidebar } from '../components/Sidebar';
-import { Header } from '../components/Header';
+import { Sidebar } from './components/Sidebar';
+import { Header } from './components/Header';
 import { getRouteIndex } from '../utils/navigationOrder';
-import { MandatoryPasswordChangeModal } from '../components/MandatoryPasswordChangeModal';
+import { MandatoryPasswordChangeModal } from '../pages/Auth/components/MandatoryPasswordChangeModal';
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);

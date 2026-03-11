@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import {
   BarChart,
   Bar,
@@ -15,21 +14,23 @@ import {
 } from 'recharts';
 
 import { type AlunoRanking } from '../../services/emprestimoService';
-import {
-  buscarEstatisticasGrafico,
-  type EstatisticaGrafico,
-} from '../../services/cursoService';
-import { CustomSelect } from '../../components/CustomSelect';
+import { type EstatisticaGrafico } from '../../services/cursoService';
+import { CustomSelect } from '../../components/ui/CustomSelect';
 
-import { LoadingIcon } from '../../components/LoadingIcon';
+import { LoadingIcon } from '../../components/ui/LoadingIcon';
 import CrownIcon from '../../assets/icons/crown.svg?react';
 import Medal1Icon from '../../assets/icons/medal1.svg?react';
 import Medal2Icon from '../../assets/icons/medal2.svg?react';
 import Medal3Icon from '../../assets/icons/medal3.svg?react';
 import FilterIcon from '../../assets/icons/filter.svg?react';
 
-import { useRanking } from '../../hooks/useDomainQueries';
-import { useCursos, useModulos, useTurnos } from '../../hooks/useCommonQueries';
+import { useRanking } from '../../hooks/queries/useLoanQueries';
+import {
+  useCursos,
+  useEstatisticasGrafico,
+  useModulos,
+  useTurnos,
+} from '../../hooks/queries/useStudentQueries';
 
 const BAR_WIDTH = 40;
 const MIN_GAP = 20;
@@ -198,18 +199,8 @@ export function ClassificacaoPage() {
   const { data: modulosList = [], isLoading: isLoadingModulos } = useModulos();
   const { data: turnosList = [], isLoading: isLoadingTurnos } = useTurnos();
 
-  const { data: statsData, isLoading: isLoadingStats } = useQuery({
-    queryKey: ['estatisticas-grafico-dashboard'],
-    queryFn: async () => {
-      const [curso, modulo, turno] = await Promise.all([
-        buscarEstatisticasGrafico('curso'),
-        buscarEstatisticasGrafico('modulo'),
-        buscarEstatisticasGrafico('turno'),
-      ]);
-      return { curso, modulo, turno };
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  const { data: statsData, isLoading: isLoadingStats } =
+    useEstatisticasGrafico();
 
   const pieDataCurso = statsData?.curso || [];
   const pieDataModulo = statsData?.modulo || [];

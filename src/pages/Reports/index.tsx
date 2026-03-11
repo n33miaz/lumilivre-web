@@ -8,21 +8,23 @@ import { buscarLivrosParaAdmin } from '../../services/livroService';
 import { buscarAlunosParaAdmin } from '../../services/alunoService';
 
 import {
-  useCursos,
-  useModulos,
-  useTurnos,
   useGeneros,
   useCdds,
   useEnum,
-} from '../../hooks/useCommonQueries';
+} from '../../hooks/queries/useBookQueries';
+import {
+  useCursos,
+  useModulos,
+  useTurnos,
+} from '../../hooks/queries/useStudentQueries';
 
 import { useToast } from '../../contexts/ToastContext';
-import { Modal } from '../../components/Modal';
-import { CustomSelect } from '../../components/CustomSelect';
-import { CustomDatePicker } from '../../components/CustomDatePicker';
-import { SearchableSelect } from '../../components/SearchableSelect';
+import { Modal } from '../../components/ui/Modal';
+import { CustomSelect } from '../../components/ui/CustomSelect';
+import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
+import { SearchableSelect } from '../../components/ui/SearchableSelect';
 
-import { LoadingIcon } from '../../components/LoadingIcon';
+import { LoadingIcon } from '../../components/ui/LoadingIcon';
 import AddIcon from '../../assets/icons/add.svg?react';
 import DownloadIcon from '../../assets/icons/upload.svg';
 import ReportPaperIcon from '../../assets/icons/report-paper.svg?react';

@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
-import { ThemeToggle } from '../../../components/ThemeToggle';
-import { InputFloatingLabel } from '../../../components/InputFloatingLabel';
+import { ThemeToggle } from '../../../layouts/components/ThemeToggle';
+import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
 import { login as apiLogin } from '../../../services/authService';
 
 import LogoIcon from '../../../assets/icons/logo.svg?react';

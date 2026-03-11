@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
-import { ActionHeader } from '../../components/ActionHeader';
-import { DataTable, type ColumnDef } from '../../components/DataTable';
-import { TableFooter } from '../../components/TableFooter';
-import { Modal } from '../../components/Modal';
-import { NovoLivro } from '../../components/forms/NewBook';
-import { NovoExemplar } from '../../components/forms/NewExemple';
-import { DetalhesLivroModal } from '../../components/details/ModalBookDetails';
-import { ModalExemplarDetails } from '../../components/details/ModalExempleDetails';
-import { BookFilter } from '../../components/filters/BookFilter';
+import { ActionHeader } from '../../components/ui/ActionHeader';
+import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
+import { TableFooter } from '../../components/ui/TableFooter';
+import { Modal } from '../../components/ui/Modal';
+import { BookModalNew } from '../../features/books/BookModalNew';
+import { ExempleModalNew } from '../../features/books/ExempleModalNew';
+import { DetalhesLivroModal } from '../../features/books/BookModalDetails';
+import { ModalExemplarDetails } from '../../features/books/ExempleModalDetails';
+import { BookFilter } from '../../features/books/BookFilter';
 import BackIcon from '../../assets/icons/arrow-left.svg?react';
 
 import {
@@ -17,11 +17,8 @@ import {
   type ListaLivro,
 } from '../../services/livroService';
 import { type EmprestimoAtivoDTO } from '../../services/emprestimoService';
-import {
-  useLivros,
-  useExemplares,
-  useEmprestimosAtivosEAtrasados,
-} from '../../hooks/useDomainQueries';
+import { useLivros, useExemplares } from '../../hooks/queries/useBookQueries';
+import { useEmprestimosAtivosEAtrasados } from '../../hooks/queries/useLoanQueries';
 
 const livrosLegend = [
   { label: 'Disponível', color: 'bg-green-500' },
@@ -509,14 +506,16 @@ export function LivrosPage() {
         />
         <Modal.Body>
           {isExemplarView && selectedBook ? (
-            <NovoExemplar
+            <ExempleModalNew
+              isOpen={isModalOpen}
               livroId={selectedBook.id}
               livroIsbn={selectedBook.isbn}
               livroNome={selectedBook.nome}
               onClose={() => setIsModalOpen(false)}
             />
           ) : (
-            <NovoLivro
+            <BookModalNew
+              isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               onSuccess={handleLivroCriado}
             />

@@ -60,7 +60,7 @@ export const cadastrarAluno = async (alunoData: AlunoPayload) => {
   return response.data;
 };
 
-interface AlunoFilterParams {
+export interface AlunoFilterParams {
   penalidade?: string;
   matricula?: string;
   nome?: string;

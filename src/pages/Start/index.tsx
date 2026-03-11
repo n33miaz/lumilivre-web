@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { StatCard } from '../../components/StatCard';
-import { DataTable, type ColumnDef } from '../../components/DataTable';
-import { TableFooter } from '../../components/TableFooter';
-import { ModalLoanDetails } from '../../components/details/ModalLoanDetails';
-import { ModalLoanRequestDetails } from '../../components/details/ModalLoanRequestDetails';
+import { StatCard } from '../../components/ui/StatCard';
+import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
+import { TableFooter } from '../../components/ui/TableFooter';
+import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
+import { LoanModalRequest } from '../../features/loans/LoanModalRequest';
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 
@@ -386,7 +386,7 @@ export function DashboardPage() {
         emprestimo={selectedLoan}
       />
 
-      <ModalLoanRequestDetails
+      <LoanModalRequest
         isOpen={isRequestModalOpen}
         onClose={handleFecharDetalhesSolicitacao}
         solicitacao={selectedRequest}
