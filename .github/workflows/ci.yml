@@ -2,32 +2,32 @@ name: CI - LumiLivre Web
 
 on:
   push:
-    branches:[ "main" ]
+    branches: ['main', 'master']
   pull_request:
-    branches:[ "main" ]
+    branches: ['main', 'master']
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout do código
-      uses: actions/checkout@v4
+      - name: Checkout do código
+        uses: actions/checkout@v4
 
-    - name: Configurar Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20' 
-        cache: 'npm'
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-    - name: Instalar dependências
-      run: npm ci
+      - name: Instalar dependências
+        run: npm ci
 
-    - name: Verificar Linting
-      run: npm run lint
+      - name: Verificar Linting
+        run: npm run lint
 
-    - name: Executar Testes (Vitest)
-      run: npx vitest run
+      - name: Executar Testes (Vitest)
+        run: npx vitest run
 
-    - name: Verificar Build
-      run: npm run build
+      - name: Verificar Build
+        run: npm run build
