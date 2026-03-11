@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useLayoutEffect,
   useId,
+  useCallback,
 } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -58,7 +59,7 @@ export function SearchableSelect({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (containerRef.current && isOpen) {
       const rect = containerRef.current.getBoundingClientRect();
       setCoords({
@@ -67,7 +68,7 @@ export function SearchableSelect({
         width: rect.width,
       });
     }
-  };
+  }, [isOpen]);
 
   useLayoutEffect(() => {
     if (isOpen) {
@@ -79,7 +80,7 @@ export function SearchableSelect({
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

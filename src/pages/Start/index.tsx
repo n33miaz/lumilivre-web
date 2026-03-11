@@ -18,6 +18,7 @@ import BookIcon from '../../assets/icons/books-active.svg?react';
 import UsersIcon from '../../assets/icons/users-active.svg?react';
 import AlertIcon from '../../assets/icons/alert.svg?react';
 import LoansIcon from '../../assets/icons/loans-active.svg?react';
+import type { EmprestimoAtivoDTO } from '../../services/emprestimoService';
 
 interface EmprestimoVencer {
   id: number;
@@ -156,7 +157,7 @@ export function DashboardPage() {
     hoje.setHours(0, 0, 0, 0);
 
     return emprestimos.data
-      .map((e: any) => {
+      .map((e: EmprestimoAtivoDTO) => {
         const dataDevolucao = new Date(e.dataDevolucao + 'T00:00:00');
         dataDevolucao.setHours(0, 0, 0, 0);
 

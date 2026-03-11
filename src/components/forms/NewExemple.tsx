@@ -1,22 +1,16 @@
 import { useState } from 'react';
-
-import {
-  cadastrarExemplar,
-  type ExemplarPayload,
-} from '../../services/exemplarService';
+import { type ExemplarPayload } from '../../services/exemplarService';
 import { useToast } from '../../contexts/ToastContext';
-import { getErrorMessage } from '../../utils/errorHandler';
-
 import { Label } from '../ui/Label';
 import { Input } from '../ui/Input';
 import { Button } from '../ui/Button';
+import { useCreateExemplar } from '../../hooks/mutations/useExemplarMutations';
 
 interface NewExemplarProps {
   livroId: number;
   livroIsbn: string;
   livroNome: string;
   onClose: () => void;
-  onSuccess: () => void;
 }
 
 export function NovoExemplar({
@@ -24,15 +18,14 @@ export function NovoExemplar({
   livroIsbn,
   livroNome,
   onClose,
-  onSuccess,
 }: NewExemplarProps) {
   const [tombo, setTombo] = useState('');
   const [localizacao, setLocalizacao] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
   const { addToast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const { mutate: createExemplar, isPending } = useCreateExemplar();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!tombo.trim() || !localizacao.trim()) {
       addToast({
@@ -43,8 +36,6 @@ export function NovoExemplar({
       return;
     }
 
-    setIsLoading(true);
-
     const payload: ExemplarPayload = {
       livro_id: livroId,
       tombo: tombo,
@@ -52,28 +43,9 @@ export function NovoExemplar({
       localizacao_fisica: localizacao,
     };
 
-    try {
-      await cadastrarExemplar(payload);
-      addToast({
-        type: 'success',
-        title: 'Exemplar Cadastrado',
-        description: 'O exemplar foi salvo com sucesso!',
-      });
-      onSuccess();
-      onClose();
-    } catch (error) {
-      console.error('Erro ao cadastrar exemplar:', error);
-      addToast({
-        type: 'error',
-        title: 'Erro ao cadastrar',
-        description: getErrorMessage(
-          error,
-          'Erro ao cadastrar exemplar. Verifique se o tombo já existe.',
-        ),
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    createExemplar(payload, {
+      onSuccess: () => onClose(),
+    });
   };
 
   return (
@@ -129,7 +101,7 @@ export function NovoExemplar({
         <Button
           type="submit"
           form="form-novo-exemplar"
-          isLoading={isLoading}
+          isLoading={isPending}
           loadingText="CADASTRANDO..."
           className="w-full py-3.5 text-[17px]"
         >

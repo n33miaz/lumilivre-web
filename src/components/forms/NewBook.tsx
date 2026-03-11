@@ -1,17 +1,22 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useForm, Controller, type Resolver } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
-  cadastrarLivro,
   buscarLivrosParaAdmin,
   type LivroPayload,
 } from '../../services/livroService';
 import { buscarLivroPorIsbn } from '../../services/googleBooksService';
+import { useCdds, useEnum, useGeneros } from '../../hooks/useCommonQueries';
+import { useCreateBook } from '../../hooks/mutations/useBookMutations';
+import { bookSchema, type BookFormData } from '../../schemas/bookSchema';
 
-import { useToast } from '../../contexts/ToastContext';
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import { CustomSelect } from '../CustomSelect';
 import { SearchableSelect } from '../SearchableSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
-import { useCdds, useEnum, useGeneros } from '../../hooks/useCommonQueries';
 
 import uploadIconUrl from '../../assets/icons/download.svg';
 import closeIcon from '../../assets/icons/close.svg';
@@ -23,35 +28,13 @@ interface Option {
 
 interface NewBookProps {
   onClose: () => void;
-  onSuccess: (livroCriado?: any) => void;
+  onSuccess: (livroCriado?: unknown) => void;
 }
 
-const estadoInicialFormulario: Partial<LivroPayload> = {
-  isbn: '',
-  nome: '',
-  data_lancamento: '',
-  numero_paginas: 0,
-  cdd: '',
-  editora: '',
-  classificacao_etaria: '',
-  tipo_capa: '',
-  generos: [],
-  autor: '',
-  sinopse: '',
-  edicao: '',
-  volume: 0,
-};
-
 export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
-  const [formData, setFormData] = useState<Partial<LivroPayload>>(
-    estadoInicialFormulario,
-  );
-
   const [capaFile, setCapaFile] = useState<File | null>(null);
   const [imagemPreview, setImagemPreview] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isBuscandoIsbn, setIsBuscandoIsbn] = useState(false);
-  const isSubmittingRef = useRef(false);
 
   const [isNovoAutor, setIsNovoAutor] = useState(false);
   const [isNovaEditora, setIsNovaEditora] = useState(false);
@@ -64,49 +47,62 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
   const { data: classificacaoData } = useEnum('CLASSIFICACAO_ETARIA');
   const { data: tipoCapaData } = useEnum('TIPO_CAPA');
 
-  const cddOptions = useMemo(() => {
-    return (
+  const { mutateAsync: createBook, isPending: isCreating } = useCreateBook();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<BookFormData>({
+    resolver: zodResolver(bookSchema) as unknown as Resolver<BookFormData>,
+    defaultValues: {
+      isbn: '',
+      nome: '',
+      data_lancamento: '',
+      numero_paginas: 0,
+      cdd: '',
+      editora: '',
+      classificacao_etaria: '',
+      tipo_capa: '',
+      autor: '',
+      generos: [],
+      sinopse: '',
+      edicao: '',
+      volume: 0,
+    },
+  });
+
+  const generosSelecionados = watch('generos');
+
+  const cddOptions = useMemo(
+    () =>
       cddData?.map((c) => ({
         label: `${c.id} - ${c.nome}`,
         value: String(c.id),
-      })) || []
-    );
-  }, [cddData]);
-
-  const generosOptions = useMemo(() => {
-    return (
-      generosData?.map((g) => ({
-        label: g.nome,
-        value: g.nome,
-      })) || []
-    );
-  }, [generosData]);
-
-  const classificacaoOptions = useMemo(() => {
-    return (
-      classificacaoData?.map((c) => ({
-        label: c.status,
-        value: c.nome,
-      })) || []
-    );
-  }, [classificacaoData]);
-
-  const tipoCapaOptions = useMemo(() => {
-    return (
-      tipoCapaData?.map((c) => ({
-        label: c.status,
-        value: c.nome,
-      })) || []
-    );
-  }, [tipoCapaData]);
-
-  const { addToast } = useToast();
+      })) || [],
+    [cddData],
+  );
+  const generosOptions = useMemo(
+    () => generosData?.map((g) => ({ label: g.nome, value: g.nome })) || [],
+    [generosData],
+  );
+  const classificacaoOptions = useMemo(
+    () =>
+      classificacaoData?.map((c) => ({ label: c.status, value: c.nome })) || [],
+    [classificacaoData],
+  );
+  const tipoCapaOptions = useMemo(
+    () => tipoCapaData?.map((c) => ({ label: c.status, value: c.nome })) || [],
+    [tipoCapaData],
+  );
 
   useEffect(() => {
     const carregarAutoresEEditoras = async () => {
       try {
         const livrosData = await buscarLivrosParaAdmin('', 0, 1000);
-
         const autoresUnicos = Array.from(
           new Set(livrosData.content.map((l) => l.autor).filter(Boolean)),
         ).sort();
@@ -123,38 +119,6 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
     carregarAutoresEEditoras();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSelectChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleAutorChange = (val: string) => {
-    setFormData((prev) => ({ ...prev, autor: val }));
-  };
-
-  const handleAddGeneroSelect = (val: string) => {
-    setFormData((prev) => {
-      const atuais = prev.generos || [];
-      if (!atuais.includes(val)) {
-        return { ...prev, generos: [...atuais, val] };
-      }
-      return prev;
-    });
-  };
-
-  const removeGenero = (g: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      generos: prev.generos?.filter((item) => item !== g),
-    }));
-  };
-
   const handleIsbnBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
     const isbn = e.target.value.replace(/-/g, '');
     if (isbn.length === 10 || isbn.length === 13) {
@@ -162,15 +126,23 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
       try {
         const dados = await buscarLivroPorIsbn(isbn);
         if (dados) {
-          setFormData((prev) => ({
-            ...prev,
-            ...dados,
-            autor: dados.autor || '',
-            generos: dados.generos || [],
-          }));
+          setValue('nome', dados.nome || '');
+          setValue('data_lancamento', dados.data_lancamento || '');
+          setValue('numero_paginas', dados.numero_paginas || 0);
+          setValue('sinopse', dados.sinopse || '');
+
+          if (dados.autor) {
+            setValue('autor', dados.autor);
+            setIsNovoAutor(true);
+          }
+          if (dados.editora) {
+            setValue('editora', dados.editora);
+            setIsNovaEditora(true);
+          }
+          if (dados.generos) {
+            setValue('generos', dados.generos);
+          }
           if (dados.imagem) setImagemPreview(dados.imagem);
-          if (dados.autor) setIsNovoAutor(true);
-          if (dados.editora) setIsNovaEditora(true);
         }
       } catch (error) {
         console.error(error);
@@ -188,89 +160,50 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (isSubmittingRef.current) return;
-
-    if (!formData.classificacao_etaria) {
-      addToast({
-        type: 'warning',
-        title: 'Campo obrigatório',
-        description: 'Por favor, selecione a Classificação Etária.',
+  const handleAddGenero = (val: string) => {
+    if (!generosSelecionados.includes(val)) {
+      setValue('generos', [...generosSelecionados, val], {
+        shouldValidate: true,
       });
-      return;
-    }
-
-    isSubmittingRef.current = true;
-    setIsLoading(true);
-
-    try {
-      const autoresString = Array.isArray(formData.autor)
-        ? formData.autor.join(', ')
-        : formData.autor || '';
-
-      const payload: LivroPayload = {
-        ...formData,
-        isbn: formData.isbn || '',
-        nome: formData.nome!,
-        data_lancamento: formData.data_lancamento
-          ? formData.data_lancamento
-          : null,
-        numero_paginas: Number(formData.numero_paginas) || 0,
-        cdd: formData.cdd ? String(formData.cdd) : '',
-        editora: formData.editora!,
-        classificacao_etaria: formData.classificacao_etaria || '',
-        tipo_capa: formData.tipo_capa ? String(formData.tipo_capa) : '',
-        autor: autoresString,
-        generos: formData.generos || [],
-        volume: Number(formData.volume) || 0,
-      } as LivroPayload;
-
-      const response = await cadastrarLivro(payload, capaFile);
-
-      addToast({
-        type: 'success',
-        title: 'Livro Cadastrado',
-        description: `O livro "${formData.nome}" foi salvo com sucesso!`,
-      });
-
-      onSuccess(response);
-      onClose();
-    } catch (error: any) {
-      console.error('Erro ao cadastrar:', error);
-
-      isSubmittingRef.current = false;
-
-      addToast({
-        type: 'error',
-        title: 'Falha no cadastro',
-        description:
-          error.response?.data?.mensagem || 'Ocorreu um erro inesperado.',
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1 flex justify-between items-center';
+  const removeGenero = (g: string) => {
+    setValue(
+      'generos',
+      generosSelecionados.filter((item) => item !== g),
+      { shouldValidate: true },
+    );
+  };
+
+  const onSubmit = async (data: BookFormData) => {
+    try {
+      const payload: LivroPayload = {
+        ...data,
+        cdd: data.cdd || '',
+        tipo_capa: data.tipo_capa || '',
+      } as LivroPayload;
+
+      const response = await createBook({ payload, file: capaFile });
+      onSuccess(response);
+      onClose();
+    } catch (error) {
+      console.error('Erro no submit:', error);
+    }
+  };
+
   const linkActionStyles =
     'text-xs text-lumi-primary dark:text-lumi-label cursor-pointer hover:underline font-bold ml-2';
-  const inputStyles =
-    'w-full h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary outline-none text-sm';
-  const buttonClass =
-    'w-full bg-lumi-primary hover:bg-lumi-primary-hover active:bg-purple-900 text-white text-[17px] font-bold py-3.5 px-4 border-2 border-transparent rounded-lg shadow-md transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none tracking-wide';
 
   return (
     <div className="flex flex-col h-full max-h-[600px] overflow-hidden">
       <form
         id="form-novo-livro"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
         className="overflow-y-auto overflow-x-hidden p-1 flex-grow pr-2 custom-scrollbar"
       >
         <div className="flex flex-col md:flex-row gap-6">
+          {/* Coluna da Esquerda (Capa e Infos Menores) */}
           <div className="w-full md:w-[28%] flex flex-col items-center space-y-4 pt-1">
             <div className="w-[9.5rem] h-[14rem] bg-gray-200 dark:bg-gray-700 rounded-lg shadow-lg flex items-center justify-center overflow-hidden border border-gray-300 dark:border-gray-600 relative group shrink-0">
               {isBuscandoIsbn ? (
@@ -310,85 +243,74 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
                 className="hidden"
               />
             </div>
+
             <div className="w-full space-y-3">
               <div>
-                <label htmlFor="edicao" className={labelStyles}>
-                  Edição
-                </label>
-                <input
+                <Label htmlFor="edicao">Edição</Label>
+                <Input
                   id="edicao"
-                  name="edicao"
-                  type="text"
-                  value={formData.edicao || ''}
-                  onChange={handleChange}
-                  className={inputStyles}
                   placeholder="Ex: 1ª"
+                  {...register('edicao')}
                 />
               </div>
               <div>
-                <label htmlFor="volume" className={labelStyles}>
-                  Volume
-                </label>
-                <input
+                <Label htmlFor="volume">Volume</Label>
+                <Input
                   id="volume"
-                  name="volume"
                   type="number"
-                  value={formData.volume || ''}
-                  onChange={handleChange}
-                  className={inputStyles}
                   placeholder="Ex: 1"
+                  {...register('volume')}
                 />
               </div>
-              <div className="col-span-6">
-                <CustomDatePicker
-                  label="Lançamento"
-                  value={formData.data_lancamento || ''}
-                  onChange={(e) =>
-                    handleSelectChange('data_lancamento', e.target.value)
-                  }
+              <div>
+                <Controller
+                  name="data_lancamento"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomDatePicker
+                      label="Lançamento"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
               </div>
             </div>
           </div>
 
+          {/* Coluna da Direita (Infos Principais) */}
           <div className="w-full md:w-[72%] space-y-4">
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-4">
-                <label htmlFor="isbn" className={labelStyles}>
+                <Label htmlFor="isbn" requiredIndicator>
                   ISBN
-                </label>
-                <input
+                </Label>
+                <Input
                   id="isbn"
-                  name="isbn"
-                  type="text"
-                  required
-                  value={formData.isbn || ''}
-                  onChange={handleChange}
-                  onBlur={handleIsbnBlur}
-                  className={`${inputStyles} border-lumi-primary/50 focus:border-lumi-primary`}
                   placeholder="Buscar..."
+                  {...register('isbn')}
+                  onBlur={handleIsbnBlur}
+                  error={errors.isbn?.message}
                 />
               </div>
               <div className="col-span-8">
-                <label htmlFor="nome" className={labelStyles}>
-                  Título do Livro*
-                </label>
-                <input
+                <Label htmlFor="nome" requiredIndicator>
+                  Título do Livro
+                </Label>
+                <Input
                   id="nome"
-                  name="nome"
-                  type="text"
-                  required
-                  value={formData.nome || ''}
-                  onChange={handleChange}
-                  className={inputStyles}
+                  {...register('nome')}
+                  error={errors.nome?.message}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-6">
-                <div className={labelStyles}>
-                  <span>Autor*</span>
+                <div className="flex justify-between items-center mb-1">
+                  <Label className="mb-0" requiredIndicator>
+                    Autor
+                  </Label>
                   <span
                     onClick={() => setIsNovoAutor(!isNovoAutor)}
                     className={linkActionStyles}
@@ -397,25 +319,38 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
                   </span>
                 </div>
                 {isNovoAutor ? (
-                  <input
-                    type="text"
-                    value={formData.autor || ''}
-                    onChange={(e) => handleAutorChange(e.target.value)}
-                    className={inputStyles}
+                  <Input
                     placeholder="Digite o nome do autor"
+                    {...register('autor')}
+                    error={errors.autor?.message}
                   />
                 ) : (
-                  <SearchableSelect
-                    value={formData.autor?.[0] || ''}
-                    onChange={handleAutorChange}
-                    options={autoresOptions}
-                    placeholder="Selecione o autor"
+                  <Controller
+                    name="autor"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <SearchableSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={autoresOptions}
+                          placeholder="Selecione o autor"
+                        />
+                        {errors.autor && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {errors.autor.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   />
                 )}
               </div>
               <div className="col-span-6">
-                <div className={labelStyles}>
-                  <span>Editora*</span>
+                <div className="flex justify-between items-center mb-1">
+                  <Label className="mb-0" requiredIndicator>
+                    Editora
+                  </Label>
                   <span
                     onClick={() => setIsNovaEditora(!isNovaEditora)}
                     className={linkActionStyles}
@@ -424,20 +359,30 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
                   </span>
                 </div>
                 {isNovaEditora ? (
-                  <input
-                    name="editora"
-                    type="text"
-                    value={formData.editora || ''}
-                    onChange={handleChange}
-                    className={inputStyles}
+                  <Input
                     placeholder="Digite a editora"
+                    {...register('editora')}
+                    error={errors.editora?.message}
                   />
                 ) : (
-                  <SearchableSelect
-                    value={formData.editora || ''}
-                    onChange={(val) => handleSelectChange('editora', val)}
-                    options={editorasOptions}
-                    placeholder="Selecione a editora"
+                  <Controller
+                    name="editora"
+                    control={control}
+                    render={({ field }) => (
+                      <div>
+                        <SearchableSelect
+                          value={field.value}
+                          onChange={field.onChange}
+                          options={editorasOptions}
+                          placeholder="Selecione a editora"
+                        />
+                        {errors.editora && (
+                          <span className="text-xs text-red-500 mt-1">
+                            {errors.editora.message}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   />
                 )}
               </div>
@@ -445,24 +390,19 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
 
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-12">
-                <div className={labelStyles}>
-                  <span>Gêneros*</span>
-                  {/* REMOVIDO O BOTÃO "Novo?" DAQUI */}
-                </div>
-
+                <Label requiredIndicator>Gêneros</Label>
                 <div className="flex gap-2 mb-2">
                   <div className="w-full">
                     <SearchableSelect
                       value=""
-                      onChange={handleAddGeneroSelect}
+                      onChange={handleAddGenero}
                       options={generosOptions}
                       placeholder="Selecione para adicionar..."
                     />
                   </div>
                 </div>
-
                 <div className="flex flex-wrap gap-2 min-h-[32px]">
-                  {formData.generos?.map((g) => (
+                  {generosSelecionados?.map((g) => (
                     <span
                       key={g}
                       className="flex items-center bg-lumi-primary/10 text-lumi-primary dark:text-lumi-label dark:bg-gray-700 px-2 py-1 rounded-md text-xs font-bold border border-lumi-primary/20"
@@ -481,80 +421,99 @@ export function NovoLivro({ onClose, onSuccess }: NewBookProps) {
                       </button>
                     </span>
                   ))}
-                  {(!formData.generos || formData.generos.length === 0) && (
+                  {(!generosSelecionados ||
+                    generosSelecionados.length === 0) && (
                     <span className="text-xs text-gray-400 italic mt-1">
                       Nenhum gênero selecionado
                     </span>
                   )}
                 </div>
+                {errors.generos && (
+                  <span className="text-xs text-red-500 mt-1">
+                    {errors.generos.message}
+                  </span>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-12 gap-4">
               <div className="col-span-4">
-                <label className={labelStyles}>CDD</label>
-                <SearchableSelect
-                  value={formData.cdd || ''}
-                  onChange={(val) => handleSelectChange('cdd', val)}
-                  options={cddOptions}
-                  placeholder="Buscar..."
+                <Label>CDD</Label>
+                <Controller
+                  name="cdd"
+                  control={control}
+                  render={({ field }) => (
+                    <SearchableSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={cddOptions}
+                      placeholder="Buscar..."
+                    />
+                  )}
                 />
               </div>
               <div className="col-span-4">
-                <label className={labelStyles}>Classificação*</label>
-                <CustomSelect
-                  value={formData.classificacao_etaria || ''}
-                  onChange={(val) =>
-                    handleSelectChange('classificacao_etaria', val)
-                  }
-                  options={classificacaoOptions}
-                  placeholder="Selecione"
+                <Label requiredIndicator>Classificação</Label>
+                <Controller
+                  name="classificacao_etaria"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <CustomSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={classificacaoOptions}
+                        placeholder="Selecione"
+                      />
+                      {errors.classificacao_etaria && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.classificacao_etaria.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               </div>
               <div className="col-span-4">
-                <label className={labelStyles}>Capa</label>
-                <CustomSelect
-                  value={formData.tipo_capa || ''}
-                  onChange={(val) => handleSelectChange('tipo_capa', val)}
-                  options={tipoCapaOptions}
-                  placeholder="Selecione"
+                <Label>Capa</Label>
+                <Controller
+                  name="tipo_capa"
+                  control={control}
+                  render={({ field }) => (
+                    <CustomSelect
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                      options={tipoCapaOptions}
+                      placeholder="Selecione"
+                    />
+                  )}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="sinopse" className={labelStyles}>
-                Sinopse
-              </label>
+              <Label htmlFor="sinopse">Sinopse</Label>
               <textarea
                 id="sinopse"
-                name="sinopse"
-                value={formData.sinopse || ''}
-                onChange={handleChange}
-                className={`${inputStyles} h-auto min-h-[80px] py-2 resize-none`}
+                {...register('sinopse')}
+                className="w-full px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary outline-none text-sm h-auto min-h-[80px] py-2 resize-none"
                 rows={3}
-              ></textarea>
+              />
             </div>
           </div>
         </div>
       </form>
 
       <div className="pt-3 mt-2 border-t border-gray-200 dark:border-gray-700 shrink-0">
-        <button
+        <Button
           type="submit"
           form="form-novo-livro"
-          disabled={isLoading || isBuscandoIsbn}
-          className={`${buttonClass} flex items-center justify-center gap-2`}
+          isLoading={isCreating || isBuscandoIsbn}
+          loadingText={isBuscandoIsbn ? 'BUSCANDO DADOS...' : 'SALVANDO...'}
+          className="w-full py-3.5 text-[17px]"
         >
-          {(isLoading || isBuscandoIsbn) && (
-            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          )}
-          {isLoading
-            ? 'SALVANDO...'
-            : isBuscandoIsbn
-              ? 'BUSCANDO DADOS...'
-              : 'CADASTRAR LIVRO'}
-        </button>
+          CADASTRAR LIVRO
+        </Button>
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ export const validarTokenReset = async (token: string): Promise<boolean> => {
 export const mudarSenhaComToken = async (
   token: string,
   novaSenha: string,
-): Promise<any> => {
+): Promise<unknown> => {
   try {
     const response = await api.post('/auth/mudar-senha', { token, novaSenha });
     return response.data;

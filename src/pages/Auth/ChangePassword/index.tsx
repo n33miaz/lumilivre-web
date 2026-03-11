@@ -11,6 +11,7 @@ import { ThemeToggle } from '../../../components/ThemeToggle';
 
 import LogoIcon from '../../../assets/icons/logo.svg?react';
 import LockIcon from '../../../assets/icons/lock.svg?react';
+import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function MudarSenhaPage() {
   const [searchParams] = useSearchParams();
@@ -93,13 +94,14 @@ export function MudarSenhaPage() {
       });
 
       setTimeout(() => navigate('/login'), 2000);
-    } catch (err: any) {
+    } catch (err) {
       addToast({
         type: 'error',
         title: 'Erro ao alterar',
-        description:
-          err.response?.data?.mensagem ||
+        description: getErrorMessage(
+          err,
           'Não foi possível alterar a senha. Tente novamente.',
+        ),
       });
       setIsSubmitting(false);
     }

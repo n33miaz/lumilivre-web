@@ -1,20 +1,21 @@
 import { useState, useEffect } from 'react';
-
 import { Modal } from '../Modal';
 import { ConfirmModal } from '../ConfirmModal';
 import { useToast } from '../../contexts/ToastContext';
-
 import { type ListaLivro } from '../../services/livroService';
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import {
-  atualizarExemplar,
-  excluirExemplar,
-} from '../../services/exemplarService';
+  useUpdateExemplar,
+  useDeleteExemplar,
+} from '../../hooks/mutations/useExemplarMutations';
 
 interface ModalExemplarDetailsProps {
   exemplar: ListaLivro | null;
   livroId: number | null;
   isOpen: boolean;
-  onClose: (foiAtualizado?: boolean) => void;
+  onClose: () => void;
 }
 
 export function ModalExemplarDetails({
@@ -24,14 +25,14 @@ export function ModalExemplarDetails({
   onClose,
 }: ModalExemplarDetailsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
   const [tombo, setTombo] = useState('');
   const [localizacao, setLocalizacao] = useState('');
-
   const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
   const { addToast } = useToast();
+
+  const { mutate: updateExemplar, isPending: isUpdating } = useUpdateExemplar();
+  const { mutate: deleteExemplar, isPending: isDeleting } = useDeleteExemplar();
 
   useEffect(() => {
     if (exemplar && isOpen) {
@@ -48,9 +49,7 @@ export function ModalExemplarDetails({
     onClose();
   };
 
-  const handleAlterarClick = () => setIsEditMode(true);
-
-  const handleSalvar = async () => {
+  const handleSalvar = () => {
     if (!tombo.trim() || !localizacao.trim()) {
       addToast({
         type: 'warning',
@@ -60,80 +59,42 @@ export function ModalExemplarDetails({
       return;
     }
 
-    if (!livroId) {
-      addToast({
-        type: 'error',
-        title: 'Erro interno',
-        description: 'ID do livro não identificado.',
-      });
-      return;
-    }
+    if (!livroId) return;
 
-    setIsLoading(true);
-    try {
-      await atualizarExemplar(exemplar.tomboExemplar, {
-        tombo: tombo,
-        localizacao_fisica: localizacao,
-        livro_id: livroId,
-        status_livro: exemplar.status,
-      });
-
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Exemplar atualizado com sucesso!',
-      });
-      setIsEditMode(false);
-      onClose(true);
-    } catch (error: any) {
-      console.error('Erro ao atualizar exemplar:', error);
-      addToast({
-        type: 'error',
-        title: 'Erro ao atualizar',
-        description:
-          error.response?.data?.mensagem || 'Erro ao atualizar exemplar.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    updateExemplar(
+      {
+        tomboAtual: exemplar.tomboExemplar,
+        payload: {
+          tombo,
+          localizacao_fisica: localizacao,
+          livro_id: livroId,
+          status_livro: exemplar.status,
+        },
+      },
+      { onSuccess: () => handleClose() },
+    );
   };
 
-  const executarExclusao = async () => {
-    setIsLoading(true);
-    try {
-      await excluirExemplar(exemplar!.tomboExemplar);
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Exemplar excluído com sucesso!',
-      });
-      onClose(true);
-    } catch (error: any) {
-      addToast({
-        type: 'error',
-        title: 'Erro ao excluir',
-        description: error.response?.data?.mensagem || 'Erro desconhecido',
-      });
-    } finally {
-      setIsLoading(false);
-      setConfirmAction(null);
-    }
+  const executarExclusao = () => {
+    if (!livroId) return;
+    deleteExemplar(
+      { tombo: exemplar.tomboExemplar, livroId },
+      {
+        onSuccess: () => {
+          setConfirmAction(null);
+          handleClose();
+        },
+      },
+    );
   };
-
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1 flex justify-between items-center';
-  const inputStyles =
-    'w-full h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary outline-none text-sm';
-  const disabledInputStyles =
-    'w-full h-[38px] px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none text-sm flex items-center';
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={isEditMode ? 'Editar Exemplar' : 'Detalhes do Exemplar'}
-    >
-      <div className="flex flex-col h-full">
+    <Modal isOpen={isOpen} onClose={handleClose}>
+      <Modal.Header
+        title={isEditMode ? 'Editar Exemplar' : 'Detalhes do Exemplar'}
+      />
+
+      <Modal.Body>
         {exemplar.status !== 'DISPONIVEL' && (
           <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 mb-4 rounded-md border border-yellow-100 dark:border-yellow-800/30">
             <label className="block text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase mb-1">
@@ -145,71 +106,59 @@ export function ModalExemplarDetails({
           </div>
         )}
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="tombo" className={labelStyles}>
-                Tombo
-              </label>
-              <input
-                id="tombo"
-                type="text"
-                value={tombo}
-                onChange={(e) => setTombo(e.target.value)}
-                disabled={!isEditMode}
-                className={isEditMode ? inputStyles : disabledInputStyles}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="localizacao" className={labelStyles}>
-                Localização Física
-              </label>
-              <input
-                id="localizacao"
-                type="text"
-                value={localizacao}
-                onChange={(e) => setLocalizacao(e.target.value)}
-                disabled={!isEditMode}
-                className={isEditMode ? inputStyles : disabledInputStyles}
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="tombo">Tombo</Label>
+            <Input
+              id="tombo"
+              value={tombo}
+              onChange={(e) => setTombo(e.target.value)}
+              disabled={!isEditMode}
+            />
+          </div>
+          <div>
+            <Label htmlFor="localizacao">Localização Física</Label>
+            <Input
+              id="localizacao"
+              value={localizacao}
+              onChange={(e) => setLocalizacao(e.target.value)}
+              disabled={!isEditMode}
+            />
           </div>
         </div>
+      </Modal.Body>
 
-        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            onClick={() => setConfirmAction('excluir')}
-            disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
-          >
-            {isLoading && confirmAction === 'excluir' && (
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-            Excluir
-          </button>
+      <Modal.Footer className="justify-between">
+        <Button
+          variant="danger"
+          onClick={() => setConfirmAction('excluir')}
+          disabled={isUpdating || isEditMode}
+          isLoading={isDeleting}
+        >
+          Excluir
+        </Button>
 
-          {isEditMode ? (
-            <button
+        {isEditMode ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditMode(false)}
+              disabled={isUpdating}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="success"
               onClick={handleSalvar}
-              disabled={isLoading}
-              className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
+              isLoading={isUpdating}
             >
-              {isLoading && confirmAction === null && (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              )}
-              {isLoading && confirmAction === null ? 'Salvando...' : 'Salvar'}
-            </button>
-          ) : (
-            <button
-              onClick={handleAlterarClick}
-              className="bg-lumi-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-lumi-primary-hover shadow-md"
-            >
-              Editar Cadastro
-            </button>
-          )}
-        </div>
-      </div>
+              Salvar
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={() => setIsEditMode(true)}>Editar Cadastro</Button>
+        )}
+      </Modal.Footer>
 
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}

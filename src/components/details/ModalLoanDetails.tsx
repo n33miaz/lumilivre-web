@@ -1,25 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useQuery } from '@tanstack/react-query';
 
 import { Modal } from '../Modal';
+import { ConfirmModal } from '../ConfirmModal';
+import { Label } from '../ui/Label';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import { SearchableSelect } from '../SearchableSelect';
 import { CustomDatePicker } from '../CustomDatePicker';
-import { useToast } from '../../contexts/ToastContext';
-import { ConfirmModal } from '../ConfirmModal';
 
 import { buscarAlunosParaAdmin } from '../../services/alunoService';
 import { buscarLivrosAgrupados } from '../../services/livroService';
 import { buscarExemplaresPorLivroId } from '../../services/exemplarService';
-import {
-  atualizarEmprestimo,
-  concluirEmprestimo,
-  excluirEmprestimo,
-  type EmprestimoPayload,
-} from '../../services/emprestimoService';
+import { type EmprestimoPayload } from '../../services/emprestimoService';
 
-interface Option {
-  label: string;
-  value: string | number;
-}
+import {
+  useUpdateLoan,
+  useCompleteLoan,
+  useDeleteLoan,
+} from '../../hooks/mutations/useLoanMutations';
+import { loanSchema, type LoanFormData } from '../../schemas/loanSchema';
 
 interface EmprestimoDados {
   id: string | number;
@@ -44,127 +46,112 @@ export function ModalLoanDetails({
   onClose,
 }: ModalLoanDetailsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingExemplares, setIsLoadingExemplares] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<
+    'devolucao' | 'excluir' | null
+  >(null);
 
-  const { addToast } = useToast();
+  const { mutateAsync: updateLoan, isPending: isUpdating } = useUpdateLoan();
+  const { mutateAsync: completeLoan, isPending: isCompleting } =
+    useCompleteLoan();
+  const { mutateAsync: deleteLoan, isPending: isDeleting } = useDeleteLoan();
 
-  const [alunoMatricula, setAlunoMatricula] = useState('');
-  const [livroId, setLivroId] = useState('');
-  const [exemplarTombo, setExemplarTombo] = useState('');
-  const [dataEmprestimo, setDataEmprestimo] = useState('');
-  const [dataDevolucao, setDataDevolucao] = useState('');
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<LoanFormData>({
+    resolver: zodResolver(loanSchema),
+  });
 
-  const [alunosOptions, setAlunosOptions] = useState<Option[]>([]);
-  const [livrosOptions, setLivrosOptions] = useState<Option[]>([]);
-  const [exemplaresOptions, setExemplaresOptions] = useState<Option[]>([]);
+  const livroIdSelecionado = watch('livro_id');
+  const exemplarTomboAtual = watch('exemplar_tombo');
 
-  const [confirmAction, setConfirmAction] = useState<'devolucao' | 'excluir' | null>(null);
+  const { data: alunosData } = useQuery({
+    queryKey: ['alunos-options'],
+    queryFn: () =>
+      buscarAlunosParaAdmin('', 0, 1000).then((res) => res.content),
+    staleTime: 1000 * 60 * 5,
+    enabled: isOpen,
+  });
+
+  const { data: livrosData } = useQuery({
+    queryKey: ['livros-options'],
+    queryFn: () =>
+      buscarLivrosAgrupados('', 0, 1000).then((res) => res.content),
+    staleTime: 1000 * 60 * 5,
+    enabled: isOpen,
+  });
+
+  const { data: exemplaresData, isLoading: isLoadingExemplares } = useQuery({
+    queryKey: ['exemplares-options', livroIdSelecionado],
+    queryFn: () => buscarExemplaresPorLivroId(Number(livroIdSelecionado)),
+    enabled: !!livroIdSelecionado && isOpen,
+  });
+
+  const alunosOptions = useMemo(
+    () =>
+      alunosData?.map((a) => ({
+        label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
+        value: a.matricula,
+      })) || [],
+    [alunosData],
+  );
+  const livrosOptions = useMemo(
+    () =>
+      livrosData?.map((l) => ({
+        label: `${l.nome} (ISBN: ${l.isbn || 'S/N'})`,
+        value: String(l.id),
+      })) || [],
+    [livrosData],
+  );
+
+  const exemplaresOptions = useMemo(() => {
+    if (!exemplaresData) return [];
+    return exemplaresData
+      .filter(
+        (ex) =>
+          ex.status === 'DISPONIVEL' || ex.tomboExemplar === exemplarTomboAtual,
+      )
+      .map((ex) => ({
+        label: `${ex.tomboExemplar} - Local: ${ex.localizacao_fisica} ${ex.tomboExemplar === exemplarTomboAtual ? '(Atual)' : ''}`,
+        value: ex.tomboExemplar,
+      }));
+  }, [exemplaresData, exemplarTomboAtual]);
 
   useEffect(() => {
-    if (isOpen) {
-      const carregarListas = async () => {
-        try {
-          const [alunosRes, livrosRes] = await Promise.all([
-            buscarAlunosParaAdmin('', 0, 1000),
-            buscarLivrosAgrupados('', 0, 1000),
-          ]);
+    if (emprestimo && isOpen && livrosOptions.length > 0) {
+      const formatarData = (data: string) =>
+        data ? new Date(data).toISOString().split('T')[0] : '';
 
-          setAlunosOptions(
-            alunosRes.content.map((a) => ({
-              label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
-              value: a.matricula,
-            })),
-          );
-
-          setLivrosOptions(
-            livrosRes.content.map((l) => ({
-              label: `${l.nome} (ISBN: ${l.isbn || 'S/N'})`,
-              value: l.id,
-            })),
-          );
-        } catch (error) {
-          console.error('Erro ao carregar listas:', error);
-        }
-      };
-      carregarListas();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (emprestimo && isOpen) {
-      setAlunoMatricula(emprestimo.alunoMatricula || '');
-      setExemplarTombo(emprestimo.exemplarTombo || '');
-
-      const formatarData = (data: string | Date) => {
-        if (!data) return '';
-        const d = new Date(data);
-        return d.toISOString().split('T')[0];
-      };
-
-      setDataEmprestimo(formatarData(emprestimo.dataEmprestimo));
-      setDataDevolucao(formatarData(emprestimo.dataDevolucao));
-
-      if (livrosOptions.length > 0) {
-        let livroEncontrado = undefined;
-
-        if (emprestimo.livroIsbn && emprestimo.livroIsbn !== '-') {
-          livroEncontrado = livrosOptions.find((opt) =>
-            opt.label.includes(emprestimo.livroIsbn),
-          );
-        }
-
-        if (!livroEncontrado && emprestimo.livroNome) {
-          livroEncontrado = livrosOptions.find((opt) =>
-            opt.label
-              .toLowerCase()
-              .includes(emprestimo.livroNome!.toLowerCase()),
-          );
-        }
-
-        if (livroEncontrado) {
-          setLivroId(String(livroEncontrado.value));
-        } else {
-          setLivroId('');
-        }
+      let livroIdEncontrado = '';
+      if (emprestimo.livroIsbn && emprestimo.livroIsbn !== '-') {
+        const found = livrosOptions.find((opt) =>
+          opt.label.includes(emprestimo.livroIsbn),
+        );
+        if (found) livroIdEncontrado = String(found.value);
+      }
+      if (!livroIdEncontrado && emprestimo.livroNome) {
+        const found = livrosOptions.find((opt) =>
+          opt.label.toLowerCase().includes(emprestimo.livroNome!.toLowerCase()),
+        );
+        if (found) livroIdEncontrado = String(found.value);
       }
 
+      reset({
+        aluno_matricula: emprestimo.alunoMatricula || '',
+        livro_id: livroIdEncontrado,
+        exemplar_tombo: emprestimo.exemplarTombo || '',
+        data_emprestimo: formatarData(emprestimo.dataEmprestimo),
+        data_devolucao: formatarData(emprestimo.dataDevolucao),
+      });
       setIsEditMode(false);
     }
-  }, [emprestimo, isOpen, livrosOptions]);
+  }, [emprestimo, isOpen, livrosOptions, reset]);
 
-  useEffect(() => {
-    if (!livroId) {
-      setExemplaresOptions([]);
-      return;
-    }
-
-    const carregarExemplares = async () => {
-      setIsLoadingExemplares(true);
-      try {
-        const lista = await buscarExemplaresPorLivroId(Number(livroId) || 0);
-
-        const disponiveisOuAtual = lista.filter(
-          (ex) =>
-            ex.status === 'DISPONIVEL' || ex.tomboExemplar === exemplarTombo,
-        );
-
-        setExemplaresOptions(
-          disponiveisOuAtual.map((ex) => ({
-            label: `Tombo: ${ex.tomboExemplar} - Local: ${ex.localizacao_fisica} ${ex.tomboExemplar === exemplarTombo ? '(Atual)' : ''}`,
-            value: ex.tomboExemplar,
-          })),
-        );
-      } catch (error) {
-        console.error('Erro ao buscar exemplares', error);
-        setExemplaresOptions([]);
-      } finally {
-        setIsLoadingExemplares(false);
-      }
-    };
-
-    carregarExemplares();
-  }, [livroId, exemplarTombo]);
+  if (!emprestimo || !isOpen) return null;
 
   const formatarDataParaBackend = (dataIso: string): string => {
     if (!dataIso) return '';
@@ -173,286 +160,238 @@ export function ModalLoanDetails({
     return `${dia}/${mes}/${ano} ${horaAtual}`;
   };
 
-  const handleSalvar = async () => {
-    if (!emprestimo) return;
-    if (
-      !alunoMatricula ||
-      !exemplarTombo ||
-      !dataEmprestimo ||
-      !dataDevolucao
-    ) {
-      addToast({
-        type: 'warning',
-        title: 'Campos obrigatórios',
-        description: 'Por favor, preencha todos os campos obrigatórios.',
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: LoanFormData) => {
     try {
       const payload: EmprestimoPayload = {
         id: Number(emprestimo.id),
-        aluno_matricula: alunoMatricula,
-        exemplar_tombo: exemplarTombo,
-        data_emprestimo: formatarDataParaBackend(dataEmprestimo),
-        data_devolucao: formatarDataParaBackend(dataDevolucao),
+        aluno_matricula: data.aluno_matricula,
+        exemplar_tombo: data.exemplar_tombo,
+        data_emprestimo: formatarDataParaBackend(data.data_emprestimo),
+        data_devolucao: formatarDataParaBackend(data.data_devolucao),
       };
 
-      await atualizarEmprestimo(Number(emprestimo.id), payload);
-      addToast({
-        type: 'success',
-        title: 'Sucesso',
-        description: 'Empréstimo atualizado com sucesso!',
-      });
+      await updateLoan({ id: Number(emprestimo.id), payload });
+      setIsEditMode(false);
       onClose(true);
-    } catch (error: any) {
-      console.error('Erro ao atualizar:', error);
-      addToast({
-        type: 'error',
-        title: 'Erro ao atualizar',
-        description:
-          error.response?.data?.mensagem || 'Erro ao atualizar empréstimo.',
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleDevolucao = async () => {
-    if (!emprestimo) return;
-    setIsLoading(true);
     try {
-      await concluirEmprestimo(Number(emprestimo.id));
-      addToast({
-        type: 'success',
-        title: 'Devolução registrada',
-        description: 'Devolução registrada com sucesso!',
-      });
+      await completeLoan(Number(emprestimo.id));
+      setConfirmAction(null);
       onClose(true);
-    } catch (error: any) {
-      addToast({
-        type: 'error',
-        title: 'Erro na devolução',
-        description:
-          error.response?.data?.mensagem || 'Erro ao registrar devolução.',
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleExcluir = async () => {
-    if (!emprestimo) return;
-    setIsLoading(true);
     try {
-      await excluirEmprestimo(Number(emprestimo.id));
-      addToast({
-        type: 'success',
-        title: 'Empréstimo excluído',
-        description: 'Empréstimo excluído com sucesso!',
-      });
+      await deleteLoan(Number(emprestimo.id));
+      setConfirmAction(null);
       onClose(true);
-    } catch (error: any) {
-      addToast({
-        type: 'error',
-        title: 'Erro ao excluir',
-        description:
-          error.response?.data?.mensagem || 'Erro ao excluir empréstimo.',
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const labelStyles =
-    'block text-sm font-medium text-gray-700 dark:text-white mb-1';
-  const disabledInputStyles =
-    'w-full h-[38px] px-3 border border-gray-200 dark:border-gray-700 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed select-none text-sm flex items-center truncate';
-
-  if (!emprestimo) return null;
-
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={() => onClose(false)}
-      title={isEditMode ? 'Editar Empréstimo' : 'Detalhes do Empréstimo'}
-    >
-      <div className="flex flex-col h-full max-h-[600px] overflow-hidden">
-        <div className="overflow-y-auto p-1 flex-grow custom-scrollbar pr-2 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {isEditMode ? (
-              <CustomDatePicker
-                label="Data do Empréstimo*"
-                value={dataEmprestimo}
-                onChange={(e) => setDataEmprestimo(e.target.value)}
-              />
-            ) : (
-              <div>
-                <label className={labelStyles}>Data do Empréstimo</label>
-                <div className={disabledInputStyles}>
-                  {dataEmprestimo && dataEmprestimo.includes('-')
-                    ? dataEmprestimo.split('-').reverse().join('/')
-                    : '-'}
-                </div>
-              </div>
-            )}
+    <Modal isOpen={isOpen} onClose={() => onClose(false)}>
+      <Modal.Header
+        title={isEditMode ? 'Editar Empréstimo' : 'Detalhes do Empréstimo'}
+      />
 
-            {isEditMode ? (
-              <CustomDatePicker
-                label="Data de Devolução*"
-                value={dataDevolucao}
-                onChange={(e) => setDataDevolucao(e.target.value)}
-              />
-            ) : (
-              <div>
-                <label className={labelStyles}>Data de Devolução</label>
-                <div className={disabledInputStyles}>
-                  {dataDevolucao && dataDevolucao.includes('-')
-                    ? dataDevolucao.split('-').reverse().join('/')
-                    : '-'}
-                </div>
-              </div>
-            )}
+      <Modal.Body>
+        <form
+          id="form-edit-emprestimo"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Controller
+              name="data_emprestimo"
+              control={control}
+              render={({ field }) => (
+                <CustomDatePicker
+                  label="Data do Empréstimo"
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={!isEditMode}
+                  error={errors.data_emprestimo?.message}
+                />
+              )}
+            />
+            <Controller
+              name="data_devolucao"
+              control={control}
+              render={({ field }) => (
+                <CustomDatePicker
+                  label="Data de Devolução"
+                  value={field.value}
+                  onChange={field.onChange}
+                  disabled={!isEditMode}
+                  error={errors.data_devolucao?.message}
+                />
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className={labelStyles}>Aluno*</label>
+              <Label requiredIndicator={isEditMode}>Aluno</Label>
               {isEditMode ? (
-                <SearchableSelect
-                  value={alunoMatricula}
-                  onChange={setAlunoMatricula}
-                  options={alunosOptions}
+                <Controller
+                  name="aluno_matricula"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <SearchableSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={alunosOptions}
+                      />
+                      {errors.aluno_matricula && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.aluno_matricula.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               ) : (
-                <input
-                  type="text"
+                <Input
+                  disabled
                   value={
-                    alunosOptions.find((a) => a.value === alunoMatricula)
-                      ?.label ||
+                    alunosOptions.find(
+                      (a) => a.value === watch('aluno_matricula'),
+                    )?.label ||
                     emprestimo.alunoNome ||
-                    alunoMatricula
+                    watch('aluno_matricula')
                   }
-                  disabled
-                  className={disabledInputStyles}
                 />
               )}
             </div>
 
             <div>
-              <label className={labelStyles}>Livro*</label>
+              <Label requiredIndicator={isEditMode}>Livro</Label>
               {isEditMode ? (
-                <SearchableSelect
-                  value={livroId}
-                  onChange={(val) => {
-                    setLivroId(val);
-                    setExemplarTombo('');
-                  }}
-                  options={livrosOptions}
+                <Controller
+                  name="livro_id"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <SearchableSelect
+                        value={field.value}
+                        onChange={(val) => {
+                          field.onChange(val);
+                          setValue('exemplar_tombo', '');
+                        }}
+                        options={livrosOptions}
+                      />
+                      {errors.livro_id && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.livro_id.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               ) : (
-                <input
-                  type="text"
+                <Input
+                  disabled
                   value={emprestimo.livroNome || emprestimo.livroIsbn}
-                  disabled
-                  className={disabledInputStyles}
                 />
               )}
             </div>
 
             <div>
-              <label className={labelStyles}>Exemplar*</label>
+              <Label requiredIndicator={isEditMode}>Exemplar</Label>
               {isEditMode ? (
-                <SearchableSelect
-                  value={exemplarTombo}
-                  onChange={setExemplarTombo}
-                  options={exemplaresOptions}
-                  placeholder={
-                    !livroId ? 'Selecione um livro' : 'Selecione um exemplar'
-                  }
-                  disabled={!livroId || isLoadingExemplares}
-                  isLoading={isLoadingExemplares}
+                <Controller
+                  name="exemplar_tombo"
+                  control={control}
+                  render={({ field }) => (
+                    <div>
+                      <SearchableSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                        options={exemplaresOptions}
+                        placeholder={
+                          !livroIdSelecionado
+                            ? 'Selecione um livro'
+                            : 'Selecione um exemplar'
+                        }
+                        disabled={!livroIdSelecionado || isLoadingExemplares}
+                        isLoading={isLoadingExemplares}
+                      />
+                      {errors.exemplar_tombo && (
+                        <span className="text-xs text-red-500 mt-1">
+                          {errors.exemplar_tombo.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 />
               ) : (
-                <input
-                  type="text"
-                  value={exemplarTombo}
-                  disabled
-                  className={disabledInputStyles}
-                />
+                <Input disabled value={watch('exemplar_tombo')} />
               )}
             </div>
           </div>
-        </div>
+        </form>
+      </Modal.Body>
 
-        <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 shrink-0">
-          <button
-            onClick={() => setConfirmAction('excluir')}
-            disabled={isLoading || isEditMode}
-            className="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md flex items-center gap-2"
-          >
-            {isLoading && confirmAction === 'excluir' && (
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-            Excluir
-          </button>
+      <Modal.Footer className="justify-between w-full">
+        <Button
+          variant="danger"
+          onClick={() => setConfirmAction('excluir')}
+          disabled={isUpdating || isEditMode}
+          isLoading={isDeleting}
+        >
+          Excluir
+        </Button>
 
-          <div className="flex gap-3">
-            {isEditMode ? (
-              <>
-                <button
-                  onClick={() => setIsEditMode(false)}
-                  className="text-gray-600 dark:text-gray-400 font-bold py-2 px-4 hover:underline"
-                  disabled={isLoading}
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSalvar}
-                  disabled={isLoading}
-                  className="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600 disabled:bg-gray-400 shadow-md flex items-center gap-2"
-                >
-                  {isLoading && confirmAction === null && (
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  )}
-                  {isLoading && confirmAction === null
-                    ? 'Salvando...'
-                    : 'Salvar Alterações'}
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => setIsEditMode(true)}
-                  className="bg-lumi-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-lumi-primary-hover shadow-md"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => setConfirmAction('devolucao')}
-                  disabled={isLoading}
-                  className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 shadow-md flex items-center gap-2"
-                >
-                  {isLoading && confirmAction === 'devolucao' && (
-                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  )}
-                  {isLoading && confirmAction === 'devolucao'
-                    ? 'Processando...'
-                    : 'Registrar Devolução'}
-                </button>
-              </>
-            )}
+        {isEditMode ? (
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => setIsEditMode(false)}
+              disabled={isUpdating}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              form="form-edit-emprestimo"
+              variant="success"
+              isLoading={isUpdating}
+            >
+              Salvar Alterações
+            </Button>
           </div>
-        </div>
-      </div>
+        ) : (
+          <div className="flex gap-3">
+            <Button onClick={() => setIsEditMode(true)}>Editar</Button>
+            <Button
+              variant="primary"
+              onClick={() => setConfirmAction('devolucao')}
+              isLoading={isCompleting}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Registrar Devolução
+            </Button>
+          </div>
+        )}
+      </Modal.Footer>
 
       <ConfirmModal
         isOpen={confirmAction !== null}
         title={
           confirmAction === 'devolucao'
             ? 'Registro de Devolução'
-            : 'Exclução de Empréstimo'
+            : 'Excluir Empréstimo'
         }
         message={
           confirmAction === 'devolucao'

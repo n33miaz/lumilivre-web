@@ -5,7 +5,6 @@ import {
   type ReactNode,
   type SVGProps,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -78,7 +77,6 @@ export function ConfiguracoesPage() {
   const { theme, setTheme } = useContext(ThemeContext);
   const { user, logoutWithAnimation } = useAuth();
   const { addToast } = useToast();
-  const navigate = useNavigate();
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 

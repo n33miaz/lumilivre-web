@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 import ArrowIcon from '../assets/icons/arrow-drop.svg?react';
@@ -49,7 +55,7 @@ export function CustomSelect({
   const listRef = useRef<HTMLDivElement>(null);
 
   // --- Posicionamento Inteligente ---
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (containerRef.current && isOpen) {
       const rect = containerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
@@ -69,7 +75,7 @@ export function CustomSelect({
         bottom: viewportHeight - rect.top + margin,
       });
     }
-  };
+  }, [isOpen]);
 
   useLayoutEffect(() => {
     if (isOpen) {
@@ -81,7 +87,7 @@ export function CustomSelect({
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
     };
-  }, [isOpen]);
+  }, [isOpen, updatePosition]);
 
   // --- Fechar ao clicar fora ---
   useEffect(() => {

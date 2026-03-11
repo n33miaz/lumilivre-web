@@ -11,6 +11,7 @@ import LogoIcon from '../../../assets/icons/logo.svg?react';
 import UserIcon from '../../../assets/icons/users.svg?react';
 import LockIcon from '../../../assets/icons/lock.svg?react';
 import DownloadIcon from '../../../assets/icons/upload.svg?react';
+import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -52,25 +53,13 @@ export function LoginPage() {
       setTimeout(() => {
         navigate('/dashboard');
       }, 500);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Erro no login:', err);
-
-      let mensagemErro = 'Usuário ou senha inválidos.';
-
-      if (err.response?.data) {
-        if (typeof err.response.data.mensagem === 'string') {
-          mensagemErro = err.response.data.mensagem;
-        } else if (typeof err.response.data.message === 'string') {
-          mensagemErro = err.response.data.message;
-        } else if (typeof err.response.data === 'string') {
-          mensagemErro = err.response.data;
-        }
-      }
 
       addToast({
         type: 'error',
         title: 'Falha no Login',
-        description: mensagemErro,
+        description: getErrorMessage(err, 'Usuário ou senha inválidos.'),
       });
 
       setIsLoading(false);
