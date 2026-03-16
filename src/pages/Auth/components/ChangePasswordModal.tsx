@@ -3,7 +3,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
 import { useToast } from '../../../contexts/ToastContext';
 import api from '../../../services/api';
-import LockIcon from '../assets/icons/lock.svg?react';
+import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
 import { Button } from '../../../components/ui/Button';
 

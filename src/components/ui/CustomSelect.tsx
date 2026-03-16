@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import ArrowIcon from '../assets/icons/arrow-drop.svg?react';
+import ArrowIcon from '../../assets/icons/arrow-drop.svg?react';
 
 interface Option {
   label: string;

@@ -6,16 +6,11 @@ import type { AlunoPayload } from '../../services/alunoService';
 import { type StudentFormData } from '../../schemas/studentSchema';
 
 interface StudentModalNewProps {
-  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function StudentModalNew({
-  isOpen,
-  onClose,
-  onSuccess,
-}: StudentModalNewProps) {
+export function StudentModalNew({ onClose, onSuccess }: StudentModalNewProps) {
   const { mutateAsync: createStudent, isPending } = useCreateStudent();
 
   const handleSubmit = async (data: StudentFormData) => {
@@ -40,8 +35,7 @@ export function StudentModalNew({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <Modal.Header title="Cadastrar Novo Aluno" />
+    <>
       <Modal.Body>
         <StudentForm formId="form-novo-aluno" onSubmit={handleSubmit} />
       </Modal.Body>
@@ -55,6 +49,6 @@ export function StudentModalNew({
           CADASTRAR ALUNO
         </Button>
       </Modal.Footer>
-    </Modal>
+    </>
   );
 }

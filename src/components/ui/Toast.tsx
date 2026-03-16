@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 
-import CloseIcon from '../assets/icons/close-sm.svg?react';
-import SuccessIcon from '../assets/icons/success.svg?react';
-import ErrorIcon from '../assets/icons/error.svg?react';
-import WarningIcon from '../assets/icons/warn.svg?react';
-import InfoIcon from '../assets/icons/info.svg?react';
+import CloseIcon from '../../assets/icons/close-sm.svg?react';
+import SuccessIcon from '../../assets/icons/success.svg?react';
+import ErrorIcon from '../../assets/icons/error.svg?react';
+import WarningIcon from '../../assets/icons/warn.svg?react';
+import InfoIcon from '../../assets/icons/info.svg?react';
 
 export interface ToastMessage {
   id: string;

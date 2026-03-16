@@ -75,7 +75,7 @@ export function LoanModalRequest({
     }
   }, [solicitacao, isOpen]);
 
-  if (!solicitacao || !isOpen) return null;
+  if (!solicitacao) return null;
 
   const executarProcessamento = async () => {
     if (confirmAction === null) return;
@@ -146,22 +146,26 @@ export function LoanModalRequest({
         </div>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="danger"
-          onClick={() => handleProcessarClick(false)}
-          disabled={isProcessing}
-          isLoading={isProcessing && confirmAction === false}
-        >
-          Recusar
-        </Button>
-        <Button
-          variant="success"
-          onClick={() => handleProcessarClick(true)}
-          disabled={isProcessing}
-          isLoading={isProcessing && confirmAction === true}
-        >
-          Aceitar
-        </Button>
+        <div className="flex gap-3 w-full">
+          <Button
+            variant="danger"
+            onClick={() => handleProcessarClick(false)}
+            disabled={isProcessing}
+            isLoading={isProcessing && confirmAction === false}
+            className="flex-1"
+          >
+            Recusar
+          </Button>
+          <Button
+            variant="success"
+            onClick={() => handleProcessarClick(true)}
+            disabled={isProcessing}
+            isLoading={isProcessing && confirmAction === true}
+            className="flex-1"
+          >
+            Aceitar
+          </Button>
+        </div>
       </Modal.Footer>
 
       <ConfirmModal

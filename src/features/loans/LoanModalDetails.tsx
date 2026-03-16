@@ -78,7 +78,7 @@ export function ModalLoanDetails({
     }
   }, [emprestimo, livrosData]);
 
-  if (!emprestimo || !isOpen) return null;
+  if (!emprestimo) return null;
 
   const formatarDataParaBackend = (dataIso: string): string => {
     if (!dataIso) return '';

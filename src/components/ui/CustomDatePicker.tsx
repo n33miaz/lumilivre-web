@@ -9,10 +9,10 @@ import React, {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import CalendarIcon from '../assets/icons/date.svg?react';
-import ArrowLeftIcon from '../assets/icons/arrow-left.svg?react';
-import ArrowRightIcon from '../assets/icons/arrow-right.svg?react';
-import ArrowDropIcon from '../assets/icons/arrow-drop.svg?react';
+import CalendarIcon from '../../assets/icons/date.svg?react';
+import ArrowLeftIcon from '../../assets/icons/arrow-left.svg?react';
+import ArrowRightIcon from '../../assets/icons/arrow-right.svg?react';
+import ArrowDropIcon from '../../assets/icons/arrow-drop.svg?react';
 
 interface CustomDatePickerProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {

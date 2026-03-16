@@ -74,7 +74,7 @@ export function ModalStudentDetails({
     }
   }, [isOpen, aluno]);
 
-  if (!isOpen || !aluno) return null;
+  if (!aluno) return null;
 
   const handleSubmit = async (data: StudentFormData) => {
     try {

@@ -1,10 +1,8 @@
-import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ExempleForm, type ExempleFormData } from './ExempleForm';
 import { useCreateExemple } from '../../hooks/mutations/useExempleMutations';
 
 interface ExempleModalNewProps {
-  isOpen: boolean;
   onClose: () => void;
   livroId: number;
   livroIsbn: string;
@@ -12,7 +10,6 @@ interface ExempleModalNewProps {
 }
 
 export function ExempleModalNew({
-  isOpen,
   onClose,
   livroId,
   livroIsbn,
@@ -34,17 +31,16 @@ export function ExempleModalNew({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <Modal.Header title="Cadastrar Novo Exemplar" />
-      <Modal.Body>
+    <>
+      <div className="p-6 overflow-y-auto custom-scrollbar flex-grow">
         <ExempleForm
           formId="form-novo-exemplar"
           livroIsbn={livroIsbn}
           livroNome={livroNome}
           onSubmit={handleSubmit}
         />
-      </Modal.Body>
-      <Modal.Footer>
+      </div>
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 shrink-0 flex justify-end gap-3">
         <Button
           type="submit"
           form="form-novo-exemplar"
@@ -53,7 +49,7 @@ export function ExempleModalNew({
         >
           CADASTRAR EXEMPLAR
         </Button>
-      </Modal.Footer>
-    </Modal>
+      </div>
+    </>
   );
 }

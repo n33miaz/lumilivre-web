@@ -504,23 +504,19 @@ export function LivrosPage() {
             isExemplarView ? 'Cadastrar Novo Exemplar' : 'Cadastrar Novo Livro'
           }
         />
-        <Modal.Body>
-          {isExemplarView && selectedBook ? (
-            <ExempleModalNew
-              isOpen={isModalOpen}
-              livroId={selectedBook.id}
-              livroIsbn={selectedBook.isbn}
-              livroNome={selectedBook.nome}
-              onClose={() => setIsModalOpen(false)}
-            />
-          ) : (
-            <BookModalNew
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onSuccess={handleLivroCriado}
-            />
-          )}
-        </Modal.Body>
+        {isExemplarView && selectedBook ? (
+          <ExempleModalNew
+            livroId={selectedBook.id}
+            livroIsbn={selectedBook.isbn}
+            livroNome={selectedBook.nome}
+            onClose={() => setIsModalOpen(false)}
+          />
+        ) : (
+          <BookModalNew
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={handleLivroCriado}
+          />
+        )}
       </Modal>
 
       <Modal

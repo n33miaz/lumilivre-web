@@ -298,13 +298,11 @@ export function EmprestimosPage() {
 
   const requestSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
-
     if (sortConfig.key === key) {
       direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
     } else {
       direction = 'asc';
     }
-
     setSortConfig({ key, direction });
     setCurrentPage(1);
   };
@@ -403,40 +401,39 @@ export function EmprestimosPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <ActionHeader
-        searchTerm={termoBusca}
-        onSearchChange={setTermoBusca}
-        onSearchSubmit={handleBusca}
-        onReset={handleResetSearch}
-        searchPlaceholder="Pesquise pelo livro, aluno ou tombo do empréstimo"
-        onAddNew={() => setIsModalOpen(true)}
-        addNewButtonLabel="NOVO EMPRÉSTIMO"
-        showFilterButton={true}
-        isFilterOpen={isFilterOpen}
-        onFilterToggle={() => setIsFilterOpen((prev) => !prev)}
-        filterComponent={
-          <LoanFilter
-            isOpen={isFilterOpen}
-            onClose={() => setIsFilterOpen(false)}
-            filters={filterParams}
-            onFilterChange={(field, value) =>
-              setFilterParams((prev) => ({ ...prev, [field]: value }))
-            }
-            onApply={handleApplyFilters}
-            onClear={handleClearFilters}
-          />
-        }
-      />
+      <div className="shrink-0 relative z-40 animate-slide-in-left">
+        <ActionHeader
+          searchTerm={termoBusca}
+          onSearchChange={setTermoBusca}
+          onSearchSubmit={handleBusca}
+          onReset={handleResetSearch}
+          searchPlaceholder="Pesquise pelo livro, aluno ou tombo do empréstimo"
+          onAddNew={() => setIsModalOpen(true)}
+          addNewButtonLabel="NOVO EMPRÉSTIMO"
+          showFilterButton={true}
+          isFilterOpen={isFilterOpen}
+          onFilterToggle={() => setIsFilterOpen((prev) => !prev)}
+          filterComponent={
+            <LoanFilter
+              isOpen={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
+              filters={filterParams}
+              onFilterChange={(field, value) =>
+                setFilterParams((prev) => ({ ...prev, [field]: value }))
+              }
+              onApply={handleApplyFilters}
+              onClear={handleClearFilters}
+            />
+          }
+        />
+      </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title="Novo Empréstimo" />
-        <Modal.Body>
-          <LoanModalNew
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={() => {}}
-          />
-        </Modal.Body>
+        <LoanModalNew
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={refetch}
+        />
       </Modal>
 
       <ModalLoanDetails

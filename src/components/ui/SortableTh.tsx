@@ -1,6 +1,6 @@
 import React from 'react';
 
-import ArrowIcon from '../assets/icons/arrow-drop.svg?react';
+import ArrowIcon from '../../assets/icons/arrow-drop.svg?react';
 
 type SortDirection = 'asc' | 'desc';
 

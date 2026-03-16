@@ -42,7 +42,7 @@ export function DetalhesLivroModal({
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
 
-  if (!livro || !isOpen) return null;
+  if (!livro) return null;
 
   const handleSubmit = async (data: BookFormData, file: File | null) => {
     try {
