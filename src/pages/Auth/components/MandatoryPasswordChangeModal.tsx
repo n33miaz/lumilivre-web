@@ -6,7 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
 import api from '../../../services/api';
 
-import LockIcon from '../assets/icons/lock.svg?react';
+import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function MandatoryPasswordChangeModal() {

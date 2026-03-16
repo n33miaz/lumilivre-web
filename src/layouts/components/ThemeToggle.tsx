@@ -1,8 +1,8 @@
 import { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
-import SunIcon from '../assets/icons/sun.svg?react';
-import MoonIcon from '../assets/icons/moon.svg?react';
+import SunIcon from '../../assets/icons/sun.svg?react';
+import MoonIcon from '../../assets/icons/moon.svg?react';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useContext(ThemeContext);

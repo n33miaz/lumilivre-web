@@ -1,23 +1,23 @@
 import { NavLink } from 'react-router-dom';
 
-import HomeIcon from '../assets/icons/home.svg?react';
-import HomeActiveIcon from '../assets/icons/home-active.svg?react';
-import BookIcon from '../assets/icons/books.svg?react';
-import BookActiveIcon from '../assets/icons/books-active.svg?react';
-import UsersIcon from '../assets/icons/users.svg?react';
-import UsersActiveIcon from '../assets/icons/users-active.svg?react';
-import LoansIcon from '../assets/icons/loans.svg?react';
-import LoansActiveIcon from '../assets/icons/loans-active.svg?react';
-import SettingsIcon from '../assets/icons/settings.svg?react';
-import SettingsActiveIcon from '../assets/icons/settings-active.svg?react';
-import ReportIcon from '../assets/icons/report.svg?react';
-import ReportActiveIcon from '../assets/icons/report-active.svg?react';
-import RankingIcon from '../assets/icons/ranking.svg?react';
-import RankingActiveIcon from '../assets/icons/ranking-active.svg?react';
-import PinIcon from '../assets/icons/pin.svg?react';
-import PinActiveIcon from '../assets/icons/pin-active.svg?react';
-import EducationCap from '../assets/icons/education-cap.svg?react';
-import EducationCapActive from '../assets/icons/education-cap-active.svg?react';
+import HomeIcon from '../../assets/icons/home.svg?react';
+import HomeActiveIcon from '../../assets/icons/home-active.svg?react';
+import BookIcon from '../../assets/icons/books.svg?react';
+import BookActiveIcon from '../../assets/icons/books-active.svg?react';
+import UsersIcon from '../../assets/icons/users.svg?react';
+import UsersActiveIcon from '../../assets/icons/users-active.svg?react';
+import LoansIcon from '../../assets/icons/loans.svg?react';
+import LoansActiveIcon from '../../assets/icons/loans-active.svg?react';
+import SettingsIcon from '../../assets/icons/settings.svg?react';
+import SettingsActiveIcon from '../../assets/icons/settings-active.svg?react';
+import ReportIcon from '../../assets/icons/report.svg?react';
+import ReportActiveIcon from '../../assets/icons/report-active.svg?react';
+import RankingIcon from '../../assets/icons/ranking.svg?react';
+import RankingActiveIcon from '../../assets/icons/ranking-active.svg?react';
+import PinIcon from '../../assets/icons/pin.svg?react';
+import PinActiveIcon from '../../assets/icons/pin-active.svg?react';
+import EducationCap from '../../assets/icons/education-cap.svg?react';
+import EducationCapActive from '../../assets/icons/education-cap-active.svg?react';
 
 const prefetchSettings = () => import('../../pages/Settings');
 

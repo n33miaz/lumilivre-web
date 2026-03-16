@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 
-import LogoIcon from '../assets/icons/logo.svg?react';
-import MenuIcon from '../assets/icons/menu.svg?react';
+import LogoIcon from '../../assets/icons/logo.svg?react';
+import MenuIcon from '../../assets/icons/menu.svg?react';
 
 interface HeaderProps {
   isSidebarExpanded: boolean;

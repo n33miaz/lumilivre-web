@@ -6,12 +6,11 @@ import { type TccPayload } from '../../services/tccService';
 import { type TccFormData } from '../../schemas/tccSchema';
 
 interface TccModalNewProps {
-  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function TccModalNew({ isOpen, onClose, onSuccess }: TccModalNewProps) {
+export function TccModalNew({ onClose, onSuccess }: TccModalNewProps) {
   const { mutateAsync: createTcc, isPending } = useCreateTcc();
 
   const handleSubmit = async (
@@ -33,8 +32,7 @@ export function TccModalNew({ isOpen, onClose, onSuccess }: TccModalNewProps) {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <Modal.Header title="Cadastrar Novo TCC" />
+    <>
       <Modal.Body>
         <TccForm formId="form-novo-tcc" onSubmit={handleSubmit} />
       </Modal.Body>
@@ -48,6 +46,6 @@ export function TccModalNew({ isOpen, onClose, onSuccess }: TccModalNewProps) {
           CADASTRAR TCC
         </Button>
       </Modal.Footer>
-    </Modal>
+    </>
   );
 }

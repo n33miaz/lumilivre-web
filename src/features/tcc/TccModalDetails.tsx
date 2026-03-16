@@ -32,7 +32,7 @@ export function TccModalDetails({
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
 
-  if (!isOpen || !tcc) return null;
+  if (!tcc) return null;
 
   const handleSubmit = async (
     data: TccFormData,

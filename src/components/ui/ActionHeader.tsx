@@ -1,9 +1,9 @@
 import { type ReactNode } from 'react';
 
-import SearchIcon from '../assets/icons/search.svg?react';
-import FilterIcon from '../assets/icons/filter.svg?react';
-import AddIcon from '../assets/icons/add.svg?react';
-import CloseIcon from '../assets/icons/close-sm.svg?react';
+import SearchIcon from '../../assets/icons/search.svg?react';
+import FilterIcon from '../../assets/icons/filter.svg?react';
+import AddIcon from '../../assets/icons/add.svg?react';
+import CloseIcon from '../../assets/icons/close-sm.svg?react';
 
 interface ActionHeaderProps {
   searchTerm: string;

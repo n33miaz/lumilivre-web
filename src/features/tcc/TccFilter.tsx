@@ -57,7 +57,6 @@ export function TccFilter({
       onClose={onClose}
       onApply={onApply}
       onClear={onClear}
-      width="w-[500px]"
     >
       {isLoading ? (
         <div className="p-8 text-center text-gray-500">Carregando...</div>

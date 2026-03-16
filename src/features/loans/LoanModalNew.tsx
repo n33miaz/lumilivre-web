@@ -6,16 +6,11 @@ import { type EmprestimoPayload } from '../../services/emprestimoService';
 import { type LoanFormData } from '../../schemas/loanSchema';
 
 interface LoanModalNewProps {
-  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function LoanModalNew({
-  isOpen,
-  onClose,
-  onSuccess,
-}: LoanModalNewProps) {
+export function LoanModalNew({ onClose, onSuccess }: LoanModalNewProps) {
   const { mutateAsync: createLoan, isPending } = useCreateLoan();
 
   const formatarDataParaBackend = (dataIso: string): string => {
@@ -43,8 +38,7 @@ export function LoanModalNew({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <Modal.Header title="Novo Empréstimo" />
+    <>
       <Modal.Body>
         <LoanForm formId="form-novo-emprestimo" onSubmit={handleSubmit} />
       </Modal.Body>
@@ -58,6 +52,6 @@ export function LoanModalNew({
           CONFIRMAR EMPRÉSTIMO
         </Button>
       </Modal.Footer>
-    </Modal>
+    </>
   );
 }

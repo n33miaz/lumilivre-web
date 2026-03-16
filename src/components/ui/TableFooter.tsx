@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import ArrowLeftIcon from '../assets/icons/arrow-left.svg?react';
-import ArrowRightIcon from '../assets/icons/arrow-right.svg?react';
-import InfoIcon from '../assets/icons/info.svg?react';
+import ArrowLeftIcon from '../../assets/icons/arrow-left.svg?react';
+import ArrowRightIcon from '../../assets/icons/arrow-right.svg?react';
+import InfoIcon from '../../assets/icons/info.svg?react';
 import { CustomSelect } from './CustomSelect';
 
 interface LegendItem {

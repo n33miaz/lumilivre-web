@@ -300,13 +300,10 @@ export function AlunosPage() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title="Cadastrar Novo Aluno" />
-        <Modal.Body>
-          <StudentModalNew
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={() => {}}
-          />
-        </Modal.Body>
+        <StudentModalNew
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={refetch}
+        />
       </Modal>
 
       <ModalStudentDetails

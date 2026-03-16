@@ -6,7 +6,7 @@ import {
   useContext,
 } from 'react';
 import { createPortal } from 'react-dom';
-import CloseIcon from '../assets/icons/close.svg?react';
+import CloseIcon from '../../assets/icons/close.svg?react';
 
 const ModalContext = createContext<{
   onClose: () => void;

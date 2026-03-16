@@ -205,13 +205,10 @@ export function TccPage() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title="Cadastrar Novo TCC" />
-        <Modal.Body>
-          <TccModalNew
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={() => {}}
-          />
-        </Modal.Body>
+        <TccModalNew
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={refetch}
+        />
       </Modal>
 
       <TccModalDetails

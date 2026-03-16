@@ -35,7 +35,7 @@ export function ModalExemplarDetails({
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
 
-  if (!isOpen || !exemplar || !livroId) return null;
+  if (!exemplar || !livroId) return null;
 
   const handleSubmit = async (data: ExempleFormData) => {
     try {

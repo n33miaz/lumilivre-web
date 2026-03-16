@@ -46,7 +46,6 @@ export function LoanFilter({
       onClose={onClose}
       onApply={onApply}
       onClear={onClear}
-      width="w-[600px]"
     >
       {isLoading ? (
         <div className="p-8 text-center text-gray-500">

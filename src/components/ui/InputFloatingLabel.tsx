@@ -1,7 +1,7 @@
 import { type InputHTMLAttributes, type ElementType, useState } from 'react';
 
-import EyeIcon from '../assets/icons/eye.svg?react';
-import EyeCloseIcon from '../assets/icons/eye-close.svg?react';
+import EyeIcon from '../../assets/icons/eye.svg?react';
+import EyeCloseIcon from '../../assets/icons/eye-close.svg?react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
