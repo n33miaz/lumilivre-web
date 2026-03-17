@@ -367,8 +367,11 @@ export const CustomDatePicker = forwardRef<
     'block text-sm font-medium text-gray-700 dark:text-white mb-1';
 
   const hasValue = inputValue.length > 0;
-  const iconColorClass =
-    isOpen || hasValue ? 'text-lumi-label' : 'text-gray-400';
+  const iconColorClass = props.disabled
+    ? 'text-gray-300 dark:text-gray-600'
+    : isOpen || hasValue
+      ? 'text-lumi-label'
+      : 'text-gray-400';
 
   return (
     <div className={`relative w-full ${className}`} ref={containerRef}>
@@ -383,25 +386,28 @@ export const CustomDatePicker = forwardRef<
           ref={inputRef}
           type="text"
           className={`
-            w-full pl-3 pr-10 py-2 text-sm bg-white dark:bg-gray-800 border rounded-md outline-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+            w-full pl-3 pr-10 py-2 text-sm border rounded-md outline-none transition-colors placeholder-gray-400 dark:placeholder-gray-500
             ${
-              error
-                ? 'border-red-500 focus:border-red-500'
-                : `border-gray-300 dark:border-gray-600 focus:border-lumi-primary dark:focus:border-lumi-primary ${isOpen ? 'border-lumi-primary ring-1 ring-lumi-primary' : ''}`
+              props.disabled
+                ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-600'
+                : error
+                  ? 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-red-500 focus:border-red-500'
+                  : `bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-lumi-primary dark:focus:border-lumi-primary ${isOpen ? 'border-lumi-primary ring-1 ring-lumi-primary' : ''}`
             }
           `}
           placeholder="dia/mês/ano"
           value={inputValue}
           onChange={handleInputChange}
-          onFocus={() => setIsOpen(true)}
+          onFocus={() => !props.disabled && setIsOpen(true)}
           autoComplete="off"
           maxLength={10}
           {...props}
         />
 
         <div
-          className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer p-1"
+          className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 ${props.disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           onClick={() => {
+            if (props.disabled) return;
             inputRef.current?.focus();
             setIsOpen(!isOpen);
           }}

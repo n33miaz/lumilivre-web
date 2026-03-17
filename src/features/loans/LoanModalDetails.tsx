@@ -175,10 +175,9 @@ export function ModalLoanDetails({
           <div className="flex gap-3">
             <Button onClick={() => setIsEditMode(true)}>Editar</Button>
             <Button
-              variant="primary"
+              variant="action"
               onClick={() => setConfirmAction('devolucao')}
               isLoading={isCompleting}
-              className="bg-blue-600 hover:bg-blue-700"
             >
               Registrar Devolução
             </Button>

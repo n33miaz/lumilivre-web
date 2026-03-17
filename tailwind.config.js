@@ -9,6 +9,8 @@ export default {
         'lumi-primary-hover': '#5E195D',
         'lumi-label': '#C964C5',
         'lumi-label-alt': '#8B5CF6',
+        'lumi-action': '#1D6FBF',
+        'lumi-action-hover': '#1558A0',
         'dark-header': '#1F2937',
         'dark-background': '#111827',
         'dark-card': '#1F2937',
