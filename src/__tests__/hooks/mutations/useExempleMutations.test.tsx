@@ -35,7 +35,9 @@ describe('useCreateExemple', () => {
   it('deve cadastrar exemplar e exibir toast de sucesso', async () => {
     mockedCadastrar.mockResolvedValue({ tombo: 'T001' });
 
-    const { result } = renderHook(() => useCreateExemple(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCreateExemple(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({
       tombo: 'T001',
@@ -47,7 +49,10 @@ describe('useCreateExemple', () => {
     await waitFor(() => {
       expect(mockedCadastrar).toHaveBeenCalled();
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'Exemplar cadastrado com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'Exemplar cadastrado com sucesso!',
+        }),
       );
     });
   });
@@ -55,7 +60,9 @@ describe('useCreateExemple', () => {
   it('deve exibir toast de erro ao falhar', async () => {
     mockedCadastrar.mockRejectedValue(new Error('Tombo já existe'));
 
-    const { result } = renderHook(() => useCreateExemple(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCreateExemple(), {
+      wrapper: createWrapper(),
+    });
 
     try {
       await result.current.mutateAsync({
@@ -82,15 +89,25 @@ describe('useUpdateExemplar', () => {
   it('deve atualizar exemplar com sucesso', async () => {
     mockedAtualizar.mockResolvedValue({ sucesso: true });
 
-    const { result } = renderHook(() => useUpdateExemplar(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useUpdateExemplar(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({
       tomboAtual: 'T001',
-      payload: { tombo: 'T001-UPD', localizacao_fisica: 'Estante B', livro_id: 1, status_livro: 'DISPONIVEL' },
+      payload: {
+        tombo: 'T001-UPD',
+        localizacao_fisica: 'Estante B',
+        livro_id: 1,
+        status_livro: 'DISPONIVEL',
+      },
     });
 
     await waitFor(() => {
-      expect(mockedAtualizar).toHaveBeenCalledWith('T001', expect.objectContaining({ tombo: 'T001-UPD' }));
+      expect(mockedAtualizar).toHaveBeenCalledWith(
+        'T001',
+        expect.objectContaining({ tombo: 'T001-UPD' }),
+      );
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'success' }),
       );
@@ -104,14 +121,19 @@ describe('useDeleteExemplar', () => {
   it('deve excluir exemplar com sucesso', async () => {
     mockedExcluir.mockResolvedValue({ sucesso: true });
 
-    const { result } = renderHook(() => useDeleteExemplar(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useDeleteExemplar(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({ tombo: 'T001', livroId: 1 });
 
     await waitFor(() => {
       expect(mockedExcluir).toHaveBeenCalledWith('T001');
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'Exemplar excluído com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'Exemplar excluído com sucesso!',
+        }),
       );
     });
   });

@@ -52,7 +52,7 @@ export function ModalExemplarDetails({
         payload: {
           tombo: data.tombo,
           localizacao_fisica: data.localizacao_fisica,
-          livro_id: livroIdAtual,
+          livro_id: livroIdAtual!,
           status_livro: exemplarAtual?.status ?? '',
         },
       });
@@ -64,7 +64,7 @@ export function ModalExemplarDetails({
 
   const executarExclusao = async () => {
     try {
-      await deleteExemplar({ tombo: exemplarAtual?.tomboExemplar ?? '', livroId: livroIdAtual });
+      await deleteExemplar({ tombo: exemplarAtual?.tomboExemplar ?? '', livroId: livroIdAtual! });
       setConfirmAction(null);
       onClose();
     } catch (error) {

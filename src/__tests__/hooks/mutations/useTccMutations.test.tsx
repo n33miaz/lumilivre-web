@@ -3,7 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-import { useCreateTcc, useUpdateTcc, useDeleteTcc } from '../../../hooks/mutations/useTccMutations';
+import {
+  useCreateTcc,
+  useUpdateTcc,
+  useDeleteTcc,
+} from '../../../hooks/mutations/useTccMutations';
 import * as tccService from '../../../services/tccService';
 
 vi.mock('../../../services/tccService');
@@ -42,14 +46,23 @@ describe('useCreateTcc', () => {
   it('deve cadastrar TCC e exibir toast de sucesso', async () => {
     mockedCadastrar.mockResolvedValue({ id: 1 });
 
-    const { result } = renderHook(() => useCreateTcc(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCreateTcc(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({ payload: mockPayload });
 
     await waitFor(() => {
-      expect(mockedCadastrar).toHaveBeenCalledWith(mockPayload, undefined, undefined);
+      expect(mockedCadastrar).toHaveBeenCalledWith(
+        mockPayload,
+        undefined,
+        undefined,
+      );
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'TCC cadastrado com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'TCC cadastrado com sucesso!',
+        }),
       );
     });
   });
@@ -57,7 +70,9 @@ describe('useCreateTcc', () => {
   it('deve exibir toast de erro ao falhar', async () => {
     mockedCadastrar.mockRejectedValue(new Error('Erro'));
 
-    const { result } = renderHook(() => useCreateTcc(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCreateTcc(), {
+      wrapper: createWrapper(),
+    });
 
     try {
       await result.current.mutateAsync({ payload: mockPayload });
@@ -66,7 +81,9 @@ describe('useCreateTcc', () => {
     }
 
     await waitFor(() => {
-      expect(mockAddToast).toHaveBeenCalledWith(expect.objectContaining({ type: 'error' }));
+      expect(mockAddToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'error' }),
+      );
     });
   });
 });
@@ -77,14 +94,24 @@ describe('useUpdateTcc', () => {
   it('deve atualizar TCC com sucesso', async () => {
     mockedAtualizar.mockResolvedValue({ sucesso: true });
 
-    const { result } = renderHook(() => useUpdateTcc(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useUpdateTcc(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({ id: 1, payload: mockPayload });
 
     await waitFor(() => {
-      expect(mockedAtualizar).toHaveBeenCalledWith(1, mockPayload, undefined, undefined);
+      expect(mockedAtualizar).toHaveBeenCalledWith(
+        1,
+        mockPayload,
+        undefined,
+        undefined,
+      );
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'TCC atualizado com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'TCC atualizado com sucesso!',
+        }),
       );
     });
   });
@@ -96,14 +123,19 @@ describe('useDeleteTcc', () => {
   it('deve excluir TCC com sucesso', async () => {
     mockedExcluir.mockResolvedValue({ sucesso: true });
 
-    const { result } = renderHook(() => useDeleteTcc(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useDeleteTcc(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync(10);
 
     await waitFor(() => {
       expect(mockedExcluir).toHaveBeenCalledWith(10);
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'TCC excluído com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'TCC excluído com sucesso!',
+        }),
       );
     });
   });

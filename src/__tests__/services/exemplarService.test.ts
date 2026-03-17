@@ -53,7 +53,10 @@ describe('exemplarService', () => {
 
       const result = await cadastrarExemplar(payload);
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/livros/exemplares/cadastrar', payload);
+      expect(mockedApi.post).toHaveBeenCalledWith(
+        '/livros/exemplares/cadastrar',
+        payload,
+      );
       expect(result.tombo).toBe('T100');
     });
   });
@@ -83,7 +86,9 @@ describe('exemplarService', () => {
 
       await excluirExemplar('T100');
 
-      expect(mockedApi.delete).toHaveBeenCalledWith('/livros/exemplares/excluir/T100');
+      expect(mockedApi.delete).toHaveBeenCalledWith(
+        '/livros/exemplares/excluir/T100',
+      );
     });
   });
 });

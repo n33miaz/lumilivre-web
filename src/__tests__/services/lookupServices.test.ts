@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import api from '../../services/api';
 
-import { buscarCursos, cadastrarCurso, buscarEstatisticasCursos, buscarEstatisticasGrafico } from '../../services/cursoService';
+import {
+  buscarCursos,
+  cadastrarCurso,
+  buscarEstatisticasCursos,
+  buscarEstatisticasGrafico,
+} from '../../services/cursoService';
 import { buscarTurnos, cadastrarTurno } from '../../services/turnoService';
 import { buscarModulos, cadastrarModulo } from '../../services/moduloService';
 import { getContagemAutores } from '../../services/autorService';
@@ -43,7 +48,11 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
     it('cadastrarCurso: deve cadastrar curso com payload correto', async () => {
       mockedApi.post.mockResolvedValue({ data: { id: 2, nome: 'Enfermagem' } });
 
-      const result = await cadastrarCurso({ nome: 'Enfermagem', turno: 'Manhã', modulo: '1' });
+      const result = await cadastrarCurso({
+        nome: 'Enfermagem',
+        turno: 'Manhã',
+        modulo: '1',
+      });
 
       expect(mockedApi.post).toHaveBeenCalledWith('/cursos/cadastrar', {
         nome: 'Enfermagem',
@@ -54,7 +63,14 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
     });
 
     it('buscarEstatisticasCursos: deve retornar estatísticas', async () => {
-      const mockStats = [{ nomeCurso: 'Info', quantidadeAlunos: 30, totalEmprestimos: 100, mediaEmprestimosPorAluno: 3.3 }];
+      const mockStats = [
+        {
+          nomeCurso: 'Info',
+          quantidadeAlunos: 30,
+          totalEmprestimos: 100,
+          mediaEmprestimosPorAluno: 3.3,
+        },
+      ];
       mockedApi.get.mockResolvedValue({ data: mockStats });
 
       const result = await buscarEstatisticasCursos();
@@ -67,13 +83,19 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
       mockedApi.get.mockResolvedValue({ data: [{ nome: 'Info', total: 50 }] });
 
       await buscarEstatisticasGrafico('curso');
-      expect(mockedApi.get).toHaveBeenCalledWith('/cursos/estatisticas-grafico');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/cursos/estatisticas-grafico',
+      );
 
       await buscarEstatisticasGrafico('modulo');
-      expect(mockedApi.get).toHaveBeenCalledWith('/modulos/estatisticas-grafico');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/modulos/estatisticas-grafico',
+      );
 
       await buscarEstatisticasGrafico('turno');
-      expect(mockedApi.get).toHaveBeenCalledWith('/turnos/estatisticas-grafico');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/turnos/estatisticas-grafico',
+      );
     });
   });
 
@@ -81,7 +103,12 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
 
   describe('turnoService', () => {
     it('buscarTurnos: deve retornar lista de turnos', async () => {
-      mockedApi.get.mockResolvedValue({ data: [{ id: 1, nome: 'Manhã' }, { id: 2, nome: 'Tarde' }] });
+      mockedApi.get.mockResolvedValue({
+        data: [
+          { id: 1, nome: 'Manhã' },
+          { id: 2, nome: 'Tarde' },
+        ],
+      });
 
       const result = await buscarTurnos();
 
@@ -94,7 +121,9 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
 
       const result = await cadastrarTurno({ nome: 'Noite' });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/turnos/cadastrar', { nome: 'Noite' });
+      expect(mockedApi.post).toHaveBeenCalledWith('/turnos/cadastrar', {
+        nome: 'Noite',
+      });
       expect(result.nome).toBe('Noite');
     });
   });
@@ -132,7 +161,9 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
 
       const result = await cadastrarModulo({ nome: 'Módulo 4' });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/modulos/cadastrar', { nome: 'Módulo 4' });
+      expect(mockedApi.post).toHaveBeenCalledWith('/modulos/cadastrar', {
+        nome: 'Módulo 4',
+      });
       expect(result.id).toBe(4);
     });
   });

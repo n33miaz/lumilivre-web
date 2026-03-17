@@ -3,7 +3,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-import { useCreateBook, useUpdateBook, useDeleteBook } from '../../../hooks/mutations/useBookMutations';
+import {
+  useCreateBook,
+  useUpdateBook,
+  useDeleteBook,
+} from '../../../hooks/mutations/useBookMutations';
 import * as livroService from '../../../services/livroService';
 
 vi.mock('../../../services/livroService');
@@ -44,14 +48,19 @@ describe('useCreateBook', () => {
   it('deve cadastrar livro e exibir toast de sucesso', async () => {
     mockedCadastrar.mockResolvedValue({ isbn: '9788535914849' });
 
-    const { result } = renderHook(() => useCreateBook(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCreateBook(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({ payload: mockPayload });
 
     await waitFor(() => {
       expect(mockedCadastrar).toHaveBeenCalledWith(mockPayload, undefined);
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'Livro cadastrado com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'Livro cadastrado com sucesso!',
+        }),
       );
     });
   });
@@ -59,7 +68,9 @@ describe('useCreateBook', () => {
   it('deve exibir toast de erro ao falhar', async () => {
     mockedCadastrar.mockRejectedValue(new Error('ISBN duplicado'));
 
-    const { result } = renderHook(() => useCreateBook(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCreateBook(), {
+      wrapper: createWrapper(),
+    });
 
     try {
       await result.current.mutateAsync({ payload: mockPayload });
@@ -81,14 +92,19 @@ describe('useUpdateBook', () => {
   it('deve atualizar livro e exibir toast de sucesso', async () => {
     mockedAtualizar.mockResolvedValue({ sucesso: true });
 
-    const { result } = renderHook(() => useUpdateBook(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useUpdateBook(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync({ id: 1, payload: mockPayload });
 
     await waitFor(() => {
       expect(mockedAtualizar).toHaveBeenCalledWith(1, mockPayload, undefined);
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'Livro atualizado com sucesso!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'Livro atualizado com sucesso!',
+        }),
       );
     });
   });
@@ -100,14 +116,19 @@ describe('useDeleteBook', () => {
   it('deve excluir livro e exibir toast de sucesso', async () => {
     mockedExcluir.mockResolvedValue({ sucesso: true });
 
-    const { result } = renderHook(() => useDeleteBook(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useDeleteBook(), {
+      wrapper: createWrapper(),
+    });
 
     await result.current.mutateAsync('9788535914849');
 
     await waitFor(() => {
       expect(mockedExcluir).toHaveBeenCalledWith('9788535914849');
       expect(mockAddToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'success', description: 'Livro e seus exemplares foram excluídos!' }),
+        expect.objectContaining({
+          type: 'success',
+          description: 'Livro e seus exemplares foram excluídos!',
+        }),
       );
     });
   });

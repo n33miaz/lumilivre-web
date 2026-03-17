@@ -424,7 +424,7 @@ export function ClassificacaoPage() {
                         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                       }}
                       itemStyle={{ color: '#374151', fontWeight: 'bold' }}
-                      formatter={(value: number) => [
+                      formatter={(value) => [
                         `${value} Livros`,
                         'Total Empréstimos',
                       ]}

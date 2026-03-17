@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { login, validarTokenReset, requestPasswordReset } from '../../services/authService';
+import {
+  login,
+  validarTokenReset,
+  requestPasswordReset,
+} from '../../services/authService';
 import api from '../../services/api';
 
 vi.mock('../../services/api', () => ({
@@ -54,7 +58,9 @@ describe('authService', () => {
 
       const result = await validarTokenReset('token-valido');
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/auth/validar-token/token-valido');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/auth/validar-token/token-valido',
+      );
       expect(result).toBe(true);
     });
 

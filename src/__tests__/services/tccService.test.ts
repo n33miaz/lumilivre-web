@@ -86,7 +86,9 @@ describe('tccService', () => {
 
       const result = await listarTccsAvancado(params);
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/tcc/buscar/avancado', { params });
+      expect(mockedApi.get).toHaveBeenCalledWith('/tcc/buscar/avancado', {
+        params,
+      });
       expect(result).toEqual([]);
     });
   });

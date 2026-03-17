@@ -8,7 +8,9 @@ test.describe('Forgot Password Page', () => {
   test('should render forgot password form', async ({ page }) => {
     await expect(page.getByText('Esqueci a Senha')).toBeVisible();
     await expect(page.getByLabel(/Email/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /ENVIAR LINK/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /ENVIAR LINK/i }),
+    ).toBeVisible();
     await expect(page.getByText('Voltar para o Login')).toBeVisible();
   });
 
@@ -18,7 +20,9 @@ test.describe('Forgot Password Page', () => {
     expect(page.url()).toContain('/login');
   });
 
-  test('should show success toast on valid email submission', async ({ page }) => {
+  test('should show success toast on valid email submission', async ({
+    page,
+  }) => {
     await page.route('**/auth/esqueci-senha', (route) =>
       route.fulfill({
         status: 200,
@@ -34,6 +38,10 @@ test.describe('Forgot Password Page', () => {
   });
 
   test('should show warning for invalid email format', async ({ page }) => {
+    // Bypass HTML5 email validation to test custom JS validation
+    await page.evaluate(() =>
+      document.querySelector('form')?.setAttribute('novalidate', ''),
+    );
     await page.getByLabel(/Email/i).fill('invalidemail');
     await page.getByRole('button', { name: /ENVIAR LINK/i }).click();
 
