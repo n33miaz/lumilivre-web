@@ -35,7 +35,7 @@ const SettingItem = ({
   children,
   iconClassName = 'w-6 h-6',
 }: SettingItemProps) => (
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0 gap-4">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0 gap-4 transition-colors duration-200">
     <div className="flex items-start sm:items-center">
       <div className="p-2 rounded-lg mr-3 sm:mr-4 bg-gray-100 dark:bg-gray-700 shrink-0 mt-1 sm:mt-0">
         <Icon
@@ -74,17 +74,84 @@ const SubPageHeader = ({
 );
 
 /**
- * Componente que exibe estado de "Coming Soon"
- * Utilizado para funcionalidades em desenvolvimento
- * @returns JSX com visual de indisponibilidade temporária
+ * Componente ComingSoonBadge - Status visual para funcionalidades em desenvolvimento
+ * 
+ * Características:
+ * - Badge animado com indicador de pulse
+ * - Suporte completo a dark mode
+ * - Estilização elegante com gradiente
+ * - Acessível e semântico
+ * 
+ * @returns {JSX.Element} Badge do "Em breve"
  */
 const ComingSoonBadge = () => (
-  <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border border-amber-200 dark:border-amber-700/50">
-    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-    <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
+  <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 border border-amber-200 dark:border-amber-700/50 backdrop-blur-sm">
+    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
+    <span className="text-xs font-medium text-amber-700 dark:text-amber-300 whitespace-nowrap">
       Em breve
     </span>
   </div>
+);
+
+/**
+ * Componente ThemeButton - Botão individual de seleção de tema
+ * 
+ * Características:
+ * - Estados visuais claramente diferenciados
+ * - Transições suaves com feedback tátil
+ * - Acessibilidade completa com aria-labels
+ * - Responsive design (mobile e desktop)
+ * 
+ * @param {Object} props
+ * @param {string} props.label - Texto do botão
+ * @param {string} props.value - Valor do tema (light, dark, system)
+ * @param {string} props.isSelected - Se o tema está selecionado
+ * @param {Function} props.onClick - Callback ao clicar
+ * @returns {JSX.Element} Botão de seleção de tema
+ */
+interface ThemeButtonProps {
+  label: string;
+  value: 'light' | 'dark' | 'system';
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const ThemeButton = ({ label, value, isSelected, onClick }: ThemeButtonProps) => (
+  <button
+    onClick={onClick}
+    aria-label={`Selecionar tema ${label.toLowerCase()}`}
+    aria-pressed={isSelected}
+    className={`
+      relative flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2.5 rounded-md font-medium
+      transition-all duration-300 ease-out
+      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary
+      dark:focus:ring-offset-gray-700
+      ${
+        isSelected
+          ? `
+            shadow-lg scale-105 font-semibold
+            ${
+              value === 'light'
+                ? 'bg-white text-lumi-primary dark:bg-white dark:text-lumi-primary'
+                : value === 'system'
+                  ? 'bg-lumi-primary text-white shadow-lg shadow-lumi-primary/30'
+                  : 'bg-gray-800 dark:bg-gray-900 text-lumi-label shadow-lg shadow-gray-800/30 dark:shadow-gray-900/30'
+            }
+          `
+          : `
+            text-gray-600 dark:text-gray-400
+            hover:text-gray-800 dark:hover:text-gray-200
+            hover:bg-gray-50 dark:hover:bg-gray-600/20
+          `
+      }
+    `}
+    title={`Tema ${label}`}
+  >
+    {isSelected && (
+      <span className="absolute inset-0 rounded-md bg-white/10 dark:bg-white/5 pointer-events-none" />
+    )}
+    <span className="relative">{label}</span>
+  </button>
 );
 
 export function ConfiguracoesPage() {
@@ -211,43 +278,25 @@ export function ConfiguracoesPage() {
             title="Tema"
             description="Escolha sua preferência de tons na plataforma."
           >
-            <div className="flex items-center gap-2 p-1 rounded-lg shadow-md bg-gray-100 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start">
-              <button
+            <div className="flex items-center gap-1.5 p-1.5 rounded-lg shadow-md bg-gray-100 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start backdrop-blur-sm">
+              <ThemeButton
+                label="Claro"
+                value="light"
+                isSelected={theme === 'light'}
                 onClick={() => setTheme('light')}
-                className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                  theme === 'light'
-                    ? 'bg-white text-lumi-primary shadow-md scale-105'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                }`}
-                title="Tema Claro"
-                aria-label="Selecionar tema claro"
-              >
-                Claro
-              </button>
-              <button
+              />
+              <ThemeButton
+                label="Automático"
+                value="system"
+                isSelected={theme === 'system'}
                 onClick={() => setTheme('system')}
-                className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                  theme === 'system'
-                    ? 'bg-lumi-primary text-white shadow-md scale-105'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                }`}
-                title="Tema Automático"
-                aria-label="Selecionar tema automático"
-              >
-                Automático
-              </button>
-              <button
+              />
+              <ThemeButton
+                label="Escuro"
+                value="dark"
+                isSelected={theme === 'dark'}
                 onClick={() => setTheme('dark')}
-                className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 text-lumi-label shadow-md scale-105 dark:bg-gray-900'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                }`}
-                title="Tema Escuro"
-                aria-label="Selecionar tema escuro"
-              >
-                Escuro
-              </button>
+              />
             </div>
           </SettingItem>
         </div>
@@ -272,15 +321,17 @@ export function ConfiguracoesPage() {
             </a>
           </SettingItem>
 
-          {/* iOS - Coming Soon */}
+          {/* 
+            iOS - Coming Soon
+            Estilização customizada para "Em Breve"
+            TODO: Substituir por link funcional quando disponível
+          */}
           <SettingItem
             Icon={UploadIcon}
             title="iOS"
             description="Acesse a versão mais recente da plataforma para alunos."
           >
-            <div className="flex items-center gap-2">
-              <ComingSoonBadge />
-            </div>
+            <ComingSoonBadge />
           </SettingItem>
         </div>
       </div>
