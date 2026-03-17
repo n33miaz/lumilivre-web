@@ -1,5 +1,25 @@
 import { test, expect, type Page } from '@playwright/test';
 
+/** Injects CSS para desabilitar animações durante testes E2E */
+async function injectReducedMotionCSS(page: Page) {
+  await page.addInitScript(() => {
+    // Cria um style tag que desabilita animações apenas para testes E2E
+    const style = document.createElement('style');
+    style.textContent = `
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        ::before,
+        ::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  });
+}
+
 /** Injects a fake authenticated user into localStorage before page loads. */
 async function injectAuthUser(page: Page) {
   await page.addInitScript(() => {
@@ -124,6 +144,7 @@ test.describe('Protected Routes — Unauthenticated', () => {
 
 test.describe('Sidebar Navigation — Authenticated', () => {
   test.beforeEach(async ({ page }) => {
+    await injectReducedMotionCSS(page);
     await injectAuthUser(page);
     await mockAllApis(page);
   });
