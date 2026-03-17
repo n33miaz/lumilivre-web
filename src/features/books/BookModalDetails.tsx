@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
@@ -34,15 +34,20 @@ export function DetalhesLivroModal({
   const { mutateAsync: updateBook, isPending: isUpdating } = useUpdateBook();
   const { mutateAsync: deleteBook, isPending: isDeleting } = useDeleteBook();
 
+  // Mantém o último dado válido durante a animação de saída
+  const livroRef = useRef(livro);
+  useEffect(() => {
+    if (livro) livroRef.current = livro;
+  }, [livro]);
+  const livroAtual = livro ?? livroRef.current;
+
   const { data: livroDetalhes, isLoading } = useLivroDetalhes(
-    isOpen ? livro?.id : undefined,
+    isOpen ? livroAtual?.id : undefined,
   );
 
   useEffect(() => {
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
-
-  if (!livro) return null;
 
   const handleSubmit = async (data: BookFormData, file: File | null) => {
     try {
@@ -51,7 +56,7 @@ export function DetalhesLivroModal({
         cdd: data.cdd || '',
         tipo_capa: data.tipo_capa || '',
       } as LivroPayload;
-      await updateBook({ id: livro.id, payload, file });
+      await updateBook({ id: livroAtual?.id ?? 0, payload, file });
       setIsEditMode(false);
       onClose(true);
     } catch (error) {
@@ -61,7 +66,7 @@ export function DetalhesLivroModal({
 
   const executarExclusao = async () => {
     try {
-      await deleteBook(livro.isbn);
+      await deleteBook(livroAtual?.isbn ?? '');
       setConfirmAction(null);
       onClose(true);
     } catch (error) {
@@ -94,12 +99,14 @@ export function DetalhesLivroModal({
         {isLoading ? (
           <LoadingIcon />
         ) : (
-          <BookForm
-            formId="form-edit-livro"
-            initialData={initialData}
-            readOnly={!isEditMode}
-            onSubmit={handleSubmit}
-          />
+          livroAtual && (
+            <BookForm
+              formId="form-edit-livro"
+              initialData={initialData}
+              readOnly={!isEditMode}
+              onSubmit={handleSubmit}
+            />
+          )
         )}
       </Modal.Body>
       <DetailsModalActionFooter
@@ -114,7 +121,7 @@ export function DetalhesLivroModal({
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}
         title="Excluir Livro"
-        message={`Tem certeza que deseja excluir o livro "${livro.nome}" e TODOS os seus exemplares junto?\nEsta ação não pode ser desfeita.`}
+        message={`Tem certeza que deseja excluir o livro "${livroAtual?.nome}" e TODOS os seus exemplares junto?\nEsta ação não pode ser desfeita.`}
         isDestructive={true}
         onConfirm={executarExclusao}
         onCancel={() => setConfirmAction(null)}

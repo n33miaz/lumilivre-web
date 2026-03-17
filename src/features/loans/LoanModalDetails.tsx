@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { Modal } from '../../components/ui/Modal';
@@ -49,6 +49,13 @@ export function ModalLoanDetails({
     useCompleteLoan();
   const { mutateAsync: deleteLoan, isPending: isDeleting } = useDeleteLoan();
 
+  // Mantém o último dado válido durante a animação de saída
+  const emprestimoRef = useRef(emprestimo);
+  useEffect(() => {
+    if (emprestimo) emprestimoRef.current = emprestimo;
+  }, [emprestimo]);
+  const emprestimoAtual = emprestimo ?? emprestimoRef.current;
+
   const { data: livrosData } = useQuery({
     queryKey: ['livros-options'],
     queryFn: () =>
@@ -62,23 +69,21 @@ export function ModalLoanDetails({
   }, [isOpen]);
 
   useEffect(() => {
-    if (emprestimo && livrosData) {
+    if (emprestimoAtual && livrosData) {
       let id = '';
-      if (emprestimo.livroIsbn && emprestimo.livroIsbn !== '-') {
-        const found = livrosData.find((l) => l.isbn === emprestimo.livroIsbn);
+      if (emprestimoAtual.livroIsbn && emprestimoAtual.livroIsbn !== '-') {
+        const found = livrosData.find((l) => l.isbn === emprestimoAtual.livroIsbn);
         if (found) id = String(found.id);
       }
-      if (!id && emprestimo.livroNome) {
+      if (!id && emprestimoAtual.livroNome) {
         const found = livrosData.find(
-          (l) => l.nome.toLowerCase() === emprestimo.livroNome?.toLowerCase(),
+          (l) => l.nome.toLowerCase() === emprestimoAtual.livroNome?.toLowerCase(),
         );
         if (found) id = String(found.id);
       }
       setLivroIdEncontrado(id);
     }
-  }, [emprestimo, livrosData]);
-
-  if (!emprestimo) return null;
+  }, [emprestimoAtual, livrosData]);
 
   const formatarDataParaBackend = (dataIso: string): string => {
     if (!dataIso) return '';
@@ -90,14 +95,14 @@ export function ModalLoanDetails({
   const handleSubmit = async (data: LoanFormData) => {
     try {
       const payload: EmprestimoPayload = {
-        id: Number(emprestimo.id),
+        id: Number(emprestimoAtual?.id),
         aluno_matricula: data.aluno_matricula,
         exemplar_tombo: data.exemplar_tombo,
         data_emprestimo: formatarDataParaBackend(data.data_emprestimo),
         data_devolucao: formatarDataParaBackend(data.data_devolucao),
       };
 
-      await updateLoan({ id: Number(emprestimo.id), payload });
+      await updateLoan({ id: Number(emprestimoAtual?.id), payload });
       setIsEditMode(false);
       onClose(true);
     } catch (error) {
@@ -106,30 +111,30 @@ export function ModalLoanDetails({
   };
 
   const handleDevolucao = async () => {
-    await completeLoan(Number(emprestimo.id));
+    await completeLoan(Number(emprestimoAtual?.id));
     setConfirmAction(null);
     onClose(true);
   };
 
   const handleExcluir = async () => {
-    await deleteLoan(Number(emprestimo.id));
+    await deleteLoan(Number(emprestimoAtual?.id));
     setConfirmAction(null);
     onClose(true);
   };
 
-  const initialData = {
-    aluno_matricula: emprestimo.alunoMatricula,
-    alunoNome: emprestimo.alunoNome,
+  const initialData = emprestimoAtual ? {
+    aluno_matricula: emprestimoAtual.alunoMatricula,
+    alunoNome: emprestimoAtual.alunoNome,
     livro_id: livroIdEncontrado,
-    livroNome: emprestimo.livroNome,
-    exemplar_tombo: emprestimo.exemplarTombo,
-    data_emprestimo: emprestimo.dataEmprestimo
-      ? new Date(emprestimo.dataEmprestimo).toISOString().split('T')[0]
+    livroNome: emprestimoAtual.livroNome,
+    exemplar_tombo: emprestimoAtual.exemplarTombo,
+    data_emprestimo: emprestimoAtual.dataEmprestimo
+      ? new Date(emprestimoAtual.dataEmprestimo).toISOString().split('T')[0]
       : '',
-    data_devolucao: emprestimo.dataDevolucao
-      ? new Date(emprestimo.dataDevolucao).toISOString().split('T')[0]
+    data_devolucao: emprestimoAtual.dataDevolucao
+      ? new Date(emprestimoAtual.dataDevolucao).toISOString().split('T')[0]
       : '',
-  };
+  } : undefined;
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
@@ -138,12 +143,14 @@ export function ModalLoanDetails({
       />
 
       <Modal.Body>
-        <LoanForm
-          formId="form-edit-emprestimo"
-          initialData={initialData}
-          readOnly={!isEditMode}
-          onSubmit={handleSubmit}
-        />
+        {emprestimoAtual && (
+          <LoanForm
+            formId="form-edit-emprestimo"
+            initialData={initialData}
+            readOnly={!isEditMode}
+            onSubmit={handleSubmit}
+          />
+        )}
       </Modal.Body>
 
       {isEditMode ? (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { useToast } from '../../contexts/ToastContext';
@@ -32,19 +32,26 @@ export function LoanModalRequest({
   const { mutateAsync: processRequest, isPending: isProcessing } =
     useProcessLoanRequest();
 
+  // Mantém o último dado válido durante a animação de saída
+  const solicitacaoRef = useRef(solicitacao);
+  useEffect(() => {
+    if (solicitacao) solicitacaoRef.current = solicitacao;
+  }, [solicitacao]);
+  const solicitacaoAtual = solicitacao ?? solicitacaoRef.current;
+
   // Busca o ID do livro e depois os exemplares disponíveis
   const { data: exemplaresData, isLoading: isLoadingExemplares } = useQuery({
-    queryKey: ['exemplares-para-solicitacao', solicitacao?.livroNome],
+    queryKey: ['exemplares-para-solicitacao', solicitacaoAtual?.livroNome],
     queryFn: async () => {
-      if (!solicitacao?.livroNome) return [];
+      if (!solicitacaoAtual?.livroNome) return [];
 
       const livrosRes = await buscarLivrosAgrupados(
-        solicitacao.livroNome,
+        solicitacaoAtual.livroNome,
         0,
         1,
       );
       const livroEncontrado = livrosRes.content.find(
-        (l) => l.nome === solicitacao.livroNome,
+        (l) => l.nome === solicitacaoAtual.livroNome,
       );
 
       if (livroEncontrado) {
@@ -52,7 +59,7 @@ export function LoanModalRequest({
       }
       return [];
     },
-    enabled: !!solicitacao && isOpen,
+    enabled: !!solicitacaoAtual && isOpen,
   });
 
   const exemplarOptions = useMemo(() => {
@@ -61,13 +68,13 @@ export function LoanModalRequest({
       .filter(
         (ex) =>
           ex.status === 'DISPONIVEL' ||
-          ex.tomboExemplar === solicitacao?.exemplarTombo,
+          ex.tomboExemplar === solicitacaoAtual?.exemplarTombo,
       )
       .map((ex) => ({
-        label: `${ex.tomboExemplar} - ${ex.localizacao_fisica} ${ex.tomboExemplar === solicitacao?.exemplarTombo ? '(Reservado)' : ''}`,
+        label: `${ex.tomboExemplar} - ${ex.localizacao_fisica} ${ex.tomboExemplar === solicitacaoAtual?.exemplarTombo ? '(Reservado)' : ''}`,
         value: ex.tomboExemplar,
       }));
-  }, [exemplaresData, solicitacao?.exemplarTombo]);
+  }, [exemplaresData, solicitacaoAtual?.exemplarTombo]);
 
   useEffect(() => {
     if (solicitacao && isOpen) {
@@ -75,12 +82,10 @@ export function LoanModalRequest({
     }
   }, [solicitacao, isOpen]);
 
-  if (!solicitacao) return null;
-
   const executarProcessamento = async () => {
     if (confirmAction === null) return;
 
-    await processRequest({ id: solicitacao.id, aceitar: confirmAction });
+    await processRequest({ id: solicitacaoAtual?.id ?? 0, aceitar: confirmAction });
     setConfirmAction(null);
     onClose(true);
   };
@@ -97,16 +102,15 @@ export function LoanModalRequest({
     setConfirmAction(aceitar);
   };
 
-  const dataFormatada = new Date(solicitacao.dataSolicitacao).toLocaleString(
-    'pt-BR',
-    {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    },
-  );
+  const dataFormatada = solicitacaoAtual
+    ? new Date(solicitacaoAtual.dataSolicitacao).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '';
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
@@ -121,7 +125,7 @@ export function LoanModalRequest({
             <div>
               <Label>Aluno</Label>
               <Input
-                value={`${solicitacao.alunoNome} (Mat: ${solicitacao.alunoMatricula})`}
+                value={`${solicitacaoAtual?.alunoNome} (Mat: ${solicitacaoAtual?.alunoMatricula})`}
                 disabled
               />
             </div>
@@ -129,7 +133,7 @@ export function LoanModalRequest({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Livro</Label>
-              <Input value={solicitacao.livroNome} disabled />
+              <Input value={solicitacaoAtual?.livroNome ?? ''} disabled />
             </div>
             <div>
               <Label>Exemplar</Label>

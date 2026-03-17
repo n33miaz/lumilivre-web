@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
@@ -28,11 +28,16 @@ export function TccModalDetails({
   const { mutateAsync: updateTcc, isPending: isUpdating } = useUpdateTcc();
   const { mutateAsync: deleteTcc, isPending: isDeleting } = useDeleteTcc();
 
+  // Mantém o último dado válido durante a animação de saída
+  const tccRef = useRef(tcc);
+  useEffect(() => {
+    if (tcc) tccRef.current = tcc;
+  }, [tcc]);
+  const tccAtual = tcc ?? tccRef.current;
+
   useEffect(() => {
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
-
-  if (!tcc) return null;
 
   const handleSubmit = async (
     data: TccFormData,
@@ -41,7 +46,7 @@ export function TccModalDetails({
   ) => {
     try {
       await updateTcc({
-        id: tcc.id,
+        id: tccAtual?.id ?? 0,
         payload: data as TccPayload,
         filePdf,
         fileFoto,
@@ -54,7 +59,7 @@ export function TccModalDetails({
   };
 
   const executarExclusao = async () => {
-    await deleteTcc(tcc.id);
+    await deleteTcc(tccAtual?.id ?? 0);
     setConfirmAction(null);
     onClose(true);
   };
@@ -63,12 +68,14 @@ export function TccModalDetails({
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
       <Modal.Header title={isEditMode ? 'Editar TCC' : 'Detalhes do TCC'} />
       <Modal.Body>
-        <TccForm
-          formId="form-edit-tcc"
-          initialData={tcc}
-          readOnly={!isEditMode}
-          onSubmit={handleSubmit}
-        />
+        {tccAtual && (
+          <TccForm
+            formId="form-edit-tcc"
+            initialData={tccAtual}
+            readOnly={!isEditMode}
+            onSubmit={handleSubmit}
+          />
+        )}
       </Modal.Body>
 
       <DetailsModalActionFooter
@@ -84,7 +91,7 @@ export function TccModalDetails({
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}
         title="Excluir TCC"
-        message={`Tem certeza que deseja excluir o TCC "${tcc.titulo}"?`}
+        message={`Tem certeza que deseja excluir o TCC "${tccAtual?.titulo}"?`}
         isDestructive={true}
         onConfirm={executarExclusao}
         onCancel={() => setConfirmAction(null)}
