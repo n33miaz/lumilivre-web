@@ -12,8 +12,8 @@ const mockedApi = vi.mocked(api);
 
 // Mock para URL.createObjectURL e URL.revokeObjectURL
 const mockUrl = 'blob:http://localhost/fake-url';
-global.URL.createObjectURL = vi.fn(() => mockUrl);
-global.URL.revokeObjectURL = vi.fn();
+globalThis.URL.createObjectURL = vi.fn(() => mockUrl);
+globalThis.URL.revokeObjectURL = vi.fn();
 
 describe('relatorioService', () => {
   beforeEach(() => {
