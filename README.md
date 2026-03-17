@@ -27,8 +27,16 @@ A aplicação foi construída com foco em produtividade, utilizando **TailwindCS
 </div>
 
 <div align="center">
-  <img src="src/assets/images/prints/login.png" width="45%" alt="Dashboard" style="border-radius: 10px; margin: 5px;">
-  <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Livros" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/login.png" width="45%" alt="Login" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Dashboard" style="border-radius: 10px; margin: 5px;">
+</div>
+<div align="center">
+  <img src="src/assets/images/prints/books_dark-new.png" width="45%" alt="Livros (Modo: Dark)" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/exemples_dark.png" width="45%" alt="Livros - Criar Novo (Modo: Dark)" style="border-radius: 10px; margin: 5px;">
+</div>
+<div align="center">
+  <img src="src/assets/images/prints/students.png" width="45%" alt="Alunos" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/students-details.png" width="45%" alt="Alunos - Botão Detalhes" style="border-radius: 10px; margin: 5px;">
 </div>
 
 <br/>
