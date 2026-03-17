@@ -17,7 +17,7 @@ describe('useDynamicPageSize', () => {
     mockDisconnect = vi.fn();
 
     // ResizeObserver deve ser mockado como classe (constructor function)
-    global.ResizeObserver = vi.fn(function (this: unknown) {
+    globalThis.ResizeObserver = vi.fn(function (this: unknown) {
       (this as Record<string, unknown>).observe = mockObserve;
       (this as Record<string, unknown>).disconnect = mockDisconnect;
       (this as Record<string, unknown>).unobserve = vi.fn();

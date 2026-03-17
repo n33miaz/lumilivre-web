@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { ConfirmModal } from '../../components/ui/ConfirmModal';
+import { ConfirmModal } from '../../../src/components/ui/ConfirmModal';
 
 describe('Componente ConfirmModal', () => {
   const mockOnConfirm = vi.fn();
