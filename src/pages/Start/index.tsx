@@ -457,7 +457,7 @@ export function DashboardPage() {
             headerTextClassName={dashboardHeaderTextClass}
             hoverHeaderClassName={dashboardHoverClass}
             hasRoundedBorderTop={false}
-            minWidth="min-w-[700px]"
+            minWidth="min-w-[600px]"
           />
 
           <TableFooter
@@ -499,7 +499,7 @@ export function DashboardPage() {
             headerTextClassName={dashboardHeaderTextClass}
             hoverHeaderClassName={dashboardHoverClass}
             hasRoundedBorderTop={false}
-            minWidth="min-w-[700px]"
+            minWidth="min-w-[600px]"
           />
 
           <TableFooter

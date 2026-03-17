@@ -42,6 +42,7 @@ export function DataTable<T>({
   headerTextClassName = 'text-white',
   hoverHeaderClassName = 'hover:bg-white/20',
   hasRoundedBorderTop = true,
+  // minWidth = 'min-w-[600px]',
   minWidth = 'min-w-[1024px]',
 }: DataTableProps<T>) {
   const tableBodyRef = useRef<HTMLDivElement>(null);
