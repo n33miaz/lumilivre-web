@@ -22,8 +22,18 @@ describe('solicitacaoEmprestimoService', () => {
   describe('buscarSolicitacoesPendentes', () => {
     it('deve retornar lista de solicitações pendentes', async () => {
       const mockSolicitacoes = [
-        { id: 1, alunoNome: 'João', livroNome: 'Dom Casmurro', dataSolicitacao: '2026-03-10' },
-        { id: 2, alunoNome: 'Maria', livroNome: 'Clean Code', dataSolicitacao: '2026-03-11' },
+        {
+          id: 1,
+          alunoNome: 'João',
+          livroNome: 'Dom Casmurro',
+          dataSolicitacao: '2026-03-10',
+        },
+        {
+          id: 2,
+          alunoNome: 'Maria',
+          livroNome: 'Clean Code',
+          dataSolicitacao: '2026-03-11',
+        },
       ];
       mockedApi.get.mockResolvedValue({ data: mockSolicitacoes });
 

@@ -45,7 +45,10 @@ describe('emprestimoService', () => {
 
       const result = await cadastrarEmprestimo(payload);
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/emprestimos/cadastrar', payload);
+      expect(mockedApi.post).toHaveBeenCalledWith(
+        '/emprestimos/cadastrar',
+        payload,
+      );
       expect(result).toHaveProperty('id', 1);
     });
   });
@@ -62,7 +65,10 @@ describe('emprestimoService', () => {
 
       await atualizarEmprestimo(1, payload);
 
-      expect(mockedApi.put).toHaveBeenCalledWith('/emprestimos/atualizar/1', payload);
+      expect(mockedApi.put).toHaveBeenCalledWith(
+        '/emprestimos/atualizar/1',
+        payload,
+      );
     });
   });
 
@@ -90,12 +96,19 @@ describe('emprestimoService', () => {
 
   describe('buscarEmprestimosPaginado', () => {
     it('deve usar endpoint /home quando não há texto de busca', async () => {
-      mockedApi.get.mockResolvedValue({ data: { content: [], totalElements: 0 } });
+      mockedApi.get.mockResolvedValue({
+        data: { content: [], totalElements: 0 },
+      });
 
       await buscarEmprestimosPaginado('', 0, 10, 'dataEmprestimo,desc');
 
       expect(mockedApi.get).toHaveBeenCalledWith('/emprestimos/home', {
-        params: { page: 0, size: 10, sort: 'dataEmprestimo,desc', texto: undefined },
+        params: {
+          page: 0,
+          size: 10,
+          sort: 'dataEmprestimo,desc',
+          texto: undefined,
+        },
       });
     });
 
@@ -105,7 +118,12 @@ describe('emprestimoService', () => {
       await buscarEmprestimosPaginado('João', 0, 10, 'dataEmprestimo,desc');
 
       expect(mockedApi.get).toHaveBeenCalledWith('/emprestimos/buscar', {
-        params: { page: 0, size: 10, sort: 'dataEmprestimo,desc', texto: 'João' },
+        params: {
+          page: 0,
+          size: 10,
+          sort: 'dataEmprestimo,desc',
+          texto: 'João',
+        },
       });
     });
   });
@@ -161,7 +179,9 @@ describe('emprestimoService', () => {
 
       const result = await getContagemEmprestimosTotais();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/emprestimos/contagem/ativos-e-atrasados');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/emprestimos/contagem/ativos-e-atrasados',
+      );
       expect(result).toBe(15);
     });
 
@@ -176,12 +196,16 @@ describe('emprestimoService', () => {
 
   describe('buscarEmprestimosAtivosEAtrasados', () => {
     it('deve retornar lista de empréstimos ativos e atrasados', async () => {
-      const mockList = [{ id: 1, livroNome: 'Livro A', statusEmprestimo: 'ATIVO' }];
+      const mockList = [
+        { id: 1, livroNome: 'Livro A', statusEmprestimo: 'ATIVO' },
+      ];
       mockedApi.get.mockResolvedValue({ data: mockList });
 
       const result = await buscarEmprestimosAtivosEAtrasados();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/emprestimos/buscar/ativos-e-atrasados');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/emprestimos/buscar/ativos-e-atrasados',
+      );
       expect(result).toHaveLength(1);
     });
 
@@ -196,7 +220,9 @@ describe('emprestimoService', () => {
 
   describe('buscarRanking', () => {
     it('deve buscar ranking com parâmetros padrão', async () => {
-      const mockRanking = [{ matricula: '001', nome: 'João', emprestimosCount: 10 }];
+      const mockRanking = [
+        { matricula: '001', nome: 'João', emprestimosCount: 10 },
+      ];
       mockedApi.get.mockResolvedValue({ data: mockRanking });
 
       const result = await buscarRanking();
@@ -226,14 +252,18 @@ describe('emprestimoService', () => {
 
       const result = await buscarHistoricoAluno('2024001');
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/emprestimos/aluno/2024001/historico');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/emprestimos/aluno/2024001/historico',
+      );
       expect(result).toHaveLength(1);
     });
   });
 
   describe('buscarEmprestimosAtivosAluno', () => {
     it('deve buscar empréstimos ativos pela matrícula', async () => {
-      mockedApi.get.mockResolvedValue({ data: [{ id: 5, statusEmprestimo: 'ATIVO' }] });
+      mockedApi.get.mockResolvedValue({
+        data: [{ id: 5, statusEmprestimo: 'ATIVO' }],
+      });
 
       const result = await buscarEmprestimosAtivosAluno('2024001');
 

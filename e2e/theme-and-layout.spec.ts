@@ -5,18 +5,45 @@ async function injectAuthenticatedUser(page: Page) {
     localStorage.setItem(
       'user',
       JSON.stringify({
-        id: 1, email: 'admin@test.com', role: 'ADMIN',
-        token: 'fake-jwt-token', isInitialPassword: false,
+        id: 1,
+        email: 'admin@test.com',
+        role: 'ADMIN',
+        token: 'fake-jwt-token',
+        isInitialPassword: false,
       }),
     );
   });
 }
 
 async function mockAllApiCalls(page: Page) {
-  await page.route('**/alunos/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ totalElements: 0 }) }));
-  await page.route('**/livros/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ totalElements: 0 }) }));
-  await page.route('**/emprestimos/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(0) }));
-  await page.route('**/solicitacoes/**', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }));
+  await page.route('**/alunos/**', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ totalElements: 0 }),
+    }),
+  );
+  await page.route('**/livros/**', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ totalElements: 0 }),
+    }),
+  );
+  await page.route('**/emprestimos/**', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(0),
+    }),
+  );
+  await page.route('**/solicitacoes/**', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
 }
 
 test.describe('Theme Toggle', () => {
@@ -28,25 +55,26 @@ test.describe('Theme Toggle', () => {
     // Padrão: light
     await expect(html).toHaveClass(/light/);
 
-    // Localiza o toggle de tema (botão no canto inferior esquerdo)
-    const themeToggle = page.locator('button').filter({ has: page.locator('svg') }).last();
+    // Localiza o toggle de tema pelo aria-label
+    const themeToggle = page.getByRole('button', { name: 'Alternar tema' });
+    await expect(themeToggle).toBeVisible();
 
-    if (await themeToggle.isVisible()) {
-      await themeToggle.click();
+    await themeToggle.click();
 
-      // Após click, deve mudar para dark
-      await expect(html).toHaveClass(/dark/);
+    // Após click, deve mudar para dark
+    await expect(html).toHaveClass(/dark/, { timeout: 3000 });
 
-      // Volta para light
-      await themeToggle.click();
-      await expect(html).toHaveClass(/light/);
-    }
+    // Volta para light
+    await themeToggle.click();
+    await expect(html).toHaveClass(/light/, { timeout: 3000 });
   });
 
   test('should persist theme choice in localStorage', async ({ page }) => {
     await page.goto('/login');
 
-    const storedTheme = await page.evaluate(() => localStorage.getItem('theme'));
+    const storedTheme = await page.evaluate(() =>
+      localStorage.getItem('theme'),
+    );
     expect(storedTheme).toBeTruthy();
   });
 });

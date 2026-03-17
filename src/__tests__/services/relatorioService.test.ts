@@ -19,8 +19,12 @@ describe('relatorioService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock do DOM para link de download
-    vi.spyOn(document.body, 'appendChild').mockImplementation(() => document.createElement('a'));
-    vi.spyOn(document.body, 'removeChild').mockImplementation(() => document.createElement('a'));
+    vi.spyOn(document.body, 'appendChild').mockImplementation(() =>
+      document.createElement('a'),
+    );
+    vi.spyOn(document.body, 'removeChild').mockImplementation(() =>
+      document.createElement('a'),
+    );
   });
 
   describe('baixarRelatorioPDF', () => {
@@ -28,7 +32,10 @@ describe('relatorioService', () => {
       const mockBlob = new Blob(['pdf-data'], { type: 'application/pdf' });
       mockedApi.get.mockResolvedValue({
         data: mockBlob,
-        headers: { 'content-disposition': 'attachment; filename="relatorio-emprestimos.pdf"' },
+        headers: {
+          'content-disposition':
+            'attachment; filename="relatorio-emprestimos.pdf"',
+        },
       });
 
       const mockClick = vi.fn();
@@ -41,7 +48,10 @@ describe('relatorioService', () => {
         remove: mockRemove,
       } as unknown as HTMLElement);
 
-      await baixarRelatorioPDF('emprestimos', { dataInicio: '2026-01-01', dataFim: '2026-03-31' });
+      await baixarRelatorioPDF('emprestimos', {
+        dataInicio: '2026-01-01',
+        dataFim: '2026-03-31',
+      });
 
       expect(mockedApi.get).toHaveBeenCalledWith(
         '/relatorios/emprestimos',
@@ -69,7 +79,10 @@ describe('relatorioService', () => {
 
       await baixarRelatorioPDF('alunos', {});
 
-      expect(mockSetAttribute).toHaveBeenCalledWith('download', 'relatorio-alunos.pdf');
+      expect(mockSetAttribute).toHaveBeenCalledWith(
+        'download',
+        'relatorio-alunos.pdf',
+      );
     });
 
     it('deve ignorar filtros vazios, null ou undefined', async () => {
@@ -92,7 +105,8 @@ describe('relatorioService', () => {
         autor: undefined,
       });
 
-      const callParams = mockedApi.get.mock.calls[0][1]?.params as URLSearchParams;
+      const callParams = mockedApi.get.mock.calls[0][1]
+        ?.params as URLSearchParams;
       expect(callParams.get('dataInicio')).toBe('2026-01-01');
       expect(callParams.has('dataFim')).toBe(false);
       expect(callParams.has('genero')).toBe(false);
@@ -113,7 +127,8 @@ describe('relatorioService', () => {
 
       await baixarRelatorioPDF('emprestimos', { statusEmprestimo: 'ATIVO' });
 
-      const callParams = mockedApi.get.mock.calls[0][1]?.params as URLSearchParams;
+      const callParams = mockedApi.get.mock.calls[0][1]
+        ?.params as URLSearchParams;
       expect(callParams.get('status')).toBe('ATIVO');
       expect(callParams.has('statusEmprestimo')).toBe(false);
     });
@@ -121,7 +136,9 @@ describe('relatorioService', () => {
     it('deve propagar erro quando download falha', async () => {
       mockedApi.get.mockRejectedValue(new Error('Falha no download'));
 
-      await expect(baixarRelatorioPDF('emprestimos', {})).rejects.toThrow('Falha no download');
+      await expect(baixarRelatorioPDF('emprestimos', {})).rejects.toThrow(
+        'Falha no download',
+      );
     });
 
     it('deve propagar CanceledError quando abort é acionado', async () => {

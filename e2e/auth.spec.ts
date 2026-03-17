@@ -25,7 +25,9 @@ test.describe('Login Page', () => {
     await page.getByLabel(/Senha/i).fill('wrongpass');
     await page.getByRole('button', { name: /ENTRAR/i }).click();
 
-    await expect(page.getByText('Falha no Login')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Falha no Login')).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test('should redirect to dashboard on successful login', async ({ page }) => {
@@ -45,16 +47,32 @@ test.describe('Login Page', () => {
 
     // Mock all dashboard API calls to prevent errors
     await page.route('**/alunos/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ totalElements: 0 }) }),
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ totalElements: 0 }),
+      }),
     );
     await page.route('**/livros/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ totalElements: 0 }) }),
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ totalElements: 0 }),
+      }),
     );
     await page.route('**/emprestimos/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(0) }),
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(0),
+      }),
     );
     await page.route('**/solicitacoes/**', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      }),
     );
 
     await page.goto('/login');
@@ -66,11 +84,17 @@ test.describe('Login Page', () => {
     expect(page.url()).toContain('/dashboard');
   });
 
-  test('should disable button and show spinner while loading', async ({ page }) => {
+  test('should disable button and show spinner while loading', async ({
+    page,
+  }) => {
     // Slow response to see loading state
     await page.route('**/auth/login', async (route) => {
       await new Promise((r) => setTimeout(r, 2000));
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: '{}',
+      });
     });
 
     await page.goto('/login');
@@ -89,18 +113,28 @@ test.describe('Forgot Password Page', () => {
 
     await expect(page.getByText('Esqueci a Senha')).toBeVisible();
     await expect(page.getByLabel(/Email/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /ENVIAR LINK/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /ENVIAR LINK/i }),
+    ).toBeVisible();
   });
 
   test('should show warning for invalid email', async ({ page }) => {
     await page.goto('/esqueci-a-senha');
+    // Bypass HTML5 email validation to test custom JS validation
+    await page.evaluate(() =>
+      document.querySelector('form')?.setAttribute('novalidate', ''),
+    );
     await page.getByLabel(/Email/i).fill('invalid-email');
     await page.getByRole('button', { name: /ENVIAR LINK/i }).click();
 
-    await expect(page.getByText('E-mail inválido')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText('E-mail inválido')).toBeVisible({
+      timeout: 3000,
+    });
   });
 
-  test('should show success toast on valid email submission', async ({ page }) => {
+  test('should show success toast on valid email submission', async ({
+    page,
+  }) => {
     await page.route('**/auth/esqueci-senha', (route) =>
       route.fulfill({
         status: 200,
@@ -113,7 +147,9 @@ test.describe('Forgot Password Page', () => {
     await page.getByLabel(/Email/i).fill('user@test.com');
     await page.getByRole('button', { name: /ENVIAR LINK/i }).click();
 
-    await expect(page.getByText('Solicitação Enviada')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText('Solicitação Enviada')).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test('should navigate back to login page', async ({ page }) => {

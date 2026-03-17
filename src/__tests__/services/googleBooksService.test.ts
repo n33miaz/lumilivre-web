@@ -31,7 +31,9 @@ describe('googleBooksService', () => {
 
       const result = await buscarLivroPorIsbn('9780132350884');
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/livros/consulta-isbn/9780132350884');
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/livros/consulta-isbn/9780132350884',
+      );
       expect(result.nome).toBe('Clean Code');
       expect(result.autor).toBe('Robert C. Martin');
     });
