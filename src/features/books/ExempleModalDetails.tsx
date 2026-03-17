@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
@@ -31,21 +31,29 @@ export function ModalExemplarDetails({
   const { mutateAsync: deleteExemplar, isPending: isDeleting } =
     useDeleteExemplar();
 
+  // Mantém os últimos dados válidos durante a animação de saída
+  const exemplarRef = useRef(exemplar);
+  const livroIdRef = useRef(livroId);
+  useEffect(() => {
+    if (exemplar) exemplarRef.current = exemplar;
+    if (livroId) livroIdRef.current = livroId;
+  }, [exemplar, livroId]);
+  const exemplarAtual = exemplar ?? exemplarRef.current;
+  const livroIdAtual = livroId ?? livroIdRef.current;
+
   useEffect(() => {
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
 
-  if (!exemplar || !livroId) return null;
-
   const handleSubmit = async (data: ExempleFormData) => {
     try {
       await updateExemplar({
-        tomboAtual: exemplar.tomboExemplar,
+        tomboAtual: exemplarAtual?.tomboExemplar ?? '',
         payload: {
           tombo: data.tombo,
           localizacao_fisica: data.localizacao_fisica,
-          livro_id: livroId,
-          status_livro: exemplar.status,
+          livro_id: livroIdAtual,
+          status_livro: exemplarAtual?.status ?? '',
         },
       });
       onClose();
@@ -56,7 +64,7 @@ export function ModalExemplarDetails({
 
   const executarExclusao = async () => {
     try {
-      await deleteExemplar({ tombo: exemplar.tomboExemplar, livroId });
+      await deleteExemplar({ tombo: exemplarAtual?.tomboExemplar ?? '', livroId: livroIdAtual });
       setConfirmAction(null);
       onClose();
     } catch (error) {
@@ -70,19 +78,21 @@ export function ModalExemplarDetails({
         title={isEditMode ? 'Editar Exemplar' : 'Detalhes do Exemplar'}
       />
       <Modal.Body>
-        <ExempleForm
-          formId="form-edit-exemplar"
-          livroIsbn={exemplar.isbn}
-          livroNome={exemplar.nome}
-          initialData={{
-            tombo: exemplar.tomboExemplar,
-            localizacao_fisica: exemplar.localizacao_fisica,
-            status: exemplar.status,
-            responsavel: exemplar.responsavel,
-          }}
-          readOnly={!isEditMode}
-          onSubmit={handleSubmit}
-        />
+        {exemplarAtual && livroIdAtual && (
+          <ExempleForm
+            formId="form-edit-exemplar"
+            livroIsbn={exemplarAtual.isbn}
+            livroNome={exemplarAtual.nome}
+            initialData={{
+              tombo: exemplarAtual.tomboExemplar,
+              localizacao_fisica: exemplarAtual.localizacao_fisica,
+              status: exemplarAtual.status,
+              responsavel: exemplarAtual.responsavel,
+            }}
+            readOnly={!isEditMode}
+            onSubmit={handleSubmit}
+          />
+        )}
       </Modal.Body>
       <DetailsModalActionFooter
         isEditMode={isEditMode}
@@ -96,7 +106,7 @@ export function ModalExemplarDetails({
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}
         title="Excluir Exemplar"
-        message={`Tem certeza que deseja excluir o exemplar de tombo "${exemplar.tomboExemplar}"?`}
+        message={`Tem certeza que deseja excluir o exemplar de tombo "${exemplarAtual?.tomboExemplar}"?`}
         isDestructive={true}
         onConfirm={executarExclusao}
         onCancel={() => setConfirmAction(null)}

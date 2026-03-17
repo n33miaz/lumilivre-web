@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
@@ -49,8 +49,15 @@ export function ModalStudentDetails({
   const { mutateAsync: resetPassword, isPending: isResetting } =
     useResetStudentPassword();
 
+  // Mantém o último dado válido durante a animação de saída
+  const alunoRef = useRef(aluno);
+  useEffect(() => {
+    if (aluno) alunoRef.current = aluno;
+  }, [aluno]);
+  const alunoAtual = aluno ?? alunoRef.current;
+
   const { data: alunoDetalhes, isLoading: isLoadingDetalhes } =
-    useAlunoDetalhes(isOpen ? aluno?.matricula : undefined);
+    useAlunoDetalhes(isOpen ? alunoAtual?.matricula : undefined);
 
   useEffect(() => {
     if (alunoDetalhes) {
@@ -70,11 +77,9 @@ export function ModalStudentDetails({
   useEffect(() => {
     if (isOpen) {
       setIsEditMode(false);
-      setPenalidade(aluno?.penalidade || '');
+      setPenalidade(alunoAtual?.penalidade || '');
     }
-  }, [isOpen, aluno]);
-
-  if (!aluno) return null;
+  }, [isOpen, alunoAtual]);
 
   const handleSubmit = async (data: StudentFormData) => {
     try {
@@ -91,7 +96,7 @@ export function ModalStudentDetails({
       };
 
       await updateStudent({
-        matricula: aluno.matricula,
+        matricula: alunoAtual?.matricula ?? '',
         payload: payload as unknown as AlunoPayload,
       });
       setIsEditMode(false);
@@ -103,7 +108,7 @@ export function ModalStudentDetails({
 
   const executarResetSenha = async () => {
     try {
-      await resetPassword(aluno.matricula);
+      await resetPassword(alunoAtual?.matricula ?? '');
       setConfirmAction(null);
     } catch (error) {
       console.error(error);
@@ -112,7 +117,7 @@ export function ModalStudentDetails({
 
   const executarExclusao = async () => {
     try {
-      await deleteStudent(aluno.matricula);
+      await deleteStudent(alunoAtual?.matricula ?? '');
       setConfirmAction(null);
       onClose(true);
     } catch (error) {
@@ -127,25 +132,27 @@ export function ModalStudentDetails({
         {isLoadingDetalhes ? (
           <LoadingIcon />
         ) : (
-          <div className="space-y-4">
-            <StudentForm
-              formId="form-edit-aluno"
-              initialData={alunoDetalhes}
-              readOnly={!isEditMode}
-              onSubmit={handleSubmit}
-            />
-            {isEditMode && (
-              <div className="pt-2">
-                <Label>Status de Penalidade</Label>
-                <CustomSelect
-                  value={penalidade}
-                  onChange={setPenalidade}
-                  options={penalidadeOptions}
-                  placeholder="Selecione"
-                />
-              </div>
-            )}
-          </div>
+          alunoAtual && (
+            <div className="space-y-4">
+              <StudentForm
+                formId="form-edit-aluno"
+                initialData={alunoDetalhes}
+                readOnly={!isEditMode}
+                onSubmit={handleSubmit}
+              />
+              {isEditMode && (
+                <div className="pt-2">
+                  <Label>Status de Penalidade</Label>
+                  <CustomSelect
+                    value={penalidade}
+                    onChange={setPenalidade}
+                    options={penalidadeOptions}
+                    placeholder="Selecione"
+                  />
+                </div>
+              )}
+            </div>
+          )
         )}
       </Modal.Body>
       <Modal.Footer className="justify-between w-full">
@@ -195,8 +202,8 @@ export function ModalStudentDetails({
         title={confirmAction === 'excluir' ? 'Excluir Aluno' : 'Resetar Senha'}
         message={
           confirmAction === 'excluir'
-            ? `Tem certeza que deseja excluir o aluno ${aluno.nomeCompleto}?`
-            : `A senha será redefinida para a matrícula: ${aluno.matricula}. Deseja continuar?`
+            ? `Tem certeza que deseja excluir o aluno ${alunoAtual?.nomeCompleto}?`
+            : `A senha será redefinida para a matrícula: ${alunoAtual?.matricula}. Deseja continuar?`
         }
         isDestructive={confirmAction === 'excluir'}
         onConfirm={
