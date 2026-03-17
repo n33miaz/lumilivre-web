@@ -63,13 +63,27 @@ const SubPageHeader = ({
   <div className="flex items-center mb-4 select-none">
     <button
       onClick={onBack}
-      className="p-2 mr-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-110 group"
+      className="p-2 mr-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-110 group transition-transform duration-200"
     >
       <BackIcon className="w-5 h-5 text-lumi-primary dark:text-lumi-label" />
     </button>
     <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label select-none">
       {title}
     </h2>
+  </div>
+);
+
+/**
+ * Componente que exibe estado de "Coming Soon"
+ * Utilizado para funcionalidades em desenvolvimento
+ * @returns JSX com visual de indisponibilidade temporária
+ */
+const ComingSoonBadge = () => (
+  <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40 border border-amber-200 dark:border-amber-700/50">
+    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+    <span className="text-xs font-medium text-amber-700 dark:text-amber-300">
+      Em breve
+    </span>
   </div>
 );
 
@@ -120,7 +134,7 @@ export function ConfiguracoesPage() {
         >
           <button
             onClick={handleFeatureNotImplemented}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto"
+            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
           >
             Selecionar
           </button>
@@ -132,7 +146,7 @@ export function ConfiguracoesPage() {
         >
           <button
             onClick={handleFeatureNotImplemented}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto"
+            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
           >
             Selecionar
           </button>
@@ -144,7 +158,7 @@ export function ConfiguracoesPage() {
         >
           <button
             onClick={handleFeatureNotImplemented}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto"
+            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
           >
             Selecionar
           </button>
@@ -155,6 +169,7 @@ export function ConfiguracoesPage() {
 
   const renderMainView = () => (
     <>
+      {/* Gerenciamento de Dados - Comentado até implementação futura */}
       {/* <div className="p-6">
         <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
           Gerenciamento de Dados
@@ -196,25 +211,40 @@ export function ConfiguracoesPage() {
             title="Tema"
             description="Escolha sua preferência de tons na plataforma."
           >
-            <div className="flex items-center space-x-1 sm:space-x-2 p-1 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start">
+            <div className="flex items-center gap-2 p-1 rounded-lg shadow-md bg-gray-100 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start">
               <button
                 onClick={() => setTheme('light')}
-                className={`flex-1 sm:flex-none text-xs sm:text-sm p-2 rounded-md ${theme === 'light' ? 'bg-white shadow text-lumi-primary' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
-                title="Claro"
+                className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2 rounded-md font-medium transition-all duration-200 ${
+                  theme === 'light'
+                    ? 'bg-white text-lumi-primary shadow-md scale-105'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                }`}
+                title="Tema Claro"
+                aria-label="Selecionar tema claro"
               >
                 Claro
               </button>
               <button
                 onClick={() => setTheme('system')}
-                className={`flex-1 sm:flex-none text-xs sm:text-sm p-2 rounded-md ${theme === 'system' ? 'bg-lumi-primary shadow text-white' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
-                title="Automático"
+                className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2 rounded-md font-medium transition-all duration-200 ${
+                  theme === 'system'
+                    ? 'bg-lumi-primary text-white shadow-md scale-105'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                }`}
+                title="Tema Automático"
+                aria-label="Selecionar tema automático"
               >
                 Automático
               </button>
               <button
                 onClick={() => setTheme('dark')}
-                className={`flex-1 sm:flex-none text-xs sm:text-sm p-2 rounded-md ${theme === 'dark' ? 'bg-gray-800 shadow text-lumi-label' : 'hover:bg-gray-600 text-gray-500 dark:text-gray-400'}`}
-                title="Escuro"
+                className={`flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2 rounded-md font-medium transition-all duration-200 ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 text-lumi-label shadow-md scale-105 dark:bg-gray-900'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                }`}
+                title="Tema Escuro"
+                aria-label="Selecionar tema escuro"
               >
                 Escuro
               </button>
@@ -236,23 +266,21 @@ export function ConfiguracoesPage() {
             <a
               href="/lumilivre.apk"
               download="LumiLivre.apk"
-              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px]"
+              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px] transition-all duration-200"
             >
               Baixar
             </a>
           </SettingItem>
-          {/* TODO: Melhorar Opção Para Acessar Outro Site */}
+
+          {/* iOS - Coming Soon */}
           <SettingItem
             Icon={UploadIcon}
             title="iOS"
-            description="Acesse a versão mais recente (site) da plataforma para alunos."
+            description="Acesse a versão mais recente da plataforma para alunos."
           >
-            <a
-              onClick={handleFeatureNotImplemented}
-              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px]"
-            >
-              Acessar
-            </a>
+            <div className="flex items-center gap-2">
+              <ComingSoonBadge />
+            </div>
           </SettingItem>
         </div>
       </div>
@@ -269,7 +297,7 @@ export function ConfiguracoesPage() {
           >
             <button
               onClick={() => setIsPasswordModalOpen(true)}
-              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px]"
+              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px] transition-all duration-200"
             >
               Alterar
             </button>
@@ -298,7 +326,7 @@ export function ConfiguracoesPage() {
 
         <button
           onClick={logoutWithAnimation}
-          className="flex items-center justify-center space-x-2 py-2 px-4 rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 w-full sm:w-auto sm:ml-auto"
+          className="flex items-center justify-center space-x-2 py-2 px-4 rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 w-full sm:w-auto sm:ml-auto transition-all duration-200"
         >
           <span className="font-bold">Sair da Conta</span>
           <LogoutIcon className="w-6 h-6 text-white" />
