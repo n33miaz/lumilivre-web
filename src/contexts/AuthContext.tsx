@@ -96,6 +96,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           logout();
+        } else if (
+          !error.response &&
+          (error.code === 'ERR_NETWORK' || error.message === 'Network Error') &&
+          user
+        ) {
+          console.warn('Servidor indisponível. Realizando logout...');
+
+          addToast({
+            type: 'error',
+            title: 'Erro de Conexão',
+            description: 'O servidor não está respondendo. Você foi desconectado.',
+          });
+
+          logout();
         }
         return Promise.reject(error);
       },
