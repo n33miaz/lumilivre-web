@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes, Outlet } from 'react-router-dom';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { RoleProtectedRoute } from './components/RoleProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import { LoadingIcon } from './components/ui/LoadingIcon';
 
@@ -51,13 +52,50 @@ function App() {
       <Route element={<ProtectedLayout />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/livros" element={<LivrosPage />} />
-        <Route path="/alunos" element={<AlunosPage />} />
-        <Route path="/emprestimos" element={<EmprestimosPage />} />
-        <Route path="/tcc" element={<TccPage />} />
         <Route path="/classificacao" element={<ClassificacaoPage />} />
-        <Route path="/relatorios" element={<RelatoriosPage />} />
         <Route path="/configuracoes" element={<ConfiguracoesPage />} />
+
+        {/* Admin + Bibliotecário */}
+        <Route
+          path="/livros"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
+              <LivrosPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/alunos"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
+              <AlunosPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/emprestimos"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
+              <EmprestimosPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/tcc"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
+              <TccPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/relatorios"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
+              <RelatoriosPage />
+            </RoleProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   );
