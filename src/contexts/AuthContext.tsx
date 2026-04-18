@@ -18,6 +18,52 @@ interface User {
   isInitialPassword?: boolean;
 }
 
+type StoredUser = Omit<User, 'token'> & { token?: string };
+
+const USER_STORAGE_KEY = 'user';
+const TOKEN_STORAGE_KEY = 'authToken';
+
+const splitUserForStorage = (userData: User) => {
+  const profile: StoredUser = { ...userData };
+  delete profile.token;
+  return profile;
+};
+
+const persistUser = (userData: User) => {
+  localStorage.setItem(
+    USER_STORAGE_KEY,
+    JSON.stringify(splitUserForStorage(userData)),
+  );
+  sessionStorage.setItem(TOKEN_STORAGE_KEY, userData.token);
+};
+
+const clearPersistedUser = () => {
+  localStorage.removeItem(USER_STORAGE_KEY);
+  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  sessionStorage.removeItem(TOKEN_STORAGE_KEY);
+};
+
+const loadPersistedUser = (): User | null => {
+  const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+  if (!storedUser) return null;
+
+  const parsedUser = JSON.parse(storedUser) as StoredUser;
+  const token = sessionStorage.getItem(TOKEN_STORAGE_KEY) ?? parsedUser.token;
+
+  if (!token) {
+    clearPersistedUser();
+    return null;
+  }
+
+  const userData = { ...parsedUser, token };
+
+  if (parsedUser.token) {
+    persistUser(userData);
+  }
+
+  return userData;
+};
+
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
@@ -40,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('user');
+    clearPersistedUser();
     delete api.defaults.headers.common['Authorization'];
     navigate('/login');
   }, [navigate]);
@@ -49,28 +95,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) {
       const updatedUser = { ...user, isInitialPassword: false };
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      persistUser(updatedUser);
     }
   }, [user]);
 
   useEffect(() => {
     const carregarUsuarioStorage = () => {
       try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const parsedUser: User = JSON.parse(storedUser);
-
-          if (parsedUser.token) {
-            setUser(parsedUser);
-            api.defaults.headers.common['Authorization'] =
-              `Bearer ${parsedUser.token}`;
-          } else {
-            localStorage.removeItem('user');
-          }
+        const parsedUser = loadPersistedUser();
+        if (parsedUser) {
+          setUser(parsedUser);
+          api.defaults.headers.common['Authorization'] =
+            `Bearer ${parsedUser.token}`;
         }
       } catch (error) {
         console.error('Falha ao carregar dados do usuário', error);
-        localStorage.removeItem('user');
+        clearPersistedUser();
       } finally {
         setIsLoading(false);
       }
@@ -122,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (userData: User) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+    persistUser(userData);
     api.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`;
   };
 

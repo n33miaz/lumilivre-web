@@ -29,6 +29,7 @@ describe('Hook: useAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
   });
 
   afterEach(() => {
@@ -67,9 +68,14 @@ describe('Hook: useAuth', () => {
     expect(result.current.user).toEqual(mockUser);
 
     // Verifica se os dados foram salvos corretamente no localStorage
+    expect(localStorageSpy).toHaveBeenCalledWith('authToken', 'fake-token-123');
     expect(localStorageSpy).toHaveBeenCalledWith(
       'user',
-      JSON.stringify(mockUser),
+      JSON.stringify({
+        id: 1,
+        email: 'teste@lumilivre.com',
+        role: 'ADMIN',
+      }),
     );
   });
 
@@ -103,6 +109,7 @@ describe('Hook: useAuth', () => {
 
     // Verifica se o localStorage foi limpo
     expect(localStorageRemoveSpy).toHaveBeenCalledWith('user');
+    expect(localStorageRemoveSpy).toHaveBeenCalledWith('authToken');
 
     // Verifica se o usuário foi redirecionado para a página de login
     expect(navigateMock).toHaveBeenCalledWith('/login');
