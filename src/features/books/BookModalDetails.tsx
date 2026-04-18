@@ -66,7 +66,7 @@ export function DetalhesLivroModal({
 
   const executarExclusao = async () => {
     try {
-      await deleteBook(livroAtual?.isbn ?? '');
+      await deleteBook(livroAtual?.id ?? 0);
       setConfirmAction(null);
       onClose(true);
     } catch (error) {
