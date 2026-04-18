@@ -66,13 +66,13 @@ describe('livroService', () => {
   });
 
   describe('excluirLivroComExemplares', () => {
-    it('deve excluir livro pelo ISBN', async () => {
+    it('deve excluir livro pelo ID', async () => {
       mockedApi.delete.mockResolvedValue({ data: { success: true } });
 
-      await excluirLivroComExemplares('9788535914849');
+      await excluirLivroComExemplares(42);
 
       expect(mockedApi.delete).toHaveBeenCalledWith(
-        '/livros/9788535914849/com-exemplares',
+        '/livros/42/com-exemplares',
       );
     });
   });

@@ -32,8 +32,8 @@ export const useUpdateBook = createMutationHook<unknown, UpdateBookVariables>({
   errorMessage: 'Erro ao atualizar livro.',
 });
 
-export const useDeleteBook = createMutationHook<unknown, string>({
-  mutationFn: (isbn) => excluirLivroComExemplares(isbn),
+export const useDeleteBook = createMutationHook<unknown, number>({
+  mutationFn: (id) => excluirLivroComExemplares(id),
   queryKey: BOOK_QUERY_KEY,
   successMessage: 'Livro e seus exemplares foram excluídos!',
   errorMessage: 'Erro ao excluir livro.',

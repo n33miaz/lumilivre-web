@@ -146,11 +146,11 @@ export const atualizarLivro = async (
   return response.data;
 };
 
-export const uploadCapaLivro = async (isbn: string, file: File) => {
+export const uploadCapaLivro = async (id: number | string, file: File) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await api.post(`/livros/${isbn}/capa`, formData);
+  const response = await api.post(`/livros/${id}/capa`, formData);
   return response.data;
 };
 
@@ -161,8 +161,8 @@ export const buscarEnum = async (
   return response.data;
 };
 
-export const excluirLivroComExemplares = async (isbn: string) => {
-  const response = await api.delete(`/livros/${isbn}/com-exemplares`);
+export const excluirLivroComExemplares = async (id: number | string) => {
+  const response = await api.delete(`/livros/${id}/com-exemplares`);
   return response.data;
 };
 
