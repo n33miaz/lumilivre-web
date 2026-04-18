@@ -7,6 +7,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './index.css';
 import App from './App.tsx';
 
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { QueryErrorBridge } from './components/QueryErrorBridge';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -17,9 +19,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <ToastProvider>
+          <QueryErrorBridge />
           <BrowserRouter>
             <AuthProvider>
-              <App />
+              <ErrorBoundary>
+                <App />
+              </ErrorBoundary>
             </AuthProvider>
           </BrowserRouter>
         </ToastProvider>
