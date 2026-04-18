@@ -42,3 +42,7 @@ export function hasCapability(role: string | undefined, capability: Capability):
   if (!role || !(role in ROLE_CAPABILITIES)) return false;
   return ROLE_CAPABILITIES[role as UserRole][capability];
 }
+
+export function getDefaultRouteForRole(role: string | undefined): string {
+  return hasCapability(role, 'canViewDashboard') ? '/dashboard' : '/classificacao';
+}

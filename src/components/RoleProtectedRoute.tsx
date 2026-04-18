@@ -3,16 +3,17 @@ import { type ReactNode } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
 import { LoadingIcon } from './ui/LoadingIcon';
+import { getDefaultRouteForRole } from '../utils/roleCapabilities';
 
 interface Props {
   children: ReactNode;
   /** Roles permitidas. Se vazio, qualquer usuário autenticado acessa. */
   allowedRoles?: string[];
-  /** Rota de fallback se não autorizado (padrão: '/dashboard') */
+  /** Rota de fallback se não autorizado. Se omitida, usa a home do papel. */
   fallback?: string;
 }
 
-export function RoleProtectedRoute({ children, allowedRoles = [], fallback = '/dashboard' }: Props) {
+export function RoleProtectedRoute({ children, allowedRoles = [], fallback }: Props) {
   const { isAuthenticated, isLoading, user } = useAuth();
 
   if (isLoading) {
@@ -28,7 +29,7 @@ export function RoleProtectedRoute({ children, allowedRoles = [], fallback = '/d
   }
 
   if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
-    return <Navigate to={fallback} replace />;
+    return <Navigate to={fallback ?? getDefaultRouteForRole(user.role)} replace />;
   }
 
   return children;
