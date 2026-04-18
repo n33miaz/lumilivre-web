@@ -8,6 +8,11 @@ import {
   buscarEmprestimosAtivosEAtrasados,
 } from '../services/emprestimoService';
 import { buscarSolicitacoesPendentes } from '../services/solicitacaoEmprestimoService';
+import {
+  getDashboardGerencialStats,
+  getEmprestimosPorMesDashboard,
+  getTopLivrosDashboard,
+} from '../services/dashboardService';
 
 export function useDashboardStats() {
   return useQuery({
@@ -39,4 +44,26 @@ export function useDashboardListas() {
   });
 
   return { solicitacoes, emprestimos };
+}
+
+export function useDashboardAnalytics() {
+  const statsGerenciais = useQuery({
+    queryKey: ['dashboard-gerencial-stats'],
+    queryFn: getDashboardGerencialStats,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const topLivros = useQuery({
+    queryKey: ['dashboard-top-livros'],
+    queryFn: getTopLivrosDashboard,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const emprestimosPorMes = useQuery({
+    queryKey: ['dashboard-emprestimos-por-mes'],
+    queryFn: getEmprestimosPorMesDashboard,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  return { statsGerenciais, topLivros, emprestimosPorMes };
 }

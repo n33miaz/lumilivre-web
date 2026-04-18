@@ -1,5 +1,17 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 import { StatCard } from '../../components/ui/StatCard';
 import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
@@ -12,13 +24,17 @@ import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 import {
   useDashboardStats,
   useDashboardListas,
+  useDashboardAnalytics,
 } from '../../hooks/useDashboardQueries';
+import { downloadCsv, printDashboardPdf } from '../../utils/dashboardExport';
 
 import BookIcon from '../../assets/icons/books-active.svg?react';
 import UsersIcon from '../../assets/icons/users-active.svg?react';
 import AlertIcon from '../../assets/icons/alert.svg?react';
 import LoansIcon from '../../assets/icons/loans-active.svg?react';
 import type { EmprestimoAtivoDTO } from '../../services/emprestimoService';
+
+const CHART_COLORS = ['#762075', '#0f766e', '#dc2626', '#ca8a04', '#2563eb'];
 
 interface EmprestimoVencer {
   id: number;
@@ -52,6 +68,8 @@ export function DashboardPage() {
     error: statsError,
   } = useDashboardStats();
   const { solicitacoes, emprestimos } = useDashboardListas();
+  const { statsGerenciais, topLivros, emprestimosPorMes } =
+    useDashboardAnalytics();
 
   // Estado para controlar se a animação deve ocorrer
   const [shouldAnimateStats, setShouldAnimateStats] = useState(false);
@@ -209,6 +227,95 @@ export function DashboardPage() {
     const start = (emprestimoPage - 1) * emprestimoPerPage;
     return sortedEmprestimos.slice(start, start + emprestimoPerPage);
   }, [sortedEmprestimos, emprestimoPage, emprestimoPerPage]);
+
+  const statusChartData = useMemo(() => {
+    const data = statsGerenciais.data;
+    if (!data) return [];
+
+    return [
+      { name: 'Ativos', total: data.emprestimosAtivos },
+      { name: 'Atrasados', total: data.emprestimosAtrasados },
+      { name: 'Concluidos', total: data.emprestimosConcluidos },
+      { name: 'Solicitacoes', total: data.solicitacoesPendentes },
+      { name: 'Reservas', total: data.reservasAguardando },
+    ].filter((item) => item.total > 0);
+  }, [statsGerenciais.data]);
+
+  const monthlyChartData = useMemo(
+    () =>
+      (emprestimosPorMes.data ?? []).map((item) => ({
+        mes: new Date(`${item.mes}T00:00:00`).toLocaleDateString('pt-BR', {
+          month: 'short',
+          year: '2-digit',
+        }),
+        total: item.total,
+      })),
+    [emprestimosPorMes.data],
+  );
+
+  const topBooksChartData = useMemo(
+    () =>
+      (topLivros.data ?? []).slice(0, 10).map((item) => ({
+        livro: item.titulo.length > 18 ? `${item.titulo.slice(0, 18)}...` : item.titulo,
+        total: item.totalEmprestimos,
+      })),
+    [topLivros.data],
+  );
+
+  const dueStatusChartData = useMemo(() => {
+    const atrasados = sortedEmprestimos.filter(
+      (item) => item.statusVencimento === 'atrasado',
+    ).length;
+    const venceHoje = sortedEmprestimos.filter(
+      (item) => item.statusVencimento === 'vence-hoje',
+    ).length;
+
+    return [
+      { name: 'Atrasados', total: atrasados },
+      { name: 'Vence hoje', total: venceHoje },
+    ].filter((item) => item.total > 0);
+  }, [sortedEmprestimos]);
+
+  const handleExportCsv = () => {
+    downloadCsv('dashboard-gerencial.csv', [
+      ...(statsGerenciais.data
+        ? [
+            {
+              indicador: 'Emprestimos ativos',
+              valor: statsGerenciais.data.emprestimosAtivos,
+            },
+            {
+              indicador: 'Emprestimos atrasados',
+              valor: statsGerenciais.data.emprestimosAtrasados,
+            },
+            {
+              indicador: 'Emprestimos concluidos',
+              valor: statsGerenciais.data.emprestimosConcluidos,
+            },
+            {
+              indicador: 'Media dias devolucao',
+              valor: statsGerenciais.data.mediaDiasDevolucao,
+            },
+            {
+              indicador: 'Solicitacoes pendentes',
+              valor: statsGerenciais.data.solicitacoesPendentes,
+            },
+            {
+              indicador: 'Reservas aguardando',
+              valor: statsGerenciais.data.reservasAguardando,
+            },
+          ]
+        : []),
+      ...(topLivros.data ?? []).map((item) => ({
+        indicador: `Livro: ${item.titulo}`,
+        valor: item.totalEmprestimos,
+      })),
+      ...(emprestimosPorMes.data ?? []).map((item) => ({
+        indicador: `Mes: ${item.mes}`,
+        valor: item.total,
+      })),
+    ]);
+  };
 
   const requestSolicitacaoSort = (key: string) => {
     const direction =
@@ -433,6 +540,138 @@ export function DashboardPage() {
           hasError={!!statsError}
           animate={shouldAnimateStats}
         />
+      </div>
+
+      <div className="bg-white dark:bg-dark-card rounded-lg shadow-md p-4 md:p-6 mb-6 shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
+              Analise gerencial
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Emprestimos, atrasos, reservas e livros mais movimentados.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="bg-lumi-primary text-white text-sm font-bold py-2 px-3 rounded hover:bg-opacity-80"
+            >
+              Exportar CSV
+            </button>
+            <button
+              type="button"
+              onClick={printDashboardPdf}
+              className="bg-gray-800 text-white text-sm font-bold py-2 px-3 rounded hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white"
+            >
+              Exportar PDF
+            </button>
+          </div>
+        </div>
+
+        {statsGerenciais.isLoading ||
+        topLivros.isLoading ||
+        emprestimosPorMes.isLoading ? (
+          <div className="h-72 flex items-center justify-center text-gray-500 dark:text-gray-400">
+            Carregando indicadores...
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                Distribuicao geral
+              </h3>
+              {statusChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="90%">
+                  <PieChart>
+                    <Pie
+                      data={statusChartData}
+                      dataKey="total"
+                      nameKey="name"
+                      innerRadius={45}
+                      outerRadius={70}
+                    >
+                      {statusChartData.map((_, index) => (
+                        <Cell
+                          key={`status-${index}`}
+                          fill={CHART_COLORS[index % CHART_COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-sm text-gray-400">
+                  Sem dados
+                </div>
+              )}
+            </div>
+
+            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                Emprestimos por mes
+              </h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={monthlyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} width={32} />
+                  <Tooltip />
+                  <Bar dataKey="total" fill="#0f766e" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                Top livros
+              </h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={topBooksChartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="livro" tick={{ fontSize: 10 }} interval={0} />
+                  <YAxis allowDecimals={false} width={32} />
+                  <Tooltip />
+                  <Bar dataKey="total" fill="#762075" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
+                Atrasos
+              </h3>
+              {dueStatusChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="90%">
+                  <PieChart>
+                    <Pie
+                      data={dueStatusChartData}
+                      dataKey="total"
+                      nameKey="name"
+                      outerRadius={70}
+                      label
+                    >
+                      {dueStatusChartData.map((_, index) => (
+                        <Cell
+                          key={`due-${index}`}
+                          fill={index === 0 ? '#dc2626' : '#ca8a04'}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-sm text-gray-400">
+                  Sem atrasos
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div
