@@ -64,11 +64,11 @@ O padrao efetivo e uma arquitetura frontend feature-oriented, com Service Layer 
 - `src/services/api.ts` cria uma instancia Axios unica.
 - Login chama `POST /auth/login` com `{ user, senha }`.
 - O retorno esperado contem `id`, `email`, `role`, `matriculaAluno`, `token` e `isInitialPassword`.
-- `AuthContext` persiste o objeto do usuario em `localStorage` com chave `user`.
+- `AuthContext` persiste o objeto do usuario em `sessionStorage` com chave `user`; `isLoggingOut` e `completePasswordChange` controlam transicoes sensiveis.
 - O token e aplicado em `api.defaults.headers.common.Authorization`.
-- Ao recarregar a pagina, `AuthContext` restaura `user` do `localStorage`.
+- Ao recarregar a aba, `AuthContext` restaura `user` do `sessionStorage`.
 - Interceptor Axios faz logout em `401`, `403` ou erro de rede quando existe usuario autenticado.
-- `ProtectedRoute` bloqueia rotas privadas e redireciona para `/login`.
+- `ProtectedRoute` bloqueia rotas privadas; `RoleProtectedRoute` filtra por `allowedRoles` conforme `roleCapabilities`.
 - Modais de senha inicial usam `/usuarios/alterar-senha` quando `isInitialPassword` esta ativo.
 
 ## Services e Contratos REST
@@ -194,6 +194,14 @@ Para producao, apontar `VITE_API_BASE_URL` para a URL publica da API.
 - Forms com Zod e React Hook Form reduzem duplicacao e erros de contrato.
 - TanStack Query evita estado remoto manual e padroniza cache/invalidation.
 - Lazy loading de paginas protegidas melhora tempo inicial do bundle.
-- O token em `localStorage` e simples, mas possui riscos de XSS. Em um ambiente de maior criticidade, avaliar cookie HttpOnly ou hardening CSP.
-- O interceptor faz logout em erro de rede. Isso e conservador, mas pode desconectar usuarios em indisponibilidade temporaria da API.
-- Manter contratos gerados a partir do OpenAPI reduziria divergencias entre frontend e backend.
+- Token migrado para `sessionStorage`; o interceptor continua conservador em erros de rede.
+- `ErrorBoundary` + `queryErrorHandler` padronizam os 4 estados (validacao, autorizacao, rede, inesperado) em todas as paginas.
+
+## Evolucao Arquitetural Recente
+
+- **Guardas por papel**: `RoleProtectedRoute` + `roleCapabilities` gatekeep rotas; menus filtrados por capacidade. `AuthContext` expoe `isLoggingOut` e `completePasswordChange`.
+- **UX unificada de erro**: `ErrorBoundary` (fallback React), `QueryErrorBridge` (ponte QueryClient -> Toast), `queryErrorHandler` + `errorHandler.getErrorKind` para categorizar erros; aplicados globalmente em `main.tsx`.
+- **Dashboard analytics**: `dashboardService`, `useDashboardAnalytics` e `pages/Start/index.tsx` usam Recharts (barras/pizza) e exportam CSV/PDF via `dashboardExport.ts`.
+- **Contratos tipados**: `orval.config.ts` + `src/api/mutator.ts` preparam codegen React Query a partir de `/v3/api-docs`; comando `npm run api:gen` materializa os hooks.
+- **Acessibilidade**: `e2e/a11y.spec.ts` cobre 5 rotas criticas (Login, Dashboard, Livros, Alunos, Emprestimos) com `@axe-core/playwright`.
+- **CI**: `.github/workflows/ci.yml` encadeia lint + Vitest + build + Playwright.
