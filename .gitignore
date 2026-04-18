@@ -11,6 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+!.env.example
+lumilivre-key.pem
+*.pem
+coverage/
+/coverage/
 
 # Editor directories and files
 .vscode/*
