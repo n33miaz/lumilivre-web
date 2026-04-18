@@ -13,6 +13,19 @@
 <br/>
 
 <div align="center">
+
+![License](https://img.shields.io/badge/license-MIT-purple?style=flat-square)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=flat-square&logo=tailwindcss)
+![Playwright](https://img.shields.io/badge/E2E-Playwright-2EAD33?style=flat-square&logo=playwright)
+
+</div>
+
+<br/>
+
+<div align="center">
   <h1>Sobre o Projeto</h1>
 </div>
 
@@ -42,32 +55,55 @@ A aplicação foi construída com foco em produtividade, utilizando **TailwindCS
 <br/>
 
 <div align="center">
+  <h1>Stack Técnica</h1>
+</div>
+
+| Camada | Tecnologia |
+|--------|------------|
+| Linguagem | TypeScript 5.8 (strict) |
+| UI | React 19.1 + Vite 6.3 |
+| Roteamento | React Router DOM 7.6 com `RoleProtectedRoute` |
+| HTTP | Axios 1.12 (`src/api/mutator.ts`) |
+| Estado remoto | TanStack Query 5.90 |
+| Formulários | React Hook Form 7.71 + Zod 4.3 |
+| Estilo | TailwindCSS 3.4, Framer Motion, Lottie, SVGR |
+| Dados | Recharts 3.4 (gráficos) + export CSV/PDF |
+| Testes | Vitest 4, Testing Library, jsdom, **Playwright + @axe-core** |
+| Contratos | **Orval** (codegen a partir de `/v3/api-docs`) |
+| Qualidade | ESLint 9, Prettier 3.6 |
+
+<br/>
+
+<div align="center">
   <h1>Funcionalidades Principais</h1>
 </div>
 
 ### 📊 Dashboard & Gestão
 
-- **Visão Geral:** Métricas em tempo real sobre empréstimos ativos, atrasos e solicitações pendentes.
-- **Controle de Acervo:** Cadastro completo de livros (com busca automática de metadados via ISBN), exemplares físicos e TCCs.
-- **Gestão de Usuários:** Administração de alunos, cursos, turnos e módulos, com histórico detalhado de cada leitor.
+- **Dashboard analítico** com Recharts (barras/pizza), export **CSV e PDF**, métricas agregadas por views materializadas da API.
+- **Controle de Acervo:** cadastro completo de livros (busca automática por ISBN), exemplares físicos e TCCs.
+- **Gestão de Usuários:** administração de alunos, cursos, turnos e módulos, com histórico detalhado por leitor.
 
 ### 🔄 Fluxo de Empréstimos
 
-- **Solicitações:** Aprovação ou rejeição de pedidos de empréstimo feitos pelo aplicativo mobile.
-- **Movimentação:** Registro de retiradas e devoluções, com cálculo automático de datas de vencimento.
-- **Penalidades:** Sistema automático de bloqueio para alunos com devoluções em atraso.
+- **Solicitações e Reservas:** aprovação/rejeição de pedidos mobile; reservas FIFO quando não há exemplar disponível.
+- **Movimentação:** registro de retiradas e devoluções, com cálculo automático de datas.
+- **Penalidades:** bloqueio automático para alunos com devoluções em atraso.
 
 ### 📑 Relatórios & Ferramentas
 
-- **Relatórios PDF:** Geração de documentos detalhados sobre acervo, alunos e movimentações para fins administrativos.
-- **Ranking:** Visualização dos alunos que mais leem (Gamificação vista pelo lado do gestor).
-- **Importação em Massa:** Ferramenta para carga de dados via planilhas Excel.
+- **Relatórios PDF** para acervo, alunos e movimentações.
+- **Ranking** de leitores.
+- **Importação em Massa** via planilhas Excel.
 
 ### ⚙️ Recursos Técnicos
 
-- **Dark Mode:** Suporte nativo a temas claro e escuro (`ThemeContext`).
-- **Performance:** Paginação dinâmica e cache de requisições com TanStack Query.
-- **Responsividade:** Layout adaptável para desktops e tablets.
+- **Guardas por papel:** `RoleProtectedRoute` + `roleCapabilities` filtram rotas e menus conforme o perfil (ADMIN / BIBLIOTECARIO / ALUNO).
+- **UX unificada de erro:** `ErrorBoundary`, `QueryErrorBridge` e `queryErrorHandler` categorizam erros em validação/autorização/rede/inesperado.
+- **Dark Mode** nativo (`ThemeContext`).
+- **Performance:** paginação dinâmica, cache TanStack Query e lazy loading de rotas.
+- **Acessibilidade:** bateria `@axe-core/playwright` em 5 rotas críticas (Login, Dashboard, Livros, Alunos, Empréstimos).
+- **Contratos gerados:** `orval.config.ts` materializa tipos e hooks React Query a partir do OpenAPI da API.
 
 <br/>
 
@@ -106,15 +142,71 @@ flowchart TD
     API -.->|Consulta Metadados| External
 ```
 
+### Estrutura interna
+
+```
+src/
+  App.tsx · main.tsx
+  components/        (ui, shared, ErrorBoundary, QueryErrorBridge, RoleProtectedRoute)
+  contexts/          (AuthContext, ThemeContext, ToastContext)
+  features/          (books, loans, students, tcc)
+  hooks/             (queries/, mutations/)
+  layouts/
+  pages/             (Auth, Books, Loans, Students, Start, TCC, Ranking, Reports, Settings, Download)
+  schemas/           (Zod)
+  services/          (camada HTTP; em migração para src/api gerado)
+  utils/             (errorHandler, queryErrorHandler, roleCapabilities, dashboardExport)
+  api/               (mutator Axios + tipos/hooks gerados pelo Orval)
+e2e/                 (Playwright + a11y)
+```
+
 <br/>
 
 <div align="center">
   <h1>Segurança</h1>
 </div>
 
-- **Rotas Protegidas:** Implementação de `ProtectedRoute` para impedir acesso não autorizado às páginas administrativas.
-- **Gestão de Sessão:** Controle de autenticação via Context API (`AuthContext`) com persistência segura e logout automático.
-- **Validação de Dados:** Tratamento rigoroso de formulários e respostas da API para prevenir injeção de dados inválidos.
+- **Rotas protegidas** com `ProtectedRoute` + **perfil** com `RoleProtectedRoute`.
+- **Gestão de Sessão** via `AuthContext` (token em `sessionStorage`, logout automático em 401/403).
+- **Validação de Dados** rigorosa (React Hook Form + Zod) antes de cada request.
+- **Variáveis de ambiente**: `.env.example` documenta `VITE_API_BASE_URL`.
+
+<br/>
+
+<div align="center">
+  <h1>Como rodar localmente</h1>
+</div>
+
+```powershell
+# 1. Variáveis de ambiente
+copy .env.example .env
+# Preencha VITE_API_BASE_URL (ex.: http://localhost:8080)
+
+# 2. Instalar e subir
+npm install
+npm run dev            # dev server em http://localhost:5173
+
+# 3. Testes
+npm run lint
+npm test
+npm run test:coverage
+npm run test:e2e
+
+# 4. Codegen de tipos a partir do OpenAPI da API
+npm run api:gen
+
+# 5. Build
+npm run build
+npm start              # servir /dist com serve
+```
+
+<br/>
+
+<div align="center">
+  <h1>Licença</h1>
+</div>
+
+Distribuído sob a licença **MIT**. Veja `LICENSE` para mais detalhes.
 
 <br/>
 
