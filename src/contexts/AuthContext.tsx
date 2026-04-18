@@ -120,13 +120,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    const isAuthEndpoint = (url?: string) => {
+      if (!url) return false;
+      try {
+        const path = new URL(url, api.defaults.baseURL ?? window.location.origin).pathname;
+        return path.startsWith('/auth/') || path === '/auth';
+      } catch {
+        return url.startsWith('/auth/') || url.includes('/auth/');
+      }
+    };
+
     const interceptorId = api.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (
-          (error.response?.status === 403 || error.response?.status === 401) &&
-          user
-        ) {
+        const requestUrl: string | undefined = error.config?.url;
+        const onAuthRoute = isAuthEndpoint(requestUrl);
+        const status = error.response?.status;
+
+        if ((status === 401 || status === 403) && user && !onAuthRoute) {
           console.warn('Sessão expirada ou inválida. Realizando logout...');
 
           addToast({
@@ -139,7 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else if (
           !error.response &&
           (error.code === 'ERR_NETWORK' || error.message === 'Network Error') &&
-          user
+          user &&
+          !onAuthRoute
         ) {
           console.warn('Servidor indisponível. Realizando logout...');
 
