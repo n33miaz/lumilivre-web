@@ -18,6 +18,11 @@ import PinIcon from '../../assets/icons/pin.svg?react';
 import PinActiveIcon from '../../assets/icons/pin-active.svg?react';
 import EducationCap from '../../assets/icons/education-cap.svg?react';
 import EducationCapActive from '../../assets/icons/education-cap-active.svg?react';
+import { useAuth } from '../../contexts/AuthContext';
+import {
+  hasCapability,
+  type Capability,
+} from '../../utils/roleCapabilities';
 
 const prefetchSettings = () => import('../../pages/Settings');
 
@@ -27,42 +32,49 @@ const navLinks = [
     label: 'Início',
     Icon: HomeIcon,
     ActiveIcon: HomeActiveIcon,
+    capability: 'canViewDashboard',
   },
   {
     path: '/livros',
     label: 'Livros',
     Icon: BookIcon,
     ActiveIcon: BookActiveIcon,
+    capability: 'canManageBooks',
   },
   {
     path: '/alunos',
     label: 'Alunos',
     Icon: UsersIcon,
     ActiveIcon: UsersActiveIcon,
+    capability: 'canManageStudents',
   },
   {
     path: '/emprestimos',
     label: 'Empréstimos',
     Icon: LoansIcon,
     ActiveIcon: LoansActiveIcon,
+    capability: 'canManageLoans',
   },
   {
     path: '/tcc',
     label: 'TCCs',
     Icon: EducationCap,
     ActiveIcon: EducationCapActive,
+    capability: 'canManageTcc',
   },
   {
     path: '/classificacao',
     label: 'Classificação',
     Icon: RankingIcon,
     ActiveIcon: RankingActiveIcon,
+    capability: 'canViewRanking',
   },
   {
     path: '/relatorios',
     label: 'Relatórios',
     Icon: ReportIcon,
     ActiveIcon: ReportActiveIcon,
+    capability: 'canViewReports',
   },
 ];
 
@@ -79,6 +91,12 @@ export function Sidebar({
   isPinned,
   setPinned,
 }: SidebarProps) {
+  const { user } = useAuth();
+  const visibleNavLinks = navLinks.filter((link) =>
+    hasCapability(user?.role, link.capability as Capability),
+  );
+  const canViewSettings = hasCapability(user?.role, 'canViewSettings');
+
   const handleMouseEnter = () => {
     if (!isPinned) {
       setExpanded(true);
@@ -120,7 +138,7 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
-        {navLinks.map((link) => (
+        {visibleNavLinks.map((link) => (
           <NavLink
             key={link.path}
             to={link.path}
@@ -160,7 +178,8 @@ export function Sidebar({
         ))}
       </nav>
 
-      <div className="p-2 border-t border-white/10 space-y-2">
+      {canViewSettings && (
+        <div className="p-2 border-t border-white/10 space-y-2">
         <NavLink
           to="/configuracoes"
           onMouseEnter={prefetchSettings}
@@ -199,7 +218,8 @@ export function Sidebar({
             );
           }}
         </NavLink>
-      </div>
+        </div>
+      )}
     </aside>
   );
 }

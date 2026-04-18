@@ -12,6 +12,7 @@ import UserIcon from '../../../assets/icons/users.svg?react';
 import LockIcon from '../../../assets/icons/lock.svg?react';
 import DownloadIcon from '../../../assets/icons/upload.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
+import { getDefaultRouteForRole } from '../../../utils/roleCapabilities';
 
 export function LoginPage() {
   const [usuario, setUsuario] = useState('');
@@ -51,7 +52,7 @@ export function LoginPage() {
       setIsExiting(true);
 
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(getDefaultRouteForRole(userToStore.role));
       }, 500);
     } catch (err) {
       console.error('Erro no login:', err);

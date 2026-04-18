@@ -3,6 +3,8 @@ import { ThemeToggle } from './ThemeToggle';
 
 import LogoIcon from '../../assets/icons/logo.svg?react';
 import MenuIcon from '../../assets/icons/menu.svg?react';
+import { useAuth } from '../../contexts/AuthContext';
+import { getDefaultRouteForRole } from '../../utils/roleCapabilities';
 
 interface HeaderProps {
   isSidebarExpanded: boolean;
@@ -12,7 +14,9 @@ interface HeaderProps {
 
 export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
   const location = useLocation();
-  const isHomePage = ['/dashboard', '/'].includes(location.pathname);
+  const { user } = useAuth();
+  const homePath = getDefaultRouteForRole(user?.role);
+  const isHomePage = [homePath, '/'].includes(location.pathname);
 
   const LogoContent = (
     <div className="flex items-center gap-3">
@@ -42,7 +46,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
             </div>
           ) : (
             <Link
-              to="/dashboard"
+              to={homePath}
               className="flex items-center rounded-lg p-1.5 -ml-2 group"
             >
               <div className="group-hover:opacity-75">{LogoContent}</div>

@@ -50,8 +50,22 @@ function App() {
 
       {/* Rotas Protegidas */}
       <Route element={<ProtectedLayout />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']} fallback="/classificacao">
+              <DashboardPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']} fallback="/classificacao">
+              <DashboardPage />
+            </RoleProtectedRoute>
+          }
+        />
         <Route path="/classificacao" element={<ClassificacaoPage />} />
         <Route path="/configuracoes" element={<ConfiguracoesPage />} />
 
