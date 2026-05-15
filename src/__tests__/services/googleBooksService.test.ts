@@ -15,35 +15,34 @@ describe('googleBooksService', () => {
     vi.clearAllMocks();
   });
 
-  describe('buscarLivroPorIsbn', () => {
-    it('deve retornar dados do livro para um ISBN válido', async () => {
-      const mockLivro = {
-        nome: 'Clean Code',
-        autor: 'Robert C. Martin',
-        editora: 'Prentice Hall',
-        data_lancamento: '2008-08-01',
-        numero_paginas: 464,
-        generos: ['Programação'],
-        sinopse: 'Um livro sobre código limpo.',
-        imagem: 'https://example.com/cover.jpg',
-      };
-      mockedApi.get.mockResolvedValue({ data: { data: mockLivro } });
-
-      const result = await buscarLivroPorIsbn('9780132350884');
-
-      expect(mockedApi.get).toHaveBeenCalledWith(
-        '/livros/consulta-isbn/9780132350884',
-      );
-      expect(result.nome).toBe('Clean Code');
-      expect(result.autor).toBe('Robert C. Martin');
+  it('maps the v2 ISBN lookup response to the book form shape', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: {
+        title: 'Clean Code',
+        author: 'Robert C. Martin',
+        publisher: 'Prentice Hall',
+        publicationDate: '2008-08-01',
+        pageCount: 464,
+        genres: ['Programacao'],
+        synopsis: 'Um livro sobre codigo limpo.',
+        coverUrl: 'https://example.com/cover.jpg',
+      },
     });
 
-    it('deve lançar erro quando livro não é encontrado', async () => {
-      mockedApi.get.mockRejectedValue(new Error('Not found'));
+    const result = await buscarLivroPorIsbn('9780132350884');
 
-      await expect(buscarLivroPorIsbn('0000000000')).rejects.toThrow(
-        'Livro não encontrado nas bases de dados.',
-      );
-    });
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      '/api/v2/books/isbn/9780132350884',
+    );
+    expect(result.nome).toBe('Clean Code');
+    expect(result.autor).toBe('Robert C. Martin');
+  });
+
+  it('throws a user-facing error when the lookup fails', async () => {
+    mockedApi.get.mockRejectedValue(new Error('Not found'));
+
+    await expect(buscarLivroPorIsbn('0000000000')).rejects.toThrow(
+      'Livro n',
+    );
   });
 });

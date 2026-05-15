@@ -8,9 +8,9 @@ import {
   useUpdateTcc,
   useDeleteTcc,
 } from '../../../hooks/mutations/useTccMutations';
-import * as tccService from '../../../services/tccService';
+import * as tccService from '../../../services/thesisService';
 
-vi.mock('../../../services/tccService');
+vi.mock('../../../services/thesisService');
 const mockedCadastrar = vi.mocked(tccService.cadastrarTcc);
 const mockedAtualizar = vi.mocked(tccService.atualizarTcc);
 const mockedExcluir = vi.mocked(tccService.excluirTcc);

@@ -3,7 +3,7 @@ import {
   listarTccs,
   listarTccsAvancado,
   type TccFilterParams,
-} from '../../services/tccService';
+} from '../../services/thesisService';
 
 export function useTccs(termoBusca: string, filtros: TccFilterParams) {
   return useQuery({

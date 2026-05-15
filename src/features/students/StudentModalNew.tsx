@@ -2,7 +2,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { StudentForm } from './StudentForm';
 import { useCreateStudent } from '../../hooks/mutations/useStudentMutations';
-import type { AlunoPayload } from '../../services/alunoService';
+import type { AlunoPayload } from '../../services/studentService';
 import { type StudentFormData } from '../../schemas/studentSchema';
 
 interface StudentModalNewProps {

@@ -6,11 +6,11 @@ import {
   cadastrarCurso,
   buscarEstatisticasCursos,
   buscarEstatisticasGrafico,
-} from '../../services/cursoService';
-import { buscarTurnos, cadastrarTurno } from '../../services/turnoService';
-import { buscarModulos, cadastrarModulo } from '../../services/moduloService';
-import { getContagemAutores } from '../../services/autorService';
-import { buscarGeneros } from '../../services/generoService';
+} from '../../services/courseService';
+import { buscarTurnos, cadastrarTurno } from '../../services/studyShiftService';
+import { buscarModulos, cadastrarModulo } from '../../services/academicModuleService';
+import { getContagemAutores } from '../../services/authorService';
+import { buscarGeneros } from '../../services/genreService';
 
 vi.mock('../../services/api', () => ({
   default: {
@@ -21,126 +21,124 @@ vi.mock('../../services/api', () => ({
 
 const mockedApi = vi.mocked(api);
 
-describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
+describe('Servicos de lookup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  // --- Curso ---
-
-  describe('cursoService', () => {
-    it('buscarCursos: deve retornar lista de cursos', async () => {
-      const mockData = { content: [{ id: 1, nome: 'Informática' }] };
-      mockedApi.get.mockResolvedValue({ data: mockData });
+  describe('courseService', () => {
+    it('buscarCursos: retorna lista de cursos da v2', async () => {
+      mockedApi.get.mockResolvedValue({
+        data: { content: [{ id: 1, name: 'Informatica' }] },
+      });
 
       const result = await buscarCursos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/cursos/buscar');
-      expect(result.content[0].nome).toBe('Informática');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/courses', {
+        params: { size: 100 },
+      });
+      expect(result.content[0].nome).toBe('Informatica');
     });
 
-    it('buscarCursos: deve propagar erro', async () => {
+    it('buscarCursos: propaga erro', async () => {
       mockedApi.get.mockRejectedValue(new Error('Erro'));
 
       await expect(buscarCursos()).rejects.toThrow('Erro');
     });
 
-    it('cadastrarCurso: deve cadastrar curso com payload correto', async () => {
-      mockedApi.post.mockResolvedValue({ data: { id: 2, nome: 'Enfermagem' } });
+    it('cadastrarCurso: cadastra curso com payload v2', async () => {
+      mockedApi.post.mockResolvedValue({ data: { id: 2, name: 'Enfermagem' } });
 
       const result = await cadastrarCurso({
         nome: 'Enfermagem',
-        turno: 'Manhã',
+        turno: 'Manha',
         modulo: '1',
       });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/cursos/cadastrar', {
-        nome: 'Enfermagem',
-        turno: 'Manhã',
-        modulo: '1',
+      expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/courses', {
+        name: 'Enfermagem',
       });
       expect(result.nome).toBe('Enfermagem');
     });
 
-    it('buscarEstatisticasCursos: deve retornar estatísticas', async () => {
-      const mockStats = [
-        {
-          nomeCurso: 'Info',
-          quantidadeAlunos: 30,
-          totalEmprestimos: 100,
-          mediaEmprestimosPorAluno: 3.3,
-        },
-      ];
-      mockedApi.get.mockResolvedValue({ data: mockStats });
+    it('buscarEstatisticasCursos: mapeia estatisticas v2', async () => {
+      mockedApi.get.mockResolvedValue({
+        data: [
+          {
+            courseName: 'Info',
+            studentCount: 30,
+            totalLoans: 100,
+            avgLoansPerStudent: 3.3,
+          },
+        ],
+      });
 
       const result = await buscarEstatisticasCursos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/cursos/estatisticas');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/courses/statistics');
       expect(result[0].quantidadeAlunos).toBe(30);
     });
 
-    it('buscarEstatisticasGrafico: deve mapear endpoints por tipo', async () => {
-      mockedApi.get.mockResolvedValue({ data: [{ nome: 'Info', total: 50 }] });
+    it('buscarEstatisticasGrafico: usa endpoints v2', async () => {
+      mockedApi.get.mockResolvedValue({ data: [{ name: 'Info', total: 50 }] });
 
       await buscarEstatisticasGrafico('curso');
-      expect(mockedApi.get).toHaveBeenCalledWith(
-        '/cursos/estatisticas-grafico',
-      );
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/courses/loan-statistics');
 
       await buscarEstatisticasGrafico('modulo');
-      expect(mockedApi.get).toHaveBeenCalledWith(
-        '/modulos/estatisticas-grafico',
-      );
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/academic-modules/loan-statistics');
 
       await buscarEstatisticasGrafico('turno');
-      expect(mockedApi.get).toHaveBeenCalledWith(
-        '/turnos/estatisticas-grafico',
-      );
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/study-shifts/loan-statistics');
     });
   });
 
-  // --- Turno ---
-
-  describe('turnoService', () => {
-    it('buscarTurnos: deve retornar lista de turnos', async () => {
+  describe('studyShiftService', () => {
+    it('buscarTurnos: retorna lista de turnos da v2', async () => {
       mockedApi.get.mockResolvedValue({
-        data: [
-          { id: 1, nome: 'Manhã' },
-          { id: 2, nome: 'Tarde' },
-        ],
+        data: {
+          content: [
+            { id: 1, name: 'Manha' },
+            { id: 2, name: 'Tarde' },
+          ],
+        },
       });
 
       const result = await buscarTurnos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/turnos');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/study-shifts', {
+        params: { size: 100 },
+      });
       expect(result).toHaveLength(2);
     });
 
-    it('cadastrarTurno: deve cadastrar turno', async () => {
-      mockedApi.post.mockResolvedValue({ data: { id: 3, nome: 'Noite' } });
+    it('cadastrarTurno: cadastra turno com payload v2', async () => {
+      mockedApi.post.mockResolvedValue({ data: { id: 3, name: 'Noite' } });
 
       const result = await cadastrarTurno({ nome: 'Noite' });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/turnos/cadastrar', {
-        nome: 'Noite',
+      expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/study-shifts', {
+        name: 'Noite',
       });
       expect(result.nome).toBe('Noite');
     });
   });
 
-  // --- Módulo ---
-
-  describe('moduloService', () => {
-    it('buscarModulos: deve retornar lista de módulos', async () => {
-      mockedApi.get.mockResolvedValue({ data: [{ id: 1, nome: 'Módulo 1' }] });
+  describe('academicModuleService', () => {
+    it('buscarModulos: retorna lista de modulos da v2', async () => {
+      mockedApi.get.mockResolvedValue({
+        data: { content: [{ id: 1, name: 'Modulo 1' }] },
+      });
 
       const result = await buscarModulos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/modulos');
-      expect(result[0].nome).toBe('Módulo 1');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/academic-modules', {
+        params: { size: 100 },
+      });
+      expect(result[0].nome).toBe('Modulo 1');
     });
 
-    it('buscarModulos: deve retornar array vazio em caso de erro', async () => {
+    it('buscarModulos: retorna array vazio em caso de erro', async () => {
       mockedApi.get.mockRejectedValue(new Error('Erro'));
 
       const result = await buscarModulos();
@@ -148,7 +146,7 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
       expect(result).toEqual([]);
     });
 
-    it('buscarModulos: deve retornar array vazio quando data é null', async () => {
+    it('buscarModulos: retorna array vazio quando data e null', async () => {
       mockedApi.get.mockResolvedValue({ data: null });
 
       const result = await buscarModulos();
@@ -156,33 +154,31 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
       expect(result).toEqual([]);
     });
 
-    it('cadastrarModulo: deve cadastrar módulo', async () => {
-      mockedApi.post.mockResolvedValue({ data: { id: 4, nome: 'Módulo 4' } });
+    it('cadastrarModulo: cadastra modulo com payload v2', async () => {
+      mockedApi.post.mockResolvedValue({ data: { id: 4, name: 'Modulo 4' } });
 
-      const result = await cadastrarModulo({ nome: 'Módulo 4' });
+      const result = await cadastrarModulo({ nome: 'Modulo 4' });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/modulos/cadastrar', {
-        nome: 'Módulo 4',
+      expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/academic-modules', {
+        name: 'Modulo 4',
       });
       expect(result.id).toBe(4);
     });
   });
 
-  // --- Autor ---
-
-  describe('autorService', () => {
-    it('getContagemAutores: deve retornar contagem de autores', async () => {
+  describe('authorService', () => {
+    it('getContagemAutores: retorna contagem de autores da v2', async () => {
       mockedApi.get.mockResolvedValue({ data: { totalElements: 42 } });
 
       const result = await getContagemAutores();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/autores/buscar', {
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/metadata/authors', {
         params: { page: 0, size: 1 },
       });
       expect(result).toBe(42);
     });
 
-    it('getContagemAutores: deve retornar 0 quando totalElements é falsy', async () => {
+    it('getContagemAutores: retorna 0 quando totalElements e falsy', async () => {
       mockedApi.get.mockResolvedValue({ data: { totalElements: 0 } });
 
       const result = await getContagemAutores();
@@ -191,21 +187,20 @@ describe('Serviços de Lookup (Curso, Turno, Módulo, Autor, Gênero)', () => {
     });
   });
 
-  // --- Gênero ---
-
-  describe('generoService', () => {
-    it('buscarGeneros: deve retornar lista de gêneros', async () => {
-      const mockGeneros = [
-        { id: 1, nome: 'ROMANCE', nomePtBr: 'Romance' },
-        { id: 2, nome: 'FICCAO', nomePtBr: 'Ficção' },
-      ];
-      mockedApi.get.mockResolvedValue({ data: mockGeneros });
+  describe('genreService', () => {
+    it('buscarGeneros: retorna lista de generos da v2', async () => {
+      mockedApi.get.mockResolvedValue({
+        data: [
+          { id: 1, name: 'ROMANCE' },
+          { id: 2, name: 'FICCAO' },
+        ],
+      });
 
       const result = await buscarGeneros();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/generos');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/genres');
       expect(result).toHaveLength(2);
-      expect(result[0].nomePtBr).toBe('Romance');
+      expect(result[0].nome).toBe('ROMANCE');
     });
   });
 });

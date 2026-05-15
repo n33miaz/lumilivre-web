@@ -4,7 +4,7 @@ import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
 import { ExempleForm, type ExempleFormData } from './ExempleForm';
 
-import { type ListaLivro } from '../../services/livroService';
+import { type ListaLivro } from '../../services/bookService';
 import {
   useUpdateExemplar,
   useDeleteExemplar,
@@ -12,7 +12,7 @@ import {
 
 interface ModalExemplarDetailsProps {
   exemplar: ListaLivro | null;
-  livroId: number | null;
+  livroId: string | number | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -52,7 +52,7 @@ export function ModalExemplarDetails({
         payload: {
           tombo: data.tombo,
           localizacao_fisica: data.localizacao_fisica,
-          livro_id: livroIdAtual!,
+          livro_id: String(livroIdAtual!),
           status_livro: exemplarAtual?.status ?? '',
         },
       });
@@ -64,7 +64,10 @@ export function ModalExemplarDetails({
 
   const executarExclusao = async () => {
     try {
-      await deleteExemplar({ tombo: exemplarAtual?.tomboExemplar ?? '', livroId: livroIdAtual! });
+      await deleteExemplar({
+        tombo: exemplarAtual?.tomboExemplar ?? '',
+        livroId: String(livroIdAtual ?? ''),
+      });
       setConfirmAction(null);
       onClose();
     } catch (error) {

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from './api';
 
 interface Endereco {
   logradouro: string;
@@ -8,13 +8,24 @@ interface Endereco {
   error?: boolean | string;
 }
 
+interface PostalCodeResponse {
+  street?: string;
+  district?: string;
+  city?: string;
+  stateCode?: string;
+}
+
 export const buscarEnderecoPorCep = async (cep: string): Promise<Endereco> => {
   try {
-    const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
-    if (response.data.erro) {
-      throw new Error('CEP não encontrado.');
-    }
-    return response.data;
+    const response = await api.get<PostalCodeResponse>(
+      `/api/v2/metadata/postal-codes/${cep}`,
+    );
+    return {
+      logradouro: response.data.street || '',
+      bairro: response.data.district || '',
+      localidade: response.data.city || '',
+      uf: response.data.stateCode || '',
+    };
   } catch (error) {
     console.error('Erro ao buscar CEP:', error);
     throw error;

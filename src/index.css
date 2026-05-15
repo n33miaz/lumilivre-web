@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Landing-only helpers (used pela rota publica em /) */
+.landing-root {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.landing-root .grid-pattern {
+  background-image: linear-gradient(rgba(118, 32, 117, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118, 32, 117, 0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.dark .landing-root .grid-pattern {
+  background-image: linear-gradient(rgba(201, 100, 197, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 100, 197, 0.08) 1px, transparent 1px);
+}
+
+.landing-root .gradient-text {
+  background: linear-gradient(135deg, #762075 0%, #c964c5 50%, #762075 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.landing-root .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 ::-webkit-scrollbar {
   width: 14px;
   height: 14px;

@@ -13,8 +13,8 @@ import {
   Legend,
 } from 'recharts';
 
-import { type AlunoRanking } from '../../services/emprestimoService';
-import { type EstatisticaGrafico } from '../../services/cursoService';
+import { type AlunoRanking } from '../../services/loanService';
+import { type EstatisticaGrafico } from '../../services/courseService';
 import { CustomSelect } from '../../components/ui/CustomSelect';
 
 import { LoadingIcon } from '../../components/ui/LoadingIcon';

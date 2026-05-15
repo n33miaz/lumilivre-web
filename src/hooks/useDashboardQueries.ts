@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getContagemLivros } from '../services/livroService';
-import { getContagemAlunos } from '../services/alunoService';
+import { getContagemLivros } from '../services/bookService';
+import { getContagemAlunos } from '../services/studentService';
 import {
   getContagemEmprestimosTotais,
   getContagemAtrasados,
   buscarEmprestimosAtivosEAtrasados,
-} from '../services/emprestimoService';
-import { buscarSolicitacoesPendentes } from '../services/solicitacaoEmprestimoService';
+} from '../services/loanService';
+import { buscarSolicitacoesPendentes } from '../services/loanRequestService';
 import {
   getDashboardGerencialStats,
   getEmprestimosPorMesDashboard,

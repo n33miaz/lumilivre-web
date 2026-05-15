@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { requestPasswordReset } from '../../../services/authService';
 import { useToast } from '../../../contexts/ToastContext';
@@ -11,6 +12,7 @@ import UserIcon from '../../../assets/icons/users.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function EsqueciSenhaPage() {
+  const { t } = useTranslation('auth');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -23,8 +25,8 @@ export function EsqueciSenhaPage() {
     if (!email.includes('@')) {
       addToast({
         type: 'warning',
-        title: 'E-mail inválido',
-        description: 'Por favor, insira um e-mail válido.',
+        title: t('forgot_password.toast.invalid_email.title'),
+        description: t('forgot_password.toast.invalid_email.description'),
       });
       setIsLoading(false);
       return;
@@ -34,18 +36,15 @@ export function EsqueciSenhaPage() {
       const data = await requestPasswordReset(email);
       addToast({
         type: 'success',
-        title: 'Solicitação Enviada',
-        description: data.mensagem || 'Verifique sua caixa de entrada.',
+        title: t('forgot_password.toast.success.title'),
+        description: data.mensagem || t('forgot_password.toast.success.default'),
         duration: 5000,
       });
     } catch (err) {
       addToast({
         type: 'error',
-        title: 'Erro ao enviar',
-        description: getErrorMessage(
-          err,
-          'Ocorreu um erro ao processar sua solicitação.',
-        ),
+        title: t('forgot_password.toast.error.title'),
+        description: getErrorMessage(err, t('forgot_password.toast.error.description')),
       });
     } finally {
       setIsLoading(false);
@@ -58,7 +57,7 @@ export function EsqueciSenhaPage() {
         <div className="text-center mb-5">
           <LogoIcon className="h-[200px] w-auto mx-auto pointer-events-none -mb-1 text-lumi-primary" />
           <h1 className="text-[32px] font-bold text-gray-800 dark:text-gray-100">
-            Esqueci a Senha
+            {t('forgot_password.title')}
           </h1>
         </div>
 
@@ -66,7 +65,7 @@ export function EsqueciSenhaPage() {
           <InputFloatingLabel
             id="email"
             type="email"
-            label="Email"
+            label={t('forgot_password.field.email')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             icon={UserIcon}
@@ -79,7 +78,7 @@ export function EsqueciSenhaPage() {
               disabled={isLoading}
               className="w-full bg-lumi-primary hover:bg-lumi-primary-hover active:bg-purple-900 text-white text-[17px] font-bold py-3.5 px-4 border-2 border-transparent rounded-lg shadow-md transform hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none tracking-wide"
             >
-              {isLoading ? 'ENVIANDO...' : 'ENVIAR LINK'}
+              {isLoading ? t('forgot_password.button.submitting') : t('forgot_password.button.submit')}
             </button>
           </div>
         </form>
@@ -89,7 +88,7 @@ export function EsqueciSenhaPage() {
             to="/login"
             className="text-gray-500 dark:text-gray-400 hover:text-lumi-primary dark:hover:text-lumi-label text-sm font-medium"
           >
-            Voltar para o Login
+            {t('forgot_password.button.back')}
           </Link>
         </div>
       </div>

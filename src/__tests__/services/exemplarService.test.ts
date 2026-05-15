@@ -6,7 +6,7 @@ import {
   excluirExemplar,
   type ExemplarPayload,
   type ExemplarUpdatePayload,
-} from '../../services/exemplarService';
+} from '../../services/bookCopyService';
 import api from '../../services/api';
 
 vi.mock('../../services/api', () => ({
@@ -20,75 +20,76 @@ vi.mock('../../services/api', () => ({
 
 const mockedApi = vi.mocked(api);
 
-describe('exemplarService', () => {
+describe('bookCopyService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('buscarExemplaresPorLivroId', () => {
-    it('deve buscar exemplares pelo ID do livro', async () => {
-      const mockExemplares = [
-        { tomboExemplar: 'T001', status: 'DISPONIVEL', isbn: '123' },
-        { tomboExemplar: 'T002', status: 'EMPRESTADO', isbn: '123' },
-      ];
-      mockedApi.get.mockResolvedValue({ data: mockExemplares });
+  it('buscarExemplaresPorLivroId uses v2 and maps copy rows', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: [
+        {
+          copyCode: 'T001',
+          status: { code: 'AVAILABLE', label: 'Disponivel' },
+          isbn: '123',
+          title: 'Livro',
+          shelfLocation: 'A1',
+        },
+      ],
+    });
 
-      const result = await buscarExemplaresPorLivroId(42);
+    const result = await buscarExemplaresPorLivroId('book-1');
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/livros/exemplares/livro/42');
-      expect(result).toHaveLength(2);
-      expect(result[0].tomboExemplar).toBe('T001');
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      '/api/v2/book-copies/by-book/book-1',
+    );
+    expect(result[0].tomboExemplar).toBe('T001');
+    expect(result[0].status).toBe('DISPONIVEL');
+  });
+
+  it('cadastrarExemplar sends a v2 payload', async () => {
+    const payload: ExemplarPayload = {
+      tombo: 'T100',
+      livro_id: 'book-1',
+      status_livro: 'DISPONIVEL',
+      localizacao_fisica: 'Estante A3',
+    };
+    mockedApi.post.mockResolvedValue({ data: { copyCode: 'T100' } });
+
+    await cadastrarExemplar(payload);
+
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/book-copies', {
+      copyCode: 'T100',
+      bookId: 'book-1',
+      status: 'AVAILABLE',
+      shelfLocation: 'Estante A3',
     });
   });
 
-  describe('cadastrarExemplar', () => {
-    it('deve cadastrar um exemplar com payload correto', async () => {
-      const payload: ExemplarPayload = {
-        tombo: 'T100',
-        livro_id: 5,
-        status_livro: 'DISPONIVEL',
-        localizacao_fisica: 'Estante A3',
-      };
-      mockedApi.post.mockResolvedValue({ data: { tombo: 'T100' } });
+  it('atualizarExemplar uses v2 update by copy code', async () => {
+    const payload: ExemplarUpdatePayload = {
+      tombo: 'T100-NEW',
+      localizacao_fisica: 'Estante B1',
+      livro_id: 'book-1',
+      status_livro: 'DISPONIVEL',
+    };
+    mockedApi.put.mockResolvedValue({ data: { copyCode: 'T100-NEW' } });
 
-      const result = await cadastrarExemplar(payload);
+    await atualizarExemplar('T100', payload);
 
-      expect(mockedApi.post).toHaveBeenCalledWith(
-        '/livros/exemplares/cadastrar',
-        payload,
-      );
-      expect(result.tombo).toBe('T100');
+    expect(mockedApi.put).toHaveBeenCalledWith('/api/v2/book-copies/T100', {
+      copyCode: 'T100-NEW',
+      bookId: 'book-1',
+      status: 'AVAILABLE',
+      shelfLocation: 'Estante B1',
     });
   });
 
-  describe('atualizarExemplar', () => {
-    it('deve atualizar exemplar pelo tombo atual', async () => {
-      const payload: ExemplarUpdatePayload = {
-        tombo: 'T100-NEW',
-        localizacao_fisica: 'Estante B1',
-        livro_id: 5,
-        status_livro: 'DISPONIVEL',
-      };
-      mockedApi.put.mockResolvedValue({ data: { sucesso: true } });
+  it('excluirExemplar uses v2 delete by copy code', async () => {
+    mockedApi.delete.mockResolvedValue({ data: undefined });
 
-      await atualizarExemplar('T100', payload);
+    await excluirExemplar('T100');
 
-      expect(mockedApi.put).toHaveBeenCalledWith(
-        '/livros/exemplares/atualizar/T100',
-        payload,
-      );
-    });
-  });
-
-  describe('excluirExemplar', () => {
-    it('deve excluir exemplar pelo tombo', async () => {
-      mockedApi.delete.mockResolvedValue({ data: { sucesso: true } });
-
-      await excluirExemplar('T100');
-
-      expect(mockedApi.delete).toHaveBeenCalledWith(
-        '/livros/exemplares/excluir/T100',
-      );
-    });
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/book-copies/T100');
   });
 });

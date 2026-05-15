@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { buscarLivrosParaAdmin } from '../../services/livroService';
+import { buscarLivrosParaAdmin } from '../../services/bookService';
 import { buscarLivroPorIsbn } from '../../services/googleBooksService';
 import {
   useGeneros,

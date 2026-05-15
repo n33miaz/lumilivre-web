@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { ThemeToggle } from '../../../layouts/components/ThemeToggle';
+import { LocaleSwitcher } from '../../../components/ui/LocaleSwitcher';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
 import { login as apiLogin } from '../../../services/authService';
 
@@ -15,6 +17,7 @@ import { getErrorMessage } from '../../../utils/errorHandler';
 import { getDefaultRouteForRole } from '../../../utils/roleCapabilities';
 
 export function LoginPage() {
+  const { t } = useTranslation('auth');
   const [usuario, setUsuario] = useState('');
   const [senha, setSenha] = useState('');
 
@@ -44,8 +47,8 @@ export function LoginPage() {
 
       addToast({
         type: 'success',
-        title: 'Bem-vindo!',
-        description: 'Login realizado com sucesso.',
+        title: t('login.toast.success.title'),
+        description: t('login.toast.success.description'),
         duration: 3000,
       });
 
@@ -59,8 +62,8 @@ export function LoginPage() {
 
       addToast({
         type: 'error',
-        title: 'Falha no Login',
-        description: getErrorMessage(err, 'Usuário ou senha inválidos.'),
+        title: t('login.toast.error.title'),
+        description: getErrorMessage(err, t('login.toast.error.description')),
       });
 
       setIsLoading(false);
@@ -86,7 +89,7 @@ export function LoginPage() {
           <InputFloatingLabel
             id="usuario"
             type="text"
-            label="Email"
+            label={t('login.field.user')}
             value={usuario}
             onChange={(e) => setUsuario(e.target.value)}
             icon={UserIcon}
@@ -97,7 +100,7 @@ export function LoginPage() {
           <InputFloatingLabel
             id="senha"
             type="password"
-            label="Senha"
+            label={t('login.field.password')}
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             icon={LockIcon}
@@ -114,10 +117,10 @@ export function LoginPage() {
               {isLoading || isExiting ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ENTRANDO...
+                  {t('login.button.submitting')}
                 </span>
               ) : (
-                'ENTRAR'
+                t('login.button.submit')
               )}
             </button>
           </div>
@@ -128,7 +131,7 @@ export function LoginPage() {
             to="/esqueci-a-senha"
             className="text-gray-500 dark:text-gray-400 hover:text-lumi-primary dark:hover:text-lumi-label text-sm font-medium"
           >
-            Esqueceu sua senha?
+            {t('login.link.forgot_password')}
           </Link>
         </div>
 
@@ -139,13 +142,14 @@ export function LoginPage() {
             className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-4 px-4 rounded-lg shadow-md transform active:scale-95"
           >
             <DownloadIcon className="w-5 h-5" />
-            BAIXAR APP PARA ANDROID
+            {t('login.download_app')}
           </a>
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-6">
+      <div className="absolute bottom-6 left-6 flex items-center gap-2">
         <ThemeToggle />
+        <LocaleSwitcher />
       </div>
     </main>
   );

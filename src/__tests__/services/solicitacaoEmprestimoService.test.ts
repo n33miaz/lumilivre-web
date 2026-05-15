@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   buscarSolicitacoesPendentes,
   processarSolicitacao,
-} from '../../services/solicitacaoEmprestimoService';
+} from '../../services/loanRequestService';
 import api from '../../services/api';
 
 vi.mock('../../services/api', () => ({
@@ -14,76 +14,51 @@ vi.mock('../../services/api', () => ({
 
 const mockedApi = vi.mocked(api);
 
-describe('solicitacaoEmprestimoService', () => {
+describe('loanRequestService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('buscarSolicitacoesPendentes', () => {
-    it('deve retornar lista de solicitações pendentes', async () => {
-      const mockSolicitacoes = [
+  it('buscarSolicitacoesPendentes uses v2 and maps fields', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: [
         {
-          id: 1,
-          alunoNome: 'João',
-          livroNome: 'Dom Casmurro',
-          dataSolicitacao: '2026-03-10',
+          id: 'req-1',
+          studentName: 'Joao',
+          studentRegistrationNumber: '2024001',
+          bookTitle: 'Dom Casmurro',
+          copyCode: 'T001',
+          requestedAt: '2026-03-10T10:00:00Z',
         },
-        {
-          id: 2,
-          alunoNome: 'Maria',
-          livroNome: 'Clean Code',
-          dataSolicitacao: '2026-03-11',
-        },
-      ];
-      mockedApi.get.mockResolvedValue({ data: mockSolicitacoes });
-
-      const result = await buscarSolicitacoesPendentes();
-
-      expect(mockedApi.get).toHaveBeenCalledWith('/solicitacoes/pendentes');
-      expect(result).toHaveLength(2);
-      expect(result[0].alunoNome).toBe('João');
+      ],
     });
 
-    it('deve retornar array vazio quando resposta é null', async () => {
-      mockedApi.get.mockResolvedValue({ data: null });
+    const result = await buscarSolicitacoesPendentes();
 
-      const result = await buscarSolicitacoesPendentes();
-
-      expect(result).toEqual([]);
-    });
-
-    it('deve retornar array vazio em caso de erro', async () => {
-      mockedApi.get.mockRejectedValue(new Error('Erro de rede'));
-
-      const result = await buscarSolicitacoesPendentes();
-
-      expect(result).toEqual([]);
-    });
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      '/api/v2/loan-requests/pending',
+    );
+    expect(result[0].alunoNome).toBe('Joao');
+    expect(result[0].livroNome).toBe('Dom Casmurro');
   });
 
-  describe('processarSolicitacao', () => {
-    it('deve aceitar uma solicitação', async () => {
-      mockedApi.post.mockResolvedValue({ data: { sucesso: true } });
+  it('buscarSolicitacoesPendentes returns [] on null response or errors', async () => {
+    mockedApi.get.mockResolvedValueOnce({ data: null });
+    await expect(buscarSolicitacoesPendentes()).resolves.toEqual([]);
 
-      await processarSolicitacao(1, true);
+    mockedApi.get.mockRejectedValueOnce(new Error('Erro de rede'));
+    await expect(buscarSolicitacoesPendentes()).resolves.toEqual([]);
+  });
 
-      expect(mockedApi.post).toHaveBeenCalledWith(
-        '/solicitacoes/processar/1',
-        null,
-        { params: { aceitar: true } },
-      );
-    });
+  it('processarSolicitacao uses v2 process endpoint', async () => {
+    mockedApi.post.mockResolvedValue({ data: { success: true } });
 
-    it('deve recusar uma solicitação', async () => {
-      mockedApi.post.mockResolvedValue({ data: { sucesso: true } });
+    await processarSolicitacao('req-1', true);
 
-      await processarSolicitacao(2, false);
-
-      expect(mockedApi.post).toHaveBeenCalledWith(
-        '/solicitacoes/processar/2',
-        null,
-        { params: { aceitar: false } },
-      );
-    });
+    expect(mockedApi.post).toHaveBeenCalledWith(
+      '/api/v2/loan-requests/req-1/process',
+      null,
+      { params: { accept: true } },
+    );
   });
 });

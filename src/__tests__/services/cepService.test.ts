@@ -1,9 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buscarEnderecoPorCep } from '../../services/cepService';
-import axios from 'axios';
+import api from '../../services/api';
 
-vi.mock('axios');
-const mockedAxios = vi.mocked(axios);
+vi.mock('../../services/api', () => ({
+  default: {
+    get: vi.fn(),
+  },
+}));
+
+const mockedApi = vi.mocked(api);
 
 describe('cepService', () => {
   beforeEach(() => {
@@ -11,34 +16,35 @@ describe('cepService', () => {
   });
 
   describe('buscarEnderecoPorCep', () => {
-    it('deve retornar o endereço para um CEP válido', async () => {
-      const mockEndereco = {
-        logradouro: 'Rua das Flores',
-        bairro: 'Centro',
-        localidade: 'São Paulo',
-        uf: 'SP',
-      };
-      mockedAxios.get.mockResolvedValue({ data: mockEndereco });
+    it('deve retornar o endereco para um CEP valido', async () => {
+      mockedApi.get.mockResolvedValue({
+        data: {
+          street: 'Rua das Flores',
+          district: 'Centro',
+          city: 'Sao Paulo',
+          stateCode: 'SP',
+        },
+      });
 
       const result = await buscarEnderecoPorCep('01001000');
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        'https://viacep.com.br/ws/01001000/json/',
+      expect(mockedApi.get).toHaveBeenCalledWith(
+        '/api/v2/metadata/postal-codes/01001000',
       );
       expect(result.logradouro).toBe('Rua das Flores');
       expect(result.uf).toBe('SP');
     });
 
-    it('deve lançar erro quando CEP não é encontrado', async () => {
-      mockedAxios.get.mockResolvedValue({ data: { erro: true } });
+    it('deve lancar erro quando CEP nao e encontrado', async () => {
+      mockedApi.get.mockRejectedValue(new Error('CEP nao encontrado.'));
 
       await expect(buscarEnderecoPorCep('00000000')).rejects.toThrow(
-        'CEP não encontrado.',
+        'CEP nao encontrado.',
       );
     });
 
-    it('deve lançar erro quando a requisição falha', async () => {
-      mockedAxios.get.mockRejectedValue(new Error('Network Error'));
+    it('deve lancar erro quando a requisicao falha', async () => {
+      mockedApi.get.mockRejectedValue(new Error('Network Error'));
 
       await expect(buscarEnderecoPorCep('99999999')).rejects.toThrow();
     });

@@ -4,7 +4,7 @@ import {
   atualizarTcc,
   excluirTcc,
   type TccPayload,
-} from '../../services/tccService';
+} from '../../services/thesisService';
 
 const TCC_QUERY_KEY = ['tccs'];
 
@@ -15,7 +15,7 @@ interface CreateTccVariables {
 }
 
 interface UpdateTccVariables {
-  id: number;
+  id: number | string;
   payload: TccPayload;
   filePdf?: File | null;
   fileFoto?: File | null;
@@ -37,7 +37,7 @@ export const useUpdateTcc = createMutationHook<unknown, UpdateTccVariables>({
   errorMessage: 'Erro ao atualizar TCC.',
 });
 
-export const useDeleteTcc = createMutationHook<unknown, number>({
+export const useDeleteTcc = createMutationHook<unknown, number | string>({
   mutationFn: (id) => excluirTcc(id),
   queryKey: TCC_QUERY_KEY,
   successMessage: 'TCC excluído com sucesso!',

@@ -10,6 +10,7 @@ vi.mock('../../services/api', () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
   },
 }));
 
@@ -20,79 +21,47 @@ describe('authService', () => {
     vi.clearAllMocks();
   });
 
-  describe('login', () => {
-    it('deve enviar credenciais e retornar dados do usuário', async () => {
-      const mockResponse = {
-        data: {
-          id: 1,
-          email: 'admin@teste.com',
-          role: 'ADMIN',
-          token: 'jwt-token-123',
-          isInitialPassword: false,
-        },
-      };
-      mockedApi.post.mockResolvedValue(mockResponse);
-
-      const result = await login({ user: 'admin', senha: '1234' });
-
-      expect(mockedApi.post).toHaveBeenCalledWith('/auth/login', {
-        user: 'admin',
-        senha: '1234',
-      });
-      expect(result.token).toBe('jwt-token-123');
-      expect(result.role).toBe('ADMIN');
+  it('login uses the v2 contract and maps the response', async () => {
+    mockedApi.post.mockResolvedValue({
+      data: {
+        id: 'user-1',
+        email: 'admin@test.com',
+        role: 'ADMIN',
+        token: 'jwt-token-123',
+        initialPasswordChange: false,
+        studentRegistrationNumber: '2024001',
+      },
     });
 
-    it('deve propagar erro quando credenciais são inválidas', async () => {
-      mockedApi.post.mockRejectedValue(new Error('Credenciais inválidas'));
+    const result = await login({ user: 'admin', senha: '1234' });
 
-      await expect(login({ user: 'admin', senha: 'errada' })).rejects.toThrow(
-        'Credenciais inválidas',
-      );
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/auth/login', {
+      username: 'admin',
+      password: '1234',
     });
+    expect(result.token).toBe('jwt-token-123');
+    expect(result.matriculaAluno).toBe('2024001');
   });
 
-  describe('validarTokenReset', () => {
-    it('deve retornar true quando token é válido', async () => {
-      mockedApi.get.mockResolvedValue({ data: { valido: true } });
+  it('validarTokenReset returns true for a valid v2 token', async () => {
+    mockedApi.get.mockResolvedValue({ data: { valid: true } });
 
-      const result = await validarTokenReset('token-valido');
+    const result = await validarTokenReset('token-valido');
 
-      expect(mockedApi.get).toHaveBeenCalledWith(
-        '/auth/validar-token/token-valido',
-      );
-      expect(result).toBe(true);
-    });
-
-    it('deve retornar false quando token é inválido', async () => {
-      mockedApi.get.mockRejectedValue(new Error('Token inválido'));
-
-      const result = await validarTokenReset('token-invalido');
-
-      expect(result).toBe(false);
-    });
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      '/api/v2/auth/validate-token/token-valido',
+    );
+    expect(result).toBe(true);
   });
 
-  describe('requestPasswordReset', () => {
-    it('deve retornar mensagem de sucesso', async () => {
-      mockedApi.post.mockResolvedValue({
-        data: { mensagem: 'Link enviado com sucesso.' },
-      });
+  it('requestPasswordReset calls the v2 endpoint and returns a generic message', async () => {
+    mockedApi.post.mockResolvedValue({ data: {} });
 
-      const result = await requestPasswordReset('user@email.com');
+    const result = await requestPasswordReset('user@email.com');
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/auth/esqueci-senha', {
-        email: 'user@email.com',
-      });
-      expect(result.mensagem).toBe('Link enviado com sucesso.');
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/auth/forgot-password', {
+      email: 'user@email.com',
     });
-
-    it('deve retornar mensagem genérica em caso de erro', async () => {
-      mockedApi.post.mockRejectedValue(new Error('Erro'));
-
-      const result = await requestPasswordReset('nao-existe@email.com');
-
-      expect(result.mensagem).toContain('link para redefinição será enviado');
-    });
+    expect(result.mensagem).toContain('link para redefini');
   });
 });

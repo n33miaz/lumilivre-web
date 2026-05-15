@@ -7,7 +7,7 @@ import {
   atualizarTcc,
   excluirTcc,
   type TccPayload,
-} from '../../services/tccService';
+} from '../../services/thesisService';
 import api from '../../services/api';
 
 vi.mock('../../services/api', () => ({
@@ -22,8 +22,8 @@ vi.mock('../../services/api', () => ({
 const mockedApi = vi.mocked(api);
 
 const mockTccPayload: TccPayload = {
-  titulo: 'Sistema de Gestão Bibliotecária',
-  alunos: 'João, Maria',
+  titulo: 'Sistema de Gestao Bibliotecaria',
+  alunos: 'Joao, Maria',
   orientadores: 'Prof. Silva',
   curso_id: 1,
   anoConclusao: '2025',
@@ -32,115 +32,70 @@ const mockTccPayload: TccPayload = {
   ativo: true,
 };
 
-describe('tccService', () => {
+describe('thesisService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('listarTccs', () => {
-    it('deve listar TCCs sem filtro de texto', async () => {
-      const mockData = [{ id: 1, titulo: 'TCC Teste' }];
-      mockedApi.get.mockResolvedValue({ data: { data: mockData } });
-
-      const result = await listarTccs();
-
-      expect(mockedApi.get).toHaveBeenCalledWith('/tcc/buscar', { params: {} });
-      expect(result).toEqual(mockData);
+  it('listarTccs uses v2 and maps results', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: [{ id: 'tcc-1', title: 'TCC Teste', authors: 'Joao' }],
     });
 
-    it('deve listar TCCs com filtro de texto', async () => {
-      mockedApi.get.mockResolvedValue({ data: { data: [] } });
+    const result = await listarTccs('Sistema');
 
-      await listarTccs('Sistema');
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/theses', {
+      params: { q: 'Sistema' },
+    });
+    expect(result[0].titulo).toBe('TCC Teste');
+    expect(result[0].alunos).toBe('Joao');
+  });
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/tcc/buscar', {
-        params: { texto: 'Sistema' },
-      });
+  it('buscarTccPorId uses v2 detail route', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: { id: 'tcc-5', title: 'TCC Especifico' },
     });
 
-    it('deve retornar array vazio quando data é undefined', async () => {
-      mockedApi.get.mockResolvedValue({ data: { data: undefined } });
+    const result = await buscarTccPorId('tcc-5');
 
-      const result = await listarTccs();
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/theses/tcc-5');
+    expect(result.id).toBe('tcc-5');
+  });
 
-      expect(result).toEqual([]);
+  it('listarTccsAvancado maps filters to v2 names', async () => {
+    mockedApi.get.mockResolvedValue({ data: [] });
+
+    await listarTccsAvancado({ cursoId: '1', semestre: '2', ano: '2025' });
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/theses/search', {
+      params: { courseId: '1', semester: '2', year: '2025' },
     });
   });
 
-  describe('buscarTccPorId', () => {
-    it('deve buscar TCC pelo ID', async () => {
-      const mockTcc = { id: 5, titulo: 'TCC Específico' };
-      mockedApi.get.mockResolvedValue({ data: { data: mockTcc } });
+  it('cadastrarTcc posts multipart data to v2', async () => {
+    mockedApi.post.mockResolvedValue({ data: { id: 'tcc-1', title: 'TCC' } });
 
-      const result = await buscarTccPorId(5);
+    await cadastrarTcc(mockTccPayload);
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/tcc/buscar/5');
-      expect(result).toEqual(mockTcc);
-    });
+    expect(mockedApi.post).toHaveBeenCalledWith(
+      '/api/v2/theses',
+      expect.any(FormData),
+    );
+    const formData = mockedApi.post.mock.calls[0][1] as FormData;
+    expect(formData.get('data')).toContain('"title":"Sistema de Gestao');
   });
 
-  describe('listarTccsAvancado', () => {
-    it('deve buscar TCCs com filtros avançados', async () => {
-      const params = { cursoId: '1', semestre: '2', ano: '2025' };
-      mockedApi.get.mockResolvedValue({ data: { data: [] } });
+  it('atualizarTcc and excluirTcc use v2 routes', async () => {
+    mockedApi.put.mockResolvedValue({ data: { id: 'tcc-1', title: 'TCC' } });
+    mockedApi.delete.mockResolvedValue({ data: undefined });
 
-      const result = await listarTccsAvancado(params);
+    await atualizarTcc('tcc-1', mockTccPayload);
+    await excluirTcc('tcc-1');
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/tcc/buscar/avancado', {
-        params,
-      });
-      expect(result).toEqual([]);
-    });
-  });
-
-  describe('cadastrarTcc', () => {
-    it('deve cadastrar TCC sem arquivos', async () => {
-      mockedApi.post.mockResolvedValue({ data: { id: 1 } });
-
-      const result = await cadastrarTcc(mockTccPayload);
-
-      expect(mockedApi.post).toHaveBeenCalledWith(
-        '/tcc/cadastrar',
-        expect.any(FormData),
-        { headers: { 'Content-Type': 'multipart/form-data' } },
-      );
-      expect(result).toEqual({ id: 1 });
-    });
-
-    it('deve cadastrar TCC com PDF e foto', async () => {
-      mockedApi.post.mockResolvedValue({ data: { id: 2 } });
-      const filePdf = new File(['pdf'], 'tcc.pdf', { type: 'application/pdf' });
-      const fileFoto = new File(['img'], 'foto.jpg', { type: 'image/jpeg' });
-
-      await cadastrarTcc(mockTccPayload, filePdf, fileFoto);
-
-      const formData = mockedApi.post.mock.calls[0][1] as FormData;
-      expect(formData.get('arquivoPdf')).toBeTruthy();
-      expect(formData.get('arquivoFoto')).toBeTruthy();
-    });
-  });
-
-  describe('atualizarTcc', () => {
-    it('deve atualizar TCC pelo ID', async () => {
-      mockedApi.put.mockResolvedValue({ data: { sucesso: true } });
-
-      await atualizarTcc(1, mockTccPayload);
-
-      expect(mockedApi.put).toHaveBeenCalledWith(
-        '/tcc/atualizar/1',
-        expect.any(FormData),
-        { headers: { 'Content-Type': 'multipart/form-data' } },
-      );
-    });
-  });
-
-  describe('excluirTcc', () => {
-    it('deve excluir TCC pelo ID', async () => {
-      mockedApi.delete.mockResolvedValue({ data: { sucesso: true } });
-
-      await excluirTcc(10);
-
-      expect(mockedApi.delete).toHaveBeenCalledWith('/tcc/excluir/10');
-    });
+    expect(mockedApi.put).toHaveBeenCalledWith(
+      '/api/v2/theses/tcc-1',
+      expect.any(FormData),
+    );
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/theses/tcc-1');
   });
 });

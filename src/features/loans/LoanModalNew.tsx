@@ -2,7 +2,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { LoanForm } from './LoanForm';
 import { useCreateLoan } from '../../hooks/mutations/useLoanMutations';
-import { type EmprestimoPayload } from '../../services/emprestimoService';
+import { type EmprestimoPayload } from '../../services/loanService';
 import { type LoanFormData } from '../../schemas/loanSchema';
 
 interface LoanModalNewProps {
@@ -13,20 +13,13 @@ interface LoanModalNewProps {
 export function LoanModalNew({ onClose, onSuccess }: LoanModalNewProps) {
   const { mutateAsync: createLoan, isPending } = useCreateLoan();
 
-  const formatarDataParaBackend = (dataIso: string): string => {
-    if (!dataIso) return '';
-    const [ano, mes, dia] = dataIso.split('-');
-    const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour12: false });
-    return `${dia}/${mes}/${ano} ${horaAtual}`;
-  };
-
   const handleSubmit = async (data: LoanFormData) => {
     try {
       const payload: EmprestimoPayload = {
         aluno_matricula: data.aluno_matricula,
         exemplar_tombo: data.exemplar_tombo,
-        data_emprestimo: formatarDataParaBackend(data.data_emprestimo),
-        data_devolucao: formatarDataParaBackend(data.data_devolucao),
+        data_emprestimo: data.data_emprestimo,
+        data_devolucao: data.data_devolucao,
       };
 
       await createLoan(payload);

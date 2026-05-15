@@ -8,9 +8,9 @@ import {
   useUpdateExemplar,
   useDeleteExemplar,
 } from '../../../hooks/mutations/useExempleMutations';
-import * as exemplarService from '../../../services/exemplarService';
+import * as exemplarService from '../../../services/bookCopyService';
 
-vi.mock('../../../services/exemplarService');
+vi.mock('../../../services/bookCopyService');
 const mockedCadastrar = vi.mocked(exemplarService.cadastrarExemplar);
 const mockedAtualizar = vi.mocked(exemplarService.atualizarExemplar);
 const mockedExcluir = vi.mocked(exemplarService.excluirExemplar);

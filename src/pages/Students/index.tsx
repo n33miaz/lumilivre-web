@@ -11,7 +11,7 @@ import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 import { useAlunos } from '../../hooks/queries/useStudentQueries';
 
-import { type ListaAluno } from '../../services/alunoService';
+import { type ListaAluno } from '../../services/studentService';
 
 type StatusPenalidade =
   | 'sem-penalidade'

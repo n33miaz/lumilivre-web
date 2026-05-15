@@ -15,8 +15,8 @@ import BackIcon from '../../assets/icons/arrow-left.svg?react';
 import {
   type LivroAgrupado,
   type ListaLivro,
-} from '../../services/livroService';
-import { type EmprestimoAtivoDTO } from '../../services/emprestimoService';
+} from '../../services/bookService';
+import { type EmprestimoAtivoDTO } from '../../services/loanService';
 import { useLivros, useExemplares } from '../../hooks/queries/useBookQueries';
 import { useEmprestimosAtivosEAtrasados } from '../../hooks/queries/useLoanQueries';
 

@@ -2,7 +2,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { TccForm } from './TccForm';
 import { useCreateTcc } from '../../hooks/mutations/useTccMutations';
-import { type TccPayload } from '../../services/tccService';
+import { type TccPayload } from '../../services/thesisService';
 import { type TccFormData } from '../../schemas/tccSchema';
 
 interface TccModalNewProps {

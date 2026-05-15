@@ -3,9 +3,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   baixarRelatorioPDF,
   type FiltrosRelatorio,
-} from '../../services/relatorioService';
-import { buscarLivrosParaAdmin } from '../../services/livroService';
-import { buscarAlunosParaAdmin } from '../../services/alunoService';
+} from '../../services/reportService';
+import { buscarLivrosParaAdmin } from '../../services/bookService';
+import { buscarAlunosParaAdmin } from '../../services/studentService';
 
 import {
   useGeneros,

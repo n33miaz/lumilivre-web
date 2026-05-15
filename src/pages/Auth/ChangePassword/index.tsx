@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import {
   validarTokenReset,
@@ -14,6 +15,7 @@ import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
 
 export function MudarSenhaPage() {
+  const { t } = useTranslation('auth');
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -30,7 +32,7 @@ export function MudarSenhaPage() {
   useEffect(() => {
     const tokenFromUrl = searchParams.get('token');
     if (!tokenFromUrl) {
-      setErrorToken('Token não encontrado na URL.');
+      setErrorToken(t('reset_password.error.token_not_found'));
       setIsLoadingToken(false);
       return;
     }
@@ -42,18 +44,16 @@ export function MudarSenhaPage() {
         if (isValid) {
           setIsTokenValid(true);
         } else {
-          setErrorToken(
-            'Este link é inválido ou expirou. Por favor, solicite uma nova redefinição.',
-          );
+          setErrorToken(t('reset_password.error.invalid_link'));
         }
       } catch {
-        setErrorToken('Ocorreu um erro ao validar o token de segurança.');
+        setErrorToken(t('reset_password.error.validate_failed'));
       } finally {
         setIsLoadingToken(false);
       }
     };
     verificarToken();
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -61,24 +61,24 @@ export function MudarSenhaPage() {
     if (novaSenha.length < 6) {
       addToast({
         type: 'warning',
-        title: 'Senha curta',
-        description: 'A nova senha deve ter pelo menos 6 caracteres.',
+        title: t('reset_password.toast.too_short.title'),
+        description: t('reset_password.toast.too_short.description'),
       });
       return;
     }
     if (novaSenha !== confirmarSenha) {
       addToast({
         type: 'warning',
-        title: 'Senhas não conferem',
-        description: 'As senhas digitadas não coincidem.',
+        title: t('reset_password.toast.mismatch.title'),
+        description: t('reset_password.toast.mismatch.description'),
       });
       return;
     }
     if (!token) {
       addToast({
         type: 'error',
-        title: 'Token inválido',
-        description: 'Token de redefinição inválido.',
+        title: t('reset_password.toast.invalid_token.title'),
+        description: t('reset_password.toast.invalid_token.description'),
       });
       return;
     }
@@ -89,19 +89,16 @@ export function MudarSenhaPage() {
 
       addToast({
         type: 'success',
-        title: 'Senha Alterada',
-        description: 'Sua senha foi redefinida com sucesso! Redirecionando...',
+        title: t('reset_password.toast.success.title'),
+        description: t('reset_password.toast.success.description'),
       });
 
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
       addToast({
         type: 'error',
-        title: 'Erro ao alterar',
-        description: getErrorMessage(
-          err,
-          'Não foi possível alterar a senha. Tente novamente.',
-        ),
+        title: t('reset_password.toast.error.title'),
+        description: getErrorMessage(err, t('reset_password.toast.error.description')),
       });
       setIsSubmitting(false);
     }
@@ -113,7 +110,7 @@ export function MudarSenhaPage() {
         <div className="text-center py-8">
           <div className="w-8 h-8 border-4 border-lumi-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">
-            Validando seu link de segurança...
+            {t('reset_password.loading')}
           </p>
         </div>
       );
@@ -129,7 +126,7 @@ export function MudarSenhaPage() {
             to="/esqueci-a-senha"
             className="text-lumi-primary hover:underline font-bold"
           >
-            Solicitar um novo link
+            {t('reset_password.link.request_new')}
           </Link>
         </div>
       );
@@ -140,7 +137,7 @@ export function MudarSenhaPage() {
         <InputFloatingLabel
           id="novaSenha"
           type="password"
-          label="Nova Senha"
+          label={t('reset_password.field.new_password')}
           value={novaSenha}
           onChange={(e) => setNovaSenha(e.target.value)}
           icon={LockIcon}
@@ -150,7 +147,7 @@ export function MudarSenhaPage() {
         <InputFloatingLabel
           id="confirmarSenha"
           type="password"
-          label="Confirmar Senha"
+          label={t('reset_password.field.confirm_password')}
           value={confirmarSenha}
           onChange={(e) => setConfirmarSenha(e.target.value)}
           icon={LockIcon}
@@ -166,10 +163,10 @@ export function MudarSenhaPage() {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                SALVANDO...
+                {t('reset_password.button.submitting')}
               </span>
             ) : (
-              'REDEFINIR'
+              t('reset_password.button.submit')
             )}
           </button>
         </div>
@@ -183,7 +180,7 @@ export function MudarSenhaPage() {
         <div className="text-center mb-5">
           <LogoIcon className="h-[200px] w-auto mx-auto pointer-events-none -mb-1 text-lumi-primary" />
           <h1 className="text-[32px] font-bold text-gray-800 dark:text-gray-100">
-            Redefinir a Senha
+            {t('reset_password.title')}
           </h1>
         </div>
 
@@ -195,7 +192,7 @@ export function MudarSenhaPage() {
               to="/login"
               className="text-gray-500 dark:text-gray-400 hover:text-lumi-primary dark:hover:text-lumi-label text-sm font-medium"
             >
-              Cancelar e Voltar ao Login
+              {t('reset_password.link.cancel')}
             </Link>
           </div>
         )}

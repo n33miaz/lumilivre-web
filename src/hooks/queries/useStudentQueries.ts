@@ -4,14 +4,14 @@ import {
   buscarAlunosAvancado,
   type AlunoFilterParams,
   buscarAlunoPorMatricula,
-} from '../../services/alunoService';
+} from '../../services/studentService';
 
 import {
   buscarCursos,
   buscarEstatisticasGrafico,
-} from '../../services/cursoService';
-import { buscarModulos } from '../../services/moduloService';
-import { buscarTurnos } from '../../services/turnoService';
+} from '../../services/courseService';
+import { buscarModulos } from '../../services/academicModuleService';
+import { buscarTurnos } from '../../services/studyShiftService';
 
 const STATIC_DATA_CONFIG = {
   staleTime: 1000 * 60 * 60 * 24,
