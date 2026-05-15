@@ -5,7 +5,7 @@ import {
   buscarEmprestimosAtivosEAtrasados,
   buscarRanking,
   type EmprestimoFilterParams,
-} from '../../services/emprestimoService';
+} from '../../services/loanService';
 
 export function useEmprestimos(
   page: number,

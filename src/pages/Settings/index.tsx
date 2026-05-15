@@ -5,11 +5,14 @@ import {
   type ReactNode,
   type SVGProps,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useLocale } from '../../contexts/LocaleContext';
 import { ChangePasswordModal } from '../Auth/components/ChangePasswordModal';
+import type { SupportedLocale } from '../../i18n';
 
 import UploadIcon from '../../assets/icons/download.svg?react';
 import LockIcon from '../../assets/icons/lock.svg?react';
@@ -84,14 +87,17 @@ const SubPageHeader = ({
  * 
  * @returns {JSX.Element} Badge do "Em breve"
  */
-const ComingSoonBadge = () => (
-  <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 border border-amber-200 dark:border-amber-700/50 backdrop-blur-sm">
-    <span className="inline-block w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
-    <span className="text-xs font-medium text-amber-700 dark:text-amber-300 whitespace-nowrap">
-      Em breve
-    </span>
-  </div>
-);
+const ComingSoonBadge = () => {
+  const { t } = useTranslation('common');
+  return (
+    <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 border border-amber-200 dark:border-amber-700/50 backdrop-blur-sm">
+      <span className="inline-block w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
+      <span className="text-xs font-medium text-amber-700 dark:text-amber-300 whitespace-nowrap">
+        {t('coming_soon')}
+      </span>
+    </div>
+  );
+};
 
 /**
  * Componente ThemeButton - Botão individual de seleção de tema
@@ -155,9 +161,11 @@ const ThemeButton = ({ label, value, isSelected, onClick }: ThemeButtonProps) =>
 );
 
 export function ConfiguracoesPage() {
+  const { t } = useTranslation('settings');
   const { theme, setTheme } = useContext(ThemeContext);
   const { user, logoutWithAnimation } = useAuth();
   const { addToast } = useToast();
+  const { locale, setLocale } = useLocale();
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
@@ -185,49 +193,49 @@ export function ConfiguracoesPage() {
   const handleFeatureNotImplemented = () => {
     addToast({
       type: 'info',
-      title: 'Em desenvolvimento',
-      description: 'Esta funcionalidade estará disponível em breve.',
+      title: t('in_development', { ns: 'common' }),
+      description: t('feature_coming_soon', { ns: 'common' }),
     });
   };
 
   const renderImportView = () => (
     <div className="p-6">
-      <SubPageHeader title="Importar" onBack={() => setCurrentView('main')} />
+      <SubPageHeader title={t('import.title')} onBack={() => setCurrentView('main')} />
       <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
         <SettingItem
           Icon={UploadIcon}
-          title="Alunos"
-          description="Adicione um arquivo CSV ou XLSX com a relação de alunos"
+          title={t('import.students.title')}
+          description={t('import.students.description')}
         >
           <button
             onClick={handleFeatureNotImplemented}
             className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
           >
-            Selecionar
+            {t('import.button.select')}
           </button>
         </SettingItem>
         <SettingItem
           Icon={UploadIcon}
-          title="Livros"
-          description="Adicione um arquivo CSV ou XLSX com a relação de livros"
+          title={t('import.books.title')}
+          description={t('import.books.description')}
         >
           <button
             onClick={handleFeatureNotImplemented}
             className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
           >
-            Selecionar
+            {t('import.button.select')}
           </button>
         </SettingItem>
         <SettingItem
           Icon={UploadIcon}
-          title="Exemplares"
-          description="Adicione um arquivo CSV ou XLSX com a relação de exemplares dos livros"
+          title={t('import.copies.title')}
+          description={t('import.copies.description')}
         >
           <button
             onClick={handleFeatureNotImplemented}
             className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
           >
-            Selecionar
+            {t('import.button.select')}
           </button>
         </SettingItem>
       </div>
@@ -259,7 +267,7 @@ export function ConfiguracoesPage() {
 
       <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          Aparência
+          {t('section.appearance')}
         </h2>
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
           <SettingItem
@@ -275,24 +283,24 @@ export function ConfiguracoesPage() {
                 ? 'w-6 h-5'
                 : 'w-6 h-6'
             }
-            title="Tema"
-            description="Escolha sua preferência de tons na plataforma."
+            title={t('theme.title')}
+            description={t('theme.description')}
           >
             <div className="flex items-center gap-1.5 p-1.5 rounded-lg shadow-md bg-gray-100 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start backdrop-blur-sm">
               <ThemeButton
-                label="Claro"
+                label={t('theme.light')}
                 value="light"
                 isSelected={theme === 'light'}
                 onClick={() => setTheme('light')}
               />
               <ThemeButton
-                label="Automático"
+                label={t('theme.system')}
                 value="system"
                 isSelected={theme === 'system'}
                 onClick={() => setTheme('system')}
               />
               <ThemeButton
-                label="Escuro"
+                label={t('theme.dark')}
                 value="dark"
                 isSelected={theme === 'dark'}
                 onClick={() => setTheme('dark')}
@@ -304,32 +312,27 @@ export function ConfiguracoesPage() {
 
       <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          Aplicativo
+          {t('section.app')}
         </h2>
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
           <SettingItem
             Icon={UploadIcon}
-            title="Android"
-            description="Baixe a versão mais recente (APK) do aplicativo para alunos."
+            title={t('app.android.title')}
+            description={t('app.android.description')}
           >
             <a
               href="/lumilivre.apk"
               download="LumiLivre.apk"
               className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px] transition-all duration-200"
             >
-              Baixar
+              {t('app.android.button')}
             </a>
           </SettingItem>
 
-          {/* 
-            iOS - Coming Soon
-            Estilização customizada para "Em Breve"
-            TODO: Substituir por link funcional quando disponível
-          */}
           <SettingItem
             Icon={UploadIcon}
-            title="iOS"
-            description="Acesse a versão mais recente da plataforma para alunos."
+            title={t('app.ios.title')}
+            description={t('app.ios.description')}
           >
             <ComingSoonBadge />
           </SettingItem>
@@ -338,20 +341,49 @@ export function ConfiguracoesPage() {
 
       <div className="p-6 border-t border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          Conta
+          {t('section.account')}
         </h2>
         <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
           <SettingItem
             Icon={LockIcon}
-            title="Mudar Senha"
-            description="Altere sua senha de acesso."
+            title={t('account.change_password.title')}
+            description={t('account.change_password.description')}
           >
             <button
               onClick={() => setIsPasswordModalOpen(true)}
               className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px] transition-all duration-200"
             >
-              Alterar
+              {t('account.change_password.button')}
             </button>
+          </SettingItem>
+        </div>
+      </div>
+
+      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
+          {t('section.language')}
+        </h2>
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
+          <SettingItem
+            Icon={ToolsIcon}
+            title={t('language.title')}
+            description={t('language.description')}
+          >
+            <div className="flex items-center gap-2">
+              {(['pt-BR', 'en-US'] as SupportedLocale[]).map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setLocale(lang)}
+                  className={`px-3 py-1.5 rounded text-sm font-semibold transition-all ${
+                    locale === lang
+                      ? 'bg-lumi-primary text-white shadow'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {t(lang === 'pt-BR' ? 'language.pt_br' : 'language.en_us')}
+                </button>
+              ))}
+            </div>
           </SettingItem>
         </div>
       </div>
@@ -367,10 +399,10 @@ export function ConfiguracoesPage() {
           </div>
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
-              {isAdmin ? 'Olá, Administrador!' : 'Olá, Bibliotecário!'}
+              {isAdmin ? t('page.title.admin') : t('page.title.librarian')}
             </h1>
             <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-              Gerencie suas preferências do sistema.
+              {t('page.subtitle')}
             </p>
           </div>
         </div>
@@ -379,7 +411,7 @@ export function ConfiguracoesPage() {
           onClick={logoutWithAnimation}
           className="flex items-center justify-center space-x-2 py-2 px-4 rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 w-full sm:w-auto sm:ml-auto transition-all duration-200"
         >
-          <span className="font-bold">Sair da Conta</span>
+          <span className="font-bold">{t('button.logout')}</span>
           <LogoutIcon className="w-6 h-6 text-white" />
         </button>
       </div>

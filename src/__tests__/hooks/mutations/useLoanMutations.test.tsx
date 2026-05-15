@@ -8,9 +8,9 @@ import {
   useCompleteLoan,
   useDeleteLoan,
 } from '../../../hooks/mutations/useLoanMutations';
-import * as emprestimoService from '../../../services/emprestimoService';
+import * as emprestimoService from '../../../services/loanService';
 
-vi.mock('../../../services/emprestimoService');
+vi.mock('../../../services/loanService');
 const mockedCadastrar = vi.mocked(emprestimoService.cadastrarEmprestimo);
 const mockedConcluir = vi.mocked(emprestimoService.concluirEmprestimo);
 const mockedExcluir = vi.mocked(emprestimoService.excluirEmprestimo);

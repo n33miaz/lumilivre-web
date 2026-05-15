@@ -4,7 +4,7 @@ import { useCreateExemple } from '../../hooks/mutations/useExempleMutations';
 
 interface ExempleModalNewProps {
   onClose: () => void;
-  livroId: number;
+  livroId: string | number;
   livroIsbn: string;
   livroNome: string;
 }
@@ -20,7 +20,7 @@ export function ExempleModalNew({
   const handleSubmit = async (data: ExempleFormData) => {
     try {
       await createExemplar({
-        livro_id: livroId,
+        livro_id: String(livroId),
         status_livro: 'DISPONIVEL',
         ...data,
       });

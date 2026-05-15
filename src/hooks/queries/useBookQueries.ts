@@ -6,9 +6,9 @@ import {
   buscarEnum,
   type LivroFilterParams,
   buscarLivroPorId,
-} from '../../services/livroService';
-import { buscarGeneros } from '../../services/generoService';
-import { buscarExemplaresPorLivroId } from '../../services/exemplarService';
+} from '../../services/bookService';
+import { buscarGeneros } from '../../services/genreService';
+import { buscarExemplaresPorLivroId } from '../../services/bookCopyService';
 
 const STATIC_DATA_CONFIG = {
   staleTime: 1000 * 60 * 60 * 24, // 24 horas
@@ -46,7 +46,7 @@ export function useLivrosOptions() {
   });
 }
 
-export function useLivroDetalhes(id?: number) {
+export function useLivroDetalhes(id?: number | string) {
   return useQuery({
     queryKey: ['livro', id],
     queryFn: () => buscarLivroPorId(id!).then((res) => res.data),
@@ -54,7 +54,7 @@ export function useLivroDetalhes(id?: number) {
   });
 }
 
-export function useExemplares(livroId: number | null) {
+export function useExemplares(livroId: number | string | null) {
   return useQuery({
     queryKey: ['exemplares', livroId],
     queryFn: () => buscarExemplaresPorLivroId(livroId!),

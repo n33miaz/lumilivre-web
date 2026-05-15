@@ -4,10 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 import { useCreateStudent } from '../../../hooks/mutations/useStudentMutations';
-import * as alunoService from '../../../services/alunoService';
-import type { AlunoPayload } from '../../../services/alunoService';
+import * as alunoService from '../../../services/studentService';
+import type { AlunoPayload } from '../../../services/studentService';
 
-vi.mock('../../../services/alunoService');
+vi.mock('../../../services/studentService');
 const mockedCadastrarAluno = vi.mocked(alunoService.cadastrarAluno);
 
 const mockAddToast = vi.fn();

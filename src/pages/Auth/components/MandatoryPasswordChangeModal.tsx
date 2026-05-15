@@ -4,7 +4,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
-import api from '../../../services/api';
+import { changePassword } from '../../../services/authService';
 
 import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
@@ -44,11 +44,7 @@ export function MandatoryPasswordChangeModal() {
     setIsLoading(true);
 
     try {
-      await api.put('/usuarios/alterar-senha', {
-        matricula: '',
-        senhaAtual: senhaAtual,
-        novaSenha: novaSenha,
-      });
+      await changePassword('', senhaAtual, novaSenha);
 
       addToast({
         type: 'success',

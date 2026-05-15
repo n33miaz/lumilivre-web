@@ -44,5 +44,7 @@ export function hasCapability(role: string | undefined, capability: Capability):
 }
 
 export function getDefaultRouteForRole(role: string | undefined): string {
-  return hasCapability(role, 'canViewDashboard') ? '/dashboard' : '/classificacao';
+  return hasCapability(role, 'canViewDashboard')
+    ? '/admin/dashboard'
+    : '/admin/classificacao';
 }

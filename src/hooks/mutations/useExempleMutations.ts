@@ -5,7 +5,7 @@ import {
   excluirExemplar,
   type ExemplarPayload,
   type ExemplarUpdatePayload,
-} from '../../services/exemplarService';
+} from '../../services/bookCopyService';
 
 const EXEMPLAR_QUERY_KEY = ['exemplares'];
 
@@ -15,7 +15,7 @@ interface UpdateExemplarVariables {
 }
 interface DeleteExemplarVariables {
   tombo: string;
-  livroId: number;
+  livroId: number | string;
 }
 
 export const useCreateExemple = createMutationHook<unknown, ExemplarPayload>({

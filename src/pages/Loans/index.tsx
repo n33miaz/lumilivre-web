@@ -10,7 +10,7 @@ import { LoanModalNew } from '../../features/loans/LoanModalNew';
 import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 
 import { useEmprestimos } from '../../hooks/queries/useLoanQueries';
-import { type EmprestimoListagemDTO } from '../../services/emprestimoService';
+import { type EmprestimoListagemDTO } from '../../services/loanService';
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 
@@ -29,7 +29,7 @@ const emprestimosLegend = [
 
 interface EmprestimoDisplay {
   id: string;
-  rawId: number;
+  rawId: string;
   status: StatusEmprestimoDisplay;
   livro: string;
   isbn: string;
@@ -92,7 +92,7 @@ export function EmprestimosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetalhesOpen, setIsDetalhesOpen] = useState(false);
   const [emprestimoSelecionado, setEmprestimoSelecionado] = useState<{
-    id: number;
+    id: string;
     alunoMatricula: string;
     livroIsbn: string;
     livroNome?: string;
@@ -219,7 +219,7 @@ export function EmprestimosPage() {
         }
 
         return {
-          id: `${item.livroTombo}-${index}`,
+          id: item.id || `${item.livroTombo}-${index}`,
           rawId: item.id,
           status: status,
           livro: item.livroNome,

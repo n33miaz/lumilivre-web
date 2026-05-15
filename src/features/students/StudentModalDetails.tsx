@@ -14,7 +14,7 @@ import LockIcon from '../../assets/icons/lock.svg?react';
 import {
   type AlunoPayload,
   type ListaAluno,
-} from '../../services/alunoService';
+} from '../../services/studentService';
 import { useEnum } from '../../hooks/queries/useBookQueries';
 import { useAlunoDetalhes } from '../../hooks/queries/useStudentQueries';
 import {
@@ -136,7 +136,11 @@ export function ModalStudentDetails({
             <div className="space-y-4">
               <StudentForm
                 formId="form-edit-aluno"
-                initialData={alunoDetalhes}
+                initialData={
+                  alunoDetalhes
+                    ? { ...alunoDetalhes, penalidade: alunoDetalhes.penalidade ?? undefined }
+                    : undefined
+                }
                 readOnly={!isEditMode}
                 onSubmit={handleSubmit}
               />

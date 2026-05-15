@@ -4,7 +4,7 @@ import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
 import { TccForm } from './TccForm';
 
-import { type TccResponse, type TccPayload } from '../../services/tccService';
+import { type TccResponse, type TccPayload } from '../../services/thesisService';
 import {
   useUpdateTcc,
   useDeleteTcc,

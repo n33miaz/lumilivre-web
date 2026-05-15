@@ -6,6 +6,7 @@ import React from 'react';
 import { LoginPage } from '../../../pages/Auth/Login';
 import { AuthProvider } from '../../../contexts/AuthContext';
 import { ToastProvider } from '../../../contexts/ToastContext';
+import i18n, { DEFAULT_LOCALE } from '../../../i18n';
 import * as authService from '../../../services/authService';
 
 // Mocks
@@ -31,8 +32,9 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('Página: Login', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
+    await i18n.changeLanguage(DEFAULT_LOCALE);
   });
 
   it('deve realizar login com sucesso e redirecionar para o dashboard', async () => {
@@ -68,7 +70,7 @@ describe('Página: Login', () => {
     // O redirecionamento no seu código tem um setTimeout de 500ms
     await waitFor(
       () => {
-        expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+        expect(mockNavigate).toHaveBeenCalledWith('/admin/dashboard');
       },
       { timeout: 1000 },
     );

@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import HomeIcon from '../../assets/icons/home.svg?react';
 import HomeActiveIcon from '../../assets/icons/home-active.svg?react';
@@ -28,50 +29,50 @@ const prefetchSettings = () => import('../../pages/Settings');
 
 const navLinks = [
   {
-    path: '/dashboard',
-    label: 'Início',
+    path: '/admin/dashboard',
+    labelKey: 'dashboard',
     Icon: HomeIcon,
     ActiveIcon: HomeActiveIcon,
     capability: 'canViewDashboard',
   },
   {
-    path: '/livros',
-    label: 'Livros',
+    path: '/admin/livros',
+    labelKey: 'books',
     Icon: BookIcon,
     ActiveIcon: BookActiveIcon,
     capability: 'canManageBooks',
   },
   {
-    path: '/alunos',
-    label: 'Alunos',
+    path: '/admin/alunos',
+    labelKey: 'students',
     Icon: UsersIcon,
     ActiveIcon: UsersActiveIcon,
     capability: 'canManageStudents',
   },
   {
-    path: '/emprestimos',
-    label: 'Empréstimos',
+    path: '/admin/emprestimos',
+    labelKey: 'loans',
     Icon: LoansIcon,
     ActiveIcon: LoansActiveIcon,
     capability: 'canManageLoans',
   },
   {
-    path: '/tcc',
-    label: 'TCCs',
+    path: '/admin/tcc',
+    labelKey: 'tcc',
     Icon: EducationCap,
     ActiveIcon: EducationCapActive,
     capability: 'canManageTcc',
   },
   {
-    path: '/classificacao',
-    label: 'Classificação',
+    path: '/admin/classificacao',
+    labelKey: 'ranking',
     Icon: RankingIcon,
     ActiveIcon: RankingActiveIcon,
     capability: 'canViewRanking',
   },
   {
-    path: '/relatorios',
-    label: 'Relatórios',
+    path: '/admin/relatorios',
+    labelKey: 'reports',
     Icon: ReportIcon,
     ActiveIcon: ReportActiveIcon,
     capability: 'canViewReports',
@@ -91,6 +92,7 @@ export function Sidebar({
   isPinned,
   setPinned,
 }: SidebarProps) {
+  const { t } = useTranslation('nav');
   const { user } = useAuth();
   const visibleNavLinks = navLinks.filter((link) =>
     hasCapability(user?.role, link.capability as Capability),
@@ -131,7 +133,7 @@ export function Sidebar({
           className={`hover:opacity-75 p-2 ${
             isExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
-          title={isPinned ? 'Desafixar menu' : 'Fixar menu'}
+          title={isPinned ? t('unpin_menu') : t('pin_menu')}
         >
           <PinComponent className="w-6 h-6 text-white" />
         </button>
@@ -168,7 +170,7 @@ export function Sidebar({
                         isActive ? 'font-bold text-white' : 'text-gray-300'
                       }`}
                     >
-                      {link.label}
+                      {t(link.labelKey)}
                     </span>
                   </div>
                 </>
@@ -181,7 +183,7 @@ export function Sidebar({
       {canViewSettings && (
         <div className="p-2 border-t border-white/10 space-y-2">
         <NavLink
-          to="/configuracoes"
+          to="/admin/configuracoes"
           onMouseEnter={prefetchSettings}
           className={({ isActive }) =>
             `flex items-center p-3 justify-center rounded-lg hover:bg-white/20 ${
@@ -211,7 +213,7 @@ export function Sidebar({
                       isActive ? 'font-bold text-white' : 'text-gray-300'
                     }`}
                   >
-                    Configurações
+                    {t('settings')}
                   </span>
                 </div>
               </>

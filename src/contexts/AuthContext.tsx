@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   role: string;
   token: string;

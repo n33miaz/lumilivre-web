@@ -9,7 +9,7 @@ import { TccModalDetails } from '../../features/tcc/TccModalDetails';
 import { TccFilter } from '../../features/tcc/TccFilter';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 import { useTccs } from '../../hooks/queries/useTccQueries';
-import { type TccResponse } from '../../services/tccService';
+import { type TccResponse } from '../../services/thesisService';
 
 export function TccPage() {
   const [termoBusca, setTermoBusca] = useState('');

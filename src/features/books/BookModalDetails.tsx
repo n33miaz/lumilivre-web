@@ -9,7 +9,7 @@ import { BookForm } from './BookForm';
 import {
   type LivroAgrupado,
   type LivroPayload,
-} from '../../services/livroService';
+} from '../../services/bookService';
 import {
   useUpdateBook,
   useDeleteBook,

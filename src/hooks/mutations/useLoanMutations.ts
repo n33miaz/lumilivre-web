@@ -5,18 +5,18 @@ import {
   concluirEmprestimo,
   excluirEmprestimo,
   type EmprestimoPayload,
-} from '../../services/emprestimoService';
-import { processarSolicitacao } from '../../services/solicitacaoEmprestimoService';
+} from '../../services/loanService';
+import { processarSolicitacao } from '../../services/loanRequestService';
 
 const LOAN_QUERY_KEY = ['emprestimos'];
 const DASHBOARD_SOLICITACOES_KEY = ['dashboard-solicitacoes'];
 
 interface UpdateLoanVariables {
-  id: number;
+  id: string;
   payload: EmprestimoPayload;
 }
 interface ProcessRequestVariables {
-  id: number;
+  id: number | string;
   aceitar: boolean;
 }
 
@@ -34,14 +34,14 @@ export const useUpdateLoan = createMutationHook<unknown, UpdateLoanVariables>({
   errorMessage: 'Erro ao atualizar empréstimo.',
 });
 
-export const useCompleteLoan = createMutationHook<unknown, number>({
+export const useCompleteLoan = createMutationHook<unknown, string>({
   mutationFn: (id) => concluirEmprestimo(id),
   queryKey: LOAN_QUERY_KEY,
   successMessage: 'Devolução registrada com sucesso!',
   errorMessage: 'Erro ao registrar devolução.',
 });
 
-export const useDeleteLoan = createMutationHook<unknown, number>({
+export const useDeleteLoan = createMutationHook<unknown, string>({
   mutationFn: (id) => excluirEmprestimo(id),
   queryKey: LOAN_QUERY_KEY,
   successMessage: 'Empréstimo excluído com sucesso!',

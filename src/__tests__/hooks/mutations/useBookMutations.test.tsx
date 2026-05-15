@@ -8,9 +8,9 @@ import {
   useUpdateBook,
   useDeleteBook,
 } from '../../../hooks/mutations/useBookMutations';
-import * as livroService from '../../../services/livroService';
+import * as livroService from '../../../services/bookService';
 
-vi.mock('../../../services/livroService');
+vi.mock('../../../services/bookService');
 const mockedCadastrar = vi.mocked(livroService.cadastrarLivro);
 const mockedAtualizar = vi.mocked(livroService.atualizarLivro);
 const mockedExcluir = vi.mocked(livroService.excluirLivroComExemplares);

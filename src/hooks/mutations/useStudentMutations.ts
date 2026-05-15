@@ -5,7 +5,7 @@ import {
   excluirAluno,
   resetarSenhaAluno,
   type AlunoPayload,
-} from '../../services/alunoService';
+} from '../../services/studentService';
 
 const STUDENT_QUERY_KEY = ['alunos'];
 

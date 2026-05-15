@@ -6,7 +6,7 @@ interface LoginCredentials {
 }
 
 interface LoginResponse {
-  id: number;
+  id: string;
   email: string;
   role: string;
   matriculaAluno?: string;
@@ -17,16 +17,29 @@ interface LoginResponse {
 export const login = async (
   credentials: LoginCredentials,
 ): Promise<LoginResponse> => {
-  const response = await api.post('/auth/login', credentials);
-  return response.data;
+  const response = await api.post('/api/v2/auth/login', {
+    username: credentials.user,
+    password: credentials.senha,
+  });
+  return {
+    id: response.data.id,
+    email: response.data.email,
+    role: response.data.role,
+    matriculaAluno: response.data.studentRegistrationNumber,
+    token: response.data.token,
+    isInitialPassword: response.data.initialPasswordChange,
+  };
 };
 
 export const requestPasswordReset = async (
   email: string,
 ): Promise<{ mensagem: string }> => {
   try {
-    const response = await api.post('/auth/esqueci-senha', { email });
-    return response.data;
+    await api.post('/api/v2/auth/forgot-password', { email });
+    return {
+      mensagem:
+        'Se um e-mail correspondente for encontrado, um link para redefinição será enviado.',
+    };
   } catch (error) {
     console.error('Erro ao solicitar redefinição de senha:', error);
     return {
@@ -38,8 +51,8 @@ export const requestPasswordReset = async (
 
 export const validarTokenReset = async (token: string): Promise<boolean> => {
   try {
-    const response = await api.get(`/auth/validar-token/${token}`);
-    return response.data.valido === true;
+    const response = await api.get(`/api/v2/auth/validate-token/${token}`);
+    return response.data.valid === true;
   } catch (error) {
     console.error('Erro ao validar token:', error);
     return false;
@@ -51,10 +64,25 @@ export const mudarSenhaComToken = async (
   novaSenha: string,
 ): Promise<unknown> => {
   try {
-    const response = await api.post('/auth/mudar-senha', { token, novaSenha });
+    const response = await api.post('/api/v2/auth/reset-password', {
+      token,
+      newPassword: novaSenha,
+    });
     return response.data;
   } catch (error) {
     console.error('Erro ao mudar a senha:', error);
     throw error;
   }
+};
+
+export const changePassword = async (
+  registrationNumber: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> => {
+  await api.put('/api/v2/auth/change-password', {
+    registrationNumber,
+    currentPassword,
+    newPassword,
+  });
 };

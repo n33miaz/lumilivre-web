@@ -10,9 +10,9 @@ import { SearchableSelect } from '../../components/ui/SearchableSelect';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { useProcessLoanRequest } from '../../hooks/mutations/useLoanMutations';
 
-import { type SolicitacaoPendente } from '../../services/solicitacaoEmprestimoService';
-import { buscarLivrosAgrupados } from '../../services/livroService';
-import { buscarExemplaresPorLivroId } from '../../services/exemplarService';
+import { type SolicitacaoPendente } from '../../services/loanRequestService';
+import { buscarLivrosAgrupados } from '../../services/bookService';
+import { buscarExemplaresPorLivroId } from '../../services/bookCopyService';
 
 interface LoanModalRequestProps {
   solicitacao: SolicitacaoPendente | null;
@@ -85,7 +85,7 @@ export function LoanModalRequest({
   const executarProcessamento = async () => {
     if (confirmAction === null) return;
 
-    await processRequest({ id: solicitacaoAtual?.id ?? 0, aceitar: confirmAction });
+    await processRequest({ id: solicitacaoAtual?.id ?? '', aceitar: confirmAction });
     setConfirmAction(null);
     onClose(true);
   };

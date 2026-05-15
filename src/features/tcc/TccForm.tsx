@@ -12,7 +12,7 @@ import { CustomSelect } from '../../components/ui/CustomSelect';
 import { ImageUploader } from '../../components/ui/ImageUploader';
 
 import UploadIcon from '../../assets/icons/upload.svg?react';
-import type { TccResponse } from '../../services/tccService';
+import type { TccResponse } from '../../services/thesisService';
 
 interface TccFormProps {
   formId: string;

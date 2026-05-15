@@ -1,12 +1,13 @@
 import { lazy, Suspense } from 'react';
-import { Route, Routes, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleProtectedRoute } from './components/RoleProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import { LoadingIcon } from './components/ui/LoadingIcon';
 
-// Rotas Públicas
+// Rotas Publicas
+import { LandingPage } from './pages/Landing';
 import { LoginPage } from './pages/Auth/Login';
 import { EsqueciSenhaPage } from './pages/Auth/ForgotPassword';
 import { MudarSenhaPage } from './pages/Auth/ChangePassword';
@@ -28,7 +29,6 @@ const PageLoader = () => (
   </div>
 );
 
-// Componente de Layout para Rotas Protegidas
 const ProtectedLayout = () => (
   <ProtectedRoute>
     <MainLayout>
@@ -42,36 +42,39 @@ const ProtectedLayout = () => (
 function App() {
   return (
     <Routes>
-      {/* Rotas Públicas */}
+      {/* Rotas Publicas */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/esqueci-a-senha" element={<EsqueciSenhaPage />} />
       <Route path="/mudar-senha" element={<MudarSenhaPage />} />
       <Route path="/download" element={<DownloadAppPage />} />
 
-      {/* Rotas Protegidas */}
-      <Route element={<ProtectedLayout />}>
-        <Route
-          path="/"
-          element={
-            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']} fallback="/classificacao">
-              <DashboardPage />
-            </RoleProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']} fallback="/classificacao">
-              <DashboardPage />
-            </RoleProtectedRoute>
-          }
-        />
-        <Route path="/classificacao" element={<ClassificacaoPage />} />
-        <Route path="/configuracoes" element={<ConfiguracoesPage />} />
+      {/* Redirecionamentos legados das rotas antigas para /admin/* */}
+      <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/livros" element={<Navigate to="/admin/livros" replace />} />
+      <Route path="/alunos" element={<Navigate to="/admin/alunos" replace />} />
+      <Route path="/emprestimos" element={<Navigate to="/admin/emprestimos" replace />} />
+      <Route path="/tcc" element={<Navigate to="/admin/tcc" replace />} />
+      <Route path="/classificacao" element={<Navigate to="/admin/classificacao" replace />} />
+      <Route path="/relatorios" element={<Navigate to="/admin/relatorios" replace />} />
+      <Route path="/configuracoes" element={<Navigate to="/admin/configuracoes" replace />} />
 
-        {/* Admin + Bibliotecário */}
+      {/* Painel (todas as rotas protegidas vivem sob /admin) */}
+      <Route path="/admin" element={<ProtectedLayout />}>
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route
-          path="/livros"
+          path="dashboard"
+          element={
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']} fallback="/admin/classificacao">
+              <DashboardPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route path="classificacao" element={<ClassificacaoPage />} />
+        <Route path="configuracoes" element={<ConfiguracoesPage />} />
+
+        <Route
+          path="livros"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
               <LivrosPage />
@@ -79,7 +82,7 @@ function App() {
           }
         />
         <Route
-          path="/alunos"
+          path="alunos"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
               <AlunosPage />
@@ -87,7 +90,7 @@ function App() {
           }
         />
         <Route
-          path="/emprestimos"
+          path="emprestimos"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
               <EmprestimosPage />
@@ -95,7 +98,7 @@ function App() {
           }
         />
         <Route
-          path="/tcc"
+          path="tcc"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
               <TccPage />
@@ -103,7 +106,7 @@ function App() {
           }
         />
         <Route
-          path="/relatorios"
+          path="relatorios"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
               <RelatoriosPage />
@@ -111,6 +114,8 @@ function App() {
           }
         />
       </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

@@ -32,12 +32,12 @@ import BookIcon from '../../assets/icons/books-active.svg?react';
 import UsersIcon from '../../assets/icons/users-active.svg?react';
 import AlertIcon from '../../assets/icons/alert.svg?react';
 import LoansIcon from '../../assets/icons/loans-active.svg?react';
-import type { EmprestimoAtivoDTO } from '../../services/emprestimoService';
+import type { EmprestimoAtivoDTO } from '../../services/loanService';
 
 const CHART_COLORS = ['#762075', '#0f766e', '#dc2626', '#ca8a04', '#2563eb'];
 
 interface EmprestimoVencer {
-  id: number;
+  id: string;
   livro: string;
   isbn: string;
   aluno: string;
@@ -50,7 +50,7 @@ interface EmprestimoVencer {
 }
 
 interface SolicitacaoDisplay {
-  id: number;
+  id: string;
   aluno: string;
   alunoMatricula?: string;
   livro: string;
@@ -96,7 +96,7 @@ export function DashboardPage() {
 
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<{
-    id: number;
+    id: string;
     alunoMatricula: string;
     livroIsbn: string;
     livroNome?: string;
@@ -107,7 +107,7 @@ export function DashboardPage() {
 
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<{
-    id: number;
+    id: string;
     alunoNome: string;
     alunoMatricula?: string;
     livroNome: string;
@@ -501,7 +501,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 shrink-0">
         <StatCard
-          to="/livros"
+          to="/admin/livros"
           Icon={BookIcon}
           title="LIVROS"
           value={statsData?.livros ?? 0}
@@ -511,7 +511,7 @@ export function DashboardPage() {
         />
 
         <StatCard
-          to="/alunos"
+          to="/admin/alunos"
           Icon={UsersIcon}
           title="ALUNOS"
           value={statsData?.alunos ?? 0}
@@ -521,7 +521,7 @@ export function DashboardPage() {
         />
 
         <StatCard
-          to="/emprestimos"
+          to="/admin/emprestimos"
           Icon={LoansIcon}
           title="EMPRÉSTIMOS"
           value={statsData?.emprestimosAtivos ?? 0}
@@ -531,7 +531,7 @@ export function DashboardPage() {
         />
 
         <StatCard
-          to="/emprestimos?filtro=atrasados"
+          to="/admin/emprestimos?filtro=atrasados"
           Icon={AlertIcon}
           title="PENDÊNCIAS"
           value={statsData?.atrasados ?? 0}

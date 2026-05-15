@@ -5,7 +5,7 @@ import { FilterPanel } from '../../components/ui/FilterPanel';
 import { CustomSelect } from '../../components/ui/CustomSelect';
 import { SearchableSelect } from '../../components/ui/SearchableSelect';
 
-import { buscarLivrosParaAdmin } from '../../services/livroService';
+import { buscarLivrosParaAdmin } from '../../services/bookService';
 import {
   useGeneros,
   useCdds,

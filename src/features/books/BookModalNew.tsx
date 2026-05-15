@@ -1,7 +1,7 @@
 import { Button } from '../../components/ui/Button';
 import { BookForm } from './BookForm';
 import { useCreateBook } from '../../hooks/mutations/useBookMutations';
-import { type LivroPayload } from '../../services/livroService';
+import { type LivroPayload } from '../../services/bookService';
 import { type BookFormData } from '../../schemas/bookSchema';
 
 interface BookModalNewProps {

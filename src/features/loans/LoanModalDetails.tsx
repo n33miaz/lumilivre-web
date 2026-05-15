@@ -7,8 +7,8 @@ import { Button } from '../../components/ui/Button';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
 import { LoanForm } from './LoanForm';
 
-import { buscarLivrosAgrupados } from '../../services/livroService';
-import { type EmprestimoPayload } from '../../services/emprestimoService';
+import { buscarLivrosAgrupados } from '../../services/bookService';
+import { type EmprestimoPayload } from '../../services/loanService';
 import {
   useUpdateLoan,
   useCompleteLoan,
@@ -17,7 +17,7 @@ import {
 import { type LoanFormData } from '../../schemas/loanSchema';
 
 interface EmprestimoDados {
-  id: string | number;
+  id: string;
   alunoMatricula: string;
   alunoNome?: string;
   livroIsbn: string;
@@ -85,24 +85,17 @@ export function ModalLoanDetails({
     }
   }, [emprestimoAtual, livrosData]);
 
-  const formatarDataParaBackend = (dataIso: string): string => {
-    if (!dataIso) return '';
-    const [ano, mes, dia] = dataIso.split('-');
-    const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour12: false });
-    return `${dia}/${mes}/${ano} ${horaAtual}`;
-  };
-
   const handleSubmit = async (data: LoanFormData) => {
     try {
       const payload: EmprestimoPayload = {
-        id: Number(emprestimoAtual?.id),
+        id: emprestimoAtual?.id,
         aluno_matricula: data.aluno_matricula,
         exemplar_tombo: data.exemplar_tombo,
-        data_emprestimo: formatarDataParaBackend(data.data_emprestimo),
-        data_devolucao: formatarDataParaBackend(data.data_devolucao),
+        data_emprestimo: data.data_emprestimo,
+        data_devolucao: data.data_devolucao,
       };
 
-      await updateLoan({ id: Number(emprestimoAtual?.id), payload });
+      await updateLoan({ id: String(emprestimoAtual?.id), payload });
       setIsEditMode(false);
       onClose(true);
     } catch (error) {
@@ -111,13 +104,13 @@ export function ModalLoanDetails({
   };
 
   const handleDevolucao = async () => {
-    await completeLoan(Number(emprestimoAtual?.id));
+    await completeLoan(String(emprestimoAtual?.id));
     setConfirmAction(null);
     onClose(true);
   };
 
   const handleExcluir = async () => {
-    await deleteLoan(Number(emprestimoAtual?.id));
+    await deleteLoan(String(emprestimoAtual?.id));
     setConfirmAction(null);
     onClose(true);
   };

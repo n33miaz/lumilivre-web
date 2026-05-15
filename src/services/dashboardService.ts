@@ -25,20 +25,35 @@ export interface EmprestimosPorMesDashboard {
 
 export const getDashboardGerencialStats =
   async (): Promise<DashboardGerencialStats> => {
-    const response = await api.get<DashboardGerencialStats>('/dashboard/stats');
-    return response.data;
+    const response = await api.get('/api/v2/dashboard/stats');
+    return {
+      emprestimosAtivos: response.data.activeLoans,
+      emprestimosAtrasados: response.data.overdueLoans,
+      emprestimosConcluidos: response.data.completedLoans,
+      mediaDiasDevolucao: response.data.avgReturnDays,
+      solicitacoesPendentes: response.data.pendingRequests,
+      reservasAguardando: response.data.waitingReservations,
+    };
   };
 
 export const getTopLivrosDashboard = async (): Promise<TopLivroDashboard[]> => {
-  const response = await api.get<TopLivroDashboard[]>('/dashboard/top-livros');
-  return response.data || [];
+  const response = await api.get('/api/v2/dashboard/top-books');
+  return (response.data || []).map((item: Record<string, unknown>) => ({
+    livroId: String(item.bookId),
+    titulo: item.title as string,
+    autor: item.author as string | null,
+    imagem: item.coverUrl as string | null,
+    totalEmprestimos: item.totalLoans as number,
+    avaliacao: item.rating as number,
+  }));
 };
 
 export const getEmprestimosPorMesDashboard = async (): Promise<
   EmprestimosPorMesDashboard[]
 > => {
-  const response = await api.get<EmprestimosPorMesDashboard[]>(
-    '/dashboard/emprestimos-por-mes',
-  );
-  return response.data || [];
+  const response = await api.get('/api/v2/dashboard/loans-by-month');
+  return (response.data || []).map((item: Record<string, unknown>) => ({
+    mes: item.month as string,
+    total: item.total as number,
+  }));
 };
