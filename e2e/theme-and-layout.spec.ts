@@ -85,7 +85,7 @@ test.describe('Responsive Layout', () => {
     await mockAllApiCalls(page);
 
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/dashboard');
+    await page.goto('/admin/dashboard');
 
     const sidebar = page.locator('aside');
     // Em mobile a sidebar deve estar translateX(-100%) — fora da tela
@@ -97,7 +97,7 @@ test.describe('Responsive Layout', () => {
     await mockAllApiCalls(page);
 
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto('/dashboard');
+    await page.goto('/admin/dashboard');
 
     const sidebar = page.locator('aside');
     await expect(sidebar).toBeVisible();
