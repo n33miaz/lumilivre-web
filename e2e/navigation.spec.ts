@@ -38,77 +38,77 @@ async function injectAuthUser(page: Page) {
 
 /** Mocks all common API calls so protected pages don't break. */
 async function mockAllApis(page: Page) {
-  await page.route('**/alunos/**', (route) =>
+  await page.route('**/api/v2/students**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/livros/**', (route) =>
+  await page.route('**/api/v2/books**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/emprestimos/**', (route) =>
+  await page.route('**/api/v2/loans**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(0),
     }),
   );
-  await page.route('**/solicitacoes/**', (route) =>
+  await page.route('**/api/v2/loan-requests**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/tcc/**', (route) =>
+  await page.route('**/api/v2/theses**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ data: [] }),
     }),
   );
-  await page.route('**/cursos/**', (route) =>
+  await page.route('**/api/v2/courses**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [] }),
     }),
   );
-  await page.route('**/enums/**', (route) =>
+  await page.route('**/api/v2/metadata/enums/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/generos', (route) =>
+  await page.route('**/api/v2/genres', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/turnos', (route) =>
+  await page.route('**/api/v2/study-shifts', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/modulos', (route) =>
+  await page.route('**/api/v2/academic-modules', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/relatorios/**', (route) =>
+  await page.route('**/api/v2/reports/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/octet-stream',
@@ -121,14 +121,14 @@ async function mockAllApis(page: Page) {
 
 test.describe('Protected Routes — Unauthenticated', () => {
   const protectedPaths = [
-    '/dashboard',
-    '/livros',
-    '/alunos',
-    '/emprestimos',
-    '/tcc',
-    '/classificacao',
-    '/relatorios',
-    '/configuracoes',
+    '/admin/dashboard',
+    '/admin/livros',
+    '/admin/alunos',
+    '/admin/emprestimos',
+    '/admin/tcc',
+    '/admin/classificacao',
+    '/admin/relatorios',
+    '/admin/configuracoes',
   ];
 
   for (const path of protectedPaths) {
@@ -150,29 +150,29 @@ test.describe('Sidebar Navigation — Authenticated', () => {
   });
 
   test('should render sidebar with all navigation links', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/admin/dashboard');
     const sidebar = page.locator('aside');
     await expect(sidebar).toBeVisible();
   });
 
   test('should navigate between pages via sidebar', async ({ page }) => {
-    await page.goto('/dashboard');
+    await page.goto('/admin/dashboard');
 
     // Navigate to Livros
     await page
       .locator('aside')
       .getByRole('link', { name: /livros/i })
       .click();
-    await page.waitForURL('**/livros', { timeout: 5000 });
-    expect(page.url()).toContain('/livros');
+    await page.waitForURL('**/admin/livros', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/livros');
 
     // Navigate to Alunos
     await page
       .locator('aside')
       .getByRole('link', { name: /alunos/i })
       .click();
-    await page.waitForURL('**/alunos', { timeout: 5000 });
-    expect(page.url()).toContain('/alunos');
+    await page.waitForURL('**/admin/alunos', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/alunos');
   });
 });
 
@@ -183,28 +183,28 @@ test.describe('Session Expiry', () => {
     await injectAuthUser(page);
 
     // First load works
-    await page.route('**/livros/**', (route) =>
+    await page.route('**/api/v2/books**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/alunos/**', (route) =>
+    await page.route('**/api/v2/students**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/emprestimos/**', (route) =>
+    await page.route('**/api/v2/loans**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(0),
       }),
     );
-    await page.route('**/solicitacoes/**', (route) =>
+    await page.route('**/api/v2/loan-requests**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -212,14 +212,14 @@ test.describe('Session Expiry', () => {
       }),
     );
 
-    await page.goto('/dashboard');
+    await page.goto('/admin/dashboard');
 
     // Now simulate 401 on next navigation
-    await page.route('**/livros/**', (route) =>
+    await page.route('**/api/v2/books**', (route) =>
       route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ mensagem: 'Token expirado' }),
+        body: JSON.stringify({ message: 'Token expirado' }),
       }),
     );
 

@@ -12,11 +12,11 @@ test.describe('Login Page', () => {
   });
 
   test('should show error toast on invalid credentials', async ({ page }) => {
-    await page.route('**/auth/login', (route) =>
+    await page.route('**/api/v2/auth/login', (route) =>
       route.fulfill({
         status: 401,
         contentType: 'application/json',
-        body: JSON.stringify({ mensagem: 'Credenciais inválidas' }),
+        body: JSON.stringify({ message: 'Credenciais invalidas' }),
       }),
     );
 
@@ -31,43 +31,43 @@ test.describe('Login Page', () => {
   });
 
   test('should redirect to dashboard on successful login', async ({ page }) => {
-    await page.route('**/auth/login', (route) =>
+    await page.route('**/api/v2/auth/login', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          id: 1,
+          id: '1',
           email: 'admin@test.com',
           role: 'ADMIN',
           token: 'fake-jwt-token',
-          isInitialPassword: false,
+          initialPasswordChange: false,
         }),
       }),
     );
 
     // Mock all dashboard API calls to prevent errors
-    await page.route('**/alunos/**', (route) =>
+    await page.route('**/api/v2/students**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ totalElements: 0 }),
+        body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/livros/**', (route) =>
+    await page.route('**/api/v2/books**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ totalElements: 0 }),
+        body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/emprestimos/**', (route) =>
+    await page.route('**/api/v2/loans**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(0),
       }),
     );
-    await page.route('**/solicitacoes/**', (route) =>
+    await page.route('**/api/v2/loan-requests**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -80,20 +80,26 @@ test.describe('Login Page', () => {
     await page.getByLabel(/Senha/i).fill('pass123');
     await page.getByRole('button', { name: /ENTRAR/i }).click();
 
-    await page.waitForURL('**/dashboard', { timeout: 5000 });
-    expect(page.url()).toContain('/dashboard');
+    await page.waitForURL('**/admin/dashboard', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/dashboard');
   });
 
   test('should disable button and show spinner while loading', async ({
     page,
   }) => {
     // Slow response to see loading state
-    await page.route('**/auth/login', async (route) => {
+    await page.route('**/api/v2/auth/login', async (route) => {
       await new Promise((r) => setTimeout(r, 2000));
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: '{}',
+        body: JSON.stringify({
+          id: '1',
+          email: 'admin@test.com',
+          role: 'ADMIN',
+          token: 'fake-jwt-token',
+          initialPasswordChange: false,
+        }),
       });
     });
 
@@ -135,11 +141,11 @@ test.describe('Forgot Password Page', () => {
   test('should show success toast on valid email submission', async ({
     page,
   }) => {
-    await page.route('**/auth/esqueci-senha', (route) =>
+    await page.route('**/api/v2/auth/forgot-password', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ mensagem: 'Link enviado com sucesso.' }),
+        body: '{}',
       }),
     );
 

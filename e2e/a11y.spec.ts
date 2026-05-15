@@ -17,56 +17,56 @@ async function injectAuthUser(page: Page) {
 }
 
 async function mockProtectedApis(page: Page) {
-  await page.route('**/alunos/**', (route) =>
+  await page.route('**/api/v2/students**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/livros/**', (route) =>
+  await page.route('**/api/v2/books**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/emprestimos/**', (route) =>
+  await page.route('**/api/v2/loans**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(0),
     }),
   );
-  await page.route('**/solicitacoes/**', (route) =>
+  await page.route('**/api/v2/loan-requests**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/cursos/**', (route) =>
+  await page.route('**/api/v2/courses**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [] }),
     }),
   );
-  await page.route('**/turnos', (route) =>
+  await page.route('**/api/v2/study-shifts', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/modulos', (route) =>
+  await page.route('**/api/v2/academic-modules', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/enums/**', (route) =>
+  await page.route('**/api/v2/metadata/enums/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -85,6 +85,12 @@ async function expectNoCriticalA11yViolations(page: Page) {
 }
 
 test.describe('Acessibilidade critica', () => {
+  test('Landing publica nao deve ter violacoes criticas', async ({ page }) => {
+    await page.goto('/');
+
+    await expectNoCriticalA11yViolations(page);
+  });
+
   test('Login nao deve ter violacoes criticas', async ({ page }) => {
     await page.goto('/login');
 
@@ -92,10 +98,10 @@ test.describe('Acessibilidade critica', () => {
   });
 
   const protectedPages = [
-    '/dashboard',
-    '/livros',
-    '/alunos',
-    '/emprestimos',
+    '/admin/dashboard',
+    '/admin/livros',
+    '/admin/alunos',
+    '/admin/emprestimos',
   ] as const;
 
   for (const path of protectedPages) {
