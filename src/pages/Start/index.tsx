@@ -501,7 +501,7 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 shrink-0">
         <StatCard
-          to="/admin/livros"
+          to="/admin/books"
           Icon={BookIcon}
           title="LIVROS"
           value={statsData?.livros ?? 0}
@@ -511,7 +511,7 @@ export function DashboardPage() {
         />
 
         <StatCard
-          to="/admin/alunos"
+          to="/admin/students"
           Icon={UsersIcon}
           title="ALUNOS"
           value={statsData?.alunos ?? 0}
@@ -521,7 +521,7 @@ export function DashboardPage() {
         />
 
         <StatCard
-          to="/admin/emprestimos"
+          to="/admin/loans"
           Icon={LoansIcon}
           title="EMPRÉSTIMOS"
           value={statsData?.emprestimosAtivos ?? 0}
@@ -531,7 +531,7 @@ export function DashboardPage() {
         />
 
         <StatCard
-          to="/admin/emprestimos?filtro=atrasados"
+          to="/admin/loans?filtro=atrasados"
           Icon={AlertIcon}
           title="PENDÊNCIAS"
           value={statsData?.atrasados ?? 0}

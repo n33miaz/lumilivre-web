@@ -6,13 +6,13 @@ describe('navigationOrder', () => {
     it('deve conter todas as rotas /admin/* principais na ordem esperada', () => {
       expect(routeOrder).toEqual([
         '/admin/dashboard',
-        '/admin/livros',
-        '/admin/alunos',
-        '/admin/emprestimos',
-        '/admin/tcc',
-        '/admin/classificacao',
-        '/admin/relatorios',
-        '/admin/configuracoes',
+        '/admin/books',
+        '/admin/students',
+        '/admin/loans',
+        '/admin/theses',
+        '/admin/ranking',
+        '/admin/reports',
+        '/admin/settings',
       ]);
     });
 
@@ -32,10 +32,10 @@ describe('navigationOrder', () => {
 
     it('deve retornar o indice correto para rotas conhecidas', () => {
       expect(getRouteIndex('/admin/dashboard')).toBe(0);
-      expect(getRouteIndex('/admin/livros')).toBe(1);
-      expect(getRouteIndex('/admin/alunos')).toBe(2);
-      expect(getRouteIndex('/admin/emprestimos')).toBe(3);
-      expect(getRouteIndex('/admin/configuracoes')).toBe(7);
+      expect(getRouteIndex('/admin/books')).toBe(1);
+      expect(getRouteIndex('/admin/students')).toBe(2);
+      expect(getRouteIndex('/admin/loans')).toBe(3);
+      expect(getRouteIndex('/admin/settings')).toBe(7);
     });
 
     it('deve retornar 0 para rotas desconhecidas', () => {
@@ -43,8 +43,8 @@ describe('navigationOrder', () => {
     });
 
     it('deve ignorar query strings ao determinar o indice', () => {
-      expect(getRouteIndex('/admin/livros?page=1')).toBe(1);
-      expect(getRouteIndex('/admin/alunos?search=teste&page=2')).toBe(2);
+      expect(getRouteIndex('/admin/books?page=1')).toBe(1);
+      expect(getRouteIndex('/admin/students?search=teste&page=2')).toBe(2);
     });
   });
 });

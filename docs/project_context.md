@@ -44,19 +44,21 @@ O padrao efetivo e uma arquitetura frontend feature-oriented, com Service Layer 
 ## Rotas e Modulos
 
 - Publicas:
+  - `/`: landing page publica.
   - `/login`: autenticacao.
-  - `/esqueci-a-senha`: solicitacao de reset.
-  - `/mudar-senha`: troca com token.
+  - `/forgot-password`: solicitacao de reset (legado: `/esqueci-a-senha` redireciona).
+  - `/change-password`: troca com token (legado: `/mudar-senha` redireciona).
   - `/download`: pagina de download do app.
-- Protegidas por `ProtectedRoute`:
-  - `/` e `/dashboard`: metricas, emprestimos e solicitacoes.
-  - `/livros`: livros, exemplares, cadastro com capa e consulta por ISBN.
-  - `/alunos`: alunos, filtros, cadastro, detalhes, reset de senha.
-  - `/emprestimos`: emprestimos, filtros, cadastro, conclusao e exclusao.
-  - `/tcc`: TCCs, PDF, capa e filtros.
-  - `/classificacao`: ranking de leitura.
-  - `/relatorios`: download de relatorios PDF.
-  - `/configuracoes`: alteracao de senha, tema e logout.
+- Protegidas por `ProtectedRoute` (sob `/admin/*`):
+  - `/admin/dashboard`: metricas, emprestimos e solicitacoes.
+  - `/admin/books`: livros, exemplares, cadastro com capa e consulta por ISBN.
+  - `/admin/students`: alunos, filtros, cadastro, detalhes, reset de senha.
+  - `/admin/loans`: emprestimos, filtros, cadastro, conclusao e exclusao.
+  - `/admin/theses`: TCCs, PDF, capa e filtros.
+  - `/admin/ranking`: ranking de leitura.
+  - `/admin/reports`: download de relatorios PDF.
+  - `/admin/settings`: alteracao de senha, tema e logout.
+- Rotas PT legadas (`/livros`, `/alunos`, `/emprestimos`, `/tcc`, `/classificacao`, `/relatorios`, `/configuracoes`, e suas variantes `/admin/<pt>`) redirecionam para os caminhos EN acima.
 
 ## Autenticacao e Comunicacao
 

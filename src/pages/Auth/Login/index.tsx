@@ -128,7 +128,7 @@ export function LoginPage() {
 
         <div className="text-center mt-4">
           <Link
-            to="/esqueci-a-senha"
+            to="/forgot-password"
             className="text-gray-500 dark:text-gray-400 hover:text-lumi-primary dark:hover:text-lumi-label text-sm font-medium"
           >
             {t('login.link.forgot_password')}

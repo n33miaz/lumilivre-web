@@ -122,13 +122,13 @@ async function mockAllApis(page: Page) {
 test.describe('Protected Routes — Unauthenticated', () => {
   const protectedPaths = [
     '/admin/dashboard',
-    '/admin/livros',
-    '/admin/alunos',
-    '/admin/emprestimos',
-    '/admin/tcc',
-    '/admin/classificacao',
-    '/admin/relatorios',
-    '/admin/configuracoes',
+    '/admin/books',
+    '/admin/students',
+    '/admin/loans',
+    '/admin/theses',
+    '/admin/ranking',
+    '/admin/reports',
+    '/admin/settings',
   ];
 
   for (const path of protectedPaths) {
@@ -163,16 +163,16 @@ test.describe('Sidebar Navigation — Authenticated', () => {
       .locator('aside')
       .getByRole('link', { name: /livros/i })
       .click();
-    await page.waitForURL('**/admin/livros', { timeout: 5000 });
-    expect(page.url()).toContain('/admin/livros');
+    await page.waitForURL('**/admin/books', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/books');
 
     // Navigate to Alunos
     await page
       .locator('aside')
       .getByRole('link', { name: /alunos/i })
       .click();
-    await page.waitForURL('**/admin/alunos', { timeout: 5000 });
-    expect(page.url()).toContain('/admin/alunos');
+    await page.waitForURL('**/admin/students', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/students');
   });
 });
 

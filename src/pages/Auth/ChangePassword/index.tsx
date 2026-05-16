@@ -123,7 +123,7 @@ export function MudarSenhaPage() {
             {errorToken}
           </div>
           <Link
-            to="/esqueci-a-senha"
+            to="/forgot-password"
             className="text-lumi-primary hover:underline font-bold"
           >
             {t('reset_password.link.request_new')}

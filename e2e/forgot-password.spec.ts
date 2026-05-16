@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Forgot Password Page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/esqueci-a-senha');
+    await page.goto('/forgot-password');
   });
 
   test('should render forgot password form', async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe('Forgot Password Page', () => {
   test('should navigate from login to forgot password', async ({ page }) => {
     await page.goto('/login');
     await page.getByText('Esqueceu sua senha?').click();
-    await page.waitForURL('**/esqueci-a-senha');
+    await page.waitForURL('**/forgot-password');
     await expect(page.getByText('Esqueci a Senha')).toBeVisible();
   });
 });

@@ -1,12 +1,12 @@
 export const routeOrder = [
   '/admin/dashboard',
-  '/admin/livros',
-  '/admin/alunos',
-  '/admin/emprestimos',
-  '/admin/tcc',
-  '/admin/classificacao',
-  '/admin/relatorios',
-  '/admin/configuracoes',
+  '/admin/books',
+  '/admin/students',
+  '/admin/loans',
+  '/admin/theses',
+  '/admin/ranking',
+  '/admin/reports',
+  '/admin/settings',
 ];
 
 export const getRouteIndex = (path: string) => {

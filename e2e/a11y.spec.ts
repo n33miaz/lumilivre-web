@@ -99,9 +99,9 @@ test.describe('Acessibilidade critica', () => {
 
   const protectedPages = [
     '/admin/dashboard',
-    '/admin/livros',
-    '/admin/alunos',
-    '/admin/emprestimos',
+    '/admin/books',
+    '/admin/students',
+    '/admin/loans',
   ] as const;
 
   for (const path of protectedPages) {

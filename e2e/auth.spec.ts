@@ -125,7 +125,7 @@ test.describe('Forgot Password Page', () => {
   });
 
   test('should show warning for invalid email', async ({ page }) => {
-    await page.goto('/esqueci-a-senha');
+    await page.goto('/forgot-password');
     // Bypass HTML5 email validation to test custom JS validation
     await page.evaluate(() =>
       document.querySelector('form')?.setAttribute('novalidate', ''),
@@ -149,7 +149,7 @@ test.describe('Forgot Password Page', () => {
       }),
     );
 
-    await page.goto('/esqueci-a-senha');
+    await page.goto('/forgot-password');
     await page.getByLabel(/Email/i).fill('user@test.com');
     await page.getByRole('button', { name: /ENVIAR LINK/i }).click();
 
@@ -159,7 +159,7 @@ test.describe('Forgot Password Page', () => {
   });
 
   test('should navigate back to login page', async ({ page }) => {
-    await page.goto('/esqueci-a-senha');
+    await page.goto('/forgot-password');
     await page.getByText('Voltar para o Login').click();
 
     await expect(page.getByRole('button', { name: /ENTRAR/i })).toBeVisible();

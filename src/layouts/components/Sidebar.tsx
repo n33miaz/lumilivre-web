@@ -36,42 +36,42 @@ const navLinks = [
     capability: 'canViewDashboard',
   },
   {
-    path: '/admin/livros',
+    path: '/admin/books',
     labelKey: 'books',
     Icon: BookIcon,
     ActiveIcon: BookActiveIcon,
     capability: 'canManageBooks',
   },
   {
-    path: '/admin/alunos',
+    path: '/admin/students',
     labelKey: 'students',
     Icon: UsersIcon,
     ActiveIcon: UsersActiveIcon,
     capability: 'canManageStudents',
   },
   {
-    path: '/admin/emprestimos',
+    path: '/admin/loans',
     labelKey: 'loans',
     Icon: LoansIcon,
     ActiveIcon: LoansActiveIcon,
     capability: 'canManageLoans',
   },
   {
-    path: '/admin/tcc',
+    path: '/admin/theses',
     labelKey: 'tcc',
     Icon: EducationCap,
     ActiveIcon: EducationCapActive,
     capability: 'canManageTcc',
   },
   {
-    path: '/admin/classificacao',
+    path: '/admin/ranking',
     labelKey: 'ranking',
     Icon: RankingIcon,
     ActiveIcon: RankingActiveIcon,
     capability: 'canViewRanking',
   },
   {
-    path: '/admin/relatorios',
+    path: '/admin/reports',
     labelKey: 'reports',
     Icon: ReportIcon,
     ActiveIcon: ReportActiveIcon,
@@ -183,7 +183,7 @@ export function Sidebar({
       {canViewSettings && (
         <div className="p-2 border-t border-white/10 space-y-2">
         <NavLink
-          to="/admin/configuracoes"
+          to="/admin/settings"
           onMouseEnter={prefetchSettings}
           className={({ isActive }) =>
             `flex items-center p-3 justify-center rounded-lg hover:bg-white/20 ${
