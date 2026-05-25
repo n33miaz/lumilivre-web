@@ -25,7 +25,7 @@ export const buscarSolicitacoesPendentes = async (): Promise<
 > => {
   try {
     const response = await api.get<Record<string, unknown>[]>(
-      '/api/v2/loan-requests/pending',
+      '/api/loan-requests/pending',
     );
     return (response.data || []).map(toSolicitacaoPendente);
   } catch (error) {
@@ -38,7 +38,7 @@ export const processarSolicitacao = async (
   id: number | string,
   aceitar: boolean,
 ) => {
-  const response = await api.post(`/api/v2/loan-requests/${id}/process`, null, {
+  const response = await api.post(`/api/loan-requests/${id}/process`, null, {
     params: { accept: aceitar },
   });
   return response.data;

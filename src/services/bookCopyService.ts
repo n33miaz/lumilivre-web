@@ -32,7 +32,7 @@ const reverseStatusMap: Record<string, string> = {
 export const buscarExemplaresPorLivroId = async (
   livroId: number | string,
 ): Promise<ListaLivro[]> => {
-  const response = await api.get(`/api/v2/book-copies/by-book/${livroId}`);
+  const response = await api.get(`/api/book-copies/by-book/${livroId}`);
   return (response.data || []).map((item: Record<string, unknown>) => ({
     status:
       reverseStatusMap[(item.status as Record<string, string>)?.code] ??
@@ -49,7 +49,7 @@ export const buscarExemplaresPorLivroId = async (
 };
 
 export const cadastrarExemplar = async (payload: ExemplarPayload) => {
-  const response = await api.post('/api/v2/book-copies', {
+  const response = await api.post('/api/book-copies', {
     copyCode: payload.tombo,
     bookId: payload.livro_id,
     status: statusMap[payload.status_livro] ?? payload.status_livro,
@@ -62,7 +62,7 @@ export const atualizarExemplar = async (
   tomboAtual: string,
   payload: ExemplarUpdatePayload,
 ) => {
-  const response = await api.put(`/api/v2/book-copies/${tomboAtual}`, {
+  const response = await api.put(`/api/book-copies/${tomboAtual}`, {
     copyCode: payload.tombo,
     bookId: payload.livro_id,
     status: statusMap[payload.status_livro] ?? payload.status_livro,
@@ -72,6 +72,6 @@ export const atualizarExemplar = async (
 };
 
 export const excluirExemplar = async (tombo: string) => {
-  const response = await api.delete(`/api/v2/book-copies/${tombo}`);
+  const response = await api.delete(`/api/book-copies/${tombo}`);
   return response.data;
 };

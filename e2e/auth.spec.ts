@@ -12,7 +12,7 @@ test.describe('Login Page', () => {
   });
 
   test('should show error toast on invalid credentials', async ({ page }) => {
-    await page.route('**/api/v2/auth/login', (route) =>
+    await page.route('**/api/auth/login', (route) =>
       route.fulfill({
         status: 401,
         contentType: 'application/json',
@@ -31,7 +31,7 @@ test.describe('Login Page', () => {
   });
 
   test('should redirect to dashboard on successful login', async ({ page }) => {
-    await page.route('**/api/v2/auth/login', (route) =>
+    await page.route('**/api/auth/login', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -46,28 +46,28 @@ test.describe('Login Page', () => {
     );
 
     // Mock all dashboard API calls to prevent errors
-    await page.route('**/api/v2/students**', (route) =>
+    await page.route('**/api/students**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/api/v2/books**', (route) =>
+    await page.route('**/api/books**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/api/v2/loans**', (route) =>
+    await page.route('**/api/loans**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(0),
       }),
     );
-    await page.route('**/api/v2/loan-requests**', (route) =>
+    await page.route('**/api/loan-requests**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -88,7 +88,7 @@ test.describe('Login Page', () => {
     page,
   }) => {
     // Slow response to see loading state
-    await page.route('**/api/v2/auth/login', async (route) => {
+    await page.route('**/api/auth/login', async (route) => {
       await new Promise((r) => setTimeout(r, 2000));
       await route.fulfill({
         status: 200,
@@ -141,7 +141,7 @@ test.describe('Forgot Password Page', () => {
   test('should show success toast on valid email submission', async ({
     page,
   }) => {
-    await page.route('**/api/v2/auth/forgot-password', (route) =>
+    await page.route('**/api/auth/forgot-password', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

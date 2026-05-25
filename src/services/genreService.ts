@@ -7,7 +7,7 @@ export interface Genero {
 }
 
 export const buscarGeneros = async (): Promise<Genero[]> => {
-  const response = await api.get('/api/v2/genres');
+  const response = await api.get('/api/genres');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     id: item.id as number,
     nome: item.name as string,

@@ -35,7 +35,7 @@ describe('authService', () => {
 
     const result = await login({ user: 'admin', senha: '1234' });
 
-    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/auth/login', {
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/auth/login', {
       username: 'admin',
       password: '1234',
     });
@@ -49,7 +49,7 @@ describe('authService', () => {
     const result = await validarTokenReset('token-valido');
 
     expect(mockedApi.get).toHaveBeenCalledWith(
-      '/api/v2/auth/validate-token/token-valido',
+      '/api/auth/validate-token/token-valido',
     );
     expect(result).toBe(true);
   });
@@ -59,7 +59,7 @@ describe('authService', () => {
 
     const result = await requestPasswordReset('user@email.com');
 
-    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/auth/forgot-password', {
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/auth/forgot-password', {
       email: 'user@email.com',
     });
     expect(result.mensagem).toContain('link para redefini');

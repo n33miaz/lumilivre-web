@@ -67,7 +67,7 @@ const toStudentRequest = (studentData: AlunoPayload) => ({
 });
 
 export const getContagemAlunos = async (): Promise<number> => {
-  const response = await api.get('/api/v2/students', {
+  const response = await api.get('/api/students', {
     params: { page: 0, size: 1 },
   });
   return response.data.totalElements || 0;
@@ -92,7 +92,7 @@ export const buscarAlunosParaAdmin = async (
   size = 10,
   sort = 'fullName,asc',
 ): Promise<Page<ListaAluno>> => {
-  const response = await api.get('/api/v2/students', {
+  const response = await api.get('/api/students', {
     params: { q: texto, page, size, sort },
   });
   return {
@@ -124,7 +124,7 @@ export interface AlunoPayload {
 }
 
 export const cadastrarAluno = async (alunoData: AlunoPayload) => {
-  const response = await api.post('/api/v2/students', toStudentRequest(alunoData));
+  const response = await api.post('/api/students', toStudentRequest(alunoData));
   return response.data;
 };
 
@@ -146,7 +146,7 @@ export interface AlunoFilterParams {
 export const buscarAlunosAvancado = async (
   params: AlunoFilterParams,
 ): Promise<Page<ListaAluno>> => {
-  const response = await api.get('/api/v2/students/search', {
+  const response = await api.get('/api/students/search', {
     params: {
       penalty: params.penalidade,
       registrationNumber: params.matricula,
@@ -166,7 +166,7 @@ export const buscarAlunosAvancado = async (
 };
 
 export const buscarAlunoPorMatricula = async (matricula: string) => {
-  const response = await api.get(`/api/v2/students/${matricula}`);
+  const response = await api.get(`/api/students/${matricula}`);
   return { ...response, data: mapStudentDetail(response.data) };
 };
 
@@ -175,7 +175,7 @@ export const atualizarAluno = async (
   alunoData: AlunoPayload,
 ) => {
   const response = await api.put(
-    `/api/v2/students/${matricula}`,
+    `/api/students/${matricula}`,
     toStudentRequest(alunoData),
   );
   return response.data;
@@ -183,12 +183,12 @@ export const atualizarAluno = async (
 
 export const resetarSenhaAluno = async (matricula: string) => {
   const response = await api.patch(
-    `/api/v2/students/${matricula}/reset-password`,
+    `/api/students/${matricula}/reset-password`,
   );
   return response.data;
 };
 
 export const excluirAluno = async (matricula: string) => {
-  const response = await api.delete(`/api/v2/students/${matricula}`);
+  const response = await api.delete(`/api/students/${matricula}`);
   return response.data;
 };

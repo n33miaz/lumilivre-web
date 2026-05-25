@@ -34,7 +34,7 @@ describe('Servicos de lookup', () => {
 
       const result = await buscarCursos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/courses', {
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/courses', {
         params: { size: 100 },
       });
       expect(result.content[0].nome).toBe('Informatica');
@@ -55,7 +55,7 @@ describe('Servicos de lookup', () => {
         modulo: '1',
       });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/courses', {
+      expect(mockedApi.post).toHaveBeenCalledWith('/api/courses', {
         name: 'Enfermagem',
       });
       expect(result.nome).toBe('Enfermagem');
@@ -75,7 +75,7 @@ describe('Servicos de lookup', () => {
 
       const result = await buscarEstatisticasCursos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/courses/statistics');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/courses/statistics');
       expect(result[0].quantidadeAlunos).toBe(30);
     });
 
@@ -83,13 +83,13 @@ describe('Servicos de lookup', () => {
       mockedApi.get.mockResolvedValue({ data: [{ name: 'Info', total: 50 }] });
 
       await buscarEstatisticasGrafico('curso');
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/courses/loan-statistics');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/courses/loan-statistics');
 
       await buscarEstatisticasGrafico('modulo');
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/academic-modules/loan-statistics');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/academic-modules/loan-statistics');
 
       await buscarEstatisticasGrafico('turno');
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/study-shifts/loan-statistics');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/study-shifts/loan-statistics');
     });
   });
 
@@ -106,7 +106,7 @@ describe('Servicos de lookup', () => {
 
       const result = await buscarTurnos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/study-shifts', {
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/study-shifts', {
         params: { size: 100 },
       });
       expect(result).toHaveLength(2);
@@ -117,7 +117,7 @@ describe('Servicos de lookup', () => {
 
       const result = await cadastrarTurno({ nome: 'Noite' });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/study-shifts', {
+      expect(mockedApi.post).toHaveBeenCalledWith('/api/study-shifts', {
         name: 'Noite',
       });
       expect(result.nome).toBe('Noite');
@@ -132,7 +132,7 @@ describe('Servicos de lookup', () => {
 
       const result = await buscarModulos();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/academic-modules', {
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/academic-modules', {
         params: { size: 100 },
       });
       expect(result[0].nome).toBe('Modulo 1');
@@ -159,7 +159,7 @@ describe('Servicos de lookup', () => {
 
       const result = await cadastrarModulo({ nome: 'Modulo 4' });
 
-      expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/academic-modules', {
+      expect(mockedApi.post).toHaveBeenCalledWith('/api/academic-modules', {
         name: 'Modulo 4',
       });
       expect(result.id).toBe(4);
@@ -172,7 +172,7 @@ describe('Servicos de lookup', () => {
 
       const result = await getContagemAutores();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/metadata/authors', {
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/metadata/authors', {
         params: { page: 0, size: 1 },
       });
       expect(result).toBe(42);
@@ -198,7 +198,7 @@ describe('Servicos de lookup', () => {
 
       const result = await buscarGeneros();
 
-      expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/genres');
+      expect(mockedApi.get).toHaveBeenCalledWith('/api/genres');
       expect(result).toHaveLength(2);
       expect(result[0].nome).toBe('ROMANCE');
     });

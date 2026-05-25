@@ -41,7 +41,7 @@ describe('loanService', () => {
       data_devolucao: '2026-03-18',
     });
 
-    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/loans', {
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/loans', {
       studentRegistrationNumber: '12345',
       copyCode: '001',
       borrowedAt: '2026-03-11T12:00:00-03:00',
@@ -49,7 +49,7 @@ describe('loanService', () => {
     });
   });
 
-  it('atualizarEmprestimo uses PUT /api/v2/loans/{id}', async () => {
+  it('atualizarEmprestimo uses PUT /api/loans/{id}', async () => {
     mockedApi.put.mockResolvedValue({ data: { id: 'loan-1' } });
 
     await atualizarEmprestimo('loan-1', {
@@ -59,7 +59,7 @@ describe('loanService', () => {
       data_devolucao: '2026-03-25',
     });
 
-    expect(mockedApi.put).toHaveBeenCalledWith('/api/v2/loans/loan-1', {
+    expect(mockedApi.put).toHaveBeenCalledWith('/api/loans/loan-1', {
       studentRegistrationNumber: '12345',
       copyCode: '001',
       borrowedAt: '2026-03-11T12:00:00-03:00',
@@ -74,8 +74,8 @@ describe('loanService', () => {
     await concluirEmprestimo('loan-99');
     await excluirEmprestimo('loan-42');
 
-    expect(mockedApi.put).toHaveBeenCalledWith('/api/v2/loans/loan-99/close');
-    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/loans/loan-42');
+    expect(mockedApi.put).toHaveBeenCalledWith('/api/loans/loan-99/close');
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/loans/loan-42');
   });
 
   it('buscarEmprestimosPaginado maps v2 list rows', async () => {
@@ -96,7 +96,7 @@ describe('loanService', () => {
 
     const result = await buscarEmprestimosPaginado('', 0, 10, 'borrowedAt,desc');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/loans', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/loans', {
       params: { q: undefined, page: 0, size: 10, sort: 'borrowedAt,desc' },
     });
     expect(result.content[0].statusEmprestimo).toBe('ATIVO');
@@ -111,7 +111,7 @@ describe('loanService', () => {
       size: 10,
     });
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/loans/advanced', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/loans/advanced', {
       params: expect.objectContaining({ status: 'OVERDUE' }),
     });
   });
@@ -124,10 +124,10 @@ describe('loanService', () => {
     await expect(getContagemAtrasados()).resolves.toBe(2);
     await expect(getContagemEmprestimosTotais()).resolves.toBe(15);
 
-    expect(mockedApi.get).toHaveBeenNthCalledWith(1, '/api/v2/loans/overdue');
+    expect(mockedApi.get).toHaveBeenNthCalledWith(1, '/api/loans/overdue');
     expect(mockedApi.get).toHaveBeenNthCalledWith(
       2,
-      '/api/v2/loans/active-and-overdue/count',
+      '/api/loans/active-and-overdue/count',
     );
   });
 
@@ -148,7 +148,7 @@ describe('loanService', () => {
     const result = await buscarEmprestimosAtivosEAtrasados();
 
     expect(mockedApi.get).toHaveBeenCalledWith(
-      '/api/v2/loans/active-and-overdue',
+      '/api/loans/active-and-overdue',
     );
     expect(result[0].statusEmprestimo).toBe('ATRASADO');
   });
@@ -160,7 +160,7 @@ describe('loanService', () => {
 
     const result = await buscarRanking(5, 1, 2, 3);
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/students/ranking', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/students/ranking', {
       params: { top: 5, courseId: 1, academicModuleId: 2, studyShiftId: 3 },
     });
     expect(result[0].nome).toBe('Joao');
@@ -176,11 +176,11 @@ describe('loanService', () => {
 
     expect(mockedApi.get).toHaveBeenNthCalledWith(
       1,
-      '/api/v2/loans/student/2024001/history',
+      '/api/loans/student/2024001/history',
     );
     expect(mockedApi.get).toHaveBeenNthCalledWith(
       2,
-      '/api/v2/loans/student/2024001',
+      '/api/loans/student/2024001',
     );
   });
 });

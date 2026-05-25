@@ -29,7 +29,7 @@ describe('cepService', () => {
       const result = await buscarEnderecoPorCep('01001000');
 
       expect(mockedApi.get).toHaveBeenCalledWith(
-        '/api/v2/metadata/postal-codes/01001000',
+        '/api/metadata/postal-codes/01001000',
       );
       expect(result.logradouro).toBe('Rua das Flores');
       expect(result.uf).toBe('SP');

@@ -17,56 +17,56 @@ async function injectAuthUser(page: Page) {
 }
 
 async function mockProtectedApis(page: Page) {
-  await page.route('**/api/v2/students**', (route) =>
+  await page.route('**/api/students**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/api/v2/books**', (route) =>
+  await page.route('**/api/books**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/api/v2/loans**', (route) =>
+  await page.route('**/api/loans**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(0),
     }),
   );
-  await page.route('**/api/v2/loan-requests**', (route) =>
+  await page.route('**/api/loan-requests**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/courses**', (route) =>
+  await page.route('**/api/courses**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [] }),
     }),
   );
-  await page.route('**/api/v2/study-shifts', (route) =>
+  await page.route('**/api/study-shifts', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/academic-modules', (route) =>
+  await page.route('**/api/academic-modules', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/metadata/enums/**', (route) =>
+  await page.route('**/api/metadata/enums/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

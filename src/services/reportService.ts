@@ -106,7 +106,7 @@ export const baixarRelatorioPDF = async (
   const params = toReportParams(tipo, filtros);
 
   try {
-    const response = await api.get(`/api/v2/reports/${endpointByType[tipo]}`, {
+    const response = await api.get(`/api/reports/${endpointByType[tipo]}`, {
       params,
       responseType: 'blob',
       signal,

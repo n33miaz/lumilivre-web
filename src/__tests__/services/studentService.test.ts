@@ -42,7 +42,7 @@ describe('studentService', () => {
 
     const result = await buscarAlunosParaAdmin();
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/students', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/students', {
       params: { q: undefined, page: 0, size: 10, sort: 'fullName,asc' },
     });
     expect(result.content[0].matricula).toBe('001');
@@ -63,7 +63,7 @@ describe('studentService', () => {
 
     await cadastrarAluno(alunoData);
 
-    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/students', {
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/students', {
       registrationNumber: '2024001',
       fullName: 'Novo Aluno',
       cpf: '12345678900',
@@ -95,7 +95,7 @@ describe('studentService', () => {
 
     const result = await buscarAlunoPorMatricula('001');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/students/001');
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/students/001');
     expect(result.data.nomeCompleto).toBe('Joao');
     expect(result.data.foto).toBe('https://example.com/avatar.png');
   });
@@ -105,6 +105,6 @@ describe('studentService', () => {
 
     await excluirAluno('2024001');
 
-    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/students/2024001');
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/students/2024001');
   });
 });

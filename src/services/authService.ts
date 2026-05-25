@@ -17,7 +17,7 @@ interface LoginResponse {
 export const login = async (
   credentials: LoginCredentials,
 ): Promise<LoginResponse> => {
-  const response = await api.post('/api/v2/auth/login', {
+  const response = await api.post('/api/auth/login', {
     username: credentials.user,
     password: credentials.senha,
   });
@@ -35,7 +35,7 @@ export const requestPasswordReset = async (
   email: string,
 ): Promise<{ mensagem: string }> => {
   try {
-    await api.post('/api/v2/auth/forgot-password', { email });
+    await api.post('/api/auth/forgot-password', { email });
     return {
       mensagem:
         'Se um e-mail correspondente for encontrado, um link para redefinição será enviado.',
@@ -51,7 +51,7 @@ export const requestPasswordReset = async (
 
 export const validarTokenReset = async (token: string): Promise<boolean> => {
   try {
-    const response = await api.get(`/api/v2/auth/validate-token/${token}`);
+    const response = await api.get(`/api/auth/validate-token/${token}`);
     return response.data.valid === true;
   } catch (error) {
     console.error('Erro ao validar token:', error);
@@ -64,7 +64,7 @@ export const mudarSenhaComToken = async (
   novaSenha: string,
 ): Promise<unknown> => {
   try {
-    const response = await api.post('/api/v2/auth/reset-password', {
+    const response = await api.post('/api/auth/reset-password', {
       token,
       newPassword: novaSenha,
     });
@@ -80,7 +80,7 @@ export const changePassword = async (
   currentPassword: string,
   newPassword: string,
 ): Promise<void> => {
-  await api.put('/api/v2/auth/change-password', {
+  await api.put('/api/auth/change-password', {
     registrationNumber,
     currentPassword,
     newPassword,

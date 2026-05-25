@@ -13,7 +13,7 @@ export interface LivroGoogle {
 
 export const buscarLivroPorIsbn = async (isbn: string) => {
   try {
-    const response = await api.get(`/api/v2/books/isbn/${isbn}`);
+    const response = await api.get(`/api/books/isbn/${isbn}`);
 
     return {
       nome: response.data.title,

@@ -71,7 +71,7 @@ const toFormData = (
 };
 
 export const listarTccs = async (texto?: string): Promise<TccResponse[]> => {
-  const response = await api.get('/api/v2/theses', {
+  const response = await api.get('/api/theses', {
     params: { q: texto || undefined },
   });
   return (response.data || []).map(toTccResponse);
@@ -80,14 +80,14 @@ export const listarTccs = async (texto?: string): Promise<TccResponse[]> => {
 export const buscarTccPorId = async (
   id: number | string,
 ): Promise<TccResponse> => {
-  const response = await api.get(`/api/v2/theses/${id}`);
+  const response = await api.get(`/api/theses/${id}`);
   return toTccResponse(response.data);
 };
 
 export const listarTccsAvancado = async (
   params: TccFilterParams,
 ): Promise<TccResponse[]> => {
-  const response = await api.get('/api/v2/theses/search', {
+  const response = await api.get('/api/theses/search', {
     params: {
       courseId: params.cursoId,
       semester: params.semestre,
@@ -103,7 +103,7 @@ export const cadastrarTcc = async (
   fileFoto?: File | null,
 ) => {
   const response = await api.post(
-    '/api/v2/theses',
+    '/api/theses',
     toFormData(tccData, filePdf, fileFoto),
   );
   return toTccResponse(response.data);
@@ -116,13 +116,13 @@ export const atualizarTcc = async (
   fileFoto?: File | null,
 ) => {
   const response = await api.put(
-    `/api/v2/theses/${id}`,
+    `/api/theses/${id}`,
     toFormData(tccData, filePdf, fileFoto),
   );
   return toTccResponse(response.data);
 };
 
 export const excluirTcc = async (id: number | string) => {
-  const response = await api.delete(`/api/v2/theses/${id}`);
+  const response = await api.delete(`/api/theses/${id}`);
   return response.data;
 };

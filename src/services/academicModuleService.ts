@@ -11,7 +11,7 @@ export interface ModuloPayload {
 
 export const buscarModulos = async (): Promise<Modulo[]> => {
   try {
-    const response = await api.get('/api/v2/academic-modules', {
+    const response = await api.get('/api/academic-modules', {
       params: { size: 100 },
     });
     return (response.data?.content || []).map((item: Record<string, unknown>) => ({
@@ -27,7 +27,7 @@ export const buscarModulos = async (): Promise<Modulo[]> => {
 export const cadastrarModulo = async (
   payload: ModuloPayload,
 ): Promise<Modulo> => {
-  const response = await api.post('/api/v2/academic-modules', {
+  const response = await api.post('/api/academic-modules', {
     name: payload.nome,
   });
   return {

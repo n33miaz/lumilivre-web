@@ -36,7 +36,7 @@ describe('loanRequestService', () => {
     const result = await buscarSolicitacoesPendentes();
 
     expect(mockedApi.get).toHaveBeenCalledWith(
-      '/api/v2/loan-requests/pending',
+      '/api/loan-requests/pending',
     );
     expect(result[0].alunoNome).toBe('Joao');
     expect(result[0].livroNome).toBe('Dom Casmurro');
@@ -56,7 +56,7 @@ describe('loanRequestService', () => {
     await processarSolicitacao('req-1', true);
 
     expect(mockedApi.post).toHaveBeenCalledWith(
-      '/api/v2/loan-requests/req-1/process',
+      '/api/loan-requests/req-1/process',
       null,
       { params: { accept: true } },
     );

@@ -10,7 +10,7 @@ export interface TurnoPayload {
 }
 
 export const buscarTurnos = async (): Promise<Turno[]> => {
-  const response = await api.get('/api/v2/study-shifts', {
+  const response = await api.get('/api/study-shifts', {
     params: { size: 100 },
   });
   return (response.data?.content || []).map((item: Record<string, unknown>) => ({
@@ -20,7 +20,7 @@ export const buscarTurnos = async (): Promise<Turno[]> => {
 };
 
 export const cadastrarTurno = async (payload: TurnoPayload): Promise<Turno> => {
-  const response = await api.post('/api/v2/study-shifts', {
+  const response = await api.post('/api/study-shifts', {
     name: payload.nome,
   });
   return {

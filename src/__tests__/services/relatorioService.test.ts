@@ -49,7 +49,7 @@ describe('reportService', () => {
     });
 
     expect(mockedApi.get).toHaveBeenCalledWith(
-      '/api/v2/reports/loans',
+      '/api/reports/loans',
       expect.objectContaining({
         responseType: 'blob',
       }),

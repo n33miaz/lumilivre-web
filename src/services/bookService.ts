@@ -206,7 +206,7 @@ const toBookRequest = (livroData: LivroPayload) => ({
 });
 
 export const getContagemLivros = async (): Promise<number> => {
-  const response = await api.get('/api/v2/books/grouped', {
+  const response = await api.get('/api/books/grouped', {
     params: { page: 0, size: 1 },
   });
   return response.data?.totalElements || 0;
@@ -218,7 +218,7 @@ export const buscarLivrosParaAdmin = async (
   size = 10,
   sort = 'nome,asc',
 ): Promise<Page<ListaLivro>> => {
-  const response = await api.get('/api/v2/books/search', {
+  const response = await api.get('/api/books/search', {
     params: {
       q: texto || undefined,
       page,
@@ -235,7 +235,7 @@ export const buscarLivrosAgrupados = async (
   size = 10,
   sort = 'nome,asc',
 ): Promise<Page<LivroAgrupado>> => {
-  const response = await api.get('/api/v2/books/grouped', {
+  const response = await api.get('/api/books/grouped', {
     params: {
       q: texto || undefined,
       page,
@@ -249,7 +249,7 @@ export const buscarLivrosAgrupados = async (
 export const buscarLivrosAvancado = async (
   params: LivroFilterParams,
 ): Promise<Page<LivroAgrupado>> => {
-  const response = await api.get('/api/v2/books/advanced', {
+  const response = await api.get('/api/books/advanced', {
     params: {
       title: params.nome,
       isbn: params.isbn,
@@ -272,7 +272,7 @@ export const cadastrarLivro = async (
   livroData: LivroPayload,
   file?: File | null,
 ) => {
-  const response = await api.post('/api/v2/books', toBookRequest(livroData));
+  const response = await api.post('/api/books', toBookRequest(livroData));
 
   if (file && response.data?.id) {
     const coverResponse = await uploadCapaLivro(response.data.id, file);
@@ -287,7 +287,7 @@ export const atualizarLivro = async (
   livroData: LivroPayload,
   file?: File | null,
 ) => {
-  const response = await api.put(`/api/v2/books/${id}`, toBookRequest(livroData));
+  const response = await api.put(`/api/books/${id}`, toBookRequest(livroData));
 
   if (file) {
     const coverResponse = await uploadCapaLivro(id, file);
@@ -301,14 +301,14 @@ export const uploadCapaLivro = async (id: number | string, file: File) => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await api.post(`/api/v2/books/${id}/cover`, formData);
+  const response = await api.post(`/api/books/${id}/cover`, formData);
   return response.data;
 };
 
 export const buscarEnum = async (
   tipo: string,
 ): Promise<{ nome: string; status: string }[]> => {
-  const response = await api.get(`/api/v2/metadata/enums/${tipo}`);
+  const response = await api.get(`/api/metadata/enums/${tipo}`);
   return (response.data || []).map((item: Record<string, unknown>) => ({
     nome: (item.code as string) ?? '',
     status: (item.label as string) ?? '',
@@ -316,12 +316,12 @@ export const buscarEnum = async (
 };
 
 export const excluirLivroComExemplares = async (id: number | string) => {
-  const response = await api.delete(`/api/v2/books/${id}`);
+  const response = await api.delete(`/api/books/${id}`);
   return response.data;
 };
 
 export const buscarLivroPorId = async (id: number | string) => {
-  const response = await api.get(`/api/v2/books/${id}`);
+  const response = await api.get(`/api/books/${id}`);
   return {
     ...response,
     data: toLivroDetalhado(response.data),
@@ -329,7 +329,7 @@ export const buscarLivroPorId = async (id: number | string) => {
 };
 
 export const buscarCdds = async (): Promise<CddItem[]> => {
-  const response = await api.get('/api/v2/dewey-classifications');
+  const response = await api.get('/api/dewey-classifications');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     id: item.code as string,
     nome: item.description as string,

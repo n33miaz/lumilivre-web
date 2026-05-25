@@ -26,7 +26,7 @@ export interface EstatisticaGrafico {
 
 export const buscarCursos = async (): Promise<Page<Curso>> => {
   try {
-    const response = await api.get('/api/v2/courses', {
+    const response = await api.get('/api/courses', {
       params: { size: 100 },
     });
     return {
@@ -43,7 +43,7 @@ export const buscarCursos = async (): Promise<Page<Curso>> => {
 };
 
 export const cadastrarCurso = async (payload: CursoPayload): Promise<Curso> => {
-  const response = await api.post('/api/v2/courses', {
+  const response = await api.post('/api/courses', {
     name: payload.nome,
   });
   return {
@@ -55,7 +55,7 @@ export const cadastrarCurso = async (payload: CursoPayload): Promise<Curso> => {
 export const buscarEstatisticasCursos = async (): Promise<
   CursoEstatistica[]
 > => {
-  const response = await api.get('/api/v2/courses/statistics');
+  const response = await api.get('/api/courses/statistics');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     nomeCurso: item.courseName as string,
     quantidadeAlunos: item.studentCount as number,
@@ -68,9 +68,9 @@ export const buscarEstatisticasGrafico = async (
   tipo: 'curso' | 'modulo' | 'turno',
 ): Promise<EstatisticaGrafico[]> => {
   const endpointMap = {
-    curso: '/api/v2/courses/loan-statistics',
-    modulo: '/api/v2/academic-modules/loan-statistics',
-    turno: '/api/v2/study-shifts/loan-statistics',
+    curso: '/api/courses/loan-statistics',
+    modulo: '/api/academic-modules/loan-statistics',
+    turno: '/api/study-shifts/loan-statistics',
   };
 
   const response = await api.get<Record<string, unknown>[]>(endpointMap[tipo]);

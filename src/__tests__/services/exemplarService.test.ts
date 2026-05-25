@@ -41,7 +41,7 @@ describe('bookCopyService', () => {
     const result = await buscarExemplaresPorLivroId('book-1');
 
     expect(mockedApi.get).toHaveBeenCalledWith(
-      '/api/v2/book-copies/by-book/book-1',
+      '/api/book-copies/by-book/book-1',
     );
     expect(result[0].tomboExemplar).toBe('T001');
     expect(result[0].status).toBe('DISPONIVEL');
@@ -58,7 +58,7 @@ describe('bookCopyService', () => {
 
     await cadastrarExemplar(payload);
 
-    expect(mockedApi.post).toHaveBeenCalledWith('/api/v2/book-copies', {
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/book-copies', {
       copyCode: 'T100',
       bookId: 'book-1',
       status: 'AVAILABLE',
@@ -77,7 +77,7 @@ describe('bookCopyService', () => {
 
     await atualizarExemplar('T100', payload);
 
-    expect(mockedApi.put).toHaveBeenCalledWith('/api/v2/book-copies/T100', {
+    expect(mockedApi.put).toHaveBeenCalledWith('/api/book-copies/T100', {
       copyCode: 'T100-NEW',
       bookId: 'book-1',
       status: 'AVAILABLE',
@@ -90,6 +90,6 @@ describe('bookCopyService', () => {
 
     await excluirExemplar('T100');
 
-    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/book-copies/T100');
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/book-copies/T100');
   });
 });

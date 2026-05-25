@@ -46,7 +46,7 @@ describe('bookService', () => {
 
     const result = await buscarLivrosParaAdmin();
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/books/search', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/books/search', {
       params: { q: undefined, page: 0, size: 10, sort: 'title,asc' },
     });
     expect(result.content[0].nome).toBe('Livro Teste');
@@ -60,7 +60,7 @@ describe('bookService', () => {
 
     const result = await buscarLivrosAgrupados('Livro');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/books/grouped', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/books/grouped', {
       params: { q: 'Livro', page: 0, size: 10, sort: 'title,asc' },
     });
     expect(result.content[0].id).toBe('book-1');
@@ -79,7 +79,7 @@ describe('bookService', () => {
       sort: 'nome,desc',
     });
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/books/advanced', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/books/advanced', {
       params: expect.objectContaining({
         title: 'Livro',
         publisher: 'Editora A',
@@ -113,7 +113,7 @@ describe('bookService', () => {
       file,
     );
 
-    expect(mockedApi.post).toHaveBeenNthCalledWith(1, '/api/v2/books', {
+    expect(mockedApi.post).toHaveBeenNthCalledWith(1, '/api/books', {
       isbn: '1234567890',
       title: 'Livro',
       author: 'Autor',
@@ -131,7 +131,7 @@ describe('bookService', () => {
     });
     expect(mockedApi.post).toHaveBeenNthCalledWith(
       2,
-      '/api/v2/books/book-1/cover',
+      '/api/books/book-1/cover',
       expect.any(FormData),
     );
   });
@@ -155,10 +155,10 @@ describe('bookService', () => {
     await excluirLivroComExemplares('book-1');
 
     expect(mockedApi.put).toHaveBeenCalledWith(
-      '/api/v2/books/book-1',
+      '/api/books/book-1',
       expect.objectContaining({ title: 'Livro' }),
     );
-    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/books/book-1');
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/books/book-1');
   });
 
   it('buscarLivroPorId maps v2 detail to the form shape', async () => {
@@ -173,7 +173,7 @@ describe('bookService', () => {
 
     const result = await buscarLivroPorId('book-1');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/books/book-1');
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/books/book-1');
     expect(result.data.nome).toBe('Livro');
     expect(result.data.classificacaoEtariaRaw).toBe('LIVRE');
   });
@@ -189,7 +189,7 @@ describe('bookService', () => {
     const result = await buscarEnum('classificacao-etaria');
 
     expect(mockedApi.get).toHaveBeenCalledWith(
-      '/api/v2/metadata/enums/classificacao-etaria',
+      '/api/metadata/enums/classificacao-etaria',
     );
     expect(result[0]).toEqual({ nome: 'LIVRE', status: 'Livre' });
   });

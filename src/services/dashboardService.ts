@@ -25,7 +25,7 @@ export interface EmprestimosPorMesDashboard {
 
 export const getDashboardGerencialStats =
   async (): Promise<DashboardGerencialStats> => {
-    const response = await api.get('/api/v2/dashboard/stats');
+    const response = await api.get('/api/dashboard/stats');
     return {
       emprestimosAtivos: response.data.activeLoans,
       emprestimosAtrasados: response.data.overdueLoans,
@@ -37,7 +37,7 @@ export const getDashboardGerencialStats =
   };
 
 export const getTopLivrosDashboard = async (): Promise<TopLivroDashboard[]> => {
-  const response = await api.get('/api/v2/dashboard/top-books');
+  const response = await api.get('/api/dashboard/top-books');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     livroId: String(item.bookId),
     titulo: item.title as string,
@@ -51,7 +51,7 @@ export const getTopLivrosDashboard = async (): Promise<TopLivroDashboard[]> => {
 export const getEmprestimosPorMesDashboard = async (): Promise<
   EmprestimosPorMesDashboard[]
 > => {
-  const response = await api.get('/api/v2/dashboard/loans-by-month');
+  const response = await api.get('/api/dashboard/loans-by-month');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     mes: item.month as string,
     total: item.total as number,

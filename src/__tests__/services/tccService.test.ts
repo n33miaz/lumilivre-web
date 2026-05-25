@@ -44,7 +44,7 @@ describe('thesisService', () => {
 
     const result = await listarTccs('Sistema');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/theses', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/theses', {
       params: { q: 'Sistema' },
     });
     expect(result[0].titulo).toBe('TCC Teste');
@@ -58,7 +58,7 @@ describe('thesisService', () => {
 
     const result = await buscarTccPorId('tcc-5');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/theses/tcc-5');
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/theses/tcc-5');
     expect(result.id).toBe('tcc-5');
   });
 
@@ -67,7 +67,7 @@ describe('thesisService', () => {
 
     await listarTccsAvancado({ cursoId: '1', semestre: '2', ano: '2025' });
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/v2/theses/search', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/theses/search', {
       params: { courseId: '1', semester: '2', year: '2025' },
     });
   });
@@ -78,7 +78,7 @@ describe('thesisService', () => {
     await cadastrarTcc(mockTccPayload);
 
     expect(mockedApi.post).toHaveBeenCalledWith(
-      '/api/v2/theses',
+      '/api/theses',
       expect.any(FormData),
     );
     const formData = mockedApi.post.mock.calls[0][1] as FormData;
@@ -93,9 +93,9 @@ describe('thesisService', () => {
     await excluirTcc('tcc-1');
 
     expect(mockedApi.put).toHaveBeenCalledWith(
-      '/api/v2/theses/tcc-1',
+      '/api/theses/tcc-1',
       expect.any(FormData),
     );
-    expect(mockedApi.delete).toHaveBeenCalledWith('/api/v2/theses/tcc-1');
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/theses/tcc-1');
   });
 });

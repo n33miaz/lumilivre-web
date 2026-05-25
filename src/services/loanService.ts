@@ -103,7 +103,7 @@ export const buscarEmprestimosPaginado = async (
   size: number,
   sort: string,
 ): Promise<Page<EmprestimoListagemDTO>> => {
-  const response = await api.get('/api/v2/loans', {
+  const response = await api.get('/api/loans', {
     params: { q: texto || undefined, page, size, sort },
   });
   return {
@@ -115,7 +115,7 @@ export const buscarEmprestimosPaginado = async (
 export const buscarEmprestimosAvancado = async (
   params: EmprestimoFilterParams,
 ): Promise<Page<EmprestimoListagemDTO>> => {
-  const response = await api.get('/api/v2/loans/advanced', {
+  const response = await api.get('/api/loans/advanced', {
     params: {
       status:
         params.statusEmprestimo === 'ATIVO'
@@ -143,19 +143,19 @@ export const buscarEmprestimosAvancado = async (
 };
 
 export const getContagemAtrasados = async (): Promise<number> => {
-  const response = await api.get('/api/v2/loans/overdue');
+  const response = await api.get('/api/loans/overdue');
   return response.status === 204 || !response.data ? 0 : response.data.length;
 };
 
 export const getContagemEmprestimosTotais = async (): Promise<number> => {
-  const response = await api.get('/api/v2/loans/active-and-overdue/count');
+  const response = await api.get('/api/loans/active-and-overdue/count');
   return response.data || 0;
 };
 
 export const buscarEmprestimosAtivosEAtrasados = async (): Promise<
   EmprestimoAtivoDTO[]
 > => {
-  const response = await api.get('/api/v2/loans/active-and-overdue');
+  const response = await api.get('/api/loans/active-and-overdue');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     id: item.id as string,
     livroNome: item.bookTitle as string,
@@ -182,7 +182,7 @@ export const buscarRanking = async (
   if (moduloId) params.academicModuleId = moduloId;
   if (turnoId) params.studyShiftId = turnoId;
 
-  const response = await api.get('/api/v2/students/ranking', { params });
+  const response = await api.get('/api/students/ranking', { params });
   return (response.data || []).map((item: Record<string, unknown>) => ({
     matricula: item.registrationNumber as string,
     nome: item.fullName as string,
@@ -191,17 +191,17 @@ export const buscarRanking = async (
 };
 
 export const buscarHistoricoAluno = async (matricula: string) => {
-  const response = await api.get(`/api/v2/loans/student/${matricula}/history`);
+  const response = await api.get(`/api/loans/student/${matricula}/history`);
   return response.data;
 };
 
 export const buscarEmprestimosAtivosAluno = async (matricula: string) => {
-  const response = await api.get(`/api/v2/loans/student/${matricula}`);
+  const response = await api.get(`/api/loans/student/${matricula}`);
   return response.data;
 };
 
 export const cadastrarEmprestimo = async (payload: EmprestimoPayload) => {
-  const response = await api.post('/api/v2/loans', {
+  const response = await api.post('/api/loans', {
     studentRegistrationNumber: payload.aluno_matricula,
     copyCode: payload.exemplar_tombo,
     borrowedAt: toOffsetDateTime(payload.data_emprestimo),
@@ -214,7 +214,7 @@ export const atualizarEmprestimo = async (
   id: string | number,
   payload: EmprestimoPayload,
 ) => {
-  const response = await api.put(`/api/v2/loans/${id}`, {
+  const response = await api.put(`/api/loans/${id}`, {
     studentRegistrationNumber: payload.aluno_matricula,
     copyCode: payload.exemplar_tombo,
     borrowedAt: toOffsetDateTime(payload.data_emprestimo),
@@ -224,11 +224,11 @@ export const atualizarEmprestimo = async (
 };
 
 export const concluirEmprestimo = async (id: string | number) => {
-  const response = await api.put(`/api/v2/loans/${id}/close`);
+  const response = await api.put(`/api/loans/${id}/close`);
   return response.data;
 };
 
 export const excluirEmprestimo = async (id: string | number) => {
-  const response = await api.delete(`/api/v2/loans/${id}`);
+  const response = await api.delete(`/api/loans/${id}`);
   return response.data;
 };

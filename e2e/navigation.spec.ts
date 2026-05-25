@@ -38,77 +38,77 @@ async function injectAuthUser(page: Page) {
 
 /** Mocks all common API calls so protected pages don't break. */
 async function mockAllApis(page: Page) {
-  await page.route('**/api/v2/students**', (route) =>
+  await page.route('**/api/students**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/api/v2/books**', (route) =>
+  await page.route('**/api/books**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
     }),
   );
-  await page.route('**/api/v2/loans**', (route) =>
+  await page.route('**/api/loans**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(0),
     }),
   );
-  await page.route('**/api/v2/loan-requests**', (route) =>
+  await page.route('**/api/loan-requests**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/theses**', (route) =>
+  await page.route('**/api/theses**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ data: [] }),
     }),
   );
-  await page.route('**/api/v2/courses**', (route) =>
+  await page.route('**/api/courses**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ content: [] }),
     }),
   );
-  await page.route('**/api/v2/metadata/enums/**', (route) =>
+  await page.route('**/api/metadata/enums/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/genres', (route) =>
+  await page.route('**/api/genres', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/study-shifts', (route) =>
+  await page.route('**/api/study-shifts', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/academic-modules', (route) =>
+  await page.route('**/api/academic-modules', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/v2/reports/**', (route) =>
+  await page.route('**/api/reports/**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/octet-stream',
@@ -183,28 +183,28 @@ test.describe('Session Expiry', () => {
     await injectAuthUser(page);
 
     // First load works
-    await page.route('**/api/v2/books**', (route) =>
+    await page.route('**/api/books**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/api/v2/students**', (route) =>
+    await page.route('**/api/students**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/api/v2/loans**', (route) =>
+    await page.route('**/api/loans**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(0),
       }),
     );
-    await page.route('**/api/v2/loan-requests**', (route) =>
+    await page.route('**/api/loan-requests**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -215,7 +215,7 @@ test.describe('Session Expiry', () => {
     await page.goto('/admin/dashboard');
 
     // Now simulate 401 on next navigation
-    await page.route('**/api/v2/books**', (route) =>
+    await page.route('**/api/books**', (route) =>
       route.fulfill({
         status: 401,
         contentType: 'application/json',

@@ -18,7 +18,7 @@ interface PostalCodeResponse {
 export const buscarEnderecoPorCep = async (cep: string): Promise<Endereco> => {
   try {
     const response = await api.get<PostalCodeResponse>(
-      `/api/v2/metadata/postal-codes/${cep}`,
+      `/api/metadata/postal-codes/${cep}`,
     );
     return {
       logradouro: response.data.street || '',

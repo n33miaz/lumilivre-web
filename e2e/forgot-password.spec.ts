@@ -23,7 +23,7 @@ test.describe('Forgot Password Page', () => {
   test('should show success toast on valid email submission', async ({
     page,
   }) => {
-    await page.route('**/api/v2/auth/forgot-password', (route) =>
+    await page.route('**/api/auth/forgot-password', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
