@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ActionHeader } from '../../components/ui/ActionHeader';
 import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
@@ -12,6 +13,7 @@ import { useTccs } from '../../hooks/queries/useTccQueries';
 import { type TccResponse } from '../../services/thesisService';
 
 export function TccPage() {
+  const { t } = useTranslation('tcc');
   const [termoBusca, setTermoBusca] = useState('');
   const [termoBuscaAtivo, setTermoBuscaAtivo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -121,7 +123,7 @@ export function TccPage() {
   const columns: ColumnDef<TccResponse>[] = [
     {
       key: 'titulo',
-      header: 'Título',
+      header: t('table.column.title'),
       width: '30%',
       render: (item) => (
         <span
@@ -134,7 +136,7 @@ export function TccPage() {
     },
     {
       key: 'alunos',
-      header: 'Alunos',
+      header: t('table.column.students'),
       width: '30%',
       render: (item) => (
         <span className="dark:text-gray-300 truncate" title={item.alunos}>
@@ -144,7 +146,7 @@ export function TccPage() {
     },
     {
       key: 'curso',
-      header: 'Curso',
+      header: t('table.column.course'),
       width: '20%',
       render: (item) => (
         <span className="dark:text-gray-300 truncate">{item.curso}</span>
@@ -152,7 +154,7 @@ export function TccPage() {
     },
     {
       key: 'anoConclusao',
-      header: 'Ano',
+      header: t('table.column.year'),
       width: '10%',
       render: (item) => (
         <span className="dark:text-gray-300">{item.anoConclusao}</span>
@@ -160,7 +162,7 @@ export function TccPage() {
     },
     {
       key: 'acoes',
-      header: 'Ações',
+      header: t('common:actions'),
       width: '10%',
       isSortable: false,
       render: (item) => (
@@ -168,7 +170,7 @@ export function TccPage() {
           onClick={() => handleOpenDetalhes(item)}
           className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
         >
-          DETALHES
+          {t('common:button.details')}
         </button>
       ),
     },

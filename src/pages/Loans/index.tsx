@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { ActionHeader } from '../../components/ui/ActionHeader';
 import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
@@ -75,6 +76,7 @@ const filtroAtrasadosObj = {
 };
 
 export function EmprestimosPage() {
+  const { t } = useTranslation('loan');
   const [searchParams] = useSearchParams();
 
   const [sortConfig, setSortConfig] = useState<{
@@ -156,11 +158,11 @@ export function EmprestimosPage() {
   const sortParam = useMemo(() => {
     const sortMap: Record<string, string> = {
       status: 'status',
-      tombo: 'exemplar.tombo',
-      livro: 'exemplar.livro.nome',
-      aluno: 'aluno.nomeCompleto',
-      emprestimo: 'dataEmprestimo',
-      devolucao: 'dataDevolucao',
+      tombo: 'bookCopy.copyCode',
+      livro: 'bookCopy.book.title',
+      aluno: 'student.fullName',
+      emprestimo: 'borrowedAt',
+      devolucao: 'dueAt',
     };
     const backendKey = sortMap[sortConfig.key] || sortConfig.key;
     return `${backendKey},${sortConfig.direction}`;
@@ -337,13 +339,13 @@ export function EmprestimosPage() {
   const columns: ColumnDef<EmprestimoDisplay>[] = [
     {
       key: 'status',
-      header: 'Status',
+      header: t('table.column.status'),
       width: '10%',
       render: (item) => <StatusIndicator status={item.status} />,
     },
     {
       key: 'tombo',
-      header: 'Tombo',
+      header: t('table.column.copy_code'),
       width: '10%',
       render: (item) => (
         <span className="font-bold dark:text-white">{item.tombo}</span>
@@ -351,7 +353,7 @@ export function EmprestimosPage() {
     },
     {
       key: 'livro',
-      header: 'Livro',
+      header: t('table.column.book'),
       width: '20%',
       render: (item) => (
         <span className="dark:text-gray-300 truncate">{item.livro}</span>
@@ -359,7 +361,7 @@ export function EmprestimosPage() {
     },
     {
       key: 'aluno',
-      header: 'Aluno',
+      header: t('table.column.student'),
       width: '20%',
       render: (item) => (
         <span className="font-bold dark:text-white truncate">
@@ -369,7 +371,7 @@ export function EmprestimosPage() {
     },
     {
       key: 'emprestimo',
-      header: 'Empréstimo',
+      header: t('table.column.borrowed_at'),
       width: '15%',
       render: (item) => (
         <span className="dark:text-gray-300">{item.emprestimo}</span>
@@ -377,7 +379,7 @@ export function EmprestimosPage() {
     },
     {
       key: 'devolucao',
-      header: 'Devolução',
+      header: t('table.column.due_at'),
       width: '15%',
       render: (item) => (
         <span className="font-bold dark:text-white">{item.devolucao}</span>
@@ -385,7 +387,7 @@ export function EmprestimosPage() {
     },
     {
       key: 'acoes',
-      header: 'Ações',
+      header: t('common:actions'),
       width: '10%',
       isSortable: false,
       render: (item) => (
@@ -393,7 +395,7 @@ export function EmprestimosPage() {
           onClick={() => handleAbrirDetalhes(item)}
           className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
         >
-          DETALHES
+          {t('common:button.details')}
         </button>
       ),
     },

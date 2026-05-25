@@ -1,16 +1,27 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import LogoIcon from '../../assets/icons/logo.svg?react';
 import { Icon } from './Icon';
 
 const REPOS = ['lumilivre-api', 'lumilivre-web', 'lumilivre-app'];
 
-const PROJECT_LINKS = [
-  { label: 'Documentacao', href: '#ecosystem' },
-  { label: 'Licenca MIT', href: 'https://opensource.org/license/mit/' },
-  { label: 'Codigo de conduta', href: '#community' },
-];
-
 export function Footer() {
+  const { t } = useTranslation('landing');
   const year = new Date().getFullYear();
+
+  const projectLinks = useMemo(
+    () => [
+      { label: t('footer.link.docs'), href: '#ecosystem' },
+      {
+        label: t('footer.link.license'),
+        href: 'https://opensource.org/license/mit/',
+      },
+      { label: t('footer.link.coc'), href: '#community' },
+    ],
+    [t],
+  );
+
   return (
     <footer className="border-t border-gray-200 dark:border-gray-800 px-6 py-16">
       <div className="max-w-6xl mx-auto">
@@ -21,14 +32,13 @@ export function Footer() {
               <span className="font-extrabold text-lg">LumiLivre</span>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-md">
-              Software livre para gestao de bibliotecas escolares. Feito por estudantes, para
-              escolas.
+              {t('footer.description')}
             </p>
           </div>
 
           <div>
             <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-500">
-              Repositorios
+              {t('footer.heading.repos')}
             </h4>
             <ul className="space-y-2.5 text-sm">
               {REPOS.map((r) => (
@@ -49,10 +59,10 @@ export function Footer() {
 
           <div>
             <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-500">
-              Projeto
+              {t('footer.heading.project')}
             </h4>
             <ul className="space-y-2.5 text-sm">
-              {PROJECT_LINKS.map((l) => (
+              {projectLinks.map((l) => (
                 <li key={l.label}>
                   <a
                     href={l.href}
@@ -69,8 +79,8 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
-          <div>© {year} LumiLivre · Distribuido sob licenca MIT.</div>
-          <div className="font-mono">Feito no IFRS · Campus Restinga · Porto Alegre/RS</div>
+          <div>{t('footer.copyright', { year })}</div>
+          <div className="font-mono">{t('footer.location')}</div>
         </div>
       </div>
     </footer>

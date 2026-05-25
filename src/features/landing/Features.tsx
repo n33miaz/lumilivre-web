@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Icon, type IconName } from './Icon';
 import { SectionHeader } from './SectionHeader';
 
@@ -11,50 +14,8 @@ interface FeatureItem {
   visual?: Visual;
 }
 
-const ITEMS: FeatureItem[] = [
-  {
-    span: 'md:col-span-2 md:row-span-2',
-    icon: 'sparkles',
-    title: 'Catalogacao inteligente',
-    desc:
-      'Digite o ISBN, busque por titulo ou cole a foto da capa. O LumiLivre preenche automaticamente titulo, autor, editora, ano e sinopse via Google Books e BrasilAPI. Cadastrar mil livros leva uma tarde, nao um semestre.',
-    visual: 'catalog',
-  },
-  {
-    span: '',
-    icon: 'arrow-left-right',
-    title: 'Emprestimos e multas',
-    desc: 'Renovacoes automaticas, alertas de atraso e calculo de penalidades configuraveis por escola.',
-  },
-  {
-    span: '',
-    icon: 'smartphone',
-    title: 'App do estudante',
-    desc: 'Catalogo digital, reservas, historico e ranking de leitura — direto no celular.',
-  },
-  {
-    span: 'md:col-span-2',
-    icon: 'graduation-cap',
-    title: 'Repositorio de TCCs',
-    desc:
-      'Trabalhos de conclusao indexados com PDF, banca, orientador e palavras-chave. O acervo intelectual da sua escola, pesquisavel.',
-    visual: 'tcc',
-  },
-  {
-    span: '',
-    icon: 'mail',
-    title: 'E-mails automaticos',
-    desc: 'Confirmacoes, lembretes de devolucao e cobrancas sem intervencao manual.',
-  },
-  {
-    span: '',
-    icon: 'file-text',
-    title: 'Relatorios em PDF',
-    desc: 'Exporte estatisticas, ranking, inventario e prestacao de contas com um clique.',
-  },
-];
-
 function CatalogVisual() {
+  const { t } = useTranslation('landing');
   return (
     <div className="mt-auto pt-6 -mx-6 -mb-6 px-6 pb-6 bg-gradient-to-br from-lumi-50 to-transparent dark:from-lumi-500/10">
       <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-ink-950 p-3 font-mono text-[11px] shadow-sm">
@@ -65,15 +26,26 @@ function CatalogVisual() {
         </div>
         <div className="space-y-1 text-gray-600 dark:text-gray-300">
           <div>
-            <span className="text-gray-400">Titulo: </span>Dom Casmurro
+            <span className="text-gray-400">
+              {t('features.visual.catalog.titleLabel')}
+            </span>
+            Dom Casmurro
           </div>
           <div>
-            <span className="text-gray-400">Autor: </span>Machado de Assis
+            <span className="text-gray-400">
+              {t('features.visual.catalog.authorLabel')}
+            </span>
+            Machado de Assis
           </div>
           <div>
-            <span className="text-gray-400">Editora: </span>Atica · 2008
+            <span className="text-gray-400">
+              {t('features.visual.catalog.publisherLabel')}
+            </span>
+            Atica · 2008
           </div>
-          <div className="text-green-500">Preenchido via Google Books</div>
+          <div className="text-green-500">
+            {t('features.visual.catalog.filledBy')}
+          </div>
         </div>
       </div>
     </div>
@@ -107,16 +79,62 @@ function TccVisual() {
 }
 
 export function Features() {
+  const { t } = useTranslation('landing');
+
+  const items: FeatureItem[] = useMemo(
+    () => [
+      {
+        span: 'md:col-span-2 md:row-span-2',
+        icon: 'sparkles',
+        title: t('features.item.catalog.title'),
+        desc: t('features.item.catalog.desc'),
+        visual: 'catalog',
+      },
+      {
+        span: '',
+        icon: 'arrow-left-right',
+        title: t('features.item.loans.title'),
+        desc: t('features.item.loans.desc'),
+      },
+      {
+        span: '',
+        icon: 'smartphone',
+        title: t('features.item.app.title'),
+        desc: t('features.item.app.desc'),
+      },
+      {
+        span: 'md:col-span-2',
+        icon: 'graduation-cap',
+        title: t('features.item.tcc.title'),
+        desc: t('features.item.tcc.desc'),
+        visual: 'tcc',
+      },
+      {
+        span: '',
+        icon: 'mail',
+        title: t('features.item.emails.title'),
+        desc: t('features.item.emails.desc'),
+      },
+      {
+        span: '',
+        icon: 'file-text',
+        title: t('features.item.reports.title'),
+        desc: t('features.item.reports.desc'),
+      },
+    ],
+    [t],
+  );
+
   return (
     <section id="features" className="py-28 px-6 bg-gray-50 dark:bg-ink-900/40">
       <div className="max-w-6xl mx-auto">
         <SectionHeader
-          eyebrow="Por dentro"
-          title="Tudo que voce esperava — e o que voce nem imaginava."
-          lead="Nao e uma planilha glorificada. E um software de verdade, pensado por quem usa biblioteca todo dia."
+          eyebrow={t('features.eyebrow')}
+          title={t('features.title')}
+          lead={t('features.lead')}
         />
         <div className="grid md:grid-cols-3 md:auto-rows-[200px] gap-4">
-          {ITEMS.map((it) => (
+          {items.map((it) => (
             <div
               key={it.title}
               className={`${it.span} group relative rounded-2xl bg-white dark:bg-ink-900 border border-gray-200 dark:border-gray-800 p-6 overflow-hidden hover:border-lumi-400 transition-colors`}

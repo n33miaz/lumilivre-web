@@ -12,7 +12,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { ChangePasswordModal } from '../Auth/components/ChangePasswordModal';
-import type { SupportedLocale } from '../../i18n';
+import { LOCALES } from '../../i18n';
 
 import UploadIcon from '../../assets/icons/download.svg?react';
 import LockIcon from '../../assets/icons/lock.svg?react';
@@ -369,20 +369,24 @@ export function ConfiguracoesPage() {
             title={t('language.title')}
             description={t('language.description')}
           >
-            <div className="flex items-center gap-2">
-              {(['pt-BR', 'en-US'] as SupportedLocale[]).map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setLocale(lang)}
-                  className={`px-3 py-1.5 rounded text-sm font-semibold transition-all ${
-                    locale === lang
-                      ? 'bg-lumi-primary text-white shadow'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {t(lang === 'pt-BR' ? 'language.pt_br' : 'language.en_us')}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 flex-wrap">
+              {LOCALES.map((item) => {
+                const i18nKey = `language.${item.code.replace('-', '_').toLowerCase()}`;
+                const fallbackLabel = item.label;
+                return (
+                  <button
+                    key={item.code}
+                    onClick={() => setLocale(item.code)}
+                    className={`px-3 py-1.5 rounded text-sm font-semibold transition-all ${
+                      locale === item.code
+                        ? 'bg-lumi-primary text-white shadow'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {t(i18nKey, fallbackLabel)}
+                  </button>
+                );
+              })}
             </div>
           </SettingItem>
         </div>

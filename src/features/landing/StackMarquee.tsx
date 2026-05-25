@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { SectionHeader } from './SectionHeader';
 
 const TECHS = [
@@ -27,22 +29,23 @@ function MarqueeItem({ t }: { t: { name: string; icon: string } }) {
 }
 
 export function StackMarquee() {
+  const { t } = useTranslation('landing');
   const stream = [...TECHS, ...TECHS];
   return (
     <section id="stack" className="py-24 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
         <SectionHeader
-          eyebrow="Tecnologia"
-          title="Stack moderno, escolhido com cuidado."
-          lead="Ferramentas estaveis, bem documentadas e populares — para que qualquer desenvolvedor consiga contribuir desde o primeiro dia."
+          eyebrow={t('stack.eyebrow')}
+          title={t('stack.title')}
+          lead={t('stack.lead')}
         />
       </div>
       <div className="relative">
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white dark:from-ink-950 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white dark:from-ink-950 to-transparent z-10 pointer-events-none" />
         <div className="flex animate-marquee" style={{ width: 'max-content' }}>
-          {stream.map((t, i) => (
-            <MarqueeItem key={`${t.name}-${i}`} t={t} />
+          {stream.map((tech, i) => (
+            <MarqueeItem key={`${tech.name}-${i}`} t={tech} />
           ))}
         </div>
       </div>

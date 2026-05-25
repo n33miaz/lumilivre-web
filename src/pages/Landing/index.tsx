@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useTheme } from '../../contexts/ThemeContext';
@@ -12,16 +13,17 @@ import { Footer } from '../../features/landing/Footer';
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation('landing');
   const { theme, setTheme } = useTheme();
   const dark = theme === 'dark';
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = 'LumiLivre — Software livre para bibliotecas escolares';
+    document.title = t('meta.title');
     return () => {
       document.title = previousTitle;
     };
-  }, []);
+  }, [t]);
 
   return (
     <div className="landing-root min-h-screen bg-white dark:bg-ink-950 text-gray-900 dark:text-gray-100 font-inter">

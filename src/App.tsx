@@ -49,27 +49,6 @@ function App() {
       <Route path="/change-password" element={<MudarSenhaPage />} />
       <Route path="/download" element={<DownloadAppPage />} />
 
-      {/* Redirecionamentos legados de rotas publicas */}
-      <Route path="/esqueci-a-senha" element={<Navigate to="/forgot-password" replace />} />
-      <Route path="/mudar-senha" element={<Navigate to="/change-password" replace />} />
-
-      {/* Redirecionamentos legados das rotas antigas (PT) para /admin/* (EN) */}
-      <Route path="/dashboard" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/livros" element={<Navigate to="/admin/books" replace />} />
-      <Route path="/alunos" element={<Navigate to="/admin/students" replace />} />
-      <Route path="/emprestimos" element={<Navigate to="/admin/loans" replace />} />
-      <Route path="/tcc" element={<Navigate to="/admin/theses" replace />} />
-      <Route path="/classificacao" element={<Navigate to="/admin/ranking" replace />} />
-      <Route path="/relatorios" element={<Navigate to="/admin/reports" replace />} />
-      <Route path="/configuracoes" element={<Navigate to="/admin/settings" replace />} />
-      <Route path="/admin/livros" element={<Navigate to="/admin/books" replace />} />
-      <Route path="/admin/alunos" element={<Navigate to="/admin/students" replace />} />
-      <Route path="/admin/emprestimos" element={<Navigate to="/admin/loans" replace />} />
-      <Route path="/admin/tcc" element={<Navigate to="/admin/theses" replace />} />
-      <Route path="/admin/classificacao" element={<Navigate to="/admin/ranking" replace />} />
-      <Route path="/admin/relatorios" element={<Navigate to="/admin/reports" replace />} />
-      <Route path="/admin/configuracoes" element={<Navigate to="/admin/settings" replace />} />
-
       {/* Painel (todas as rotas protegidas vivem sob /admin) */}
       <Route path="/admin" element={<ProtectedLayout />}>
         <Route index element={<Navigate to="dashboard" replace />} />

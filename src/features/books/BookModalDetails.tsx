@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
@@ -28,6 +29,7 @@ export function DetalhesLivroModal({
   isOpen,
   onClose,
 }: DetalhesLivroModalProps) {
+  const { t } = useTranslation('book');
   const [isEditMode, setIsEditMode] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
@@ -120,8 +122,8 @@ export function DetalhesLivroModal({
       />
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}
-        title="Excluir Livro"
-        message={`Tem certeza que deseja excluir o livro "${livroAtual?.nome}" e TODOS os seus exemplares junto?\nEsta ação não pode ser desfeita.`}
+        title={t('confirm.delete.title')}
+        message={t('confirm.delete.message', { name: livroAtual?.nome ?? '' })}
         isDestructive={true}
         onConfirm={executarExclusao}
         onCancel={() => setConfirmAction(null)}

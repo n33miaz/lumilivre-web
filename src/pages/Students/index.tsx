@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ActionHeader } from '../../components/ui/ActionHeader';
 import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
@@ -34,6 +35,7 @@ type AlunoDisplay = ListaAluno & {
 };
 
 export function AlunosPage() {
+  const { t } = useTranslation('student');
   const [currentPage, setCurrentPage] = useState(1);
   const [termoBusca, setTermoBusca] = useState('');
   const [filtroAtivo, setFiltroAtivo] = useState('');
@@ -79,11 +81,11 @@ export function AlunosPage() {
   }, [dynamicPageSize]);
 
   const mapSortKey: Record<string, string> = {
-    penalidadeStatus: 'penalidade',
-    cursoNome: 'curso.nome',
-    nascimentoDate: 'dataNascimento',
-    matricula: 'matricula',
-    nomeCompleto: 'nomeCompleto',
+    penalidadeStatus: 'penaltyCode',
+    cursoNome: 'course.name',
+    nascimentoDate: 'birthDate',
+    matricula: 'registrationNumber',
+    nomeCompleto: 'fullName',
   };
 
   const sortKeyBackend = mapSortKey[sortConfig.key] || sortConfig.key;
@@ -215,13 +217,13 @@ export function AlunosPage() {
   const columns: ColumnDef<AlunoDisplay>[] = [
     {
       key: 'penalidadeStatus',
-      header: 'Penalidade',
+      header: t('table.column.penalty'),
       width: '10%',
       render: (item) => <PenalidadeIndicator status={item.penalidadeStatus} />,
     },
     {
       key: 'matricula',
-      header: 'Matrícula',
+      header: t('table.column.registration'),
       width: '15%',
       render: (item) => (
         <span className="font-bold dark:text-gray-300">{item.matricula}</span>
@@ -229,7 +231,7 @@ export function AlunosPage() {
     },
     {
       key: 'nomeCompleto',
-      header: 'Aluno',
+      header: t('table.column.name'),
       width: '35%',
       render: (item) => (
         <span className="font-bold dark:text-gray-300 truncate">
@@ -239,7 +241,7 @@ export function AlunosPage() {
     },
     {
       key: 'cursoNome',
-      header: 'Curso',
+      header: t('table.column.course'),
       width: '20%',
       render: (item) => (
         <span className="dark:text-gray-300 truncate">{item.cursoNome}</span>
@@ -247,7 +249,7 @@ export function AlunosPage() {
     },
     {
       key: 'nascimentoDate',
-      header: 'Nascimento',
+      header: t('table.column.birth_date'),
       width: '10%',
       render: (item) => (
         <span className="dark:text-gray-300">
@@ -257,7 +259,7 @@ export function AlunosPage() {
     },
     {
       key: 'acoes',
-      header: 'Ações',
+      header: t('common:actions'),
       width: '10%',
       isSortable: false,
       render: (item) => (
@@ -265,7 +267,7 @@ export function AlunosPage() {
           onClick={() => handleAbrirDetalhes(item)}
           className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
         >
-          DETALHES
+          {t('common:button.details')}
         </button>
       ),
     },

@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import LogoIcon from '../../assets/icons/logo.svg?react';
 import { Icon, type IconName } from './Icon';
 
@@ -10,22 +13,30 @@ const ACTIVITY_ITEMS: Array<[string, string, string]> = [
   ['Bruno Lima', 'Memorias Postumas', 'bg-gray-400'],
 ];
 
-const STATS = [
-  { l: 'Livros', v: '1.247', c: 'bg-lumi-100 text-lumi-600' },
-  { l: 'Emprestimos', v: '86', c: 'bg-blue-100 text-blue-600' },
-  { l: 'Atrasados', v: '7', c: 'bg-orange-100 text-orange-600' },
-];
-
-const GENRES = [
-  { c: '#E8115B', t: 'Romance' },
-  { c: '#006450', t: 'Infantil' },
-  { c: '#8400E7', t: 'Juvenil' },
-  { c: '#1E3264', t: 'Aventura' },
-];
-
 const FEATURED_COVERS = ['#3754A8', '#A20E47', '#8A4100'];
 
 export function HeroVisual() {
+  const { t } = useTranslation('landing');
+
+  const stats = useMemo(
+    () => [
+      { l: t('heroVisual.stat.books'), v: '1.247', c: 'bg-lumi-100 text-lumi-600' },
+      { l: t('heroVisual.stat.loans'), v: '86', c: 'bg-blue-100 text-blue-600' },
+      { l: t('heroVisual.stat.overdue'), v: '7', c: 'bg-orange-100 text-orange-600' },
+    ],
+    [t],
+  );
+
+  const genres = useMemo(
+    () => [
+      { c: '#E8115B', t: t('heroVisual.genre.romance') },
+      { c: '#006450', t: t('heroVisual.genre.children') },
+      { c: '#8400E7', t: t('heroVisual.genre.teen') },
+      { c: '#1E3264', t: t('heroVisual.genre.adventure') },
+    ],
+    [t],
+  );
+
   return (
     <div className="relative h-[520px]">
       <div className="absolute top-4 left-0 right-12 h-[380px] rounded-2xl bg-white dark:bg-ink-900 border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden animate-float">
@@ -48,10 +59,14 @@ export function HeroVisual() {
             ))}
           </div>
           <div className="flex-1 p-5">
-            <div className="text-xs font-bold text-gray-900 dark:text-white mb-1">Painel</div>
-            <div className="text-[10px] text-gray-500 mb-4">Visao geral</div>
+            <div className="text-xs font-bold text-gray-900 dark:text-white mb-1">
+              {t('heroVisual.title')}
+            </div>
+            <div className="text-[10px] text-gray-500 mb-4">
+              {t('heroVisual.subtitle')}
+            </div>
             <div className="grid grid-cols-3 gap-2 mb-4">
-              {STATS.map((s) => (
+              {stats.map((s) => (
                 <div
                   key={s.l}
                   className="rounded-lg border border-gray-200 dark:border-gray-700 p-2.5"
@@ -86,11 +101,11 @@ export function HeroVisual() {
       >
         <div className="h-full bg-gray-50 dark:bg-ink-900 relative">
           <div className="bg-lumi-label h-[100px] rounded-b-[24px] flex flex-col justify-center px-4 pt-6">
-            <div className="text-[10px] text-white/80">Ola,</div>
+            <div className="text-[10px] text-white/80">{t('heroVisual.greeting')}</div>
             <div className="text-base font-extrabold text-white">Anna</div>
           </div>
           <div className="px-3 -mt-6 grid grid-cols-2 gap-2 relative z-10">
-            {GENRES.map((g) => (
+            {genres.map((g) => (
               <div
                 key={g.t}
                 className="rounded-lg p-2.5 text-white text-[10px] font-extrabold h-12 flex items-end"
@@ -102,7 +117,7 @@ export function HeroVisual() {
           </div>
           <div className="px-3 mt-3">
             <div className="text-[10px] font-bold text-gray-700 dark:text-gray-200 mb-1.5">
-              Em destaque
+              {t('heroVisual.featured')}
             </div>
             <div className="flex gap-1.5 overflow-hidden">
               {FEATURED_COVERS.map((c, i) => (
@@ -116,7 +131,8 @@ export function HeroVisual() {
                   />
                   <div className="p-1.5">
                     <div className="text-[7px] font-bold text-gray-900 dark:text-white truncate">
-                      Livro #{i + 1}
+                      {t('heroVisual.book.prefix')}
+                      {i + 1}
                     </div>
                   </div>
                 </div>

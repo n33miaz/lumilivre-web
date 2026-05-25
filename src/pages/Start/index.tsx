@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Bar,
@@ -60,6 +61,7 @@ interface SolicitacaoDisplay {
 }
 
 export function DashboardPage() {
+  const { t } = useTranslation('dashboard');
   const queryClient = useQueryClient();
 
   const {
@@ -391,7 +393,7 @@ export function DashboardPage() {
   const solicitacoesColumns: ColumnDef<SolicitacaoDisplay>[] = [
     {
       key: 'aluno',
-      header: 'Aluno',
+      header: t('table.column.student'),
       width: '30%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
@@ -401,7 +403,7 @@ export function DashboardPage() {
     },
     {
       key: 'livro',
-      header: 'Livro',
+      header: t('table.column.book'),
       width: '40%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
@@ -411,7 +413,7 @@ export function DashboardPage() {
     },
     {
       key: 'solicitacao',
-      header: 'Solicitado',
+      header: t('table.column.requested_at'),
       width: '16%',
       render: (item) => (
         <span className="dark:text-white font-bold">
@@ -421,7 +423,7 @@ export function DashboardPage() {
     },
     {
       key: 'acoes',
-      header: 'Ações',
+      header: t('common:actions'),
       width: '14%',
       isSortable: false,
       render: (item) => (
@@ -429,7 +431,7 @@ export function DashboardPage() {
           onClick={() => handleAbrirDetalhesSolicitacao(item)}
           className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
         >
-          Detalhes
+          {t('common:button.details')}
         </button>
       ),
     },
@@ -438,7 +440,7 @@ export function DashboardPage() {
   const emprestimosColumns: ColumnDef<EmprestimoVencer>[] = [
     {
       key: 'aluno',
-      header: 'Aluno',
+      header: t('table.column.student'),
       width: '30%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
@@ -448,7 +450,7 @@ export function DashboardPage() {
     },
     {
       key: 'livro',
-      header: 'Livro',
+      header: t('table.column.book'),
       width: '40%',
       render: (item) => (
         <span className="text-gray-700 dark:text-gray-300 truncate">
@@ -458,7 +460,7 @@ export function DashboardPage() {
     },
     {
       key: 'devolucao',
-      header: 'Devolução',
+      header: t('table.column.due_at'),
       width: '16%',
       render: (item) => (
         <span className="dark:text-white font-bold">{item.devolucao}</span>
@@ -466,7 +468,7 @@ export function DashboardPage() {
     },
     {
       key: 'acoes',
-      header: 'Ações',
+      header: t('common:actions'),
       width: '14%',
       isSortable: false,
       render: (item) => (
@@ -474,7 +476,7 @@ export function DashboardPage() {
           onClick={() => handleAbrirDetalhesEmprestimo(item)}
           className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
         >
-          Detalhes
+          {t('common:button.details')}
         </button>
       ),
     },

@@ -44,6 +44,8 @@
   "confirm.copy_register.question": "Would you like to register a physical copy now?",
   "confirm.copy_register.yes": "Yes, register",
   "confirm.copy_register.no": "No, do it later",
+  "confirm.delete.title": "Delete Book",
+  "confirm.delete.message": "Are you sure you want to delete the book \"{{name}}\" and ALL its copies together?\nThis action cannot be undone.",
   "toast.created": "Book registered successfully.",
   "toast.updated": "Book updated successfully.",
   "toast.deleted": "Book deleted successfully.",

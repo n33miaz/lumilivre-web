@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Icon, type IconName } from './Icon';
 
 interface Card {
@@ -6,30 +9,35 @@ interface Card {
   desc: string;
 }
 
-const CARDS: Card[] = [
-  {
-    icon: 'git-fork',
-    title: 'Forke os repositorios',
-    desc: 'Adapte ao contexto da sua escola.',
-  },
-  {
-    icon: 'git-pull-request',
-    title: 'Abra um pull request',
-    desc: 'Bug fix, feature, traducao — tudo conta.',
-  },
-  {
-    icon: 'message-circle',
-    title: 'Abra uma discussao',
-    desc: 'Tire duvidas, mostre o que voce fez.',
-  },
-  {
-    icon: 'heart',
-    title: 'Cite no seu projeto',
-    desc: 'A maior contribuicao e a adocao real.',
-  },
-];
-
 export function CommunityCTA() {
+  const { t } = useTranslation('landing');
+
+  const cards: Card[] = useMemo(
+    () => [
+      {
+        icon: 'git-fork',
+        title: t('community.card.fork.title'),
+        desc: t('community.card.fork.desc'),
+      },
+      {
+        icon: 'git-pull-request',
+        title: t('community.card.pr.title'),
+        desc: t('community.card.pr.desc'),
+      },
+      {
+        icon: 'message-circle',
+        title: t('community.card.discuss.title'),
+        desc: t('community.card.discuss.desc'),
+      },
+      {
+        icon: 'heart',
+        title: t('community.card.cite.title'),
+        desc: t('community.card.cite.desc'),
+      },
+    ],
+    [t],
+  );
+
   return (
     <section id="community" className="py-28 px-6">
       <div className="max-w-5xl mx-auto relative rounded-3xl overflow-hidden bg-gradient-to-br from-lumi-700 via-lumi-500 to-lumi-label p-1">
@@ -40,22 +48,20 @@ export function CommunityCTA() {
           <div className="relative grid md:grid-cols-2 gap-10 items-center">
             <div>
               <span className="inline-block px-3 py-1 mb-5 rounded-full bg-white/15 backdrop-blur text-white text-xs font-bold uppercase tracking-wider">
-                Comunidade · Open Source
+                {t('community.badge')}
               </span>
               <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-5 leading-tight">
-                Sua escola usa.
+                {t('community.title.line1')}
                 <br />
-                Sua escola contribui.
+                {t('community.title.line2')}
               </h2>
               <p className="text-lg text-white/85 leading-relaxed">
-                LumiLivre e livre para qualquer instituicao de ensino — publica, privada, tecnica,
-                fundamental, superior. Forke, adapte, traduza, compartilhe. Pull requests sempre
-                bem-vindos.
+                {t('community.description')}
               </p>
             </div>
 
             <div className="space-y-3">
-              {CARDS.map((c) => (
+              {cards.map((c) => (
                 <div
                   key={c.title}
                   className="flex items-start gap-4 p-4 rounded-xl bg-white/10 backdrop-blur hover:bg-white/15 transition cursor-pointer"

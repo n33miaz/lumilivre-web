@@ -13,6 +13,7 @@ import ptBRRanking from './locales/pt-BR/ranking.json';
 import ptBRReport from './locales/pt-BR/report.json';
 import ptBRTcc from './locales/pt-BR/tcc.json';
 import ptBRDashboard from './locales/pt-BR/dashboard.json';
+import ptBRLanding from './locales/pt-BR/landing.json';
 
 import enUSCommon from './locales/en-US/common.json';
 import enUSAuth from './locales/en-US/auth.json';
@@ -25,9 +26,19 @@ import enUSRanking from './locales/en-US/ranking.json';
 import enUSReport from './locales/en-US/report.json';
 import enUSTcc from './locales/en-US/tcc.json';
 import enUSDashboard from './locales/en-US/dashboard.json';
+import enUSLanding from './locales/en-US/landing.json';
 
-export const SUPPORTED_LOCALES = ['pt-BR', 'en-US'] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+export const LOCALES = [
+  { code: 'pt-BR', label: 'Português', short: 'PT' },
+  { code: 'en-US', label: 'English', short: 'EN' },
+] as const;
+
+export type SupportedLocale = (typeof LOCALES)[number]['code'];
+
+export const SUPPORTED_LOCALES = LOCALES.map(
+  (l) => l.code,
+) as readonly SupportedLocale[];
+
 export const DEFAULT_LOCALE: SupportedLocale = 'pt-BR';
 export const LOCALE_STORAGE_KEY = 'lumilivre.locale';
 
@@ -48,6 +59,7 @@ i18n
         report: ptBRReport,
         tcc: ptBRTcc,
         dashboard: ptBRDashboard,
+        landing: ptBRLanding,
       },
       'en-US': {
         common: enUSCommon,
@@ -61,6 +73,7 @@ i18n
         report: enUSReport,
         tcc: enUSTcc,
         dashboard: enUSDashboard,
+        landing: enUSLanding,
       },
     },
     fallbackLng: DEFAULT_LOCALE,

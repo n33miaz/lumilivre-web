@@ -44,6 +44,8 @@
   "confirm.copy_register.question": "Deseja cadastrar um exemplar físico agora?",
   "confirm.copy_register.yes": "Sim, cadastrar",
   "confirm.copy_register.no": "Não, fazer depois",
+  "confirm.delete.title": "Excluir Livro",
+  "confirm.delete.message": "Tem certeza que deseja excluir o livro \"{{name}}\" e TODOS os seus exemplares junto?\nEsta ação não pode ser desfeita.",
   "toast.created": "Livro cadastrado com sucesso.",
   "toast.updated": "Livro atualizado com sucesso.",
   "toast.deleted": "Livro excluído com sucesso.",

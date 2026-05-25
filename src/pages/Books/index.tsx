@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 import { ActionHeader } from '../../components/ui/ActionHeader';
@@ -26,6 +27,7 @@ const livrosLegend = [
 ];
 
 export function LivrosPage() {
+  const { t } = useTranslation('book');
   const [isExemplarView, setIsExemplarView] = useState(false);
   const [selectedBook, setSelectedBook] = useState<LivroAgrupado | null>(null);
 
@@ -304,7 +306,7 @@ export function LivrosPage() {
     (): ColumnDef<LivroAgrupado>[] => [
       {
         key: 'isbn',
-        header: 'ISBN',
+        header: t('table.column.isbn'),
         width: '15%',
         render: (item) => (
           <span className="font-bold dark:text-white">{item.isbn || '-'}</span>
@@ -312,7 +314,7 @@ export function LivrosPage() {
       },
       {
         key: 'nome',
-        header: 'Livro',
+        header: t('table.column.title'),
         width: '25%',
         render: (item) => (
           <span className="font-bold dark:text-white truncate">
@@ -322,7 +324,7 @@ export function LivrosPage() {
       },
       {
         key: 'autor',
-        header: 'Autor',
+        header: t('table.column.author'),
         width: '20%',
         render: (item) => (
           <span className="dark:text-gray-300 truncate">{item.autor}</span>
@@ -330,7 +332,7 @@ export function LivrosPage() {
       },
       {
         key: 'editora',
-        header: 'Editora',
+        header: t('table.column.publisher'),
         width: '15%',
         render: (item) => (
           <span className="dark:text-gray-300 truncate">{item.editora}</span>
@@ -338,7 +340,7 @@ export function LivrosPage() {
       },
       {
         key: 'quantidade',
-        header: 'Qtd',
+        header: t('table.column.quantity'),
         width: '5%',
         render: (item) => (
           <span className="font-bold dark:text-white">
@@ -350,7 +352,7 @@ export function LivrosPage() {
       },
       {
         key: 'acoes',
-        header: 'Ações',
+        header: t('common:actions'),
         width: '20%',
         isSortable: false,
         render: (item) => (
@@ -359,32 +361,32 @@ export function LivrosPage() {
               onClick={() => handleVerExemplares(item)}
               className="bg-blue-500 text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md"
             >
-              EXEMPLARES
+              {t('button.copies')}
             </button>
             <button
               onClick={() => handleAbrirDetalhes(item)}
               className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
             >
-              DETALHES
+              {t('common:button.details')}
             </button>
           </div>
         ),
       },
     ],
-    [handleVerExemplares, handleAbrirDetalhes],
+    [t, handleVerExemplares, handleAbrirDetalhes],
   );
 
   const exemplaresColumns = useMemo(
     (): ColumnDef<ListaLivro>[] => [
       {
         key: 'status',
-        header: 'Status',
+        header: t('copy.table.column.status'),
         width: '15%',
         render: (item) => <StatusIndicator status={item.status} />,
       },
       {
         key: 'tomboExemplar',
-        header: 'Tombo',
+        header: t('copy.table.column.code'),
         width: '20%',
         render: (item) => (
           <span className="font-bold dark:text-white">
@@ -394,7 +396,7 @@ export function LivrosPage() {
       },
       {
         key: 'localizacao_fisica',
-        header: 'Localização',
+        header: t('copy.table.column.location'),
         width: '25%',
         render: (item) => (
           <span className="dark:text-gray-300">{item.localizacao_fisica}</span>
@@ -402,7 +404,7 @@ export function LivrosPage() {
       },
       {
         key: 'responsavel',
-        header: 'Responsável',
+        header: t('copy.table.column.responsible'),
         width: '25%',
         render: (item) => (
           <span className="dark:text-gray-300">{item.responsavel}</span>
@@ -410,7 +412,7 @@ export function LivrosPage() {
       },
       {
         key: 'acoes',
-        header: 'Ações',
+        header: t('common:actions'),
         width: '15%',
         isSortable: false,
         render: (item) => (
@@ -419,13 +421,13 @@ export function LivrosPage() {
               onClick={() => handleAbrirDetalhesExemplar(item)}
               className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
             >
-              DETALHES
+              {t('common:button.details')}
             </button>
           </div>
         ),
       },
     ],
-    [handleAbrirDetalhesExemplar],
+    [t, handleAbrirDetalhesExemplar],
   );
 
   return (

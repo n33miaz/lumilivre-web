@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Icon, type IconName } from './Icon';
 import { SectionHeader } from './SectionHeader';
 
@@ -10,47 +13,49 @@ interface Pillar {
   accent: string;
 }
 
-const PILLARS: Pillar[] = [
-  {
-    icon: 'server',
-    tag: 'Nucleo',
-    title: 'LumiLivre API',
-    desc:
-      'Backend robusto em Spring Boot com PostgreSQL e Supabase. Todos os clientes consomem a mesma API REST documentada.',
-    stack: ['Spring Boot', 'PostgreSQL', 'Supabase', 'JWT'],
-    accent: 'from-lumi-500 to-lumi-700',
-  },
-  {
-    icon: 'monitor',
-    tag: 'Painel',
-    title: 'LumiLivre Web',
-    desc:
-      'Painel administrativo em React para bibliotecarias e coordenacao. Gestao completa do acervo, emprestimos, alunos e relatorios.',
-    stack: ['React', 'TypeScript', 'TailwindCSS', 'Vite'],
-    accent: 'from-lumi-action to-blue-700',
-  },
-  {
-    icon: 'smartphone',
-    tag: 'Estudantes',
-    title: 'LumiLivre App',
-    desc:
-      'Aplicativo Flutter para alunos descobrirem livros, reservarem titulos, consultarem emprestimos e disputarem o ranking de leitura.',
-    stack: ['Flutter', 'Dart', 'Material 3', 'FCM'],
-    accent: 'from-lumi-label to-pink-600',
-  },
-];
-
 export function Ecosystem() {
+  const { t } = useTranslation('landing');
+
+  const pillars: Pillar[] = useMemo(
+    () => [
+      {
+        icon: 'server',
+        tag: t('ecosystem.pillar.api.tag'),
+        title: t('ecosystem.pillar.api.title'),
+        desc: t('ecosystem.pillar.api.desc'),
+        stack: ['Spring Boot', 'PostgreSQL', 'Supabase', 'JWT'],
+        accent: 'from-lumi-500 to-lumi-700',
+      },
+      {
+        icon: 'monitor',
+        tag: t('ecosystem.pillar.web.tag'),
+        title: t('ecosystem.pillar.web.title'),
+        desc: t('ecosystem.pillar.web.desc'),
+        stack: ['React', 'TypeScript', 'TailwindCSS', 'Vite'],
+        accent: 'from-lumi-action to-blue-700',
+      },
+      {
+        icon: 'smartphone',
+        tag: t('ecosystem.pillar.app.tag'),
+        title: t('ecosystem.pillar.app.title'),
+        desc: t('ecosystem.pillar.app.desc'),
+        stack: ['Flutter', 'Dart', 'Material 3', 'FCM'],
+        accent: 'from-lumi-label to-pink-600',
+      },
+    ],
+    [t],
+  );
+
   return (
     <section id="ecosystem" className="py-28 px-6 relative">
       <div className="max-w-6xl mx-auto">
         <SectionHeader
-          eyebrow="O ecossistema"
-          title="Tres pecas, um unico objetivo."
-          lead="Tudo que sua biblioteca precisa em tres aplicacoes que conversam entre si: a API que guarda os dados, o painel que a equipe usa, e o app que os alunos amam."
+          eyebrow={t('ecosystem.eyebrow')}
+          title={t('ecosystem.title')}
+          lead={t('ecosystem.lead')}
         />
         <div className="grid md:grid-cols-3 gap-6">
-          {PILLARS.map((p, i) => (
+          {pillars.map((p, i) => (
             <div
               key={p.title}
               className="group relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-ink-900 p-7 hover:border-lumi-400 hover:-translate-y-1 transition-all duration-300 shadow-soft hover:shadow-glow"
