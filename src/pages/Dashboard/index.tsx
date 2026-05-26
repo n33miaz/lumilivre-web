@@ -15,12 +15,20 @@ import {
 } from 'recharts';
 
 import { StatCard } from '../../components/ui/StatCard';
+import { DashboardViewToggle } from '../../components/ui/DashboardViewToggle';
 import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
 import { TableFooter } from '../../components/ui/TableFooter';
 import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 import { LoanModalRequest } from '../../features/loans/LoanModalRequest';
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
+import {
+  useDashboardViewAlerts,
+  type AnalyticsFingerprint,
+  type DashboardView,
+  type TablesFingerprint,
+} from '../../hooks/useDashboardViewAlerts';
+import { ChartCard } from './components/ChartCard';
 
 import {
   useDashboardStats,
@@ -36,6 +44,138 @@ import LoansIcon from '../../assets/icons/loans-active.svg?react';
 import type { EmprestimoAtivoDTO } from '../../services/loanService';
 
 const CHART_COLORS = ['#762075', '#0f766e', '#dc2626', '#ca8a04', '#2563eb'];
+
+const DASHBOARD_VIEW_STORAGE_KEY = 'lumilivre.dashboard.view';
+
+const readStoredView = (): DashboardView => {
+  if (typeof window === 'undefined') return 'analytics';
+  const stored = window.localStorage.getItem(DASHBOARD_VIEW_STORAGE_KEY);
+  return stored === 'tables' ? 'tables' : 'analytics';
+};
+
+function ManagementIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 3v18h18" />
+      <rect x="7" y="12" width="3" height="6" rx="0.5" />
+      <rect x="12" y="8" width="3" height="10" rx="0.5" />
+      <rect x="17" y="5" width="3" height="13" rx="0.5" />
+    </svg>
+  );
+}
+
+function RefreshIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M21 12a9 9 0 1 1-3.5-7.1" />
+      <path d="M21 3v6h-6" />
+    </svg>
+  );
+}
+
+function CsvIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M8 13h2m4 0h2M8 17h8" />
+    </svg>
+  );
+}
+
+function PdfIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 9V2h9l5 5v15a2 2 0 0 1-2 2H8" />
+      <path d="M14 2v6h6" />
+      <path d="M3 15h2a1.5 1.5 0 0 1 0 3H3v-3z" />
+      <path d="M3 21v-3" />
+    </svg>
+  );
+}
+
+interface PeriodSelectDisabledProps {
+  defaultLabel: string;
+  ariaLabel: string;
+  tooltip: string;
+}
+
+function PeriodSelectDisabled({
+  defaultLabel,
+  ariaLabel,
+  tooltip,
+}: PeriodSelectDisabledProps) {
+  return (
+    <div
+      className="relative inline-flex items-center"
+      title={tooltip}
+    >
+      <button
+        type="button"
+        disabled
+        aria-label={ariaLabel}
+        className="inline-flex items-center gap-2 h-9 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/60 px-3 text-xs sm:text-sm cursor-not-allowed select-none"
+      >
+        <span className="opacity-80">{defaultLabel}</span>
+        <svg
+          aria-hidden="true"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="opacity-60"
+        >
+          <path d="M3 4.5L6 7.5L9 4.5" />
+        </svg>
+      </button>
+    </div>
+  );
+}
 
 interface EmprestimoVencer {
   id: string;
@@ -61,8 +201,14 @@ interface SolicitacaoDisplay {
 }
 
 export function DashboardPage() {
-  const { t } = useTranslation('dashboard');
+  const { t, i18n } = useTranslation('dashboard');
   const queryClient = useQueryClient();
+
+  const [view, setView] = useState<DashboardView>(() => readStoredView());
+
+  useEffect(() => {
+    window.localStorage.setItem(DASHBOARD_VIEW_STORAGE_KEY, view);
+  }, [view]);
 
   const {
     data: statsData,
@@ -200,12 +346,12 @@ export function DashboardPage() {
           tombo: e.tombo,
           rawDevolucao: e.dataDevolucao,
           retirada: e.dataEmprestimo || '-',
-          devolucao: dataDevolucao.toLocaleDateString('pt-BR'),
+          devolucao: dataDevolucao.toLocaleDateString(i18n.language),
           statusVencimento,
         };
       })
       .filter((item) => item.statusVencimento !== 'ativo');
-  }, [emprestimos.data]);
+  }, [emprestimos.data, i18n.language]);
 
   const sortedEmprestimos = useMemo(() => {
     const items = [...emprestimosProcessados];
@@ -235,24 +381,24 @@ export function DashboardPage() {
     if (!data) return [];
 
     return [
-      { name: 'Ativos', total: data.emprestimosAtivos },
-      { name: 'Atrasados', total: data.emprestimosAtrasados },
-      { name: 'Concluidos', total: data.emprestimosConcluidos },
-      { name: 'Solicitacoes', total: data.solicitacoesPendentes },
-      { name: 'Reservas', total: data.reservasAguardando },
+      { name: t('chart.status.active'), total: data.emprestimosAtivos },
+      { name: t('chart.status.overdue'), total: data.emprestimosAtrasados },
+      { name: t('chart.status.completed'), total: data.emprestimosConcluidos },
+      { name: t('chart.status.requests'), total: data.solicitacoesPendentes },
+      { name: t('chart.status.reservations'), total: data.reservasAguardando },
     ].filter((item) => item.total > 0);
-  }, [statsGerenciais.data]);
+  }, [statsGerenciais.data, t]);
 
   const monthlyChartData = useMemo(
     () =>
       (emprestimosPorMes.data ?? []).map((item) => ({
-        mes: new Date(`${item.mes}T00:00:00`).toLocaleDateString('pt-BR', {
+        mes: new Date(`${item.mes}T00:00:00`).toLocaleDateString(i18n.language, {
           month: 'short',
           year: '2-digit',
         }),
         total: item.total,
       })),
-    [emprestimosPorMes.data],
+    [emprestimosPorMes.data, i18n.language],
   );
 
   const topBooksChartData = useMemo(
@@ -273,50 +419,113 @@ export function DashboardPage() {
     ).length;
 
     return [
-      { name: 'Atrasados', total: atrasados },
-      { name: 'Vence hoje', total: venceHoje },
+      { name: t('chart.due.overdue'), total: atrasados },
+      { name: t('chart.due.due_today'), total: venceHoje },
     ].filter((item) => item.total > 0);
-  }, [sortedEmprestimos]);
+  }, [sortedEmprestimos, t]);
+
+  const analyticsFingerprint = useMemo<AnalyticsFingerprint | null>(() => {
+    const data = statsGerenciais.data;
+    if (!data) return null;
+    return {
+      ativos: data.emprestimosAtivos,
+      atrasados: data.emprestimosAtrasados,
+      concluidos: data.emprestimosConcluidos,
+      solicitacoesPendentes: data.solicitacoesPendentes,
+      reservasAguardando: data.reservasAguardando,
+    };
+  }, [statsGerenciais.data]);
+
+  const tablesFingerprint = useMemo<TablesFingerprint | null>(() => {
+    if (!solicitacoes.data || !emprestimos.data) return null;
+    return {
+      solicitacoesCount: solicitacoes.data.length,
+      emprestimosCount: emprestimosProcessados.length,
+    };
+  }, [solicitacoes.data, emprestimos.data, emprestimosProcessados]);
+
+  const { analyticsHasNews, tablesHasNews } = useDashboardViewAlerts({
+    view,
+    analytics: analyticsFingerprint,
+    tables: tablesFingerprint,
+  });
+
+  const statusChartTotal = useMemo(
+    () => statusChartData.reduce((sum, item) => sum + item.total, 0),
+    [statusChartData],
+  );
+
+  const monthlyChartTotal = useMemo(
+    () => monthlyChartData.reduce((sum, item) => sum + item.total, 0),
+    [monthlyChartData],
+  );
+
+  const topBooksChartTotal = useMemo(
+    () => topBooksChartData.reduce((sum, item) => sum + item.total, 0),
+    [topBooksChartData],
+  );
+
+  const dueStatusChartTotal = useMemo(
+    () => dueStatusChartData.reduce((sum, item) => sum + item.total, 0),
+    [dueStatusChartData],
+  );
+
+  const [isRefreshingAnalytics, setIsRefreshingAnalytics] = useState(false);
+
+  const isAnalyticsLoading =
+    statsGerenciais.isLoading ||
+    topLivros.isLoading ||
+    emprestimosPorMes.isLoading;
+
+  const handleRefreshAnalytics = async () => {
+    if (isRefreshingAnalytics) return;
+    setIsRefreshingAnalytics(true);
+    try {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['dashboard-gerencial-stats'] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard-top-livros'] }),
+        queryClient.invalidateQueries({ queryKey: ['dashboard-emprestimos-por-mes'] }),
+      ]);
+    } finally {
+      setIsRefreshingAnalytics(false);
+    }
+  };
 
   const handleExportCsv = () => {
-    downloadCsv('dashboard-gerencial.csv', [
-      ...(statsGerenciais.data
-        ? [
-            {
-              indicador: 'Emprestimos ativos',
-              valor: statsGerenciais.data.emprestimosAtivos,
-            },
-            {
-              indicador: 'Emprestimos atrasados',
-              valor: statsGerenciais.data.emprestimosAtrasados,
-            },
-            {
-              indicador: 'Emprestimos concluidos',
-              valor: statsGerenciais.data.emprestimosConcluidos,
-            },
-            {
-              indicador: 'Media dias devolucao',
-              valor: statsGerenciais.data.mediaDiasDevolucao,
-            },
-            {
-              indicador: 'Solicitacoes pendentes',
-              valor: statsGerenciais.data.solicitacoesPendentes,
-            },
-            {
-              indicador: 'Reservas aguardando',
-              valor: statsGerenciais.data.reservasAguardando,
-            },
-          ]
-        : []),
-      ...(topLivros.data ?? []).map((item) => ({
-        indicador: `Livro: ${item.titulo}`,
-        valor: item.totalEmprestimos,
-      })),
-      ...(emprestimosPorMes.data ?? []).map((item) => ({
-        indicador: `Mes: ${item.mes}`,
-        valor: item.total,
-      })),
-    ]);
+    const headerIndicator = t('export.csv.header.indicator');
+    const headerValue = t('export.csv.header.value');
+    const rows: Array<Record<string, string | number>> = [];
+
+    if (statsGerenciais.data) {
+      const indicators: Array<[string, number]> = [
+        [t('export.csv.row.active_loans'), statsGerenciais.data.emprestimosAtivos],
+        [t('export.csv.row.overdue_loans'), statsGerenciais.data.emprestimosAtrasados],
+        [t('export.csv.row.completed_loans'), statsGerenciais.data.emprestimosConcluidos],
+        [t('export.csv.row.avg_return_days'), statsGerenciais.data.mediaDiasDevolucao],
+        [t('export.csv.row.pending_requests'), statsGerenciais.data.solicitacoesPendentes],
+        [t('export.csv.row.waiting_reservations'), statsGerenciais.data.reservasAguardando],
+      ];
+
+      indicators.forEach(([label, value]) => {
+        rows.push({ [headerIndicator]: label, [headerValue]: value });
+      });
+    }
+
+    (topLivros.data ?? []).forEach((item) => {
+      rows.push({
+        [headerIndicator]: `${t('export.csv.row.book_prefix')}: ${item.titulo}`,
+        [headerValue]: item.totalEmprestimos,
+      });
+    });
+
+    (emprestimosPorMes.data ?? []).forEach((item) => {
+      rows.push({
+        [headerIndicator]: `${t('export.csv.row.month_prefix')}: ${item.mes}`,
+        [headerValue]: item.total,
+      });
+    });
+
+    downloadCsv('dashboard-gerencial.csv', rows);
   };
 
   const requestSolicitacaoSort = (key: string) => {
@@ -417,7 +626,7 @@ export function DashboardPage() {
       width: '16%',
       render: (item) => (
         <span className="dark:text-white font-bold">
-          {item.solicitacao.toLocaleDateString('pt-BR')}
+          {item.solicitacao.toLocaleDateString(i18n.language)}
         </span>
       ),
     },
@@ -505,7 +714,7 @@ export function DashboardPage() {
         <StatCard
           to="/admin/books"
           Icon={BookIcon}
-          title="LIVROS"
+          title={t('stat.books')}
           value={statsData?.livros ?? 0}
           isLoading={isStatsLoading}
           hasError={!!statsError}
@@ -515,7 +724,7 @@ export function DashboardPage() {
         <StatCard
           to="/admin/students"
           Icon={UsersIcon}
-          title="ALUNOS"
+          title={t('stat.students')}
           value={statsData?.alunos ?? 0}
           isLoading={isStatsLoading}
           hasError={!!statsError}
@@ -525,7 +734,7 @@ export function DashboardPage() {
         <StatCard
           to="/admin/loans"
           Icon={LoansIcon}
-          title="EMPRÉSTIMOS"
+          title={t('stat.loans')}
           value={statsData?.emprestimosAtivos ?? 0}
           isLoading={isStatsLoading}
           hasError={!!statsError}
@@ -535,7 +744,7 @@ export function DashboardPage() {
         <StatCard
           to="/admin/loans?filtro=atrasados"
           Icon={AlertIcon}
-          title="PENDÊNCIAS"
+          title={t('stat.overdue')}
           value={statsData?.atrasados ?? 0}
           variant="danger"
           isLoading={isStatsLoading}
@@ -544,156 +753,201 @@ export function DashboardPage() {
         />
       </div>
 
-      <div className="bg-white dark:bg-dark-card rounded-lg shadow-md p-4 md:p-6 mb-6 shrink-0">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-              Analise gerencial
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Emprestimos, atrasos, reservas e livros mais movimentados.
-            </p>
+      <div className="flex justify-end mb-4 shrink-0 print:hidden">
+        <DashboardViewToggle
+          value={view}
+          onChange={setView}
+          analyticsHasNews={analyticsHasNews}
+          tablesHasNews={tablesHasNews}
+        />
+      </div>
+
+      <div
+        data-dashboard-block="analytics"
+        className={`bg-white dark:bg-dark-card rounded-2xl shadow-md p-4 md:p-6 mb-6 shrink-0 ${
+          view === 'analytics' ? 'block animate-fade-in' : 'hidden'
+        }`}
+      >
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+          <div className="flex items-start gap-3">
+            <span
+              aria-hidden="true"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lumi-primary/10 dark:bg-lumi-primary/25 text-lumi-primary dark:text-lumi-label"
+            >
+              <ManagementIcon />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white truncate">
+                {t('section.management')}
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t('section.management.subtitle')}
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            <PeriodSelectDisabled
+              ariaLabel={t('section.management.period.aria')}
+              defaultLabel={t('section.management.period.30d')}
+              tooltip={t('feature_coming_soon', { ns: 'common' })}
+            />
+            <button
+              type="button"
+              onClick={handleRefreshAnalytics}
+              disabled={isRefreshingAnalytics || isAnalyticsLoading}
+              aria-label={t('section.management.refresh.aria')}
+              title={
+                isRefreshingAnalytics
+                  ? t('section.management.refreshing')
+                  : t('section.management.refresh')
+              }
+              className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <RefreshIcon
+                className={isRefreshingAnalytics ? 'animate-spin' : ''}
+              />
+            </button>
             <button
               type="button"
               onClick={handleExportCsv}
-              className="bg-lumi-primary text-white text-sm font-bold py-2 px-3 rounded hover:bg-opacity-80"
+              className="inline-flex items-center gap-1.5 bg-lumi-primary text-white text-xs sm:text-sm font-semibold py-2 px-3 rounded-lg hover:bg-opacity-90 hover:shadow-md transition-all"
             >
-              Exportar CSV
+              <CsvIcon />
+              <span className="hidden sm:inline">{t('button.export_csv')}</span>
             </button>
             <button
               type="button"
               onClick={printDashboardPdf}
-              className="bg-gray-800 text-white text-sm font-bold py-2 px-3 rounded hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white"
+              className="inline-flex items-center gap-1.5 bg-gray-800 text-white text-xs sm:text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white hover:shadow-md transition-all"
             >
-              Exportar PDF
+              <PdfIcon />
+              <span className="hidden sm:inline">{t('button.export_pdf')}</span>
             </button>
           </div>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4">
+          <ChartCard
+            title={t('chart.general_distribution')}
+            total={statusChartTotal}
+            totalLabel={t('chart.total_label')}
+            isLoading={isAnalyticsLoading}
+            isEmpty={statusChartData.length === 0}
+            emptyMessage={t('chart.no_data')}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusChartData}
+                  dataKey="total"
+                  nameKey="name"
+                  innerRadius={45}
+                  outerRadius={70}
+                  paddingAngle={2}
+                >
+                  {statusChartData.map((_, index) => (
+                    <Cell
+                      key={`status-${index}`}
+                      fill={CHART_COLORS[index % CHART_COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard
+            title={t('chart.loans_per_month')}
+            total={monthlyChartTotal}
+            totalLabel={t('chart.total_label')}
+            isLoading={isAnalyticsLoading}
+            isEmpty={monthlyChartData.length === 0}
+            emptyMessage={t('chart.no_data')}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyChartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+                <YAxis allowDecimals={false} width={32} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#0f766e" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard
+            title={t('chart.top_books')}
+            total={topBooksChartTotal}
+            totalLabel={t('chart.total_label')}
+            isLoading={isAnalyticsLoading}
+            isEmpty={topBooksChartData.length === 0}
+            emptyMessage={t('chart.no_data')}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={topBooksChartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="livro" tick={{ fontSize: 10 }} interval={0} />
+                <YAxis allowDecimals={false} width={32} />
+                <Tooltip />
+                <Bar dataKey="total" fill="#762075" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+
+          <ChartCard
+            title={t('chart.overdue')}
+            total={dueStatusChartTotal}
+            totalLabel={t('chart.total_label')}
+            isLoading={isAnalyticsLoading}
+            isEmpty={dueStatusChartData.length === 0}
+            emptyMessage={t('chart.no_overdue')}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={dueStatusChartData}
+                  dataKey="total"
+                  nameKey="name"
+                  outerRadius={70}
+                  label
+                >
+                  {dueStatusChartData.map((_, index) => (
+                    <Cell
+                      key={`due-${index}`}
+                      fill={index === 0 ? '#dc2626' : '#ca8a04'}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
         </div>
-
-        {statsGerenciais.isLoading ||
-        topLivros.isLoading ||
-        emprestimosPorMes.isLoading ? (
-          <div className="h-72 flex items-center justify-center text-gray-500 dark:text-gray-400">
-            Carregando indicadores...
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
-                Distribuicao geral
-              </h3>
-              {statusChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="90%">
-                  <PieChart>
-                    <Pie
-                      data={statusChartData}
-                      dataKey="total"
-                      nameKey="name"
-                      innerRadius={45}
-                      outerRadius={70}
-                    >
-                      {statusChartData.map((_, index) => (
-                        <Cell
-                          key={`status-${index}`}
-                          fill={CHART_COLORS[index % CHART_COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-sm text-gray-400">
-                  Sem dados
-                </div>
-              )}
-            </div>
-
-            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
-                Emprestimos por mes
-              </h3>
-              <ResponsiveContainer width="100%" height="90%">
-                <BarChart data={monthlyChartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                  <YAxis allowDecimals={false} width={32} />
-                  <Tooltip />
-                  <Bar dataKey="total" fill="#0f766e" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
-                Top livros
-              </h3>
-              <ResponsiveContainer width="100%" height="90%">
-                <BarChart data={topBooksChartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="livro" tick={{ fontSize: 10 }} interval={0} />
-                  <YAxis allowDecimals={false} width={32} />
-                  <Tooltip />
-                  <Bar dataKey="total" fill="#762075" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="h-72 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
-                Atrasos
-              </h3>
-              {dueStatusChartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="90%">
-                  <PieChart>
-                    <Pie
-                      data={dueStatusChartData}
-                      dataKey="total"
-                      nameKey="name"
-                      outerRadius={70}
-                      label
-                    >
-                      {dueStatusChartData.map((_, index) => (
-                        <Cell
-                          key={`due-${index}`}
-                          fill={index === 0 ? '#dc2626' : '#ca8a04'}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-sm text-gray-400">
-                  Sem atrasos
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       <div
         ref={dashboardContainerRef}
-        className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0"
+        data-dashboard-block="tables"
+        className={`flex-grow grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 ${
+          view === 'tables' ? 'grid animate-fade-in' : 'hidden'
+        }`}
       >
         <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[350px] md:min-h-0 will-change-transform overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
-            Solicitações
+            {t('section.requests')}
           </h3>
 
           <DataTable
             data={paginatedSolicitacoes}
             columns={solicitacoesColumns}
             isLoading={solicitacoes.isLoading}
-            error={solicitacoes.error ? 'Erro ao carregar' : null}
+            error={solicitacoes.error ? t('error.load') : null}
             sortConfig={solicitacaoSort}
             onSort={requestSolicitacaoSort}
             getRowKey={(item) => item.id}
-            emptyStateMessage="Nenhuma solicitação pendente."
+            emptyStateMessage={t('table.empty.requests')}
             headerClassName={dashboardHeaderClass}
             headerTextClassName={dashboardHeaderTextClass}
             hoverHeaderClassName={dashboardHoverClass}
@@ -723,19 +977,19 @@ export function DashboardPage() {
 
         <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[350px] md:min-h-0 will-change-transform overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
-            Atrasados e a Vencer
+            {t('section.overdue_due')}
           </h3>
 
           <DataTable
             data={paginatedEmprestimos}
             columns={emprestimosColumns}
             isLoading={emprestimos.isLoading}
-            error={emprestimos.error ? 'Erro ao carregar' : null}
+            error={emprestimos.error ? t('error.load') : null}
             sortConfig={emprestimoSort}
             onSort={requestEmprestimoSort}
             getRowKey={(item) => item.id}
             getRowClass={getRowClass}
-            emptyStateMessage="Nenhum empréstimo ativo no momento."
+            emptyStateMessage={t('table.empty.loans')}
             headerClassName={dashboardHeaderClass}
             headerTextClassName={dashboardHeaderTextClass}
             hoverHeaderClassName={dashboardHoverClass}

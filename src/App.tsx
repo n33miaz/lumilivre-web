@@ -14,7 +14,7 @@ import { MudarSenhaPage } from './pages/Auth/ChangePassword';
 import { DownloadAppPage } from './pages/Download';
 
 // Rotas Protegidas (Lazy Loaded)
-const DashboardPage = lazy(() => import('./pages/Start').then((m) => ({ default: m.DashboardPage })));
+const DashboardPage = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.DashboardPage })));
 const LivrosPage = lazy(() => import('./pages/Books').then((m) => ({ default: m.LivrosPage })));
 const AlunosPage = lazy(() => import('./pages/Students').then((m) => ({ default: m.AlunosPage })));
 const EmprestimosPage = lazy(() => import('./pages/Loans').then((m) => ({ default: m.EmprestimosPage })));

@@ -275,3 +275,21 @@ input[type='date']::-webkit-calendar-picker-indicator {
     }
   }
 }
+
+/* Dashboard view toggle: garantir que o print do PDF mostre ambos os blocos,
+   independente da view ativa na tela. */
+@media print {
+  [data-dashboard-block='analytics'] {
+    display: block !important;
+    page-break-after: always;
+  }
+
+  [data-dashboard-block='tables'] {
+    display: grid !important;
+  }
+
+  .print\:hidden,
+  [aria-hidden='true'].animate-ping {
+    display: none !important;
+  }
+}
