@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -16,13 +17,13 @@ import {
 import { type AlunoRanking } from '../../services/loanService';
 import { type EstatisticaGrafico } from '../../services/courseService';
 import { CustomSelect } from '../../components/ui/CustomSelect';
+import { SearchableSelect } from '../../components/ui/SearchableSelect';
 
 import { LoadingIcon } from '../../components/ui/LoadingIcon';
 import CrownIcon from '../../assets/icons/crown.svg?react';
 import Medal1Icon from '../../assets/icons/medal1.svg?react';
 import Medal2Icon from '../../assets/icons/medal2.svg?react';
 import Medal3Icon from '../../assets/icons/medal3.svg?react';
-import FilterIcon from '../../assets/icons/filter.svg?react';
 
 import { useRanking } from '../../hooks/queries/useLoanQueries';
 import {
@@ -39,146 +40,152 @@ const CHART_PADDING = 40;
 
 const BAR_COLORS = ['#762075', '#9b2c9a', '#bf3abf', '#d65ad6', '#e085e0'];
 const TOP_3_COLORS = ['#EAB308', '#9CA3AF', '#F97316'];
-
 const PIE_COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#8884d8',
-  '#82ca9d',
-  '#ff6b6b',
-  '#4ecdc4',
+  '#762075',
+  '#1D6FBF',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#8B5CF6',
+  '#06B6D4',
+  '#84CC16',
 ];
 
-const PieChartCard = ({
-  title,
-  data,
-  emptyMessage,
-}: {
+interface PieCardProps {
   title: string;
   data: EstatisticaGrafico[];
   emptyMessage: string;
-}) => (
-  <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-4">
-    <h4 className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-2 text-center uppercase tracking-wide">
-      {title}
-    </h4>
-    <div className="flex-grow relative flex items-center justify-center min-h-[200px]">
-      {data && data.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data as unknown as Record<string, unknown>[]}
-              dataKey="total"
-              nameKey="nome"
-              cx="50%"
-              cy="50%"
-              outerRadius={60}
-              innerRadius={35}
-              paddingAngle={5}
-              label={({ percent = 0 }) => `${(percent * 100).toFixed(0)}%`}
-            >
-              {data.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={PIE_COLORS[index % PIE_COLORS.length]}
-                  stroke="none"
-                />
-              ))}
-            </Pie>
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#fff',
-                borderRadius: '8px',
-                border: 'none',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              }}
-              itemStyle={{ color: '#374151', fontWeight: 'bold' }}
-            />
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              iconType="circle"
-              wrapperStyle={{ fontSize: '10px' }}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      ) : (
-        <div className="text-gray-400 text-xs text-center px-4">
-          {emptyMessage}
-        </div>
-      )}
-    </div>
-  </div>
-);
+}
 
-const PodiumItem = ({
-  aluno,
-  position,
-}: {
-  aluno?: AlunoRanking;
-  position: 1 | 2 | 3;
-}) => {
-  let heightClass = 'h-[45%]';
-  let colorClass = 'bg-gray-200 dark:bg-gray-700';
-  let Medal = Medal3Icon;
-  let medalColorClass = 'text-orange-400';
-  let orderClass = 'order-3';
-  let zIndex = 'z-0';
-
-  if (position === 1) {
-    heightClass = 'h-[85%]';
-    colorClass = 'bg-gradient-to-t from-yellow-400 to-yellow-300';
-    Medal = Medal1Icon;
-    medalColorClass = 'text-yellow-500 drop-shadow-sm';
-    orderClass = 'order-2';
-    zIndex = 'z-10';
-  } else if (position === 2) {
-    heightClass = 'h-[55%]';
-    colorClass = 'bg-gradient-to-t from-gray-300 to-gray-200';
-    Medal = Medal2Icon;
-    medalColorClass = 'text-gray-400';
-    orderClass = 'order-3';
-  } else {
-    heightClass = 'h-[45%]';
-    colorClass = 'bg-gradient-to-t from-orange-400 to-orange-300';
-    Medal = Medal3Icon;
-    medalColorClass = 'text-orange-600 dark:text-orange-500';
-    orderClass = 'order-1';
-  }
-
+function PieChartCard({ title, data, emptyMessage }: PieCardProps) {
   return (
-    <div
-      className={`flex flex-col items-center justify-end w-1/3 ${orderClass} ${zIndex} h-full duration-500 hover:scale-105`}
-    >
-      <div className="flex flex-col items-center mb-2 w-full">
-        <Medal className={`w-12 h-12 mb-1 ${medalColorClass}`} />
-        {aluno ? (
-          <>
-            <span className="font-bold text-gray-800 dark:text-white text-center text-sm line-clamp-1 w-full px-1">
-              {aluno.nome.split(' ')[0]}
-            </span>
-            <span className="text-xs font-bold text-lumi-primary dark:text-lumi-label bg-white dark:bg-gray-800 px-2 py-0.5 rounded-full shadow-sm mt-1 border border-gray-100 dark:border-gray-600 whitespace-nowrap">
-              {aluno.emprestimosCount} livros
-            </span>
-          </>
-        ) : (
-          <span className="text-xs text-gray-400">-</span>
-        )}
+    <div className="text-center">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+        {title}
       </div>
-      <div
-        className={`w-full ${heightClass} ${colorClass} rounded-t-lg shadow-lg flex items-start justify-center pt-2 relative overflow-hidden border-t border-white/20`}
-      >
-        <span className="text-5xl font-black text-white/40 mix-blend-overlay select-none">
-          {position}
-        </span>
+      <div className="h-44">
+        {data && data.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data as unknown as Record<string, unknown>[]}
+                dataKey="total"
+                nameKey="nome"
+                cx="50%"
+                cy="50%"
+                outerRadius={55}
+                innerRadius={32}
+                paddingAngle={4}
+              >
+                {data.map((_, idx) => (
+                  <Cell
+                    key={`pie-${idx}`}
+                    fill={PIE_COLORS[idx % PIE_COLORS.length]}
+                    stroke="none"
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend
+                verticalAlign="bottom"
+                height={28}
+                iconType="circle"
+                wrapperStyle={{ fontSize: 10 }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-full flex items-center justify-center text-xs text-gray-400 dark:text-gray-500 px-4">
+            {emptyMessage}
+          </div>
+        )}
       </div>
     </div>
   );
-};
+}
+
+interface PodiumProps {
+  aluno?: AlunoRanking;
+  position: 1 | 2 | 3;
+}
+
+function PodiumItem({ aluno, position }: PodiumProps) {
+  const { t } = useTranslation('ranking');
+
+  const config = {
+    1: {
+      tileBg: 'bg-gradient-to-br from-amber-400 to-amber-600',
+      bgBar: 'bg-gradient-to-b from-amber-300 to-amber-500',
+      Medal: Medal1Icon,
+      barHeight: 176,
+      barText: '1',
+      glow: 'shadow-glow animate-float',
+      badgeClass:
+        'text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10',
+      order: 'order-2',
+    },
+    2: {
+      tileBg: 'bg-gradient-to-br from-gray-300 to-gray-400',
+      bgBar:
+        'bg-gradient-to-b from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800',
+      Medal: Medal2Icon,
+      barHeight: 116,
+      barText: '2',
+      glow: '',
+      badgeClass:
+        'text-lumi-primary dark:text-lumi-label bg-lumi-50 dark:bg-white/5',
+      order: 'order-1',
+    },
+    3: {
+      tileBg: 'bg-gradient-to-br from-orange-400 to-orange-600',
+      bgBar: 'bg-gradient-to-b from-orange-300 to-orange-500',
+      Medal: Medal3Icon,
+      barHeight: 80,
+      barText: '3',
+      glow: '',
+      badgeClass:
+        'text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-500/10',
+      order: 'order-3',
+    },
+  } as const;
+
+  const cfg = config[position];
+  const Medal = cfg.Medal;
+  const firstName = aluno?.nome.split(' ')[0]?.toUpperCase() ?? '—';
+
+  return (
+    <div className={`flex-1 flex flex-col items-center ${cfg.order}`}>
+      <div
+        className={`w-12 h-12 rounded-xl ${cfg.tileBg} flex items-center justify-center text-white mb-1.5 ${cfg.glow}`}
+      >
+        <Medal className="w-5 h-5" />
+      </div>
+      {aluno ? (
+        <>
+          <div className="font-display font-extrabold text-sm dark:text-white">
+            {firstName}
+          </div>
+          <div
+            className={`text-[10px] font-mono ${cfg.badgeClass} px-2 py-0.5 rounded-full mt-1`}
+          >
+            {t('books_count', { count: aluno.emprestimosCount })}
+          </div>
+        </>
+      ) : (
+        <div className="text-xs text-gray-400">-</div>
+      )}
+      <div
+        className={`w-full mt-3 rounded-t-xl ${cfg.bgBar} flex items-center justify-center text-3xl font-display font-extrabold text-white`}
+        style={{ height: `${cfg.barHeight}px` }}
+      >
+        {cfg.barText}
+      </div>
+    </div>
+  );
+}
 
 export function ClassificacaoPage() {
+  const { t } = useTranslation('ranking');
   const [filtroCurso, setFiltroCurso] = useState<string>('');
   const [filtroModulo, setFiltroModulo] = useState<string>('');
   const [filtroTurno, setFiltroTurno] = useState<string>('');
@@ -211,15 +218,10 @@ export function ClassificacaoPage() {
       if (chartContainerRef.current) {
         const containerWidth =
           chartContainerRef.current.getBoundingClientRect().width;
-
         if (containerWidth <= 0) return;
-
         const availableSpace = containerWidth - Y_AXIS_WIDTH - CHART_PADDING;
-
         const itemSize = BAR_WIDTH + MIN_GAP;
-
         const calculatedLimit = Math.floor(availableSpace / itemSize);
-
         setChartLimit((prev) => {
           const newValue = Math.max(5, calculatedLimit);
           return prev !== newValue ? newValue : prev;
@@ -227,17 +229,12 @@ export function ClassificacaoPage() {
       }
     };
 
-    const resizeObserver = new ResizeObserver(() => {
-      calculateLimit();
-    });
-
+    const resizeObserver = new ResizeObserver(calculateLimit);
     window.addEventListener('resize', calculateLimit);
-
     if (chartContainerRef.current) {
       resizeObserver.observe(chartContainerRef.current);
       calculateLimit();
     }
-
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', calculateLimit);
@@ -246,26 +243,26 @@ export function ClassificacaoPage() {
 
   const cursoOptions = useMemo(
     () => [
-      { label: 'Todos os Cursos', value: '' },
+      { label: t('filter.all_courses'), value: '' },
       ...cursosList.map((c) => ({ label: c.nome, value: c.id })),
     ],
-    [cursosList],
+    [cursosList, t],
   );
 
   const moduloOptions = useMemo(
     () => [
-      { label: 'Todos os Módulos', value: '' },
+      { label: t('filter.all_modules'), value: '' },
       ...modulosList.map((m) => ({ label: m.nome, value: m.id })),
     ],
-    [modulosList],
+    [modulosList, t],
   );
 
   const turnoOptions = useMemo(
     () => [
-      { label: 'Todos os Turnos', value: '' },
-      ...turnosList.map((t) => ({ label: t.nome, value: t.id })),
+      { label: t('filter.all_shifts'), value: '' },
+      ...turnosList.map((t2) => ({ label: t2.nome, value: t2.id })),
     ],
-    [turnosList],
+    [turnosList, t],
   );
 
   const isLoading =
@@ -279,188 +276,171 @@ export function ClassificacaoPage() {
   if (isLoading) return <LoadingIcon />;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 mb-6 shrink-0 select-none">
-        <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-full shrink-0">
-          <CrownIcon className="w-8 h-8 text-yellow-600 dark:text-yellow-400" />
-        </div>
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
-            Classificação dos Leitores
-          </h1>
-          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-            Acompanhe o desempenho de leitura dos alunos.
-          </p>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-dark-card rounded-lg shadow-md flex-grow flex flex-col min-h-0 overflow-hidden border border-gray-100 dark:border-gray-700">
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* PODIO */}
-            <div className="flex flex-col h-full min-h-[350px] lg:min-h-[400px] lg:col-span-5">
-              <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 mb-4 flex items-center gap-2 shrink-0">
-                <span className="w-1 h-6 bg-lumi-primary dark:bg-lumi-label rounded-full"></span>
-                Pódio dos Maiores
-              </h3>
-              <div className="flex-grow bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-4 flex items-end justify-center h-96">
-                <div className="flex items-end justify-center w-full max-w-lg gap-2 md:gap-4 h-full">
-                  <PodiumItem aluno={podiumData[2]} position={3} />
-                  <PodiumItem aluno={podiumData[0]} position={1} />
-                  <PodiumItem aluno={podiumData[1]} position={2} />
-                </div>
-              </div>
-            </div>
-
-            {/* GRAFICOS DE PIZZA */}
-            <div className="flex flex-col h-full min-h-[400px] lg:col-span-7">
-              <div className="flex justify-between items-center mb-4 gap-2 shrink-0">
-                <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                  <span className="w-1 h-6 bg-lumi-primary dark:bg-lumi-label rounded-full"></span>
-                  Distribuição de Empréstimos
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full lg:min-h-[384px]">
-                <PieChartCard
-                  title="Por Curso"
-                  data={pieDataCurso}
-                  emptyMessage="Sem dados de cursos"
-                />
-                <PieChartCard
-                  title="Por Módulo"
-                  data={pieDataModulo}
-                  emptyMessage="Sem dados de módulos"
-                />
-                <PieChartCard
-                  title="Por Turno"
-                  data={pieDataTurno}
-                  emptyMessage="Sem dados de turnos"
-                />
-              </div>
-            </div>
+    <section className="space-y-6">
+      <div className="flex items-end justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white shadow-lg">
+            <CrownIcon className="w-6 h-6" />
           </div>
-
-          <hr className="border-gray-200 dark:border-gray-700" />
-
-          {/* GRAFICO DE BARRAS */}
-          <div className="flex flex-col min-h-[500px]">
-            <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6">
-              <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-                <span className="w-1 h-6 bg-lumi-primary dark:bg-lumi-label rounded-full"></span>
-                Top Alunos (Geral)
-              </h3>
-
-              {/* Filtros */}
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-center bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 w-full xl:w-auto">
-                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-wide mr-1 w-full sm:w-auto">
-                  <FilterIcon className="w-4 h-4" />
-                  Filtrar:
-                </div>
-                <div className="w-full sm:w-44">
-                  <CustomSelect
-                    value={filtroCurso}
-                    onChange={setFiltroCurso}
-                    options={cursoOptions}
-                    placeholder="Todos os Cursos"
-                    invertArrow={true}
-                  />
-                </div>
-                <div className="w-full sm:w-44">
-                  <CustomSelect
-                    value={filtroModulo}
-                    onChange={setFiltroModulo}
-                    options={moduloOptions}
-                    placeholder="Todos os Módulos"
-                    invertArrow={true}
-                  />
-                </div>
-                <div className="w-full sm:w-40">
-                  <CustomSelect
-                    value={filtroTurno}
-                    onChange={setFiltroTurno}
-                    options={turnoOptions}
-                    placeholder="Todos os Turnos"
-                    invertArrow={true}
-                  />
-                </div>
-              </div>
+          <div>
+            <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
+              {t('page.eyebrow', { defaultValue: 'Engajamento' })}
             </div>
-
-            {/* Container do Gráfico */}
-            <div className="w-full h-[500px]" ref={chartContainerRef}>
-              {chartData && chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={chartData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#e5e7eb"
-                    />
-                    <XAxis
-                      dataKey="nome"
-                      angle={-45}
-                      textAnchor="end"
-                      interval={0}
-                      tick={{ fill: '#6b7280', fontSize: 12 }}
-                      height={80}
-                      tickFormatter={(value) => {
-                        const names = value.split(' ');
-                        return names.length > 1
-                          ? `${names[0]} ${names[names.length - 1]}`
-                          : value;
-                      }}
-                    />
-                    <YAxis tick={{ fill: '#6b7280' }} allowDecimals={false} />
-                    <Tooltip
-                      cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                      contentStyle={{
-                        backgroundColor: '#fff',
-                        borderRadius: '8px',
-                        border: 'none',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                      }}
-                      itemStyle={{ color: '#374151', fontWeight: 'bold' }}
-                      formatter={(value) => [
-                        `${value} Livros`,
-                        'Total Empréstimos',
-                      ]}
-                    />
-                    <Bar
-                      dataKey="emprestimosCount"
-                      radius={[6, 6, 0, 0]}
-                      animationDuration={1500}
-                      barSize={BAR_WIDTH}
-                    >
-                      {chartData.map((_, index) => {
-                        let fillColor = BAR_COLORS[index % BAR_COLORS.length];
-                        if (index === 0) fillColor = TOP_3_COLORS[0];
-                        if (index === 1) fillColor = TOP_3_COLORS[1];
-                        if (index === 2) fillColor = TOP_3_COLORS[2];
-
-                        return (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={fillColor}
-                            className="hover:opacity-80 transition-opacity cursor-pointer dark:hover:brightness-110"
-                          />
-                        );
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full flex items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
-                  Nenhum aluno encontrado com os filtros selecionados.
-                </div>
-              )}
-            </div>
+            <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white">
+              {t('page.title')}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {t('page.subtitle')}
+            </p>
           </div>
         </div>
       </div>
-    </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1.4fr] gap-4">
+        <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-1 h-5 rounded bg-lumi-primary" />
+            <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white">
+              {t('section.podium')}
+            </h3>
+          </div>
+          <div className="flex items-end justify-center gap-3 h-72">
+            <PodiumItem aluno={podiumData[1]} position={2} />
+            <PodiumItem aluno={podiumData[0]} position={1} />
+            <PodiumItem aluno={podiumData[2]} position={3} />
+          </div>
+        </div>
+
+        <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-1 h-5 rounded bg-lumi-primary" />
+            <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white">
+              {t('section.distribution')}
+            </h3>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <PieChartCard
+              title={t('pie.by_course')}
+              data={pieDataCurso}
+              emptyMessage={t('pie.empty.course')}
+            />
+            <PieChartCard
+              title={t('pie.by_module')}
+              data={pieDataModulo}
+              emptyMessage={t('pie.empty.module')}
+            />
+            <PieChartCard
+              title={t('pie.by_shift')}
+              data={pieDataTurno}
+              emptyMessage={t('pie.empty.shift')}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <span className="w-1 h-5 rounded bg-lumi-primary" />
+            <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white">
+              {t('section.top_students')}
+            </h3>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {t('filter.label')}
+            </span>
+            <div className="w-44">
+              <SearchableSelect
+                value={filtroCurso}
+                onChange={setFiltroCurso}
+                options={cursoOptions}
+                placeholder={t('filter.all_courses')}
+              />
+            </div>
+            <div className="w-44">
+              <CustomSelect
+                value={filtroModulo}
+                onChange={setFiltroModulo}
+                options={moduloOptions}
+                placeholder={t('filter.all_modules')}
+                invertArrow
+              />
+            </div>
+            <div className="w-40">
+              <CustomSelect
+                value={filtroTurno}
+                onChange={setFiltroTurno}
+                options={turnoOptions}
+                placeholder={t('filter.all_shifts')}
+                invertArrow
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full h-72" ref={chartContainerRef}>
+          {chartData && chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#e5e7eb"
+                />
+                <XAxis
+                  dataKey="nome"
+                  angle={-30}
+                  textAnchor="end"
+                  interval={0}
+                  tick={{ fill: '#6b7280', fontSize: 11 }}
+                  height={60}
+                  tickFormatter={(value: string) => {
+                    const names = value.split(' ');
+                    return names.length > 1
+                      ? `${names[0]} ${names[names.length - 1]}`
+                      : value;
+                  }}
+                />
+                <YAxis tick={{ fill: '#6b7280' }} allowDecimals={false} />
+                <Tooltip
+                  formatter={(value) => [
+                    `${value} ${t('tooltip.books')}`,
+                    t('tooltip.total_loans'),
+                  ]}
+                />
+                <Bar
+                  dataKey="emprestimosCount"
+                  radius={[6, 6, 0, 0]}
+                  animationDuration={1200}
+                  barSize={BAR_WIDTH}
+                >
+                  {chartData.map((_, index) => {
+                    let fillColor = BAR_COLORS[index % BAR_COLORS.length];
+                    if (index === 0) fillColor = TOP_3_COLORS[0];
+                    if (index === 1) fillColor = TOP_3_COLORS[1];
+                    if (index === 2) fillColor = TOP_3_COLORS[2];
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={fillColor}
+                        className="hover:opacity-80 transition-opacity cursor-pointer dark:hover:brightness-110"
+                      />
+                    );
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+              {t('chart.empty')}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }

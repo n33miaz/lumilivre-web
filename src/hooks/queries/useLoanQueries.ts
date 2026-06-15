@@ -51,6 +51,9 @@ export function useRanking(
     queryKey: ['ranking', top, cursoId, moduloId, turnoId],
     queryFn: () => buscarRanking(top, cursoId, moduloId, turnoId),
     staleTime: 1000 * 60 * 10, // 10 minutos
+    // gcTime longo: sem isto o cache é coletado em 5 min (default) e, ao sair e
+    // voltar para a Classificação, tudo recarrega do zero (flash do loader).
+    gcTime: 1000 * 60 * 30,
     placeholderData: keepPreviousData,
   });
 }
