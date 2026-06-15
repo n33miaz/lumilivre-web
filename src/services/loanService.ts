@@ -45,6 +45,7 @@ const mapLoanListItem = (item: Record<string, unknown>): EmprestimoListagemDTO =
   curso: (item.courseName as string) ?? '',
   dataEmprestimo: (item.borrowedAt as string) ?? '',
   dataDevolucao: (item.dueAt as string) ?? '',
+  dataRetorno: (item.returnedAt as string) ?? '',
 });
 
 export interface EmprestimoListagemDTO {
@@ -56,7 +57,10 @@ export interface EmprestimoListagemDTO {
   matriculaAluno: string;
   curso: string;
   dataEmprestimo: string;
+  /** Data combinada de devolução (dueAt). */
   dataDevolucao: string;
+  /** Data real de devolução (returnedAt) — vazio enquanto não devolvido. */
+  dataRetorno: string;
 }
 
 export interface EmprestimoAtivoDTO {
@@ -186,7 +190,7 @@ export const buscarRanking = async (
   return (response.data || []).map((item: Record<string, unknown>) => ({
     matricula: item.registrationNumber as string,
     nome: item.fullName as string,
-    emprestimosCount: item.emprestimosCount as number,
+    emprestimosCount: Number(item.loanCount ?? item.emprestimosCount ?? 0),
   }));
 };
 

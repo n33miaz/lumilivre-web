@@ -38,6 +38,34 @@ async function injectAuthUser(page: Page) {
 
 /** Mocks all common API calls so protected pages don't break. */
 async function mockAllApis(page: Page) {
+  await page.route('**/api/dashboard/stats', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        activeLoans: 0,
+        overdueLoans: 0,
+        completedLoans: 0,
+        avgReturnDays: 0,
+        pendingRequests: 0,
+        waitingReservations: 0,
+      }),
+    }),
+  );
+  await page.route('**/api/dashboard/top-books', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+  await page.route('**/api/dashboard/loans-by-month', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
   await page.route('**/api/students**', (route) =>
     route.fulfill({
       status: 200,
@@ -183,6 +211,34 @@ test.describe('Session Expiry', () => {
     await injectAuthUser(page);
 
     // First load works
+    await page.route('**/api/dashboard/stats', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          activeLoans: 0,
+          overdueLoans: 0,
+          completedLoans: 0,
+          avgReturnDays: 0,
+          pendingRequests: 0,
+          waitingReservations: 0,
+        }),
+      }),
+    );
+    await page.route('**/api/dashboard/top-books', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      }),
+    );
+    await page.route('**/api/dashboard/loans-by-month', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      }),
+    );
     await page.route('**/api/books**', (route) =>
       route.fulfill({
         status: 200,
@@ -223,11 +279,14 @@ test.describe('Session Expiry', () => {
       }),
     );
 
-    await page
+    const redirectToLogin = page.waitForURL('**/login', { timeout: 10000 });
+    const clickBooks = page
       .locator('aside')
       .getByRole('link', { name: /livros/i })
-      .click();
+      .click({ timeout: 10000 })
+      .catch(() => undefined);
 
+    await Promise.race([clickBooks, redirectToLogin]);
     await page.waitForURL('**/login', { timeout: 10000 });
     expect(page.url()).toContain('/login');
   });

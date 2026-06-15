@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import CalendarIcon from '../../assets/icons/date.svg?react';
 import ArrowLeftIcon from '../../assets/icons/arrow-left.svg?react';
@@ -21,10 +22,18 @@ interface CustomDatePickerProps
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const formatInputDate = (date: Date) => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 export const CustomDatePicker = forwardRef<
   HTMLInputElement,
   CustomDatePickerProps
 >(({ label, error, className = '', value, onChange, ...props }, ref) => {
+  const { t, i18n } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [viewDate, setViewDate] = useState(new Date());
@@ -32,6 +41,15 @@ export const CustomDatePicker = forwardRef<
 
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [direction, setDirection] = useState<'down' | 'up'>('down');
+  const weekdayLabels = [
+    t('date.weekday_short_sun'),
+    t('date.weekday_short_mon'),
+    t('date.weekday_short_tue'),
+    t('date.weekday_short_wed'),
+    t('date.weekday_short_thu'),
+    t('date.weekday_short_fri'),
+    t('date.weekday_short_sat'),
+  ];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -123,7 +141,7 @@ export const CustomDatePicker = forwardRef<
   const handleDateClick = (day: number) => {
     const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
     const isoDate = newDate.toISOString().split('T')[0];
-    const displayDate = newDate.toLocaleDateString('pt-BR');
+    const displayDate = formatInputDate(newDate);
 
     setInputValue(displayDate);
     triggerChange(isoDate);
@@ -319,8 +337,8 @@ export const CustomDatePicker = forwardRef<
             className="flex items-center gap-1 text-sm font-bold text-gray-800 dark:text-white hover:text-lumi-primary"
           >
             {viewMode === 'days'
-              ? `${viewDate.toLocaleString('pt-BR', { month: 'long' })} ${viewDate.getFullYear()}`
-              : 'Selecione o Ano'}
+              ? `${viewDate.toLocaleString(i18n.language, { month: 'long' })} ${viewDate.getFullYear()}`
+              : t('date.select_year')}
             <ArrowDropIcon
               className={`w-4 h-4 ${viewMode === 'years' ? 'rotate-180' : ''}`}
             />
@@ -342,7 +360,7 @@ export const CustomDatePicker = forwardRef<
           {viewMode === 'days' ? (
             <>
               <div className="grid grid-cols-7 mb-2 text-center">
-                {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
+                {weekdayLabels.map((day, i) => (
                   <span key={i} className="text-xs font-semibold text-gray-400">
                     {day}
                   </span>
@@ -395,7 +413,7 @@ export const CustomDatePicker = forwardRef<
                   : `bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:border-lumi-primary dark:focus:border-lumi-primary ${isOpen ? 'border-lumi-primary ring-1 ring-lumi-primary' : ''}`
             }
           `}
-          placeholder="dia/mês/ano"
+          placeholder={t('date.format_hint')}
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => !props.disabled && setIsOpen(true)}

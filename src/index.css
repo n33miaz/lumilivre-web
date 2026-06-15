@@ -2,6 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --lumi-primary: #762075;
+  --lumi-label: #c964c5;
+}
+
+html,
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(118, 32, 117, 0.5);
+  border-radius: 20px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(118, 32, 117, 0.8);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(201, 100, 197, 0.25);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(201, 100, 197, 0.45);
+}
+
+/* ============================================================
+   Hover feedback: instant on enter, slow fade on leave.
+   Applied to the sidebar nav pills and to every table row.
+   Unlayered on purpose so the longer transition overrides
+   Tailwind's `.transition` utility and the global 200ms rule.
+   The :hover state zeroes the duration → highlight snaps in;
+   leaving reverts to the base rule → it eases out over ~0.5s.
+   Gradients can't be transitioned, so rows use a solid tint.
+   ============================================================ */
+.nav-pill {
+  transition: background-color 0.5s ease;
+}
+.nav-pill:hover {
+  transition-duration: 0s;
+}
+.row-hover {
+  transition: background-color 0.55s ease;
+}
+.row-hover:hover {
+  background-color: rgba(118, 32, 117, 0.06);
+  transition-duration: 0s;
+}
+.dark .row-hover:hover {
+  background-color: rgba(201, 100, 197, 0.08);
+}
+
 /* Landing-only helpers (used pela rota publica em /) */
 .landing-root {
   font-family: 'Inter', system-ui, sans-serif;
@@ -9,13 +81,15 @@
 }
 
 .landing-root .grid-pattern {
-  background-image: linear-gradient(rgba(118, 32, 117, 0.06) 1px, transparent 1px),
+  background-image:
+    linear-gradient(rgba(118, 32, 117, 0.06) 1px, transparent 1px),
     linear-gradient(90deg, rgba(118, 32, 117, 0.06) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
 .dark .landing-root .grid-pattern {
-  background-image: linear-gradient(rgba(201, 100, 197, 0.08) 1px, transparent 1px),
+  background-image:
+    linear-gradient(rgba(201, 100, 197, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(201, 100, 197, 0.08) 1px, transparent 1px);
 }
 
@@ -32,74 +106,6 @@
   filter: blur(80px);
   opacity: 0.35;
   pointer-events: none;
-}
-
-::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #762075;
-  border-radius: 20px;
-  border: 4px solid transparent;
-  background-clip: content-box;
-  transition: background-color 200ms ease-in-out;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: #5a1859;
-}
-
-::-webkit-scrollbar-thumb:active {
-  transform: scale(0.98);
-}
-
-::-webkit-scrollbar-button:single-button {
-  background-color: transparent;
-  display: block;
-  background-size: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  height: 14px;
-  width: 14px;
-  cursor: pointer;
-}
-
-::-webkit-scrollbar-button {
-  display: none;
-}
-
-::-webkit-scrollbar-button:single-button:vertical:increment {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11.18 15.83 6.543 9.203C5.892 8.275 6.556 7 7.689 7h8.622c1.133 0 1.797 1.275 1.147 2.203l-4.639 6.627a1 1 0 0 1-1.638 0' fill='%2300000080'/%3E%3C/svg%3E");
-}
-
-::-webkit-scrollbar-button:single-button:vertical:decrement {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform='rotate(180 12 12)'%3E%3Cpath d='M11.18 15.83 6.543 9.203C5.892 8.275 6.556 7 7.689 7h8.622c1.133 0 1.797 1.275 1.147 2.203l-4.639 6.627a1 1 0 0 1-1.638 0' fill='%2300000080'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background-color: #4b5563;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background-color: #6b7280;
-}
-
-.dark ::-webkit-scrollbar-button:single-button:vertical:increment {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11.18 15.83 6.543 9.203C5.892 8.275 6.556 7 7.689 7h8.622c1.133 0 1.797 1.275 1.147 2.203l-4.639 6.627a1 1 0 0 1-1.638 0' fill='%239CA3AF'/%3E%3C/svg%3E");
-}
-
-.dark ::-webkit-scrollbar-button:single-button:vertical:decrement {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg transform='rotate(180 12 12)'%3E%3Cpath d='M11.18 15.83 6.543 9.203C5.892 8.275 6.556 7 7.689 7h8.622c1.133 0 1.797 1.275 1.147 2.203l-4.639 6.627a1 1 0 0 1-1.638 0' fill='%239CA3AF'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-.will-change-transform {
-  will-change: transform, opacity;
 }
 
 input[type='date']::-webkit-calendar-picker-indicator {
@@ -131,33 +137,785 @@ input[type='date']::-webkit-calendar-picker-indicator {
     -webkit-appearance: none;
   }
 
-  *,
-  ::before,
-  ::after {
-    @apply transition-all duration-200 ease-in-out;
-
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  @layer base {
+    /* Transição global apenas para a TROCA DE TEMA: limitamos às propriedades
+       de cor (color/background/border/fill/stroke). Não usar `transition-all`,
+       pois transicionaria transform/opacity/layout em todos os elementos e
+       atrapalharia animações como a navegação entre páginas (framer-motion). */
+    *:not([class*='transition']) {
+      @apply transition-colors duration-200 ease-in-out;
+    }
   }
 }
 
 @layer utilities {
-  /* entrada */
+  /* Mobile: a single flat color (the right-side fill) — no gradient, no mesh.
+     The `background-color` is transitionable so theme switch stays smooth.
+     At lg+ a static split gradient is layered on as the fallback behind the
+     interactive mesh canvas. CSS can't tween gradients, but it can tween the
+     background-color, keeping the theme switch in lockstep with the card. */
+  .login-shell {
+    background-color: #fbf6fd;
+    transition: background-color 200ms ease;
+  }
+
+  .dark .login-shell {
+    background-color: #181b23;
+  }
+
+  /* Single-column auth pages (forgot/reset): flat themed color at every
+     breakpoint (no split), with the non-split mesh layered on at lg+. */
+  .auth-shell {
+    background-color: #fbf6fd;
+    transition: background-color 200ms ease;
+  }
+
+  .dark .auth-shell {
+    background-color: #181b23;
+  }
+
+  /* ============================================================
+     Animated gradient background — the dependable base layer.
+     Always present (≥sm); the WebGL mesh canvas, when it works,
+     paints ON TOP of this ::before and hides it. When WebGL is
+     unavailable (HW accel off, blocklisted driver, lost context),
+     this keeps the background alive and flowing instead of dead.
+     Phones (<640px) stay a flat single color.
+     ============================================================ */
+  @media (min-width: 640px) {
+    .login-shell::before,
+    .auth-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(40% 50% at 20% 25%, rgba(201, 100, 197, 0.30), transparent 60%),
+        radial-gradient(45% 55% at 82% 28%, rgba(118, 32, 117, 0.22), transparent 62%),
+        radial-gradient(52% 55% at 65% 85%, rgba(157, 77, 156, 0.26), transparent 62%),
+        radial-gradient(42% 48% at 25% 80%, rgba(94, 25, 93, 0.18), transparent 60%);
+      background-size: 200% 200%;
+      animation: authFlow 22s ease-in-out infinite alternate;
+    }
+
+    .dark .login-shell::before,
+    .dark .auth-shell::before {
+      background:
+        radial-gradient(40% 50% at 20% 25%, rgba(118, 32, 117, 0.55), transparent 60%),
+        radial-gradient(45% 55% at 82% 28%, rgba(74, 20, 72, 0.55), transparent 62%),
+        radial-gradient(52% 55% at 65% 85%, rgba(94, 25, 93, 0.5), transparent 62%),
+        radial-gradient(42% 48% at 25% 80%, rgba(58, 15, 57, 0.5), transparent 60%);
+      background-size: 200% 200%;
+    }
+  }
+
+  @keyframes authFlow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 50% 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .login-shell::before,
+    .auth-shell::before {
+      animation: none;
+    }
+  }
+
+  .login-stage {
+    opacity: 1;
+  }
+
+  .login-brand-panel {
+    background: transparent;
+  }
+
+  .login-form-panel {
+    background: transparent;
+  }
+
+  .login-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    z-index: 15;
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(118, 32, 117, 0.18) 30%,
+      rgba(118, 32, 117, 0.18) 70%,
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  .dark .login-divider {
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(255, 255, 255, 0.12) 30%,
+      rgba(255, 255, 255, 0.12) 70%,
+      transparent
+    );
+  }
+
+  @media (min-width: 1024px) {
+    /* Login two-column: rich brand purple flows on the LEFT half (so the white
+       brand-panel text reads), the RIGHT half stays the light themed base (the
+       form area). Overrides the soft single-column fallback above. */
+    .login-shell::before {
+      background:
+        radial-gradient(55% 75% at 22% 38%, #7a2378, transparent 70%),
+        radial-gradient(50% 65% at 6% 82%, #4a1448, transparent 72%),
+        radial-gradient(46% 58% at 34% 6%, #8b2b87, transparent 72%),
+        linear-gradient(
+          to right,
+          #5e195d 0%,
+          #5e195d 42%,
+          rgba(94, 25, 93, 0) 54%
+        );
+      background-size: 150% 150%;
+      animation: authFlow 26s ease-in-out infinite alternate;
+    }
+
+    .dark .login-shell::before {
+      background:
+        radial-gradient(55% 75% at 22% 38%, #5e195d, transparent 70%),
+        radial-gradient(50% 65% at 6% 82%, #2a0c2a, transparent 72%),
+        radial-gradient(46% 58% at 34% 6%, #4a1448, transparent 72%),
+        linear-gradient(
+          to right,
+          #3a0f39 0%,
+          #3a0f39 42%,
+          rgba(0, 0, 0, 0) 54%
+        );
+      background-size: 150% 150%;
+    }
+  }
+
+  /* Card glass */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(118, 32, 117, 0.08);
+  }
+
+  .dark .glass {
+    background: rgba(24, 27, 35, 0.72);
+    border-color: rgba(201, 100, 197, 0.1);
+  }
+
+  /* Login card: solid white in light mode, solid dark-card (#181B23) in dark.
+     200ms color transition keeps it in sync with the shader's palette lerp. */
+  .login-card {
+    background: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid rgba(118, 32, 117, 0.1);
+    box-shadow: 0 30px 80px -20px rgba(94, 25, 93, 0.22);
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      box-shadow 200ms ease;
+  }
+  .dark .login-card {
+    background: #181b23;
+    border-color: rgba(201, 100, 197, 0.12);
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Shared base for the lit gradient buttons (submit + download). Colors come
+     from CSS variables so each button only overrides its palette. The pointer
+     spotlight (--btn-x/--btn-y/--btn-light) is driven by JS; the ShaderBackground
+     canvas sits on top. Transition/transform live on the JSX (Tailwind). */
+  .btn-shader {
+    --btn-x: 50%;
+    --btn-y: 50%;
+    --btn-light: 0;
+    /* Purple palette by default. */
+    --btn-grad-1: #70206f;
+    --btn-grad-2: #8b2b87;
+    --btn-grad-3: #9d4d9c;
+    --btn-glow-core: 255, 236, 253;
+    --btn-glow-mid: 232, 158, 226;
+    --btn-glow-soft: 201, 100, 197;
+    --btn-glow-edge: 118, 32, 117;
+    --btn-sheen: 255, 235, 253;
+    isolation: isolate;
+    min-height: 52px;
+    background: linear-gradient(
+      135deg,
+      var(--btn-grad-1) 0%,
+      var(--btn-grad-2) 45%,
+      var(--btn-grad-3) 100%
+    );
+  }
+
+  .btn-shader::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background:
+      radial-gradient(
+        72% 260% at var(--btn-x) var(--btn-y),
+        rgba(var(--btn-glow-core), calc(var(--btn-light) * 0.4)) 0%,
+        rgba(var(--btn-glow-mid), calc(var(--btn-light) * 0.28)) 32%,
+        rgba(var(--btn-glow-soft), calc(var(--btn-light) * 0.1)) 64%,
+        rgba(var(--btn-glow-edge), 0) 82%
+      ),
+      linear-gradient(
+        135deg,
+        var(--btn-grad-1) 0%,
+        var(--btn-grad-2) 48%,
+        var(--btn-grad-3) 100%
+      );
+    pointer-events: none;
+  }
+
+  .btn-shader::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    z-index: 2;
+    border-radius: 11px;
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.2),
+        rgba(255, 255, 255, 0.04) 34%,
+        rgba(255, 255, 255, 0) 64%
+      ),
+      radial-gradient(
+        76% 180% at var(--btn-x) 0%,
+        rgba(var(--btn-sheen), calc(var(--btn-light) * 0.18)),
+        rgba(var(--btn-sheen), 0) 66%
+      );
+    mix-blend-mode: screen;
+    opacity: 0.68;
+    pointer-events: none;
+  }
+
+  .btn-shader:is(:hover, :focus-visible) {
+    --btn-light: 1;
+  }
+
+  .btn-shader canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  /* Download button: emerald palette over the same lit-button base. */
+  .btn-download {
+    --btn-grad-1: #047857;
+    --btn-grad-2: #059669;
+    --btn-grad-3: #10b981;
+    --btn-glow-core: 220, 252, 231;
+    --btn-glow-mid: 134, 239, 172;
+    --btn-glow-soft: 52, 211, 153;
+    --btn-glow-edge: 6, 78, 59;
+    --btn-sheen: 209, 250, 229;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, #762075 0%, #c964c5 55%, #762075 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Grid bg pattern */
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(118, 32, 117, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(118, 32, 117, 0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .dark .grid-pattern {
+    background-image:
+      linear-gradient(rgba(201, 100, 197, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 100, 197, 0.06) 1px, transparent 1px);
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(90deg, #eee 0%, #f7f7f7 50%, #eee 100%);
+    background-size: 400px 100%;
+    animation: shimmer 1.6s linear infinite;
+  }
+
+  .dark .skeleton {
+    background: linear-gradient(90deg, #1f232c 0%, #262b35 50%, #1f232c 100%);
+    background-size: 400px 100%;
+  }
+
+  /* Active sidebar pill */
+  .nav-pill {
+    position: relative;
+  }
+
+  .nav-pill.active::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    background: linear-gradient(180deg, #ffffff 0%, #c964c5 100%);
+    border-radius: 4px;
+    box-shadow: 0 0 12px rgba(201, 100, 197, 0.7);
+  }
+
+  /* Floating blobs (login) */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  /* Hide scrollbar utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Toast slide */
+  .toast {
+    animation: slideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Pulse indicator dot */
+  .pulse-dot {
+    position: relative;
+  }
+
+  .pulse-dot::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+    animation: pulseRing 1.8s ease-out infinite;
+  }
+
+  /* Tooltip */
+  [data-tooltip] {
+    position: relative;
+  }
+  [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -34px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    background: #13101b;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
+    z-index: 80;
+  }
+  [data-tooltip]:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Input with floating label */
+  .float-field {
+    position: relative;
+  }
+  .float-field input,
+  .float-field select,
+  .float-field textarea {
+    width: 100%;
+    padding: 18px 14px 8px 38px;
+    background: transparent;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .dark .float-field input,
+  .dark .float-field select,
+  .dark .float-field textarea {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+  .float-field input:focus,
+  .float-field select:focus,
+  .float-field textarea:focus {
+    border-color: #762075;
+    box-shadow: 0 0 0 4px rgba(118, 32, 117, 0.1);
+  }
+  .float-field label {
+    position: absolute;
+    left: 38px;
+    top: 14px;
+    font-size: 13px;
+    color: #9ca3af;
+    pointer-events: none;
+    transition: all 0.15s;
+  }
+  .float-field input:focus + label,
+  .float-field input:not(:placeholder-shown) + label,
+  .float-field select:focus + label,
+  .float-field select.has-value + label,
+  .float-field textarea:focus + label,
+  .float-field textarea:not(:placeholder-shown) + label {
+    top: 5px;
+    font-size: 10px;
+    color: #762075;
+    font-weight: 600;
+  }
+  .dark .float-field input:focus + label,
+  .dark .float-field input:not(:placeholder-shown) + label,
+  .dark .float-field select:focus + label,
+  .dark .float-field select.has-value + label,
+  .dark .float-field textarea:focus + label,
+  .dark .float-field textarea:not(:placeholder-shown) + label {
+    color: #c964c5;
+  }
+  .float-field .ic {
+    position: absolute;
+    left: 12px;
+    top: 14px;
+    color: #9ca3af;
+    width: 18px;
+    height: 18px;
+  }
+  .float-field:focus-within .ic {
+    color: #762075;
+  }
+  .dark .float-field:focus-within .ic {
+    color: #c964c5;
+  }
+
+  /* Pretty chip toggle */
+  .chip-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    background: rgba(118, 32, 117, 0.06);
+    color: #762075;
+    border: 1px solid rgba(118, 32, 117, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip-toggle:hover {
+    background: rgba(118, 32, 117, 0.1);
+  }
+  .chip-toggle.active {
+    background: #762075;
+    color: #fff;
+    border-color: #762075;
+    box-shadow: 0 6px 16px -4px rgba(118, 32, 117, 0.45);
+  }
+  .dark .chip-toggle {
+    background: rgba(201, 100, 197, 0.08);
+    color: #e1bee7;
+    border-color: rgba(201, 100, 197, 0.12);
+  }
+  .dark .chip-toggle:hover {
+    background: rgba(201, 100, 197, 0.14);
+  }
+  .dark .chip-toggle.active {
+    background: linear-gradient(135deg, #762075, #c964c5);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 18px -4px rgba(118, 32, 117, 0.7);
+  }
+
+  /* Status pills */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+  .pill-success {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+  }
+  .pill-success .dot {
+    background: #22c55e;
+  }
+  .pill-warn {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  .pill-warn .dot {
+    background: #f59e0b;
+  }
+  .pill-danger {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+  .pill-danger .dot {
+    background: #ef4444;
+  }
+  .pill-info {
+    background: rgba(29, 111, 191, 0.12);
+    color: #1d6fbf;
+  }
+  .pill-info .dot {
+    background: #1d6fbf;
+  }
+  .pill-purple {
+    background: rgba(118, 32, 117, 0.12);
+    color: #762075;
+  }
+  .pill-purple .dot {
+    background: #762075;
+  }
+  .dark .pill-success {
+    background: rgba(34, 197, 94, 0.16);
+    color: #4ade80;
+  }
+  .dark .pill-warn {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+  }
+  .dark .pill-danger {
+    background: rgba(239, 68, 68, 0.16);
+    color: #f87171;
+  }
+  .dark .pill-info {
+    background: rgba(29, 111, 191, 0.2);
+    color: #60a5fa;
+  }
+  .dark .pill-purple {
+    background: rgba(201, 100, 197, 0.18);
+    color: #e1bee7;
+  }
+
+  /* Custom switch */
+  .switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  }
+  .switch.on {
+    background: linear-gradient(135deg, #762075, #c964c5);
+  }
+  .switch.on::after {
+    left: 23px;
+  }
+
+  /* Sticky thead pattern */
+  .tbl-scroll {
+    overflow: auto;
+    max-height: var(--tbl-max-h, 60vh);
+  }
+  .tbl-scroll.tbl-tall {
+    max-height: 70vh;
+  }
+  .tbl-scroll.tbl-short {
+    max-height: 48vh;
+  }
+  /* Fills the available flex height instead of a fixed vh cap (parent must be
+     a bounded flex column: flex-1 min-h-0). Sticky thead still applies. */
+  .tbl-scroll.tbl-fill {
+    max-height: none;
+    height: 100%;
+  }
+  .tbl-scroll thead.tbl-head-dark th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: #762075;
+    color: #fff;
+  }
+  .tbl-scroll thead.tbl-head-light th {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: #f9fafb;
+    color: #6b7280;
+    box-shadow: inset 0 -1px 0 rgba(15, 17, 22, 0.06);
+  }
+  .dark .tbl-scroll thead.tbl-head-light th {
+    background-color: #181b23;
+    color: #9ca3af;
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  /* Detail row pretty */
+  .kv {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .kv .k {
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .kv .v {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  .dark .kv .v {
+    color: #e5e7eb;
+  }
+
+  /* Books grid cover */
+  .book-cover {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #762075, #4a1448);
+    box-shadow: 0 12px 30px -10px rgba(118, 32, 117, 0.5);
+  }
+
+  /* Page transition leaving */
+  .page-leaving {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+  }
+
+  .will-change-transform {
+    will-change: transform, opacity;
+  }
+
+  /* Entrada */
   .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+    animation: fadeIn 0.25s ease-out forwards;
+  }
+
+  /* Login entry: soft fade + tiny scale-up so coming from the landing doesn't
+     feel like a hard cut. Plays once on mount. */
+  .login-enter {
+    animation: loginEnter 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .login-enter {
+      animation: none;
+    }
+  }
+  @keyframes loginEnter {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+      filter: blur(2px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
   }
 
   .animate-grow-in {
     animation: growIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* saída */
+  /* Saída */
   .animate-fade-out {
     animation: fadeOut 0.2s ease-in forwards;
   }
 
   .animate-shrink-out {
     animation: shrinkOut 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Refresh button: a single eased full turn, looped while refreshing, so even
+     an instant cache hit shows a smooth spin (min-duration enforced in JS). */
+  .animate-spin-smooth {
+    animation: spinSmooth 0.7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.2s ease-out forwards;
+    transform-origin: top center;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.2s ease-in forwards;
+    transform-origin: top center;
+  }
+
+  /* Reverse-of-open close for overlays (paired com .animate-slide-down via
+     usePresence): espelha exatamente o slideDown — some encolhendo e subindo,
+     em vez de reaproveitar uma animação de entrada. */
+  .animate-slide-down-out {
+    animation: slideDownOut 0.16s ease-in forwards;
+    transform-origin: top center;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
   .custom-scrollbar {
@@ -172,25 +930,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
     scrollbar-color: #4b5563 transparent;
   }
 
-  .animate-slide-down {
-    animation: slideDown 0.2s ease-out forwards;
-    transform-origin: top center;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.2s ease-in forwards;
-    transform-origin: top center;
-  }
-
-  .animate-slide-in-right {
-    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  .animate-slide-in-left {
-    animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  /* keyframes */
+  /* Keyframes */
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -244,6 +984,17 @@ input[type='date']::-webkit-calendar-picker-indicator {
 
   @keyframes slideUp {
     from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideDownOut {
+    from {
       opacity: 1;
       transform: translateY(0) scale(1);
     }
@@ -274,22 +1025,47 @@ input[type='date']::-webkit-calendar-picker-indicator {
       transform: translateX(0);
     }
   }
+
+  @keyframes spinSmooth {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pulseRing {
+    0% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+    }
+    70% {
+      box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+  }
 }
 
-/* Dashboard view toggle: garantir que o print do PDF mostre ambos os blocos,
-   independente da view ativa na tela. */
+/* Print: neutraliza slides para PDF mostrar tudo */
 @media print {
   [data-dashboard-block='analytics'] {
     display: block !important;
     page-break-after: always;
   }
-
   [data-dashboard-block='tables'] {
-    display: grid !important;
+    display: block !important;
   }
-
+  [data-slide-track] {
+    transform: none !important;
+    flex-direction: column !important;
+  }
+  [data-slide-track] > * {
+    width: 100% !important;
+  }
   .print\:hidden,
   [aria-hidden='true'].animate-ping {
+    display: none !important;
+  }
+  .pulse-dot::after {
     display: none !important;
   }
 }

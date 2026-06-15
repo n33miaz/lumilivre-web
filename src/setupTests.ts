@@ -21,3 +21,9 @@ vi.mock('lottie-react', () => ({
   __esModule: true,
   default: () => null,
 }));
+
+// jsdom não implementa getContext (WebGL/2D); ShaderBackground degrada
+// graciosamente quando ausente. Stub silencia o warning ruidoso.
+HTMLCanvasElement.prototype.getContext = vi.fn(
+  () => null,
+) as unknown as typeof HTMLCanvasElement.prototype.getContext;

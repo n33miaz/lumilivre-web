@@ -15,12 +15,12 @@ export function CommunityCTA() {
   const cards: Card[] = useMemo(
     () => [
       {
-        icon: 'git-fork',
+        icon: 'github',
         title: t('community.card.fork.title'),
         desc: t('community.card.fork.desc'),
       },
       {
-        icon: 'git-pull-request',
+        icon: 'monitor',
         title: t('community.card.pr.title'),
         desc: t('community.card.pr.desc'),
       },
@@ -30,7 +30,7 @@ export function CommunityCTA() {
         desc: t('community.card.discuss.desc'),
       },
       {
-        icon: 'heart',
+        icon: 'mail',
         title: t('community.card.cite.title'),
         desc: t('community.card.cite.desc'),
       },

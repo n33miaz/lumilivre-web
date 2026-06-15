@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import SearchIcon from '../../assets/icons/search.svg?react';
 import FilterIcon from '../../assets/icons/filter.svg?react';
@@ -36,6 +37,8 @@ export function ActionHeader({
   filterComponent,
   onReset,
 }: ActionHeaderProps) {
+  const { t } = useTranslation('common');
+
   return (
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 shrink-0 relative z-40 w-full">
       <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full md:w-auto">
@@ -46,7 +49,7 @@ export function ActionHeader({
           <div className="relative flex-1 md:flex-none select-none">
             <button
               onClick={onSearchSubmit}
-              aria-label="Pesquisar"
+              aria-label={t('aria.search')}
               className="absolute inset-y-0 right-0 px-4 rounded-r-lg flex items-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 active:bg-gray-400 dark:active:bg-gray-700 group z-10"
             >
               <SearchIcon className="w-5 h-5 text-lumi-primary dark:text-lumi-label" />
@@ -74,7 +77,7 @@ export function ActionHeader({
               <button
                 onClick={onReset}
                 className="absolute inset-y-0 right-14 px-2 flex items-center text-gray-400 hover:text-red-500 transition-colors"
-                title="Limpar pesquisa"
+                title={t('action.clear_search')}
               >
                 <CloseIcon className="w-4 h-4 fill-current" />
               </button>
@@ -87,12 +90,14 @@ export function ActionHeader({
               <button
                 id="filter-toggle-button"
                 onClick={onFilterToggle}
-                title="Filtro Avançado"
+                title={t('action.advanced_filter')}
                 className={`flex items-center justify-center bg-white dark:bg-dark-card dark:text-white font-semibold p-2 md:py-2 md:px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 active:bg-gray-400 dark:active:bg-gray-700 shadow-md select-none group transition-colors ${
                   isFilterOpen ? 'ring-2 ring-lumi-primary' : ''
                 }`}
               >
-                <span className="hidden md:inline">Filtro Avançado</span>
+                <span className="hidden md:inline">
+                  {t('action.advanced_filter')}
+                </span>
                 <FilterIcon
                   className={`w-6 h-6 md:w-5 md:h-5 md:ml-2 md:-mr-1 text-lumi-primary dark:text-lumi-label transition-transform ${
                     isFilterOpen ? '-rotate-90' : ''

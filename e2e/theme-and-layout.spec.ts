@@ -16,28 +16,56 @@ async function injectAuthenticatedUser(page: Page) {
 }
 
 async function mockAllApiCalls(page: Page) {
-  await page.route('**/alunos/**', (r) =>
+  await page.route('**/api/dashboard/stats', (r) =>
     r.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ totalElements: 0 }),
+      body: JSON.stringify({
+        activeLoans: 0,
+        overdueLoans: 0,
+        completedLoans: 0,
+        avgReturnDays: 0,
+        pendingRequests: 0,
+        waitingReservations: 0,
+      }),
     }),
   );
-  await page.route('**/livros/**', (r) =>
+  await page.route('**/api/dashboard/top-books', (r) =>
     r.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ totalElements: 0 }),
+      body: JSON.stringify([]),
     }),
   );
-  await page.route('**/emprestimos/**', (r) =>
+  await page.route('**/api/dashboard/loans-by-month', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+  await page.route('**/api/students**', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
+    }),
+  );
+  await page.route('**/api/books**', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
+    }),
+  );
+  await page.route('**/api/loans**', (r) =>
     r.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(0),
     }),
   );
-  await page.route('**/solicitacoes/**', (r) =>
+  await page.route('**/api/loan-requests**', (r) =>
     r.fulfill({
       status: 200,
       contentType: 'application/json',

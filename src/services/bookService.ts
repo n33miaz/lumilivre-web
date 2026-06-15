@@ -31,6 +31,7 @@ export interface LivroAgrupado {
   autor: string;
   editora: string;
   quantidade: number;
+  imagem?: string;
 }
 
 export interface LivroFilterParams {
@@ -158,6 +159,7 @@ const toLivroAgrupado = (item: Record<string, unknown>): LivroAgrupado => ({
   autor: (item.author as string) ?? '',
   editora: (item.publisher as string) ?? '',
   quantidade: Number(item.copyCount ?? 0),
+  imagem: (item.coverUrl as string) ?? '',
 });
 
 const toLivroDetalhado = (item: Record<string, unknown>): LivroDetalhado => {

@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
 
 interface ChartCardProps {
+  eyebrow?: string;
   title: string;
-  total?: number | null;
-  totalLabel?: string;
+  badge?: ReactNode;
   isLoading?: boolean;
   isEmpty?: boolean;
   emptyMessage?: string;
@@ -12,39 +12,32 @@ interface ChartCardProps {
 }
 
 export function ChartCard({
+  eyebrow,
   title,
-  total,
-  totalLabel,
+  badge,
   isLoading = false,
   isEmpty = false,
   emptyMessage,
   emptyIcon,
   children,
 }: ChartCardProps) {
-  const showBadge = typeof total === 'number' && Number.isFinite(total);
-
   return (
-    <div
-      className="h-72 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-dark-card p-3 flex flex-col shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
-    >
-      <header className="flex items-center justify-between gap-2 mb-2 shrink-0">
-        <h3 className="text-sm font-bold text-gray-700 dark:text-gray-200 truncate">
-          {title}
-        </h3>
-        {showBadge && (
-          <span
-            title={totalLabel}
-            className="inline-flex items-center gap-1 rounded-full bg-lumi-primary/10 dark:bg-lumi-primary/25 text-lumi-primary dark:text-lumi-label text-[10px] font-semibold px-2 py-0.5 select-none"
-          >
-            {totalLabel && (
-              <span className="opacity-75 hidden sm:inline">{totalLabel}</span>
-            )}
-            <span className="tabular-nums">{total}</span>
-          </span>
-        )}
-      </header>
+    <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-5 flex flex-col">
+      <div className="flex items-start justify-between mb-4 gap-2">
+        <div className="min-w-0">
+          {eyebrow && (
+            <div className="text-[11px] font-bold tracking-wider text-gray-500 dark:text-gray-400 uppercase truncate">
+              {eyebrow}
+            </div>
+          )}
+          <div className="font-display font-bold text-lg mt-0.5 text-gray-900 dark:text-white truncate">
+            {title}
+          </div>
+        </div>
+        {badge && <div className="shrink-0">{badge}</div>}
+      </div>
 
-      <div className="flex-1 min-h-0">
+      <div className="h-56 flex-1 min-h-0">
         {isLoading ? (
           <ChartSkeleton />
         ) : isEmpty ? (

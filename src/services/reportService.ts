@@ -24,7 +24,11 @@ const endpointByType = {
   alunos: 'students',
   livros: 'books',
   exemplares: 'copies',
+  cursos: 'courses',
+  estatisticas: 'books/statistics',
 } as const;
+
+export type ReportType = keyof typeof endpointByType;
 
 const statusLoanMap: Record<string, string> = {
   ATIVO: 'ACTIVE',
@@ -99,7 +103,7 @@ const toReportParams = (
 };
 
 export const baixarRelatorioPDF = async (
-  tipo: 'emprestimos' | 'alunos' | 'livros' | 'exemplares',
+  tipo: ReportType,
   filtros: FiltrosRelatorio,
   signal?: AbortSignal,
 ) => {

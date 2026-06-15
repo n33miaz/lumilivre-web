@@ -7,6 +7,22 @@ interface DynamicPageSizeOptions {
   minRows?: number;
 }
 
+/**
+ * Calcula quantas linhas cabem no container da tabela, ajustando o page size ao
+ * espaço disponível na viewport (preenche a tela, sem sobra nem scroll de
+ * página).
+ *
+ * Robustez:
+ * - Medições com altura implausível (menor que o necessário para uma linha) são
+ *   descartadas. Era o que travava o valor ao alternar muito entre telas: o
+ *   container chegava a ser medido com altura intermediária durante a montagem.
+ * - O `ResizeObserver` observa o *content box*, então a transição de rota
+ *   (translateY/opacity via Framer Motion) não dispara recálculo — só mudanças
+ *   reais de tamanho (resize de janela, novo layout).
+ * - O container precisa ter altura *determinada* (estar dentro de uma coluna
+ *   flex limitada: flex-1 + min-h-0); caso contrário a tabela cresceria com as
+ *   linhas e realimentaria a medição.
+ */
 export function useDynamicPageSize(
   containerRef: RefObject<HTMLElement | null>,
   options: DynamicPageSizeOptions = {},
@@ -21,33 +37,44 @@ export function useDynamicPageSize(
   const [itemsPerPage, setItemsPerPage] = useState(0);
 
   useEffect(() => {
-    const calculatePageSize = () => {
-      if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-      const containerHeight = containerRef.current.clientHeight;
-      if (containerHeight === 0) return;
+    let raf = 0;
 
-      const availableHeightForRows =
-        containerHeight - headerHeight - footerHeight;
+    const apply = () => {
+      // Usa getBoundingClientRect (sub-pixel) e só aceita a medição quando o
+      // container já está visível e com altura plausível. Alturas intermediárias
+      // durante a transição de rota (translateY/opacity) são ignoradas — era o
+      // que travava o valor ao alternar muito entre telas.
+      const containerHeight = el.getBoundingClientRect().height;
+      if (containerHeight < headerHeight + footerHeight + rowHeight) return;
 
-      const calculatedRows = Math.floor(availableHeightForRows / rowHeight);
+      const available = containerHeight - headerHeight - footerHeight;
+      const rows = Math.max(minRows, Math.floor(available / rowHeight));
 
-      setItemsPerPage(Math.max(minRows, calculatedRows));
+      setItemsPerPage((prev) => (prev === rows ? prev : rows));
     };
 
-    // calculo
-    calculatePageSize();
+    // Mede sempre no próximo frame: garante que o layout já estabilizou depois
+    // do mount/troca de rota antes de decidir o page size.
+    const measure = () => {
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(apply);
+    };
 
-    const observer = new ResizeObserver(() => {
-      calculatePageSize();
-    });
+    measure();
 
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    // Backup: alguns redimensionamentos de viewport não mudam o content-box
+    // observado de imediato (ex.: barra de ferramentas do navegador).
+    window.addEventListener('resize', measure);
 
     return () => {
+      window.cancelAnimationFrame(raf);
       observer.disconnect();
+      window.removeEventListener('resize', measure);
     };
   }, [containerRef, rowHeight, headerHeight, footerHeight, minRows]);
 

@@ -17,6 +17,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { Label } from '../../components/ui/Label';
 import { Input } from '../../components/ui/Input';
 import { CustomSelect } from '../../components/ui/CustomSelect';
+import { SearchableSelect } from '../../components/ui/SearchableSelect';
 import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
 
 interface StudentFormProps {
@@ -156,7 +157,7 @@ export function StudentForm({
             control={control}
             render={({ field }) => (
               <div>
-                <CustomSelect
+                <SearchableSelect
                   value={String(field.value)}
                   onChange={field.onChange}
                   options={cursosOptions}

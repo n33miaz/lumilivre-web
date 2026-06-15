@@ -96,5 +96,10 @@ export function useEstatisticasGrafico() {
       return { curso, modulo, turno };
     },
     staleTime: 1000 * 60 * 60,
+    // Mantém o cache vivo por 30 min e reaproveita os dados anteriores ao
+    // remontar: ao reabrir a Classificação os 3 gráficos não recarregam do
+    // zero — atualizam em segundo plano se estiverem velhos.
+    gcTime: 1000 * 60 * 30,
+    placeholderData: keepPreviousData,
   });
 }

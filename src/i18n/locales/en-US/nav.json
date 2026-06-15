@@ -8,5 +8,18 @@
   "reports": "Reports",
   "settings": "Settings",
   "pin_menu": "Pin menu",
-  "unpin_menu": "Unpin menu"
+  "unpin_menu": "Unpin menu",
+  "aria.toggle_sidebar": "Toggle sidebar",
+  "aria.toggle_theme": "Toggle theme",
+  "aria.notifications": "Notifications",
+  "theme.switch_to_dark": "Switch to dark theme",
+  "theme.switch_to_light": "Switch to light theme",
+  "notifications.title": "Notifications",
+  "notifications.empty": "All caught up",
+  "notifications.overdue_one": "{{count}} loan overdue",
+  "notifications.overdue_other": "{{count}} loans overdue",
+  "notifications.new_request": "New request from {{name}}",
+  "help.label": "Help",
+  "user.profile": "My profile",
+  "user.menu_aria": "User menu"
 }

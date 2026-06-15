@@ -12,7 +12,7 @@
 
 <div align="center">
 
-![License](https://img.shields.io/badge/license-MIT-purple?style=flat-square)
+![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-762075?style=flat-square)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=flat-square&logo=typescript)
 ![Vite](https://img.shields.io/badge/Vite-6-646CFF?style=flat-square&logo=vite)
@@ -37,6 +37,9 @@ A aplicação foi construída com foco em produtividade, utilizando **TailwindCS
   <h1>Screenshots</h1>
 </div>
 
+<div align="center">
+  <img src="src/assets/images/prints/landing.png" width="92%" alt="Landing pública" style="border-radius: 10px; margin: 5px;">
+</div>
 <div align="center">
   <img src="src/assets/images/prints/login.png" width="45%" alt="Login" style="border-radius: 10px; margin: 5px;">
   <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Dashboard" style="border-radius: 10px; margin: 5px;">
@@ -204,7 +207,7 @@ npm start              # servir /dist com serve
   <h1>Licença</h1>
 </div>
 
-Distribuído sob a licença **MIT**. Veja `LICENSE` para mais detalhes.
+**Proprietário — Todos os direitos reservados.** O código-fonte é público apenas para leitura, estudo e avaliação. Qualquer uso, cópia, modificação ou execução em produção requer licença comercial mediante negociação. Veja [`LICENSE`](LICENSE). Interessados: **ncormino@gmail.com**.
 
 <br/>
 

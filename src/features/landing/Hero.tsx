@@ -4,9 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import { Btn } from './Btn';
 import { HeroVisual } from './HeroVisual';
+import { useIsDark } from '../../hooks/useIsDark';
+import { LoginMeshBackground } from '../../components/ui/ShaderBackground/LoginMeshBackground';
 
 export function Hero() {
   const { t } = useTranslation('landing');
+  const isDark = useIsDark();
 
   const stats = useMemo(
     () => [
@@ -22,11 +25,18 @@ export function Hero() {
 
   return (
     <section id="top" className="relative overflow-hidden">
-      <div className="absolute inset-0 grid-pattern" />
-      <div className="blob bg-lumi-400 w-[400px] h-[400px] -top-32 -left-20" />
-      <div className="blob bg-lumi-label w-[500px] h-[500px] top-20 -right-32" />
+      {/* Fundo interativo (mesma malha reativa do login). Degrada com
+          graça em clientes sem WebGL / prefers-reduced-motion. */}
+      <LoginMeshBackground
+        isDark={isDark}
+        split={false}
+        quality={0.4}
+        className="absolute inset-0 z-0 opacity-50 dark:opacity-40"
+      />
+      <div className="absolute inset-0 z-[1] grid-pattern" />
+      <div className="blob bg-lumi-label w-[500px] h-[500px] top-20 -right-32 z-[1]" />
 
-      <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-28">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-28">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lumi-100 dark:bg-lumi-500/20 text-lumi-700 dark:text-lumi-200 text-xs font-bold mb-6">
@@ -49,15 +59,13 @@ export function Hero() {
 
             <div className="flex flex-wrap gap-3">
               <Btn
-                href="https://github.com/n33miaz"
-                target="_blank"
-                rel="noreferrer"
+                href="mailto:ncormino@gmail.com"
                 variant="primary"
-                icon={<Icon name="github" size={16} />}
+                icon={<Icon name="mail" size={16} />}
               >
                 {t('hero.cta.github')}
               </Btn>
-              <Btn href="#ecosystem" variant="secondary" icon={<Icon name="book-open" size={16} />}>
+              <Btn href="#screens" variant="secondary" icon={<Icon name="book-open" size={16} />}>
                 {t('hero.cta.docs')}
               </Btn>
             </div>

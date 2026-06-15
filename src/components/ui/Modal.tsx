@@ -6,6 +6,7 @@ import {
   useContext,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import CloseIcon from '../../assets/icons/close.svg?react';
 
 const ModalContext = createContext<{
@@ -69,6 +70,7 @@ export function Modal({
 
 // Subcomponentes
 Modal.Header = function ModalHeader({ title }: { title: string }) {
+  const { t } = useTranslation('common');
   const context = useContext(ModalContext);
   return (
     <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
@@ -79,7 +81,7 @@ Modal.Header = function ModalHeader({ title }: { title: string }) {
         <button
           onClick={context?.onClose}
           className="rounded-md hover:opacity-75 transition-opacity"
-          aria-label="Fechar modal"
+          aria-label={t('action.close_modal')}
         >
           <CloseIcon className="w-8 h-8 mr-0.5 text-lumi-primary" />
         </button>

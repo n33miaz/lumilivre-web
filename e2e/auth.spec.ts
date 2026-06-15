@@ -4,7 +4,9 @@ test.describe('Login Page', () => {
   test('should render login form with all elements', async ({ page }) => {
     await page.goto('/login');
 
-    await expect(page.getByText('LumiLivre')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'LumiLivre', level: 1 }),
+    ).toBeVisible();
     await expect(page.getByLabel(/Email/i)).toBeVisible();
     await expect(page.getByLabel(/Senha/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /ENTRAR/i })).toBeVisible();

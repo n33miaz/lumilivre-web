@@ -1,10 +1,12 @@
 import { useContext, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../contexts/ThemeContext';
 
 import SunIcon from '../../assets/icons/sun.svg?react';
 import MoonIcon from '../../assets/icons/moon.svg?react';
 
 export function ThemeToggle() {
+  const { t } = useTranslation('nav');
   const { theme, setTheme } = useContext(ThemeContext);
 
   const [effectiveTheme, setEffectiveTheme] = useState(theme);
@@ -28,18 +30,33 @@ export function ThemeToggle() {
     setTheme(newTheme);
   };
 
+  const isLight = effectiveTheme === 'light';
+
   return (
     <button
       onClick={handleToggle}
-      className="group p-2 rounded-full shadow-md select-none bg-gray-200 hover:bg-gray-300 active:bg-gray-400 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:active:bg-gray-800 dark:text-gray-200"
-      title={`Mudar para tema ${effectiveTheme === 'light' ? 'escuro' : 'claro'}`}
-      aria-label="Alternar tema"
+      className="group h-9 w-9 rounded-lg flex items-center justify-center select-none text-gray-600 hover:bg-lumi-primary/10 hover:text-lumi-primary dark:text-gray-300 dark:hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary transition-all duration-200 ease-out"
+      title={isLight ? t('theme.switch_to_dark') : t('theme.switch_to_light')}
+      aria-label={t('aria.toggle_theme')}
     >
-      {effectiveTheme === 'light' ? (
-        <MoonIcon className="w-6 h-6 text-lumi-primary duration-500 origin-center overflow-visible group-hover:rotate-180 group-active:scale-180" />
-      ) : (
-        <SunIcon className="w-6 h-6 text-white duration-500 origin-center overflow-visible group-hover:rotate-90 group-active:scale-90" />
-      )}
+      {/* Both icons share one grid cell and cross-fade + rotate on theme change,
+          so the swap glides instead of hard-cutting. Wrapper tilts on hover. */}
+      <span className="relative grid h-5 w-5 place-items-center transition-transform duration-300 ease-out group-hover:rotate-12">
+        <MoonIcon
+          className={`col-start-1 row-start-1 h-5 w-5 text-lumi-primary transition-[opacity,transform] duration-300 ease-out ${
+            isLight
+              ? 'rotate-0 scale-100 opacity-100'
+              : '-rotate-90 scale-0 opacity-0'
+          }`}
+        />
+        <SunIcon
+          className={`col-start-1 row-start-1 h-5 w-5 text-amber-400 transition-[opacity,transform] duration-300 ease-out ${
+            isLight
+              ? 'rotate-90 scale-0 opacity-0'
+              : 'rotate-0 scale-100 opacity-100'
+          }`}
+        />
+      </span>
     </button>
   );
 }

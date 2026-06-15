@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { LoadingIcon } from './LoadingIcon';
 import { SortableTh } from './SortableTh';
@@ -37,7 +38,7 @@ export function DataTable<T>({
   onSort,
   getRowKey,
   getRowClass,
-  emptyStateMessage = 'Nenhum item encontrado.',
+  emptyStateMessage,
   headerClassName = 'bg-lumi-primary shadow-md',
   headerTextClassName = 'text-white',
   hoverHeaderClassName = 'hover:bg-white/20',
@@ -45,7 +46,9 @@ export function DataTable<T>({
   // minWidth = 'min-w-[600px]',
   minWidth = 'min-w-[1024px]',
 }: DataTableProps<T>) {
+  const { t } = useTranslation('common');
   const tableBodyRef = useRef<HTMLDivElement>(null);
+  const resolvedEmptyMessage = emptyStateMessage ?? t('empty');
 
   return (
     <div
@@ -95,7 +98,7 @@ export function DataTable<T>({
               <div className="p-8 text-red-500 text-center">{error}</div>
             ) : data.length === 0 ? (
               <div className="p-8 text-gray-500 text-center">
-                {emptyStateMessage}
+                {resolvedEmptyMessage}
               </div>
             ) : (
               <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -105,7 +108,7 @@ export function DataTable<T>({
                     className={`flex items-center w-full ${
                       getRowClass
                         ? getRowClass(item)
-                        : 'hover:bg-gray-300 dark:hover:bg-gray-600 hover:duration-0'
+                        : 'row-hover hover:duration-0'
                     }`}
                   >
                     {columns.map((col) => (

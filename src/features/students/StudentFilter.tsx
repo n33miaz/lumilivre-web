@@ -1,5 +1,6 @@
 import { FilterPanel } from '../../components/ui/FilterPanel';
 import { CustomSelect } from '../../components/ui/CustomSelect';
+import { SearchableSelect } from '../../components/ui/SearchableSelect';
 import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
 
 import {
@@ -111,12 +112,11 @@ export function StudentFilter({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className={labelStyles}>Curso</label>
-              <CustomSelect
+              <SearchableSelect
                 value={filters.cursoNome}
                 onChange={(val) => onFilterChange('cursoNome', val)}
                 options={cursoOptions}
                 placeholder="Selecione o Curso"
-                invertArrow={true}
               />
             </div>
 

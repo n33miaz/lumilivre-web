@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import ArrowIcon from '../../assets/icons/arrow-drop.svg?react';
 import SearchIcon from '../../assets/icons/search.svg?react';
@@ -37,13 +38,14 @@ export function SearchableSelect({
   value,
   onChange,
   options,
-  placeholder = 'Selecione...',
+  placeholder,
   label,
   className = '',
   disabled = false,
   isLoading = false,
   onLoadMore,
 }: SearchableSelectProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -206,6 +208,7 @@ export function SearchableSelect({
   };
 
   const hasValue = value !== '' && value !== null && value !== undefined;
+  const resolvedPlaceholder = placeholder ?? t('select');
   const arrowColorClass =
     isOpen || (hasValue && !disabled) ? 'text-lumi-label' : 'text-gray-400';
   const labelStyles =
@@ -224,7 +227,7 @@ export function SearchableSelect({
           zIndex: 9999,
         }}
         className={`
-          flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-xl overflow-hidden origin-top ease-out
+          flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-xl overflow-hidden origin-top transition-[opacity,transform] duration-150 ease-out
           ${
             isOpen
               ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
@@ -241,7 +244,7 @@ export function SearchableSelect({
               ref={searchInputRef}
               type="text"
               className="w-full pl-8 pr-3 py-1.5 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-lumi-primary text-gray-800 dark:text-gray-100 placeholder-gray-400"
-              placeholder="Buscar..."
+              placeholder={t('search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -258,7 +261,7 @@ export function SearchableSelect({
         >
           {visibleOptions.length === 0 && !isLoading ? (
             <li className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center italic">
-              Nenhum resultado encontrado.
+              {t('empty')}
             </li>
           ) : (
             visibleOptions.map((option, index) => {
@@ -272,7 +275,7 @@ export function SearchableSelect({
                     onClick={() => handleSelect(option.value)}
                     onMouseEnter={() => setHighlightedIndex(index)}
                     className={`
-                      w-full text-left px-4 py-2 text-sm
+                      row-hover w-full text-left px-4 py-2 text-sm
                       ${
                         isSelected
                           ? 'bg-lumi-primary/10 text-lumi-primary font-bold'
@@ -294,7 +297,7 @@ export function SearchableSelect({
 
           {isLoading && (
             <li className="px-4 py-2 text-xs text-gray-400 text-center animate-pulse">
-              Carregando mais opções...
+              {t('loading')}
             </li>
           )}
         </ul>
@@ -330,7 +333,7 @@ export function SearchableSelect({
                 : 'text-gray-700 dark:text-gray-200'
             }`}
           >
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption ? selectedOption.label : resolvedPlaceholder}
           </span>
         </div>
 
@@ -340,7 +343,7 @@ export function SearchableSelect({
               role="button"
               onClick={handleClear}
               className="p-0.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 hover:text-red-500 flex items-center justify-center"
-              title="Limpar seleção"
+              title={t('action.clear_selection')}
             >
               <CloseIcon className="w-4 h-4" />
             </div>
