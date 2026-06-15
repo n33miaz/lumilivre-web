@@ -1,11 +1,13 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import { FileDown, FileSpreadsheet, RefreshCw } from 'lucide-react';
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
+  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -15,13 +17,17 @@ import {
 } from 'recharts';
 
 import { StatCard } from '../../components/ui/StatCard';
-import { DashboardViewToggle } from '../../components/ui/DashboardViewToggle';
-import { DataTable, type ColumnDef } from '../../components/ui/DataTable';
+import {
+  DashboardViewToggle,
+  type DashboardTablesAlert,
+} from '../../components/ui/DashboardViewToggle';
+import { SlideStage } from '../../components/ui/SlideStage';
 import { TableFooter } from '../../components/ui/TableFooter';
+import { Modal } from '../../components/ui/Modal';
 import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 import { LoanModalRequest } from '../../features/loans/LoanModalRequest';
 import { formatarNome } from '../../utils/formatters';
-import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
+import { useToast } from '../../contexts/ToastContext';
 import {
   useDashboardViewAlerts,
   type AnalyticsFingerprint,
@@ -29,13 +35,23 @@ import {
   type TablesFingerprint,
 } from '../../hooks/useDashboardViewAlerts';
 import { ChartCard } from './components/ChartCard';
+import {
+  PeriodDropdown,
+  type CustomRange,
+  type DashboardPeriod,
+} from './components/PeriodDropdown';
 
 import {
   useDashboardStats,
   useDashboardListas,
   useDashboardAnalytics,
 } from '../../hooks/useDashboardQueries';
-import { downloadCsv, printDashboardPdf } from '../../utils/dashboardExport';
+import {
+  exportDashboardXlsx,
+  exportDashboardPdf,
+  type DashboardReport,
+  type ReportTable,
+} from '../../utils/dashboardExport';
 
 import BookIcon from '../../assets/icons/books-active.svg?react';
 import UsersIcon from '../../assets/icons/users-active.svg?react';
@@ -44,7 +60,6 @@ import LoansIcon from '../../assets/icons/loans-active.svg?react';
 import type { EmprestimoAtivoDTO } from '../../services/loanService';
 
 const CHART_COLORS = ['#762075', '#0f766e', '#dc2626', '#ca8a04', '#2563eb'];
-
 const DASHBOARD_VIEW_STORAGE_KEY = 'lumilivre.dashboard.view';
 
 const readStoredView = (): DashboardView => {
@@ -52,130 +67,6 @@ const readStoredView = (): DashboardView => {
   const stored = window.localStorage.getItem(DASHBOARD_VIEW_STORAGE_KEY);
   return stored === 'tables' ? 'tables' : 'analytics';
 };
-
-function ManagementIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 3v18h18" />
-      <rect x="7" y="12" width="3" height="6" rx="0.5" />
-      <rect x="12" y="8" width="3" height="10" rx="0.5" />
-      <rect x="17" y="5" width="3" height="13" rx="0.5" />
-    </svg>
-  );
-}
-
-function RefreshIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M21 12a9 9 0 1 1-3.5-7.1" />
-      <path d="M21 3v6h-6" />
-    </svg>
-  );
-}
-
-function CsvIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" />
-      <path d="M8 13h2m4 0h2M8 17h8" />
-    </svg>
-  );
-}
-
-function PdfIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 9V2h9l5 5v15a2 2 0 0 1-2 2H8" />
-      <path d="M14 2v6h6" />
-      <path d="M3 15h2a1.5 1.5 0 0 1 0 3H3v-3z" />
-      <path d="M3 21v-3" />
-    </svg>
-  );
-}
-
-interface PeriodSelectDisabledProps {
-  defaultLabel: string;
-  ariaLabel: string;
-  tooltip: string;
-}
-
-function PeriodSelectDisabled({
-  defaultLabel,
-  ariaLabel,
-  tooltip,
-}: PeriodSelectDisabledProps) {
-  return (
-    <div
-      className="relative inline-flex items-center"
-      title={tooltip}
-    >
-      <button
-        type="button"
-        disabled
-        aria-label={ariaLabel}
-        className="inline-flex items-center gap-2 h-9 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/60 px-3 text-xs sm:text-sm cursor-not-allowed select-none"
-      >
-        <span className="opacity-80">{defaultLabel}</span>
-        <svg
-          aria-hidden="true"
-          width="12"
-          height="12"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="opacity-60"
-        >
-          <path d="M3 4.5L6 7.5L9 4.5" />
-        </svg>
-      </button>
-    </div>
-  );
-}
 
 interface EmprestimoVencer {
   id: string;
@@ -200,11 +91,59 @@ interface SolicitacaoDisplay {
   rawDataSolicitacao: string;
 }
 
+const PERIOD_MONTHS: Record<'30d' | '60d' | '90d', number> = {
+  '30d': 1,
+  '60d': 2,
+  '90d': 3,
+};
+
+/**
+ * Mini-tendências decorativas no canto inferior direito dos cards (paridade com
+ * o protótipo). O card de empréstimos usa a série real (loansSparkline); os
+ * demais não possuem série temporal própria, então recebem um traçado ambiente
+ * estável — arte sutil em opacity-60, sem eixos nem rótulos, apenas ritmo
+ * visual. Mantidos como constantes para não remontar a cada render.
+ */
+const SPARK_BOOKS = [8, 10, 13, 18, 16, 21, 23, 25];
+const SPARK_STUDENTS = [10, 14, 11, 17, 19, 16, 21, 24];
+const SPARK_OVERDUE = [22, 18, 20, 14, 16, 11, 9, 7];
+
+/** Client-side pagination for the small dashboard widget tables. */
+function useClientPagination<T>(items: T[], initialSize = 10) {
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(initialSize);
+  const totalPages = Math.max(1, Math.ceil(items.length / size));
+  const currentPage = Math.min(page, totalPages);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const paged = items.slice((currentPage - 1) * size, currentPage * size);
+  return {
+    paged,
+    page: currentPage,
+    setPage,
+    size,
+    setSize,
+    totalPages,
+    total: items.length,
+  };
+}
+
 export function DashboardPage() {
   const { t, i18n } = useTranslation('dashboard');
   const queryClient = useQueryClient();
+  const { addToast } = useToast();
 
   const [view, setView] = useState<DashboardView>(() => readStoredView());
+  const [period, setPeriod] = useState<DashboardPeriod>('90d');
+  const [customRange, setCustomRange] = useState<CustomRange>({
+    start: '',
+    end: '',
+  });
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     window.localStorage.setItem(DASHBOARD_VIEW_STORAGE_KEY, view);
@@ -219,28 +158,10 @@ export function DashboardPage() {
   const { statsGerenciais, topLivros, emprestimosPorMes } =
     useDashboardAnalytics();
 
-  // Estado para controlar se a animação deve ocorrer
   const [shouldAnimateStats, setShouldAnimateStats] = useState(false);
-
   useEffect(() => {
-    if (isStatsLoading) {
-      setShouldAnimateStats(true);
-    }
+    if (isStatsLoading) setShouldAnimateStats(true);
   }, [isStatsLoading]);
-
-  const dashboardContainerRef = useRef<HTMLDivElement>(null);
-  const dynamicPageSize = useDynamicPageSize(dashboardContainerRef, {
-    rowHeight: 48,
-    headerHeight: 100,
-    footerHeight: 60,
-    minRows: 3,
-  });
-
-  const [solicitacaoPage, setSolicitacaoPage] = useState(1);
-  const [solicitacaoPerPage, setSolicitacaoPerPage] = useState(10);
-
-  const [emprestimoPage, setEmprestimoPage] = useState(1);
-  const [emprestimoPerPage, setEmprestimoPerPage] = useState(10);
 
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<{
@@ -263,22 +184,7 @@ export function DashboardPage() {
     dataSolicitacao: string;
   } | null>(null);
 
-  useEffect(() => {
-    setSolicitacaoPerPage(dynamicPageSize);
-    setEmprestimoPerPage(dynamicPageSize);
-  }, [dynamicPageSize]);
-
-  const [solicitacaoSort, setSolicitacaoSort] = useState<{
-    key: string;
-    direction: 'asc' | 'desc';
-  }>({ key: 'solicitacao', direction: 'asc' });
-
-  const [emprestimoSort, setEmprestimoSort] = useState<{
-    key: string;
-    direction: 'asc' | 'desc';
-  }>({ key: 'devolucao', direction: 'asc' });
-
-  const solicitacoesProcessadas = useMemo(() => {
+  const solicitacoesProcessadas = useMemo<SolicitacaoDisplay[]>(() => {
     if (!solicitacoes.data) return [];
     return solicitacoes.data.map((s) => ({
       id: s.id,
@@ -291,33 +197,7 @@ export function DashboardPage() {
     }));
   }, [solicitacoes.data]);
 
-  const sortedSolicitacoes = useMemo(() => {
-    const items = [...solicitacoesProcessadas];
-    items.sort((a, b) => {
-      const key = solicitacaoSort.key as keyof SolicitacaoDisplay;
-
-      if (key === 'solicitacao') {
-        return solicitacaoSort.direction === 'asc'
-          ? a.solicitacao.getTime() - b.solicitacao.getTime()
-          : b.solicitacao.getTime() - a.solicitacao.getTime();
-      }
-
-      const valA = a[key] ?? '';
-      const valB = b[key] ?? '';
-
-      if (valA < valB) return solicitacaoSort.direction === 'asc' ? -1 : 1;
-      if (valA > valB) return solicitacaoSort.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return items;
-  }, [solicitacoesProcessadas, solicitacaoSort]);
-
-  const paginatedSolicitacoes = useMemo(() => {
-    const start = (solicitacaoPage - 1) * solicitacaoPerPage;
-    return sortedSolicitacoes.slice(start, start + solicitacaoPerPage);
-  }, [sortedSolicitacoes, solicitacaoPage, solicitacaoPerPage]);
-
-  const emprestimosProcessados = useMemo(() => {
+  const emprestimosProcessados = useMemo<EmprestimoVencer[]>(() => {
     if (!emprestimos.data) return [];
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
@@ -328,7 +208,6 @@ export function DashboardPage() {
         dataDevolucao.setHours(0, 0, 0, 0);
 
         let statusVencimento: EmprestimoVencer['statusVencimento'] = 'ativo';
-
         if (e.statusEmprestimo === 'ATRASADO') {
           statusVencimento = 'atrasado';
         } else if (dataDevolucao.getTime() < hoje.getTime()) {
@@ -353,33 +232,12 @@ export function DashboardPage() {
       .filter((item) => item.statusVencimento !== 'ativo');
   }, [emprestimos.data, i18n.language]);
 
-  const sortedEmprestimos = useMemo(() => {
-    const items = [...emprestimosProcessados];
-    items.sort((a, b) => {
-      const key = emprestimoSort.key as keyof EmprestimoVencer;
-      if (key === 'devolucao') {
-        const dateA = new Date(a.devolucao.split('/').reverse().join('-'));
-        const dateB = new Date(b.devolucao.split('/').reverse().join('-'));
-        return emprestimoSort.direction === 'asc'
-          ? dateA.getTime() - dateB.getTime()
-          : dateB.getTime() - dateA.getTime();
-      }
-      if (a[key] < b[key]) return emprestimoSort.direction === 'asc' ? -1 : 1;
-      if (a[key] > b[key]) return emprestimoSort.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return items;
-  }, [emprestimosProcessados, emprestimoSort]);
-
-  const paginatedEmprestimos = useMemo(() => {
-    const start = (emprestimoPage - 1) * emprestimoPerPage;
-    return sortedEmprestimos.slice(start, start + emprestimoPerPage);
-  }, [sortedEmprestimos, emprestimoPage, emprestimoPerPage]);
+  const requestsPagination = useClientPagination(solicitacoesProcessadas);
+  const overduePagination = useClientPagination(emprestimosProcessados);
 
   const statusChartData = useMemo(() => {
     const data = statsGerenciais.data;
     if (!data) return [];
-
     return [
       { name: t('chart.status.active'), total: data.emprestimosAtivos },
       { name: t('chart.status.overdue'), total: data.emprestimosAtrasados },
@@ -389,40 +247,65 @@ export function DashboardPage() {
     ].filter((item) => item.total > 0);
   }, [statsGerenciais.data, t]);
 
+  const filteredMonthly = useMemo(() => {
+    const src = emprestimosPorMes.data ?? [];
+    if (period === 'ytd') {
+      const year = new Date().getFullYear();
+      return src.filter(
+        (item) => new Date(`${item.mes}T00:00:00`).getFullYear() === year,
+      );
+    }
+    if (period === 'custom') {
+      if (!customRange.start || !customRange.end) return src;
+      const start = new Date(`${customRange.start}T00:00:00`);
+      const end = new Date(`${customRange.end}T23:59:59`);
+      return src.filter((item) => {
+        const date = new Date(`${item.mes}T00:00:00`);
+        return date >= start && date <= end;
+      });
+    }
+    return src.slice(-PERIOD_MONTHS[period]);
+  }, [emprestimosPorMes.data, period, customRange]);
+
   const monthlyChartData = useMemo(
     () =>
-      (emprestimosPorMes.data ?? []).map((item) => ({
-        mes: new Date(`${item.mes}T00:00:00`).toLocaleDateString(i18n.language, {
-          month: 'short',
-          year: '2-digit',
-        }),
+      filteredMonthly.map((item) => ({
+        mes: new Date(`${item.mes}T00:00:00`).toLocaleDateString(
+          i18n.language,
+          { month: 'short', year: '2-digit' },
+        ),
         total: item.total,
       })),
-    [emprestimosPorMes.data, i18n.language],
+    [filteredMonthly, i18n.language],
+  );
+
+  const loansSparkline = useMemo(
+    () => (emprestimosPorMes.data ?? []).map((item) => item.total).slice(-8),
+    [emprestimosPorMes.data],
   );
 
   const topBooksChartData = useMemo(
     () =>
-      (topLivros.data ?? []).slice(0, 10).map((item) => ({
-        livro: item.titulo.length > 18 ? `${item.titulo.slice(0, 18)}...` : item.titulo,
+      (topLivros.data ?? []).slice(0, 5).map((item) => ({
+        livro:
+          item.titulo.length > 18 ? `${item.titulo.slice(0, 18)}…` : item.titulo,
         total: item.totalEmprestimos,
       })),
     [topLivros.data],
   );
 
   const dueStatusChartData = useMemo(() => {
-    const atrasados = sortedEmprestimos.filter(
+    const atrasados = emprestimosProcessados.filter(
       (item) => item.statusVencimento === 'atrasado',
     ).length;
-    const venceHoje = sortedEmprestimos.filter(
+    const venceHoje = emprestimosProcessados.filter(
       (item) => item.statusVencimento === 'vence-hoje',
     ).length;
-
     return [
       { name: t('chart.due.overdue'), total: atrasados },
       { name: t('chart.due.due_today'), total: venceHoje },
     ].filter((item) => item.total > 0);
-  }, [sortedEmprestimos, t]);
+  }, [emprestimosProcessados, t]);
 
   const analyticsFingerprint = useMemo<AnalyticsFingerprint | null>(() => {
     const data = statsGerenciais.data;
@@ -450,98 +333,175 @@ export function DashboardPage() {
     tables: tablesFingerprint,
   });
 
+  const tablesAlert: DashboardTablesAlert = useMemo(() => {
+    const pending = statsGerenciais.data?.solicitacoesPendentes ?? 0;
+    const overdue = statsGerenciais.data?.emprestimosAtrasados ?? 0;
+    if (pending > 0) return 'requests';
+    if (overdue > 0) return 'overdue';
+    return 'none';
+  }, [statsGerenciais.data]);
+
   const statusChartTotal = useMemo(
     () => statusChartData.reduce((sum, item) => sum + item.total, 0),
     [statusChartData],
   );
-
   const monthlyChartTotal = useMemo(
     () => monthlyChartData.reduce((sum, item) => sum + item.total, 0),
     [monthlyChartData],
   );
-
   const topBooksChartTotal = useMemo(
     () => topBooksChartData.reduce((sum, item) => sum + item.total, 0),
     [topBooksChartData],
   );
-
   const dueStatusChartTotal = useMemo(
     () => dueStatusChartData.reduce((sum, item) => sum + item.total, 0),
     [dueStatusChartData],
   );
 
   const [isRefreshingAnalytics, setIsRefreshingAnalytics] = useState(false);
-
   const isAnalyticsLoading =
     statsGerenciais.isLoading ||
     topLivros.isLoading ||
     emprestimosPorMes.isLoading;
+  const [refreshedAt, setRefreshedAt] = useState<Date>(() => new Date());
 
   const handleRefreshAnalytics = async () => {
     if (isRefreshingAnalytics) return;
     setIsRefreshingAnalytics(true);
+    const startedAt = Date.now();
     try {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['dashboard-gerencial-stats'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['dashboard-gerencial-stats'],
+        }),
         queryClient.invalidateQueries({ queryKey: ['dashboard-top-livros'] }),
-        queryClient.invalidateQueries({ queryKey: ['dashboard-emprestimos-por-mes'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['dashboard-emprestimos-por-mes'],
+        }),
       ]);
+      setRefreshedAt(new Date());
     } finally {
-      setIsRefreshingAnalytics(false);
+      // Hold the spin a beat even when the cache resolves instantly.
+      const MIN_SPIN_MS = 650;
+      const remaining = Math.max(0, MIN_SPIN_MS - (Date.now() - startedAt));
+      window.setTimeout(() => setIsRefreshingAnalytics(false), remaining);
     }
   };
 
-  const handleExportCsv = () => {
-    const headerIndicator = t('export.csv.header.indicator');
-    const headerValue = t('export.csv.header.value');
-    const rows: Array<Record<string, string | number>> = [];
-
+  const buildDashboardReport = (): DashboardReport => {
+    const indicators: ReportTable = {
+      name: t('export.section.indicators', { defaultValue: 'Indicadores' }),
+      columns: [t('export.csv.header.indicator'), t('export.csv.header.value')],
+      rows: [],
+    };
+    if (statsData) {
+      indicators.rows.push(
+        [
+          t('card.total_books', { defaultValue: 'Total de Livros' }),
+          statsData.livros,
+        ],
+        [
+          t('card.total_students', { defaultValue: 'Total de Alunos' }),
+          statsData.alunos,
+        ],
+      );
+    }
     if (statsGerenciais.data) {
-      const indicators: Array<[string, number]> = [
-        [t('export.csv.row.active_loans'), statsGerenciais.data.emprestimosAtivos],
-        [t('export.csv.row.overdue_loans'), statsGerenciais.data.emprestimosAtrasados],
-        [t('export.csv.row.completed_loans'), statsGerenciais.data.emprestimosConcluidos],
-        [t('export.csv.row.avg_return_days'), statsGerenciais.data.mediaDiasDevolucao],
-        [t('export.csv.row.pending_requests'), statsGerenciais.data.solicitacoesPendentes],
-        [t('export.csv.row.waiting_reservations'), statsGerenciais.data.reservasAguardando],
-      ];
-
-      indicators.forEach(([label, value]) => {
-        rows.push({ [headerIndicator]: label, [headerValue]: value });
-      });
+      const g = statsGerenciais.data;
+      indicators.rows.push(
+        [t('export.csv.row.active_loans'), g.emprestimosAtivos],
+        [t('export.csv.row.overdue_loans'), g.emprestimosAtrasados],
+        [t('export.csv.row.completed_loans'), g.emprestimosConcluidos],
+        [t('export.csv.row.avg_return_days'), g.mediaDiasDevolucao],
+        [t('export.csv.row.pending_requests'), g.solicitacoesPendentes],
+        [t('export.csv.row.waiting_reservations'), g.reservasAguardando],
+      );
     }
 
-    (topLivros.data ?? []).forEach((item) => {
-      rows.push({
-        [headerIndicator]: `${t('export.csv.row.book_prefix')}: ${item.titulo}`,
-        [headerValue]: item.totalEmprestimos,
-      });
+    const topBooks: ReportTable = {
+      name: t('chart.top_books', { defaultValue: 'Top Livros' }),
+      columns: [
+        t('table.column.book', { defaultValue: 'Livro' }),
+        t('export.column.author', { defaultValue: 'Autor' }),
+        t('export.column.loans', { defaultValue: 'Empréstimos' }),
+      ],
+      rows: (topLivros.data ?? []).map((item) => [
+        item.titulo,
+        item.autor ?? '—',
+        item.totalEmprestimos,
+      ]),
+    };
+
+    const byMonth: ReportTable = {
+      name: t('chart.loans_per_month', { defaultValue: 'Empréstimos por Mês' }),
+      columns: [
+        t('export.column.month', { defaultValue: 'Mês' }),
+        t('chart.total_label', { defaultValue: 'Total' }),
+      ],
+      rows: (emprestimosPorMes.data ?? []).map((item) => [
+        new Date(`${item.mes}T00:00:00`).toLocaleDateString(i18n.language, {
+          month: 'short',
+          year: 'numeric',
+        }),
+        item.total,
+      ]),
+    };
+
+    const generatedAt = new Date().toLocaleString(i18n.language, {
+      dateStyle: 'short',
+      timeStyle: 'short',
     });
 
-    (emprestimosPorMes.data ?? []).forEach((item) => {
-      rows.push({
-        [headerIndicator]: `${t('export.csv.row.month_prefix')}: ${item.mes}`,
-        [headerValue]: item.total,
+    return {
+      title: t('export.report.title', {
+        defaultValue: 'Relatório do Dashboard',
+      }),
+      generatedAtLabel: t('export.report.generated_at', {
+        date: generatedAt,
+        defaultValue: `Gerado em ${generatedAt}`,
+      }),
+      tables: [indicators, topBooks, byMonth].filter(
+        (table) => table.rows.length > 0,
+      ),
+    };
+  };
+
+  const handleExport = async (format: 'xlsx' | 'pdf') => {
+    if (isExporting) return;
+    setIsExporting(true);
+    try {
+      const report = buildDashboardReport();
+      if (report.tables.length === 0) {
+        addToast({
+          type: 'info',
+          title: t('export.empty.title', { defaultValue: 'Nada para exportar' }),
+          description: t('export.empty.description', {
+            defaultValue:
+              'Ainda não há dados disponíveis para gerar o relatório.',
+          }),
+        });
+        return;
+      }
+      const stamp = new Date().toISOString().slice(0, 10);
+      const filename = `lumilivre-dashboard-${stamp}.${format}`;
+      if (format === 'xlsx') {
+        await exportDashboardXlsx(report, filename);
+      } else {
+        await exportDashboardPdf(report, filename);
+      }
+      setIsExportOpen(false);
+    } catch (error) {
+      console.error('Erro ao exportar dashboard:', error);
+      addToast({
+        type: 'error',
+        title: t('export.error.title', { defaultValue: 'Falha ao exportar' }),
+        description: t('export.error.description', {
+          defaultValue: 'Não foi possível gerar o arquivo. Tente novamente.',
+        }),
       });
-    });
-
-    downloadCsv('dashboard-gerencial.csv', rows);
-  };
-
-  const requestSolicitacaoSort = (key: string) => {
-    const direction =
-      solicitacaoSort.key === key && solicitacaoSort.direction === 'asc'
-        ? 'desc'
-        : 'asc';
-    setSolicitacaoSort({ key, direction });
-  };
-
-  const requestEmprestimoSort = (key: string) => {
-    const direction =
-      emprestimoSort.key === key && emprestimoSort.direction === 'asc'
-        ? 'desc'
-        : 'asc';
-    setEmprestimoSort({ key, direction });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleAbrirDetalhesEmprestimo = (item: EmprestimoVencer) => {
@@ -556,7 +516,6 @@ export function DashboardPage() {
     });
     setIsLoanModalOpen(true);
   };
-
   const handleFecharDetalhesEmprestimo = (foiAtualizado?: boolean) => {
     setIsLoanModalOpen(false);
     if (foiAtualizado) {
@@ -564,7 +523,6 @@ export function DashboardPage() {
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     }
   };
-
   const handleAbrirDetalhesSolicitacao = (item: SolicitacaoDisplay) => {
     setSelectedRequest({
       id: item.id,
@@ -576,7 +534,6 @@ export function DashboardPage() {
     });
     setIsRequestModalOpen(true);
   };
-
   const handleFecharDetalhesSolicitacao = (foiProcessado?: boolean) => {
     setIsRequestModalOpen(false);
     if (foiProcessado) {
@@ -586,437 +543,639 @@ export function DashboardPage() {
     }
   };
 
-  const getRowClass = (item: EmprestimoVencer) => {
-    const baseHover = 'hover:duration-0';
-    switch (item.statusVencimento) {
-      case 'atrasado':
-        return `bg-red-500/30 dark:bg-red-500/30 hover:bg-red-500/40 dark:hover:bg-red-500/40 ${baseHover}`;
-      case 'vence-hoje':
-        return `bg-yellow-300/25 dark:bg-yellow-300/25 hover:bg-yellow-300/40 dark:hover:bg-yellow-300/35 ${baseHover}`;
-      case 'ativo':
-      default:
-        return `hover:bg-gray-300 dark:hover:bg-gray-600 ${baseHover}`;
-    }
-  };
-
-  const solicitacoesColumns: ColumnDef<SolicitacaoDisplay>[] = [
-    {
-      key: 'aluno',
-      header: t('table.column.student'),
-      width: '30%',
-      render: (item) => (
-        <span className="text-gray-700 dark:text-gray-300 truncate">
-          {formatarNome(item.aluno)}
-        </span>
-      ),
-    },
-    {
-      key: 'livro',
-      header: t('table.column.book'),
-      width: '40%',
-      render: (item) => (
-        <span className="text-gray-700 dark:text-gray-300 truncate">
-          {item.livro}
-        </span>
-      ),
-    },
-    {
-      key: 'solicitacao',
-      header: t('table.column.requested_at'),
-      width: '16%',
-      render: (item) => (
-        <span className="dark:text-white font-bold">
-          {item.solicitacao.toLocaleDateString(i18n.language)}
-        </span>
-      ),
-    },
-    {
-      key: 'acoes',
-      header: t('common:actions'),
-      width: '14%',
-      isSortable: false,
-      render: (item) => (
-        <button
-          onClick={() => handleAbrirDetalhesSolicitacao(item)}
-          className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
-        >
-          {t('common:button.details')}
-        </button>
-      ),
-    },
-  ];
-
-  const emprestimosColumns: ColumnDef<EmprestimoVencer>[] = [
-    {
-      key: 'aluno',
-      header: t('table.column.student'),
-      width: '30%',
-      render: (item) => (
-        <span className="text-gray-700 dark:text-gray-300 truncate">
-          {formatarNome(item.aluno)}
-        </span>
-      ),
-    },
-    {
-      key: 'livro',
-      header: t('table.column.book'),
-      width: '40%',
-      render: (item) => (
-        <span className="text-gray-700 dark:text-gray-300 truncate">
-          {item.livro}
-        </span>
-      ),
-    },
-    {
-      key: 'devolucao',
-      header: t('table.column.due_at'),
-      width: '16%',
-      render: (item) => (
-        <span className="dark:text-white font-bold">{item.devolucao}</span>
-      ),
-    },
-    {
-      key: 'acoes',
-      header: t('common:actions'),
-      width: '14%',
-      isSortable: false,
-      render: (item) => (
-        <button
-          onClick={() => handleAbrirDetalhesEmprestimo(item)}
-          className="bg-lumi-label text-white text-xs font-bold py-1 px-3 rounded hover:bg-opacity-75 hover:scale-105 shadow-md select-none"
-        >
-          {t('common:button.details')}
-        </button>
-      ),
-    },
-  ];
-
-  const dashboardHeaderClass =
-    'h-8 bg-white dark:bg-dark-card border-gray-200 dark:border-gray-700 shadow-sm';
-  const dashboardHeaderTextClass = 'text-gray-800 dark:text-white';
-  const dashboardHoverClass = 'hover:bg-gray-200 dark:hover:bg-gray-700';
+  const todayLabel = useMemo(() => {
+    const today = new Date();
+    return today
+      .toLocaleDateString(i18n.language, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+      .replace('.', '');
+  }, [i18n.language]);
 
   return (
-    <div className="flex flex-col h-full will-change-transform">
+    <section className="space-y-6">
       <ModalLoanDetails
         isOpen={isLoanModalOpen}
         onClose={handleFecharDetalhesEmprestimo}
         emprestimo={selectedLoan}
       />
-
       <LoanModalRequest
         isOpen={isRequestModalOpen}
         onClose={handleFecharDetalhesSolicitacao}
         solicitacao={selectedRequest}
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 shrink-0">
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
+            {t('page.eyebrow', { defaultValue: 'Visão geral' })} · {todayLabel}
+          </div>
+          <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
+            {t('page.title', { defaultValue: 'Dashboard' })}
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {t('page.subtitle', {
+              defaultValue: 'Visão geral da sua biblioteca ao vivo.',
+            })}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 print:hidden">
+          <PeriodDropdown
+            value={period}
+            onChange={setPeriod}
+            customRange={customRange}
+            onCustomRangeChange={setCustomRange}
+          />
+          <button
+            type="button"
+            onClick={handleRefreshAnalytics}
+            disabled={isRefreshingAnalytics || isAnalyticsLoading}
+            aria-label={t('section.management.refresh.aria')}
+            title={t('section.management.refresh')}
+            className="group h-9 w-9 rounded-lg bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-lumi-primary hover:text-lumi-primary active:scale-95 inline-flex items-center justify-center transition-[transform,color,border-color] duration-200 disabled:opacity-50"
+          >
+            <RefreshCw
+              className={`h-4 w-4 transition-transform duration-300 ease-out ${
+                isRefreshingAnalytics
+                  ? 'animate-spin-smooth'
+                  : 'group-hover:-rotate-180'
+              }`}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsExportOpen(true)}
+            className="h-9 px-3.5 rounded-lg bg-lumi-gradient text-white text-sm font-semibold inline-flex items-center gap-2 hover:shadow-glow"
+          >
+            <FileDown className="h-4 w-4" /> {t('button.export')}
+          </button>
+        </div>
+      </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           to="/admin/books"
           Icon={BookIcon}
           title={t('stat.books')}
           value={statsData?.livros ?? 0}
+          tone="lumi"
           isLoading={isStatsLoading}
           hasError={!!statsError}
           animate={shouldAnimateStats}
+          sparkline={SPARK_BOOKS}
         />
-
         <StatCard
           to="/admin/students"
           Icon={UsersIcon}
           title={t('stat.students')}
           value={statsData?.alunos ?? 0}
+          tone="blue"
           isLoading={isStatsLoading}
           hasError={!!statsError}
           animate={shouldAnimateStats}
+          sparkline={SPARK_STUDENTS}
         />
-
         <StatCard
           to="/admin/loans"
           Icon={LoansIcon}
           title={t('stat.loans')}
           value={statsData?.emprestimosAtivos ?? 0}
+          tone="violet"
           isLoading={isStatsLoading}
           hasError={!!statsError}
           animate={shouldAnimateStats}
+          sparkline={loansSparkline}
+          // badge={
+          //   <span className="pill pill-purple">
+          //     <span className="dot" />
+          //     {t('chart.status.active')}
+          //   </span>
+          // }
         />
-
         <StatCard
           to="/admin/loans?filtro=atrasados"
           Icon={AlertIcon}
           title={t('stat.overdue')}
           value={statsData?.atrasados ?? 0}
-          variant="danger"
+          tone="danger"
           isLoading={isStatsLoading}
           hasError={!!statsError}
           animate={shouldAnimateStats}
+          sparkline={SPARK_OVERDUE}
         />
       </div>
 
-      <div className="flex justify-end mb-4 shrink-0 print:hidden">
+      {/* View toggle */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <DashboardViewToggle
           value={view}
           onChange={setView}
           analyticsHasNews={analyticsHasNews}
           tablesHasNews={tablesHasNews}
+          tablesAlert={tablesAlert}
         />
+        <div className="text-xs text-gray-500 dark:text-gray-400">
+          <RefreshedAgo
+            at={refreshedAt}
+            locale={i18n.language}
+            label={t('refreshed_label', { defaultValue: 'Atualizado' })}
+          />
+        </div>
       </div>
 
-      <div
-        data-dashboard-block="analytics"
-        className={`bg-white dark:bg-dark-card rounded-2xl shadow-md p-4 md:p-6 mb-6 shrink-0 ${
-          view === 'analytics' ? 'block animate-fade-in' : 'hidden'
-        }`}
-      >
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-          <div className="flex items-start gap-3">
-            <span
-              aria-hidden="true"
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lumi-primary/10 dark:bg-lumi-primary/25 text-lumi-primary dark:text-lumi-label"
-            >
-              <ManagementIcon />
-            </span>
-            <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white truncate">
-                {t('section.management')}
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t('section.management.subtitle')}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 print:hidden">
-            <PeriodSelectDisabled
-              ariaLabel={t('section.management.period.aria')}
-              defaultLabel={t('section.management.period.30d')}
-              tooltip={t('feature_coming_soon', { ns: 'common' })}
-            />
-            <button
-              type="button"
-              onClick={handleRefreshAnalytics}
-              disabled={isRefreshingAnalytics || isAnalyticsLoading}
-              aria-label={t('section.management.refresh.aria')}
-              title={
-                isRefreshingAnalytics
-                  ? t('section.management.refreshing')
-                  : t('section.management.refresh')
+      {/* Slide stage */}
+      <SlideStage
+        className="min-h-0"
+        trackClassName="items-stretch"
+        itemClassName=""
+        currentIndex={view === 'analytics' ? 0 : 1}
+        viewDataAttribute="dashboard-block"
+        viewDataValues={['analytics', 'tables']}
+        views={[
+          <div
+            key="analytics"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-4 pr-1"
+          >
+            <ChartCard
+              eyebrow={t('chart.general_distribution_eyebrow', {
+                defaultValue: 'Distribuição geral',
+              })}
+              title={t('chart.general_distribution_title', {
+                defaultValue: 'Status dos Empréstimos',
+              })}
+              badge={
+                statusChartTotal > 0 ? (
+                  <span className="pill pill-purple">
+                    <span className="dot" />
+                    {statusChartTotal}
+                  </span>
+                ) : undefined
               }
-              className="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              isLoading={isAnalyticsLoading}
+              isEmpty={statusChartData.length === 0}
+              emptyMessage={t('chart.no_data')}
             >
-              <RefreshIcon
-                className={isRefreshingAnalytics ? 'animate-spin' : ''}
-              />
-            </button>
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              className="inline-flex items-center gap-1.5 bg-lumi-primary text-white text-xs sm:text-sm font-semibold py-2 px-3 rounded-lg hover:bg-opacity-90 hover:shadow-md transition-all"
-            >
-              <CsvIcon />
-              <span className="hidden sm:inline">{t('button.export_csv')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={printDashboardPdf}
-              className="inline-flex items-center gap-1.5 bg-gray-800 text-white text-xs sm:text-sm font-semibold py-2 px-3 rounded-lg hover:bg-gray-700 dark:bg-gray-200 dark:text-gray-900 dark:hover:bg-white hover:shadow-md transition-all"
-            >
-              <PdfIcon />
-              <span className="hidden sm:inline">{t('button.export_pdf')}</span>
-            </button>
-          </div>
-        </header>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart margin={{ left: 4, right: 4 }}>
+                  <Pie
+                    data={statusChartData}
+                    dataKey="total"
+                    nameKey="name"
+                    cx="65%"
+                    cy="50%"
+                    innerRadius={42}
+                    outerRadius={66}
+                    paddingAngle={2}
+                  >
+                    {statusChartData.map((_, index) => (
+                      <Cell
+                        key={`status-${index}`}
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend
+                    layout="vertical"
+                    verticalAlign="middle"
+                    align="left"
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: 11, fontWeight: 600 }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartCard>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-4">
-          <ChartCard
-            title={t('chart.general_distribution')}
-            total={statusChartTotal}
-            totalLabel={t('chart.total_label')}
-            isLoading={isAnalyticsLoading}
-            isEmpty={statusChartData.length === 0}
-            emptyMessage={t('chart.no_data')}
+            <ChartCard
+              eyebrow={t('chart.activity_eyebrow', { defaultValue: 'Atividade' })}
+              title={t('chart.loans_per_month')}
+              badge={
+                monthlyChartTotal > 0 ? (
+                  <span className="pill pill-info">
+                    <span className="dot" />
+                    {monthlyChartTotal}
+                  </span>
+                ) : undefined
+              }
+              isLoading={isAnalyticsLoading}
+              isEmpty={monthlyChartData.length === 0}
+              emptyMessage={t('chart.no_data')}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyChartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+                  <YAxis allowDecimals={false} width={32} />
+                  <Tooltip />
+                  <Bar dataKey="total" fill="#1D6FBF" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard
+              eyebrow={t('chart.catalog_eyebrow', { defaultValue: 'Catálogo' })}
+              title={t('chart.top_books')}
+              badge={
+                topBooksChartTotal > 0 ? (
+                  <span className="pill pill-purple">
+                    <span className="dot" />
+                    top 5
+                  </span>
+                ) : undefined
+              }
+              isLoading={isAnalyticsLoading}
+              isEmpty={topBooksChartData.length === 0}
+              emptyMessage={t('chart.no_data')}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topBooksChartData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" allowDecimals={false} hide />
+                  <YAxis
+                    type="category"
+                    dataKey="livro"
+                    width={90}
+                    tick={{ fontSize: 11 }}
+                  />
+                  <Tooltip />
+                  <Bar dataKey="total" fill="#762075" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard
+              eyebrow={t('chart.attention_eyebrow', { defaultValue: 'Atenção' })}
+              title={t('chart.overdue_and_due', {
+                defaultValue: 'Atrasos & Vencendo',
+              })}
+              badge={
+                dueStatusChartTotal > 0 ? (
+                  <span className="pill pill-danger">
+                    <span className="dot" />
+                    {dueStatusChartTotal}
+                  </span>
+                ) : undefined
+              }
+              isLoading={isAnalyticsLoading}
+              isEmpty={dueStatusChartData.length === 0}
+              emptyMessage={t('chart.no_overdue')}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={dueStatusChartData}
+                    dataKey="total"
+                    nameKey="name"
+                    outerRadius={70}
+                    label
+                  >
+                    {dueStatusChartData.map((_, index) => (
+                      <Cell
+                        key={`due-${index}`}
+                        fill={index === 0 ? '#dc2626' : '#ca8a04'}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartCard>
+          </div>,
+
+          <div
+            key="tables"
+            className="grid grid-cols-1 xl:grid-cols-2 gap-4 pl-1"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statusChartData}
-                  dataKey="total"
-                  nameKey="name"
-                  innerRadius={45}
-                  outerRadius={70}
-                  paddingAngle={2}
-                >
-                  {statusChartData.map((_, index) => (
-                    <Cell
-                      key={`status-${index}`}
-                      fill={CHART_COLORS[index % CHART_COLORS.length]}
-                    />
+            <DashboardTableCard
+              title={t('section.requests')}
+              subtitle={t('section.requests.subtitle', {
+                defaultValue: 'Aguardam aprovação do bibliotecário',
+              })}
+              badge={
+                solicitacoesProcessadas.length > 0 ? (
+                  <span className="pill pill-warn">
+                    <span className="dot" />
+                    {solicitacoesProcessadas.length}{' '}
+                    {t('open', { defaultValue: 'abertas' })}
+                  </span>
+                ) : (
+                  <span className="pill pill-success">
+                    <span className="dot" />
+                    0
+                  </span>
+                )
+              }
+              isLoading={solicitacoes.isLoading}
+              error={solicitacoes.error ? t('error.load') : null}
+              empty={solicitacoesProcessadas.length === 0}
+              emptyMessage={t('table.empty.requests')}
+              footer={
+                solicitacoesProcessadas.length > 0 ? (
+                  <TableFooter
+                    viewMode="exception"
+                    pagination={{
+                      currentPage: requestsPagination.page,
+                      totalPages: requestsPagination.totalPages,
+                      itemsPerPage: requestsPagination.size,
+                      totalItems: requestsPagination.total,
+                    }}
+                    onPageChange={requestsPagination.setPage}
+                    onItemsPerPageChange={(size) => {
+                      requestsPagination.setSize(size);
+                      requestsPagination.setPage(1);
+                    }}
+                  />
+                ) : undefined
+              }
+            >
+              <table className="w-full text-sm">
+                <thead className="tbl-head-light text-[11px] font-bold uppercase">
+                  <tr>
+                    <th className="text-left px-5 py-3">
+                      {t('table.column.student')}
+                    </th>
+                    <th className="text-left px-5 py-3">
+                      {t('table.column.book')}
+                    </th>
+                    <th className="text-left px-5 py-3">
+                      {t('table.column.requested_at')}
+                    </th>
+                    <th className="text-right px-5 py-3">{t('actions', { ns: 'common' })}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requestsPagination.paged.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="border-t border-gray-100 dark:border-white/5 row-hover"
+                    >
+                      <td className="px-5 py-3 font-semibold dark:text-gray-200">
+                        {formatarNome(item.aluno)}
+                      </td>
+                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300 max-w-[240px] truncate">
+                        {item.livro}
+                      </td>
+                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300 font-mono text-xs">
+                        {item.solicitacao.toLocaleDateString(i18n.language)}
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDetalhesSolicitacao(item)}
+                          className="pill pill-purple hover:bg-lumi-primary hover:text-white"
+                        >
+                          {t('common:button.details')}
+                        </button>
+                      </td>
+                    </tr>
                   ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
+                </tbody>
+              </table>
+            </DashboardTableCard>
 
-          <ChartCard
-            title={t('chart.loans_per_month')}
-            total={monthlyChartTotal}
-            totalLabel={t('chart.total_label')}
-            isLoading={isAnalyticsLoading}
-            isEmpty={monthlyChartData.length === 0}
-            emptyMessage={t('chart.no_data')}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyChartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} width={32} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#0f766e" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          <ChartCard
-            title={t('chart.top_books')}
-            total={topBooksChartTotal}
-            totalLabel={t('chart.total_label')}
-            isLoading={isAnalyticsLoading}
-            isEmpty={topBooksChartData.length === 0}
-            emptyMessage={t('chart.no_data')}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topBooksChartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="livro" tick={{ fontSize: 10 }} interval={0} />
-                <YAxis allowDecimals={false} width={32} />
-                <Tooltip />
-                <Bar dataKey="total" fill="#762075" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
-
-          <ChartCard
-            title={t('chart.overdue')}
-            total={dueStatusChartTotal}
-            totalLabel={t('chart.total_label')}
-            isLoading={isAnalyticsLoading}
-            isEmpty={dueStatusChartData.length === 0}
-            emptyMessage={t('chart.no_overdue')}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={dueStatusChartData}
-                  dataKey="total"
-                  nameKey="name"
-                  outerRadius={70}
-                  label
-                >
-                  {dueStatusChartData.map((_, index) => (
-                    <Cell
-                      key={`due-${index}`}
-                      fill={index === 0 ? '#dc2626' : '#ca8a04'}
-                    />
+            <DashboardTableCard
+              title={t('section.overdue_due')}
+              subtitle={t('section.overdue_due.subtitle', {
+                defaultValue: 'Empréstimos ativos próximos da data limite',
+              })}
+              badge={
+                emprestimosProcessados.length > 0 ? (
+                  <span className="pill pill-danger">
+                    <span className="dot" />
+                    {emprestimosProcessados.length}{' '}
+                    {t('items', { defaultValue: 'itens' })}
+                  </span>
+                ) : (
+                  <span className="pill pill-success">
+                    <span className="dot" />
+                    0
+                  </span>
+                )
+              }
+              isLoading={emprestimos.isLoading}
+              error={emprestimos.error ? t('error.load') : null}
+              empty={emprestimosProcessados.length === 0}
+              emptyMessage={t('table.empty.loans')}
+              footer={
+                emprestimosProcessados.length > 0 ? (
+                  <TableFooter
+                    viewMode="exception"
+                    pagination={{
+                      currentPage: overduePagination.page,
+                      totalPages: overduePagination.totalPages,
+                      itemsPerPage: overduePagination.size,
+                      totalItems: overduePagination.total,
+                    }}
+                    onPageChange={overduePagination.setPage}
+                    onItemsPerPageChange={(size) => {
+                      overduePagination.setSize(size);
+                      overduePagination.setPage(1);
+                    }}
+                  />
+                ) : undefined
+              }
+            >
+              <table className="w-full text-sm">
+                <thead className="tbl-head-light text-[11px] font-bold uppercase">
+                  <tr>
+                    <th className="text-left px-5 py-3">
+                      {t('table.column.student')}
+                    </th>
+                    <th className="text-left px-5 py-3">
+                      {t('table.column.book')}
+                    </th>
+                    <th className="text-left px-5 py-3">
+                      {t('table.column.due_at')}
+                    </th>
+                    <th className="text-right px-5 py-3">{t('actions', { ns: 'common' })}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overduePagination.paged.map((item) => (
+                    <tr
+                      key={item.id}
+                      className="border-t border-gray-100 dark:border-white/5 row-hover"
+                    >
+                      <td className="px-5 py-3 font-semibold dark:text-gray-200">
+                        {formatarNome(item.aluno)}
+                      </td>
+                      <td className="px-5 py-3 text-gray-600 dark:text-gray-300 max-w-[240px] truncate">
+                        {item.livro}
+                      </td>
+                      <td className="px-5 py-3">
+                        {item.statusVencimento === 'atrasado' ? (
+                          <span className="pill pill-danger">
+                            <span className="dot" />
+                            {item.devolucao}
+                          </span>
+                        ) : (
+                          <span className="pill pill-warn">
+                            <span className="dot" />
+                            {item.devolucao}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => handleAbrirDetalhesEmprestimo(item)}
+                          className="pill pill-purple hover:bg-lumi-primary hover:text-white"
+                        >
+                          {t('common:button.details')}
+                        </button>
+                      </td>
+                    </tr>
                   ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        </div>
-      </div>
+                </tbody>
+              </table>
+            </DashboardTableCard>
+          </div>,
+        ]}
+      />
 
-      <div
-        ref={dashboardContainerRef}
-        data-dashboard-block="tables"
-        className={`flex-grow grid-cols-1 lg:grid-cols-2 gap-6 min-h-0 ${
-          view === 'tables' ? 'grid animate-fade-in' : 'hidden'
-        }`}
+      <Modal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        maxWidth="max-w-md"
       >
-        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[350px] md:min-h-0 will-change-transform overflow-hidden">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
-            {t('section.requests')}
-          </h3>
+        <Modal.Header title={t('export.modal.title')} />
+        <Modal.Body className="space-y-3">
+          <p className="-mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {t('export.modal.subtitle')}
+          </p>
+          <button
+            type="button"
+            onClick={() => handleExport('xlsx')}
+            disabled={isExporting}
+            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 p-4 text-left transition hover:border-lumi-primary hover:bg-lumi-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10">
+              <FileSpreadsheet className="h-5 w-5" />
+            </span>
+            <span>
+              <span className="block font-semibold text-gray-800 dark:text-gray-100">
+                {t('export.option.csv.title')}
+              </span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">
+                {t('export.option.csv.desc')}
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleExport('pdf')}
+            disabled={isExporting}
+            className="flex w-full items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 p-4 text-left transition hover:border-lumi-primary hover:bg-lumi-primary/5 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-100 text-red-600 dark:bg-red-500/10">
+              <FileDown className="h-5 w-5" />
+            </span>
+            <span>
+              <span className="block font-semibold text-gray-800 dark:text-gray-100">
+                {t('export.option.pdf.title')}
+              </span>
+              <span className="block text-xs text-gray-500 dark:text-gray-400">
+                {t('export.option.pdf.desc')}
+              </span>
+            </span>
+          </button>
+        </Modal.Body>
+      </Modal>
+    </section>
+  );
+}
 
-          <DataTable
-            data={paginatedSolicitacoes}
-            columns={solicitacoesColumns}
-            isLoading={solicitacoes.isLoading}
-            error={solicitacoes.error ? t('error.load') : null}
-            sortConfig={solicitacaoSort}
-            onSort={requestSolicitacaoSort}
-            getRowKey={(item) => item.id}
-            emptyStateMessage={t('table.empty.requests')}
-            headerClassName={dashboardHeaderClass}
-            headerTextClassName={dashboardHeaderTextClass}
-            hoverHeaderClassName={dashboardHoverClass}
-            hasRoundedBorderTop={false}
-            minWidth="min-w-[600px]"
-          />
+interface DashboardTableCardProps {
+  title: string;
+  subtitle: string;
+  badge?: React.ReactNode;
+  isLoading: boolean;
+  error: string | null;
+  empty: boolean;
+  emptyMessage: string;
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+}
 
-          <TableFooter
-            viewMode={'exception'}
-            className="h-8"
-            selectClassName="h-6"
-            pagination={{
-              currentPage: solicitacaoPage,
-              totalPages: Math.ceil(
-                sortedSolicitacoes.length / solicitacaoPerPage,
-              ),
-              itemsPerPage: solicitacaoPerPage,
-              totalItems: sortedSolicitacoes.length,
-            }}
-            onPageChange={setSolicitacaoPage}
-            onItemsPerPageChange={(size) => {
-              setSolicitacaoPerPage(size);
-              setSolicitacaoPage(1);
-            }}
-          />
+function DashboardTableCard({
+  title,
+  subtitle,
+  badge,
+  isLoading,
+  error,
+  empty,
+  emptyMessage,
+  footer,
+  children,
+}: DashboardTableCardProps) {
+  const showContent = !isLoading && !error && !empty;
+  return (
+    <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden flex flex-col">
+      <div className="px-5 py-4 border-b border-gray-200/70 dark:border-white/5 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="font-display font-bold text-lg text-gray-900 dark:text-white truncate">
+            {title}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            {subtitle}
+          </div>
         </div>
-
-        <div className="bg-white dark:bg-dark-card p-4 md:p-6 rounded-lg shadow-md flex flex-col min-h-[350px] md:min-h-0 will-change-transform overflow-hidden">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 shrink-0 select-none">
-            {t('section.overdue_due')}
-          </h3>
-
-          <DataTable
-            data={paginatedEmprestimos}
-            columns={emprestimosColumns}
-            isLoading={emprestimos.isLoading}
-            error={emprestimos.error ? t('error.load') : null}
-            sortConfig={emprestimoSort}
-            onSort={requestEmprestimoSort}
-            getRowKey={(item) => item.id}
-            getRowClass={getRowClass}
-            emptyStateMessage={t('table.empty.loans')}
-            headerClassName={dashboardHeaderClass}
-            headerTextClassName={dashboardHeaderTextClass}
-            hoverHeaderClassName={dashboardHoverClass}
-            hasRoundedBorderTop={false}
-            minWidth="min-w-[600px]"
-          />
-
-          <TableFooter
-            viewMode={'exception'}
-            className="h-8"
-            selectClassName="h-6"
-            pagination={{
-              currentPage: emprestimoPage,
-              totalPages: Math.ceil(
-                sortedEmprestimos.length / emprestimoPerPage,
-              ),
-              itemsPerPage: emprestimoPerPage,
-              totalItems: sortedEmprestimos.length,
-            }}
-            onPageChange={setEmprestimoPage}
-            onItemsPerPageChange={(size) => {
-              setEmprestimoPerPage(size);
-              setEmprestimoPage(1);
-            }}
-          />
-        </div>
+        {badge && <div className="shrink-0">{badge}</div>}
       </div>
+      <div className="tbl-scroll tbl-short flex-1">
+        {isLoading ? (
+          <div className="p-8 text-center text-sm text-gray-400">…</div>
+        ) : error ? (
+          <div className="p-8 text-center text-sm text-red-500">{error}</div>
+        ) : empty ? (
+          <div className="p-8 text-center text-sm text-gray-400">
+            {emptyMessage}
+          </div>
+        ) : (
+          children
+        )}
+      </div>
+      {showContent && footer}
     </div>
+  );
+}
+
+interface RefreshedAgoProps {
+  at: Date;
+  locale: string;
+  label: string;
+}
+
+/** Live "updated X ago" label. Keeps its own 1s ticker so the heavy dashboard
+ *  (and its charts) don't re-render every second. */
+function RefreshedAgo({ at, locale, label }: RefreshedAgoProps) {
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setTick((n) => n + 1), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const rtf = useMemo(
+    () => new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }),
+    [locale],
+  );
+
+  const seconds = Math.max(0, Math.round((Date.now() - at.getTime()) / 1000));
+  const relative =
+    seconds < 60
+      ? rtf.format(-seconds, 'second')
+      : seconds < 3600
+        ? rtf.format(-Math.floor(seconds / 60), 'minute')
+        : rtf.format(-Math.floor(seconds / 3600), 'hour');
+
+  return (
+    <>
+      {label} <span className="font-mono">{relative}</span>
+    </>
   );
 }
