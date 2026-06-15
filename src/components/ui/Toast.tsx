@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import CloseIcon from '../../assets/icons/close-sm.svg?react';
 import SuccessIcon from '../../assets/icons/success.svg?react';
@@ -20,6 +21,7 @@ interface ToastProps {
 }
 
 export function Toast({ message, onRemove }: ToastProps) {
+  const { t } = useTranslation('common');
   const [progress, setProgress] = useState(100);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -107,7 +109,10 @@ export function Toast({ message, onRemove }: ToastProps) {
       {/* Botão de Fechar */}
       <div className="flex pr-2">
         <button
+          type="button"
           onClick={() => onRemove(message.id)}
+          aria-label={t('close')}
+          title={t('close')}
           className="w-full rounded-lg p-2 flex items-start justify-center text-white/70 hover:text-white focus:outline-none mt-2"
         >
           <CloseIcon className="w-5 h-5 fill-current dark:text-white" />

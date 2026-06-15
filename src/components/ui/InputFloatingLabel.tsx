@@ -40,12 +40,12 @@ export function InputFloatingLabel({
       <input
         id={id}
         type={currentType}
-        className={`w-full pl-10 ${isPasswordType ? 'pr-10' : 'pr-4'} py-3.5 bg-transparent border-2 rounded-lg outline-none text-gray-800 dark:text-gray-100
+        className={`w-full pl-10 ${isPasswordType ? 'pr-10' : 'pr-4'} py-3.5 bg-transparent border-2 rounded-lg outline-none text-gray-800 dark:text-gray-100 transition-[border-color,box-shadow,color] duration-200 ease-out
           ${
             error
               ? 'border-red-500'
               : isFocused
-                ? 'border-lumi-primary dark:border-lumi-primary'
+                ? 'border-lumi-primary dark:border-lumi-primary shadow-[0_0_0_4px_rgba(118,32,117,0.12)] dark:shadow-[0_0_0_4px_rgba(201,100,197,0.15)]'
                 : 'border-gray-300 dark:border-gray-600'
           }
         `}
@@ -60,13 +60,16 @@ export function InputFloatingLabel({
         {...props}
       />
 
+      {/* Float driven purely by `transform` (top/left stay constant) so the
+          200ms transition interpolates a single matrix — switching `top`
+          between % and rem made Chromium snap instead of animate. */}
       <label
         htmlFor={id}
-        className={`absolute cursor-text px-1 pointer-events-none bg-gray-50 dark:bg-dark-background text-lumi-label
+        className={`absolute left-3 top-1/2 origin-left cursor-text px-1 pointer-events-none bg-white dark:bg-dark-card text-base transition-all duration-200 ease-out motion-reduce:transition-none
           ${
             shouldFloatLabel
-              ? '-top-2 left-3 text-xs font-bold'
-              : 'top-1/2 left-10 -translate-y-1/2 text-base'
+              ? 'translate-x-0 translate-y-[calc(-50%_-_1.75rem)] scale-75 font-bold'
+              : 'translate-x-7 -translate-y-1/2 scale-100'
           }
 
           ${error ? 'text-red-500' : 'text-lumi-label'}
@@ -77,7 +80,7 @@ export function InputFloatingLabel({
 
       {Icon && (
         <Icon
-          className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5
+          className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-200 ease-out
             ${
               error
                 ? 'text-red-500'

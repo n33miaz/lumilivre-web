@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { usePresence } from '../../hooks/usePresence';
 
 interface FilterPanelProps {
   isOpen: boolean;
@@ -17,22 +20,9 @@ export function FilterPanel({
   onClose,
   width = 'md:w-[600px]', // Valor padrão agora inclui o prefixo md:
 }: FilterPanelProps) {
-  const [shouldRender, setShouldRender] = useState(isOpen);
-  const [isClosing, setIsClosing] = useState(false);
+  const { t } = useTranslation('common');
+  const { shouldRender, isClosing } = usePresence(isOpen);
   const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setShouldRender(true);
-      setIsClosing(false);
-    } else {
-      setIsClosing(true);
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,9 +57,9 @@ export function FilterPanel({
   return (
     <div
       ref={panelRef}
-      className={`absolute top-full -right-2 mt-2 origin-top-right bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-50 select-none 
+      className={`absolute top-full -right-2 mt-2 origin-top-right bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-[70] select-none
         w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-[95vw] ${width}
-        ${isClosing ? 'animate-slide-up' : 'animate-slide-down'}
+        ${isClosing ? 'animate-slide-down-out' : 'animate-slide-down'}
         `}
     >
       <div className="p-4 md:p-6 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar">
@@ -80,13 +70,13 @@ export function FilterPanel({
             onClick={onClear}
             className="font-semibold py-2 px-4 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
           >
-            Limpar
+            {t('clear')}
           </button>
           <button
             onClick={onApply}
             className="bg-lumi-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-lumi-primary-hover transform hover:scale-105 shadow-md"
           >
-            Aplicar Filtros
+            {t('apply_filters')}
           </button>
         </div>
       </div>

@@ -1,80 +1,73 @@
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import {
+  BookMarked,
+  FileText,
+  GraduationCap,
+  HandHelping,
+  LayoutDashboard,
+  Pin,
+  Settings2,
+  Trophy,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 
-import HomeIcon from '../../assets/icons/home.svg?react';
-import HomeActiveIcon from '../../assets/icons/home-active.svg?react';
-import BookIcon from '../../assets/icons/books.svg?react';
-import BookActiveIcon from '../../assets/icons/books-active.svg?react';
-import UsersIcon from '../../assets/icons/users.svg?react';
-import UsersActiveIcon from '../../assets/icons/users-active.svg?react';
-import LoansIcon from '../../assets/icons/loans.svg?react';
-import LoansActiveIcon from '../../assets/icons/loans-active.svg?react';
-import SettingsIcon from '../../assets/icons/settings.svg?react';
-import SettingsActiveIcon from '../../assets/icons/settings-active.svg?react';
-import ReportIcon from '../../assets/icons/report.svg?react';
-import ReportActiveIcon from '../../assets/icons/report-active.svg?react';
-import RankingIcon from '../../assets/icons/ranking.svg?react';
-import RankingActiveIcon from '../../assets/icons/ranking-active.svg?react';
-import PinIcon from '../../assets/icons/pin.svg?react';
-import PinActiveIcon from '../../assets/icons/pin-active.svg?react';
-import EducationCap from '../../assets/icons/education-cap.svg?react';
-import EducationCapActive from '../../assets/icons/education-cap-active.svg?react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   hasCapability,
   type Capability,
 } from '../../utils/roleCapabilities';
+import { SidebarLocaleSwitcher } from './SidebarLocaleSwitcher';
 
 const prefetchSettings = () => import('../../pages/Settings');
 
-const navLinks = [
+const navLinks: {
+  path: string;
+  labelKey: string;
+  Icon: LucideIcon;
+  capability: string;
+}[] = [
   {
     path: '/admin/dashboard',
     labelKey: 'dashboard',
-    Icon: HomeIcon,
-    ActiveIcon: HomeActiveIcon,
+    Icon: LayoutDashboard,
     capability: 'canViewDashboard',
   },
   {
     path: '/admin/books',
     labelKey: 'books',
-    Icon: BookIcon,
-    ActiveIcon: BookActiveIcon,
+    Icon: BookMarked,
     capability: 'canManageBooks',
   },
   {
     path: '/admin/students',
     labelKey: 'students',
-    Icon: UsersIcon,
-    ActiveIcon: UsersActiveIcon,
+    Icon: Users,
     capability: 'canManageStudents',
   },
   {
     path: '/admin/loans',
     labelKey: 'loans',
-    Icon: LoansIcon,
-    ActiveIcon: LoansActiveIcon,
+    Icon: HandHelping,
     capability: 'canManageLoans',
   },
   {
     path: '/admin/theses',
     labelKey: 'tcc',
-    Icon: EducationCap,
-    ActiveIcon: EducationCapActive,
+    Icon: GraduationCap,
     capability: 'canManageTcc',
   },
   {
     path: '/admin/ranking',
     labelKey: 'ranking',
-    Icon: RankingIcon,
-    ActiveIcon: RankingActiveIcon,
+    Icon: Trophy,
     capability: 'canViewRanking',
   },
   {
     path: '/admin/reports',
     labelKey: 'reports',
-    Icon: ReportIcon,
-    ActiveIcon: ReportActiveIcon,
+    Icon: FileText,
     capability: 'canViewReports',
   },
 ];
@@ -84,6 +77,58 @@ interface SidebarProps {
   setExpanded: (isExpanded: boolean) => void;
   isPinned: boolean;
   setPinned: (isPinned: boolean) => void;
+}
+
+interface SidebarNavItemProps {
+  to: string;
+  label: string;
+  Icon: LucideIcon;
+  isExpanded: boolean;
+  onMouseEnter?: () => void;
+}
+
+function SidebarNavItem({
+  to,
+  label,
+  Icon,
+  isExpanded,
+  onMouseEnter,
+}: SidebarNavItemProps) {
+  return (
+    <NavLink
+      to={to}
+      onMouseEnter={onMouseEnter}
+      className={({ isActive }) =>
+        `nav-pill flex items-center py-2.5 rounded-xl overflow-hidden hover:bg-white/10 transition-colors ${
+          isActive ? 'active bg-white/10' : ''
+        }`
+      }
+    >
+      {({ isActive }) => (
+        <>
+          {/* Coluna de ícone com largura fixa (= largura útil do rail recolhido):
+              mantém o ícone imóvel entre recolhido/expandido, evitando o "salto". */}
+          <span className="flex w-14 shrink-0 items-center justify-center">
+            <Icon
+              className={`w-5 h-5 pointer-events-none ${
+                isActive ? 'text-white' : 'text-gray-200'
+              }`}
+              fill={isActive ? 'currentColor' : 'none'}
+              fillOpacity={isActive ? 0.25 : 0}
+              strokeWidth={isActive ? 2.25 : 2}
+            />
+          </span>
+          <span
+            className={`text-sm font-semibold whitespace-nowrap transition-opacity duration-200 ${
+              isExpanded ? 'opacity-100' : 'opacity-0'
+            } ${isActive ? 'text-white' : 'text-gray-200'}`}
+          >
+            {label}
+          </span>
+        </>
+      )}
+    </NavLink>
+  );
 }
 
 export function Sidebar({
@@ -100,15 +145,10 @@ export function Sidebar({
   const canViewSettings = hasCapability(user?.role, 'canViewSettings');
 
   const handleMouseEnter = () => {
-    if (!isPinned) {
-      setExpanded(true);
-    }
+    if (!isPinned) setExpanded(true);
   };
-
   const handleMouseLeave = () => {
-    if (!isPinned) {
-      setExpanded(false);
-    }
+    if (!isPinned) setExpanded(false);
   };
 
   const handlePinToggle = () => {
@@ -117,111 +157,58 @@ export function Sidebar({
     setExpanded(newPinState);
   };
 
-  const PinComponent = isPinned ? PinActiveIcon : PinIcon;
+  const PinComponent = Pin;
 
   return (
     <aside
-      className={`fixed top-14 left-0 h-[calc(100vh-3.5rem)] bg-lumi-primary text-gray-200 flex flex-col shrink-0 duration-300 shadow-[8px_0_15px_rgba(0,0,0,0.2)] select-none z-40 
-      ${isExpanded ? 'w-48 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'} 
+      className={`h-full bg-sidebar-gradient text-gray-200 flex flex-col shrink-0 transition-[width,transform] duration-300 shadow-[8px_0_24px_rgba(0,0,0,0.18)] select-none
+      ${isExpanded ? 'w-56 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'}
+      ${isPinned ? 'md:relative' : 'md:absolute md:inset-y-0 md:left-0 md:z-40'}
       `}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative top-1 flex items-center justify-end">
+      <div className="flex justify-end p-2">
         <button
+          type="button"
           onClick={handlePinToggle}
-          className={`hover:opacity-75 p-2 ${
+          className={`p-2 rounded-lg hover:bg-white/15 transition-opacity ${
             isExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
           title={isPinned ? t('unpin_menu') : t('pin_menu')}
+          aria-label={isPinned ? t('unpin_menu') : t('pin_menu')}
         >
-          <PinComponent className="w-6 h-6 text-white" />
+          <PinComponent className="w-4 h-4 text-white" />
         </button>
       </div>
 
-      <nav className="flex-1 p-2 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-3 pb-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
         {visibleNavLinks.map((link) => (
-          <NavLink
+          <SidebarNavItem
             key={link.path}
             to={link.path}
-            className={({ isActive }) =>
-              `flex items-center p-3 justify-center rounded-lg hover:bg-white/20 ${
-                isActive ? 'bg-white/20' : ''
-              }`
-            }
-          >
-            {({ isActive }) => {
-              const IconComponent = isActive ? link.ActiveIcon : link.Icon;
-
-              return (
-                <>
-                  <IconComponent
-                    className={`w-6 h-6 shrink-0 pointer-events-none ${
-                      isActive ? 'text-white' : 'text-gray-300'
-                    }`}
-                  />
-                  <div
-                    className={`overflow-hidden duration-300 ${
-                      isExpanded ? 'w-40 ml-4' : 'w-0'
-                    }`}
-                  >
-                    <span
-                      className={`whitespace-nowrap ${
-                        isActive ? 'font-bold text-white' : 'text-gray-300'
-                      }`}
-                    >
-                      {t(link.labelKey)}
-                    </span>
-                  </div>
-                </>
-              );
-            }}
-          </NavLink>
+            label={t(link.labelKey)}
+            Icon={link.Icon}
+            isExpanded={isExpanded}
+          />
         ))}
       </nav>
 
-      {canViewSettings && (
-        <div className="p-2 border-t border-white/10 space-y-2">
-        <NavLink
-          to="/admin/settings"
-          onMouseEnter={prefetchSettings}
-          className={({ isActive }) =>
-            `flex items-center p-3 justify-center rounded-lg hover:bg-white/20 ${
-              isActive ? 'bg-white/20' : ''
-            }`
-          }
-        >
-          {({ isActive }) => {
-            const SettingsComponent = isActive
-              ? SettingsActiveIcon
-              : SettingsIcon;
-
-            return (
-              <>
-                <SettingsComponent
-                  className={`w-6 h-6 shrink-0 pointer-events-none ${
-                    isActive ? 'text-white' : 'text-gray-300'
-                  }`}
-                />
-                <div
-                  className={`overflow-hidden duration-300 ${
-                    isExpanded ? 'w-40 ml-4' : 'w-0'
-                  }`}
-                >
-                  <span
-                    className={`whitespace-nowrap ${
-                      isActive ? 'font-bold text-white' : 'text-gray-300'
-                    }`}
-                  >
-                    {t('settings')}
-                  </span>
-                </div>
-              </>
-            );
-          }}
-        </NavLink>
+      <div className="p-3 border-t border-white/10 space-y-1">
+        {/* Idioma só aparece na sidebar em telas pequenas; no desktop fica no Header */}
+        <div className="md:hidden">
+          <SidebarLocaleSwitcher isExpanded={isExpanded} />
         </div>
-      )}
+        {canViewSettings && (
+          <SidebarNavItem
+            to="/admin/settings"
+            label={t('settings')}
+            Icon={Settings2}
+            isExpanded={isExpanded}
+            onMouseEnter={prefetchSettings}
+          />
+        )}
+      </div>
     </aside>
   );
 }

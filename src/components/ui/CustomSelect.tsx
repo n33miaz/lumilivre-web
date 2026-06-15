@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import ArrowIcon from '../../assets/icons/arrow-drop.svg?react';
 
@@ -31,15 +32,17 @@ export function CustomSelect({
   value,
   onChange,
   options,
-  placeholder = 'Selecione',
+  placeholder,
   className = '',
   icon,
   buttonClassName = 'px-3 py-2',
   invertArrow = false,
   disabled = false,
 }: CustomSelectProps) {
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const resolvedPlaceholder = placeholder ?? t('select');
 
   const [menuPlacement, setMenuPlacement] = useState<'up' | 'down'>('down');
 
@@ -94,7 +97,7 @@ export function CustomSelect({
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       const dropdownElement = document.getElementById(
-        `dropdown-portal-custom-${placeholder}`,
+        `dropdown-portal-custom-${resolvedPlaceholder}`,
       );
 
       if (
@@ -111,7 +114,7 @@ export function CustomSelect({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, placeholder]);
+  }, [isOpen, resolvedPlaceholder]);
 
   // --- Resetar highlight ao abrir ---
   useEffect(() => {
@@ -228,10 +231,10 @@ export function CustomSelect({
 
     return createPortal(
       <div
-        id={`dropdown-portal-custom-${placeholder}`}
+        id={`dropdown-portal-custom-${resolvedPlaceholder}`}
         style={style}
         className={`
-          overflow-y-auto custom-scrollbar bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg ease-out
+          overflow-y-auto custom-scrollbar bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg transition-[opacity,transform] duration-150 ease-out
           ${originClass}
           ${animationClasses}
         `}
@@ -249,7 +252,7 @@ export function CustomSelect({
               onClick={() => handleSelect(option.value)}
               onMouseEnter={() => setHighlightedIndex(index)}
               className={`
-                w-full text-left px-3 py-2 text-sm truncate block
+                row-hover w-full text-left px-3 py-2 text-sm truncate block
                 ${
                   isSelected
                     ? 'bg-lumi-primary/10 text-lumi-primary font-bold'
@@ -295,7 +298,7 @@ export function CustomSelect({
             <span className="text-gray-500 dark:text-gray-400">{icon}</span>
           )}
           <span className="truncate text-gray-700 dark:text-white">
-            {selectedOption ? selectedOption.label : placeholder}
+            {selectedOption ? selectedOption.label : resolvedPlaceholder}
           </span>
         </div>
 
