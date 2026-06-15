@@ -15,7 +15,7 @@ export function Footer() {
       { label: t('footer.link.docs'), href: '#ecosystem' },
       {
         label: t('footer.link.license'),
-        href: 'https://opensource.org/license/mit/',
+        href: 'https://github.com/n33miaz/lumilivre-web/blob/master/LICENSE',
       },
       { label: t('footer.link.coc'), href: '#community' },
     ],
