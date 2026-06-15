@@ -17,6 +17,34 @@ async function injectAuthUser(page: Page) {
 }
 
 async function mockProtectedApis(page: Page) {
+  await page.route('**/api/dashboard/stats', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        activeLoans: 0,
+        overdueLoans: 0,
+        completedLoans: 0,
+        avgReturnDays: 0,
+        pendingRequests: 0,
+        waitingReservations: 0,
+      }),
+    }),
+  );
+  await page.route('**/api/dashboard/top-books', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
+  await page.route('**/api/dashboard/loans-by-month', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    }),
+  );
   await page.route('**/api/students**', (route) =>
     route.fulfill({
       status: 200,

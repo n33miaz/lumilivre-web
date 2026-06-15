@@ -14,6 +14,7 @@ import ptBRReport from './locales/pt-BR/report.json';
 import ptBRTcc from './locales/pt-BR/tcc.json';
 import ptBRDashboard from './locales/pt-BR/dashboard.json';
 import ptBRLanding from './locales/pt-BR/landing.json';
+import ptBRDownload from './locales/pt-BR/download.json';
 
 import enUSCommon from './locales/en-US/common.json';
 import enUSAuth from './locales/en-US/auth.json';
@@ -27,6 +28,7 @@ import enUSReport from './locales/en-US/report.json';
 import enUSTcc from './locales/en-US/tcc.json';
 import enUSDashboard from './locales/en-US/dashboard.json';
 import enUSLanding from './locales/en-US/landing.json';
+import enUSDownload from './locales/en-US/download.json';
 
 export const LOCALES = [
   { code: 'pt-BR', label: 'Português', short: 'PT' },
@@ -60,6 +62,7 @@ i18n
         tcc: ptBRTcc,
         dashboard: ptBRDashboard,
         landing: ptBRLanding,
+        download: ptBRDownload,
       },
       'en-US': {
         common: enUSCommon,
@@ -74,6 +77,7 @@ i18n
         tcc: enUSTcc,
         dashboard: enUSDashboard,
         landing: enUSLanding,
+        download: enUSDownload,
       },
     },
     fallbackLng: DEFAULT_LOCALE,

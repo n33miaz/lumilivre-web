@@ -14,7 +14,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
-lumilivre-key.pem
 *.pem
 coverage/
 /coverage/
