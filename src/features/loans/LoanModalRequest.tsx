@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { useToast } from '../../contexts/ToastContext';
 import { Modal } from '../../components/ui/Modal';
@@ -25,6 +26,7 @@ export function LoanModalRequest({
   isOpen,
   onClose,
 }: LoanModalRequestProps) {
+  const { t, i18n } = useTranslation('loan');
   const { addToast } = useToast();
   const [selectedTombo, setSelectedTombo] = useState('');
   const [confirmAction, setConfirmAction] = useState<boolean | null>(null);
@@ -71,10 +73,14 @@ export function LoanModalRequest({
           ex.tomboExemplar === solicitacaoAtual?.exemplarTombo,
       )
       .map((ex) => ({
-        label: `${ex.tomboExemplar} - ${ex.localizacao_fisica} ${ex.tomboExemplar === solicitacaoAtual?.exemplarTombo ? '(Reservado)' : ''}`,
+        label: `${ex.tomboExemplar} - ${ex.localizacao_fisica} ${
+          ex.tomboExemplar === solicitacaoAtual?.exemplarTombo
+            ? `(${t('request.reserved')})`
+            : ''
+        }`,
         value: ex.tomboExemplar,
       }));
-  }, [exemplaresData, solicitacaoAtual?.exemplarTombo]);
+  }, [exemplaresData, solicitacaoAtual?.exemplarTombo, t]);
 
   useEffect(() => {
     if (solicitacao && isOpen) {
@@ -94,8 +100,8 @@ export function LoanModalRequest({
     if (aceitar && !selectedTombo) {
       addToast({
         type: 'warning',
-        title: 'Atenção',
-        description: 'Selecione um exemplar para aceitar a solicitação.',
+        title: t('toast.select_copy.title'),
+        description: t('toast.select_copy.description'),
       });
       return;
     }
@@ -103,7 +109,7 @@ export function LoanModalRequest({
   };
 
   const dataFormatada = solicitacaoAtual
-    ? new Date(solicitacaoAtual.dataSolicitacao).toLocaleString('pt-BR', {
+    ? new Date(solicitacaoAtual.dataSolicitacao).toLocaleString(i18n.language, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -114,34 +120,34 @@ export function LoanModalRequest({
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
-      <Modal.Header title="Solicitação de Empréstimo" />
+      <Modal.Header title={t('modal.request.title')} />
       <Modal.Body>
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Data da Solicitação</Label>
+              <Label>{t('form.field.requested_at')}</Label>
               <Input value={dataFormatada} disabled />
             </div>
             <div>
-              <Label>Aluno</Label>
+              <Label>{t('form.field.student')}</Label>
               <Input
-                value={`${solicitacaoAtual?.alunoNome} (Mat: ${solicitacaoAtual?.alunoMatricula})`}
+                value={`${solicitacaoAtual?.alunoNome} (${t('request.registration_abbr')}: ${solicitacaoAtual?.alunoMatricula})`}
                 disabled
               />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Livro</Label>
+              <Label>{t('form.field.book')}</Label>
               <Input value={solicitacaoAtual?.livroNome ?? ''} disabled />
             </div>
             <div>
-              <Label>Exemplar</Label>
+              <Label>{t('form.field.copy')}</Label>
               <SearchableSelect
                 value={selectedTombo}
                 onChange={setSelectedTombo}
                 options={exemplarOptions}
-                placeholder="Selecione o exemplar..."
+                placeholder={t('request.copy_placeholder')}
                 isLoading={isLoadingExemplares}
                 disabled={isProcessing}
               />
@@ -158,7 +164,7 @@ export function LoanModalRequest({
             isLoading={isProcessing && confirmAction === false}
             className="flex-1"
           >
-            Recusar
+            {t('action.reject')}
           </Button>
           <Button
             variant="success"
@@ -167,15 +173,23 @@ export function LoanModalRequest({
             isLoading={isProcessing && confirmAction === true}
             className="flex-1"
           >
-            Aceitar
+            {t('action.accept')}
           </Button>
         </div>
       </Modal.Footer>
 
       <ConfirmModal
         isOpen={confirmAction !== null}
-        title={confirmAction ? 'Aceitar Solicitação' : 'Recusar Solicitação'}
-        message={`Tem certeza que deseja ${confirmAction ? 'aceitar' : 'recusar'} esta solicitação?`}
+        title={
+          confirmAction
+            ? t('confirm.request.accept_title')
+            : t('confirm.request.reject_title')
+        }
+        message={
+          confirmAction
+            ? t('confirm.request.accept_message')
+            : t('confirm.request.reject_message')
+        }
         isDestructive={!confirmAction}
         onConfirm={executarProcessamento}
         onCancel={() => setConfirmAction(null)}

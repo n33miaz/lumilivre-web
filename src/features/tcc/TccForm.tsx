@@ -9,6 +9,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { Label } from '../../components/ui/Label';
 import { Input } from '../../components/ui/Input';
 import { CustomSelect } from '../../components/ui/CustomSelect';
+import { SearchableSelect } from '../../components/ui/SearchableSelect';
 import { ImageUploader } from '../../components/ui/ImageUploader';
 
 import UploadIcon from '../../assets/icons/upload.svg?react';
@@ -160,7 +161,7 @@ export function TccForm({
               control={control}
               render={({ field }) => (
                 <div>
-                  <CustomSelect
+                  <SearchableSelect
                     value={field.value || ''}
                     onChange={field.onChange}
                     options={cursosOptions}

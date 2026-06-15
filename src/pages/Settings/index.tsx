@@ -1,434 +1,283 @@
-import {
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-  type SVGProps,
-} from 'react';
+import { useContext, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../contexts/ToastContext';
-import { useLocale } from '../../contexts/LocaleContext';
 import { ChangePasswordModal } from '../Auth/components/ChangePasswordModal';
-import { LOCALES } from '../../i18n';
 
 import UploadIcon from '../../assets/icons/download.svg?react';
 import LockIcon from '../../assets/icons/lock.svg?react';
 import SunIcon from '../../assets/icons/sun.svg?react';
 import MoonIcon from '../../assets/icons/moon.svg?react';
 import AutoIcon from '../../assets/icons/auto.svg?react';
-import BackIcon from '../../assets/icons/arrow-left.svg?react';
 import LogoutIcon from '../../assets/icons/logout.svg?react';
 import ToolsIcon from '../../assets/icons/tools.svg?react';
+import AlertIcon from '../../assets/icons/alert.svg?react';
+import { LocaleSwitcher } from '../../components/ui/LocaleSwitcher';
 
-interface SettingItemProps {
-  Icon: React.FunctionComponent<SVGProps<SVGSVGElement>>;
+type ThemeValue = 'light' | 'dark' | 'system';
+
+interface SettingsRowProps {
+  icon: ReactNode;
   title: string;
   description: string;
-  children: ReactNode;
-  iconClassName?: string;
+  action: ReactNode;
 }
 
-const SettingItem = ({
-  Icon,
-  title,
-  description,
-  children,
-  iconClassName = 'w-6 h-6',
-}: SettingItemProps) => (
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0 gap-4 transition-colors duration-200">
-    <div className="flex items-start sm:items-center">
-      <div className="p-2 rounded-lg mr-3 sm:mr-4 bg-gray-100 dark:bg-gray-700 shrink-0 mt-1 sm:mt-0">
-        <Icon
-          className={`${iconClassName} text-lumi-primary dark:text-lumi-label select-none`}
-        />
+function SettingsRow({ icon, title, description, action }: SettingsRowProps) {
+  return (
+    <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="w-12 h-12 rounded-xl bg-lumi-50 dark:bg-white/5 text-lumi-primary dark:text-lumi-label flex items-center justify-center shrink-0">
+        {icon}
       </div>
-      <div>
-        <h3 className="font-semibold text-gray-800 dark:text-white">{title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">
+      <div className="flex-1 min-w-0">
+        <div className="font-display font-bold text-gray-900 dark:text-white">
+          {title}
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
           {description}
         </p>
       </div>
-    </div>
-    <div className="w-full sm:w-auto flex justify-end">{children}</div>
-  </div>
-);
-
-const SubPageHeader = ({
-  title,
-  onBack,
-}: {
-  title: string;
-  onBack: () => void;
-}) => (
-  <div className="flex items-center mb-4 select-none">
-    <button
-      onClick={onBack}
-      className="p-2 mr-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-110 group transition-transform duration-200"
-    >
-      <BackIcon className="w-5 h-5 text-lumi-primary dark:text-lumi-label" />
-    </button>
-    <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label select-none">
-      {title}
-    </h2>
-  </div>
-);
-
-/**
- * Componente ComingSoonBadge - Status visual para funcionalidades em desenvolvimento
- * 
- * Características:
- * - Badge animado com indicador de pulse
- * - Suporte completo a dark mode
- * - Estilização elegante com gradiente
- * - Acessível e semântico
- * 
- * @returns {JSX.Element} Badge do "Em breve"
- */
-const ComingSoonBadge = () => {
-  const { t } = useTranslation('common');
-  return (
-    <div className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 border border-amber-200 dark:border-amber-700/50 backdrop-blur-sm">
-      <span className="inline-block w-2 h-2 rounded-full bg-amber-500 dark:bg-amber-400 animate-pulse" />
-      <span className="text-xs font-medium text-amber-700 dark:text-amber-300 whitespace-nowrap">
-        {t('coming_soon')}
-      </span>
+      <div className="shrink-0">{action}</div>
     </div>
   );
-};
-
-/**
- * Componente ThemeButton - Botão individual de seleção de tema
- * 
- * Características:
- * - Estados visuais claramente diferenciados
- * - Transições suaves com feedback tátil
- * - Acessibilidade completa com aria-labels
- * - Responsive design (mobile e desktop)
- * 
- * @param {Object} props
- * @param {string} props.label - Texto do botão
- * @param {string} props.value - Valor do tema (light, dark, system)
- * @param {string} props.isSelected - Se o tema está selecionado
- * @param {Function} props.onClick - Callback ao clicar
- * @returns {JSX.Element} Botão de seleção de tema
- */
-interface ThemeButtonProps {
-  label: string;
-  value: 'light' | 'dark' | 'system';
-  isSelected: boolean;
-  onClick: () => void;
 }
 
-const ThemeButton = ({ label, value, isSelected, onClick }: ThemeButtonProps) => (
-  <button
-    onClick={onClick}
-    aria-label={`Selecionar tema ${label.toLowerCase()}`}
-    aria-pressed={isSelected}
-    className={`
-      relative flex-1 sm:flex-none text-xs sm:text-sm px-3 py-2.5 rounded-md font-medium
-      transition-all duration-300 ease-out
-      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lumi-primary
-      dark:focus:ring-offset-gray-700
-      ${
-        isSelected
-          ? `
-            shadow-lg scale-105 font-semibold
-            ${
-              value === 'light'
-                ? 'bg-white text-lumi-primary dark:bg-white dark:text-lumi-primary'
-                : value === 'system'
-                  ? 'bg-lumi-primary text-white shadow-lg shadow-lumi-primary/30'
-                  : 'bg-gray-800 dark:bg-gray-900 text-lumi-label shadow-lg shadow-gray-800/30 dark:shadow-gray-900/30'
-            }
-          `
-          : `
-            text-gray-600 dark:text-gray-400
-            hover:text-gray-800 dark:hover:text-gray-200
-            hover:bg-gray-50 dark:hover:bg-gray-600/20
-          `
-      }
-    `}
-    title={`Tema ${label}`}
-  >
-    {isSelected && (
-      <span className="absolute inset-0 rounded-md bg-white/10 dark:bg-white/5 pointer-events-none" />
-    )}
-    <span className="relative">{label}</span>
-  </button>
-);
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="text-lumi-primary dark:text-lumi-label font-display font-bold text-lg mb-3">
+      {children}
+    </h2>
+  );
+}
+
+interface ThemePickerProps {
+  theme: ThemeValue;
+  onChange: (next: ThemeValue) => void;
+  labels: { light: string; system: string; dark: string };
+}
+
+function ThemePicker({ theme, onChange, labels }: ThemePickerProps) {
+  const options: Array<{ value: ThemeValue; label: string }> = [
+    { value: 'light', label: labels.light },
+    { value: 'system', label: labels.system },
+    { value: 'dark', label: labels.dark },
+  ];
+
+  return (
+    <div className="inline-flex p-1 rounded-xl bg-gray-100 dark:bg-white/5">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={theme === option.value}
+          onClick={() => onChange(option.value)}
+          className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${
+            theme === option.value
+              ? 'bg-white dark:bg-lumi-primary text-lumi-primary dark:text-white shadow-md'
+              : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+interface NotifSwitchProps {
+  checked: boolean;
+  onChange: () => void;
+  ariaLabel: string;
+}
+
+function NotifSwitch({ checked, onChange, ariaLabel }: NotifSwitchProps) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={ariaLabel}
+      onClick={onChange}
+      className={`switch ${checked ? 'on' : ''}`}
+    />
+  );
+}
 
 export function ConfiguracoesPage() {
   const { t } = useTranslation('settings');
   const { theme, setTheme } = useContext(ThemeContext);
-  const { user, logoutWithAnimation } = useAuth();
-  const { addToast } = useToast();
-  const { locale, setLocale } = useLocale();
+  const { logoutWithAnimation } = useAuth();
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-
-  const isAdmin = user?.role === 'ADMIN';
-
-  const [currentView, setCurrentView] = useState<'main' | 'import' | 'export'>(
-    'main',
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    () => localStorage.getItem('lumilivre.notifications.enabled') !== 'false',
   );
 
-  const [effectiveTheme, setEffectiveTheme] = useState(theme);
+  const handleNotificationsChange = () => {
+    setNotificationsEnabled((current) => {
+      const next = !current;
+      localStorage.setItem('lumilivre.notifications.enabled', String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      setEffectiveTheme(mediaQuery.matches ? 'dark' : 'light');
-      const handler = (e: MediaQueryListEvent) =>
-        setEffectiveTheme(e.matches ? 'dark' : 'light');
+      const handler = () => {};
       mediaQuery.addEventListener('change', handler);
       return () => mediaQuery.removeEventListener('change', handler);
-    } else {
-      setEffectiveTheme(theme);
     }
   }, [theme]);
 
-  const handleFeatureNotImplemented = () => {
-    addToast({
-      type: 'info',
-      title: t('in_development', { ns: 'common' }),
-      description: t('feature_coming_soon', { ns: 'common' }),
-    });
-  };
-
-  const renderImportView = () => (
-    <div className="p-6">
-      <SubPageHeader title={t('import.title')} onBack={() => setCurrentView('main')} />
-      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-        <SettingItem
-          Icon={UploadIcon}
-          title={t('import.students.title')}
-          description={t('import.students.description')}
-        >
-          <button
-            onClick={handleFeatureNotImplemented}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
-          >
-            {t('import.button.select')}
-          </button>
-        </SettingItem>
-        <SettingItem
-          Icon={UploadIcon}
-          title={t('import.books.title')}
-          description={t('import.books.description')}
-        >
-          <button
-            onClick={handleFeatureNotImplemented}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
-          >
-            {t('import.button.select')}
-          </button>
-        </SettingItem>
-        <SettingItem
-          Icon={UploadIcon}
-          title={t('import.copies.title')}
-          description={t('import.copies.description')}
-        >
-          <button
-            onClick={handleFeatureNotImplemented}
-            className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-auto transition-all duration-200"
-          >
-            {t('import.button.select')}
-          </button>
-        </SettingItem>
-      </div>
-    </div>
-  );
-
-  const renderMainView = () => (
-    <>
-      {/* Gerenciamento de Dados - Comentado até implementação futura */}
-      {/* <div className="p-6">
-        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          Gerenciamento de Dados
-        </h2>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-          <SettingItem
-            Icon={UploadIcon}
-            title="Importações"
-            description="Trazer dados a partir de arquivos."
-          >
-            <button
-              onClick={() => setCurrentView('import')}
-              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px]"
-            >
-              Opções
-            </button>
-          </SettingItem>
-        </div>
-      </div> */}
-
-      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          {t('section.appearance')}
-        </h2>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-          <SettingItem
-            Icon={
-              theme === 'system'
-                ? AutoIcon
-                : effectiveTheme === 'light'
-                  ? SunIcon
-                  : MoonIcon
-            }
-            iconClassName={
-              effectiveTheme === 'dark' && theme !== 'system'
-                ? 'w-6 h-5'
-                : 'w-6 h-6'
-            }
-            title={t('theme.title')}
-            description={t('theme.description')}
-          >
-            <div className="flex items-center gap-1.5 p-1.5 rounded-lg shadow-md bg-gray-100 dark:bg-gray-700 select-none w-full sm:w-auto justify-between sm:justify-start backdrop-blur-sm">
-              <ThemeButton
-                label={t('theme.light')}
-                value="light"
-                isSelected={theme === 'light'}
-                onClick={() => setTheme('light')}
-              />
-              <ThemeButton
-                label={t('theme.system')}
-                value="system"
-                isSelected={theme === 'system'}
-                onClick={() => setTheme('system')}
-              />
-              <ThemeButton
-                label={t('theme.dark')}
-                value="dark"
-                isSelected={theme === 'dark'}
-                onClick={() => setTheme('dark')}
-              />
-            </div>
-          </SettingItem>
-        </div>
-      </div>
-
-      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          {t('section.app')}
-        </h2>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-          <SettingItem
-            Icon={UploadIcon}
-            title={t('app.android.title')}
-            description={t('app.android.description')}
-          >
-            <a
-              href="/lumilivre.apk"
-              download="LumiLivre.apk"
-              className="flex items-center justify-center font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-green-600 hover:bg-green-700 transform hover:scale-105 select-none w-full sm:w-[110px] transition-all duration-200"
-            >
-              {t('app.android.button')}
-            </a>
-          </SettingItem>
-
-          <SettingItem
-            Icon={UploadIcon}
-            title={t('app.ios.title')}
-            description={t('app.ios.description')}
-          >
-            <ComingSoonBadge />
-          </SettingItem>
-        </div>
-      </div>
-
-      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          {t('section.account')}
-        </h2>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-          <SettingItem
-            Icon={LockIcon}
-            title={t('account.change_password.title')}
-            description={t('account.change_password.description')}
-          >
-            <button
-              onClick={() => setIsPasswordModalOpen(true)}
-              className="font-semibold dark:text-white py-2 px-4 rounded-lg shadow-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transform hover:scale-105 select-none w-full sm:w-[110px] transition-all duration-200"
-            >
-              {t('account.change_password.button')}
-            </button>
-          </SettingItem>
-        </div>
-      </div>
-
-      <div className="p-6 border-t border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-bold text-lumi-primary dark:text-lumi-label mb-4 select-none">
-          {t('section.language')}
-        </h2>
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-          <SettingItem
-            Icon={ToolsIcon}
-            title={t('language.title')}
-            description={t('language.description')}
-          >
-            <div className="flex items-center gap-2 flex-wrap">
-              {LOCALES.map((item) => {
-                const i18nKey = `language.${item.code.replace('-', '_').toLowerCase()}`;
-                const fallbackLabel = item.label;
-                return (
-                  <button
-                    key={item.code}
-                    onClick={() => setLocale(item.code)}
-                    className={`px-3 py-1.5 rounded text-sm font-semibold transition-all ${
-                      locale === item.code
-                        ? 'bg-lumi-primary text-white shadow'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {t(i18nKey, fallbackLabel)}
-                  </button>
-                );
-              })}
-            </div>
-          </SettingItem>
-        </div>
-      </div>
-    </>
-  );
-
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 shrink-0 select-none">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="p-2 bg-lumi-primary/10 dark:bg-lumi-primary/20 rounded-full shrink-0">
-            <ToolsIcon className="w-8 h-8 text-lumi-primary dark:text-lumi-label" />
-          </div>
-          <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
-              {isAdmin ? t('page.title.admin') : t('page.title.librarian')}
-            </h1>
-            <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-              {t('page.subtitle')}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={logoutWithAnimation}
-          className="flex items-center justify-center space-x-2 py-2 px-4 rounded-lg shadow-md bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 w-full sm:w-auto sm:ml-auto transition-all duration-200"
-        >
-          <span className="font-bold">{t('button.logout')}</span>
-          <LogoutIcon className="w-6 h-6 text-white" />
-        </button>
-      </div>
-
-      <div className="bg-white dark:bg-dark-card rounded-lg shadow-md flex-grow overflow-y-auto border border-gray-100 dark:border-gray-700">
-        {currentView === 'main' && renderMainView()}
-        {currentView === 'import' && renderImportView()}
-      </div>
-
+    <section className="space-y-5">
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
       />
-    </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-lumi-gradient flex items-center justify-center text-white shadow-glowSoft">
+            <ToolsIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white">
+              {t('page.title.librarian', { defaultValue: 'Olá, Bibliotecário!' })}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {t('page.subtitle', {
+                defaultValue: 'Gerencie suas preferências do sistema.',
+              })}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={logoutWithAnimation}
+          className="h-10 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-bold inline-flex items-center gap-2 shadow-md"
+        >
+          <LogoutIcon className="w-4 h-4" />
+          {t('button.logout', { defaultValue: 'SAIR DA CONTA' })}
+        </button>
+      </div>
+
+      <div className="space-y-6">
+        <div>
+          <SectionTitle>
+            {t('section.appearance', { defaultValue: 'Aparência' })}
+          </SectionTitle>
+          <SettingsRow
+            icon={
+              theme === 'dark' ? (
+                <MoonIcon className="w-6 h-6" />
+              ) : theme === 'light' ? (
+                <SunIcon className="w-6 h-6" />
+              ) : (
+                <AutoIcon className="w-6 h-6" />
+              )
+            }
+            title={t('theme.title', { defaultValue: 'Tema' })}
+            description={t('theme.description', {
+              defaultValue:
+                'Escolha sua preferência de tons na plataforma.',
+            })}
+            action={
+              <ThemePicker
+                theme={theme as ThemeValue}
+                onChange={setTheme}
+                labels={{
+                  light: t('theme.light', { defaultValue: 'Claro' }),
+                  system: t('theme.system', { defaultValue: 'Automático' }),
+                  dark: t('theme.dark', { defaultValue: 'Escuro' }),
+                }}
+              />
+            }
+          />
+        </div>
+
+        <div>
+          <SectionTitle>
+            {t('section.app', { defaultValue: 'Aplicativo' })}
+          </SectionTitle>
+          <SettingsRow
+            icon={<UploadIcon className="w-6 h-6" />}
+            title={t('app.android.title', { defaultValue: 'Android' })}
+            description={t('app.android.description', {
+              defaultValue:
+                'Baixe a versão mais recente (APK) do aplicativo para alunos.',
+            })}
+            action={
+              <a
+                href="/lumilivre.apk"
+                download="LumiLivre.apk"
+                className="h-9 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm inline-flex items-center gap-2"
+              >
+                {t('app.android.button', { defaultValue: 'Baixar' })}
+              </a>
+            }
+          />
+        </div>
+
+        <div>
+          <SectionTitle>
+            {t('section.account', { defaultValue: 'Conta' })}
+          </SectionTitle>
+          <div className="space-y-2">
+            <SettingsRow
+              icon={<LockIcon className="w-6 h-6" />}
+              title={t('account.change_password.title', {
+                defaultValue: 'Mudar Senha',
+              })}
+              description={t('account.change_password.description', {
+                defaultValue: 'Altere sua senha de acesso.',
+              })}
+              action={
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordModalOpen(true)}
+                  className="h-9 px-4 rounded-lg bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 font-bold text-sm text-gray-700 dark:text-gray-200"
+                >
+                  {t('account.change_password.button', {
+                    defaultValue: 'Alterar',
+                  })}
+                </button>
+              }
+            />
+            <SettingsRow
+              icon={<ToolsIcon className="w-6 h-6" />}
+              title={t('language.title', { defaultValue: 'Idioma' })}
+              description={t('language.description', {
+                defaultValue: 'Português (Brasil) · English (US)',
+              })}
+              action={
+                <LocaleSwitcher />
+              }
+            />
+            <SettingsRow
+              icon={<AlertIcon className="w-6 h-6" />}
+              title={t('notification.title', {
+                defaultValue: 'Notificações por email',
+              })}
+              description={t('notification.description', {
+                defaultValue:
+                  'Receba resumos diários por email institucional.',
+              })}
+              action={
+                <NotifSwitch
+                  checked={notificationsEnabled}
+                  onChange={handleNotificationsChange}
+                  ariaLabel={t('notification.toggle_aria', {
+                    defaultValue: 'Alternar notificações',
+                  })}
+                />
+              }
+            />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

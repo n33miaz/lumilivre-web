@@ -1,11 +1,25 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, type ComponentType } from 'react';
+import { useTranslation } from 'react-i18next';
+import axios from 'axios';
+import {
+  AlertTriangle,
+  ArrowRightLeft,
+  BookOpen,
+  FileBarChart2,
+  GraduationCap,
+  Layers,
+  LibraryBig,
+  Users,
+} from 'lucide-react';
 
 import {
   baixarRelatorioPDF,
   type FiltrosRelatorio,
+  type ReportType,
 } from '../../services/reportService';
 import { buscarLivrosParaAdmin } from '../../services/bookService';
 import { buscarAlunosParaAdmin } from '../../services/studentService';
+import { useDashboardStats } from '../../hooks/useDashboardQueries';
 
 import {
   useGeneros,
@@ -27,12 +41,15 @@ import { SearchableSelect } from '../../components/ui/SearchableSelect';
 import { LoadingIcon } from '../../components/ui/LoadingIcon';
 import AddIcon from '../../assets/icons/add.svg?react';
 import DownloadIcon from '../../assets/icons/upload.svg';
-import ReportPaperIcon from '../../assets/icons/report-paper.svg?react';
-import axios from 'axios';
+
+type ReportIcon = ComponentType<{ className?: string }>;
 
 interface ReportItemProps {
   title: string;
   description: string;
+  buttonLabel: string;
+  metaLabel: string;
+  formatLabel: string;
   onGenerate: () => void;
 }
 
@@ -41,32 +58,141 @@ interface Option {
   value: string | number;
 }
 
-const ReportItem = ({ title, description, onGenerate }: ReportItemProps) => (
-  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b last:border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:duration-0 gap-4">
-    <div className="flex items-start sm:items-center">
-      <div className="p-2 rounded-lg mr-3 sm:mr-4 bg-gray-100 dark:bg-gray-700 shrink-0 mt-1 sm:mt-0">
-        <AddIcon className="w-6 h-6 text-lumi-primary dark:text-lumi-label" />
+type ReportTone = 'lumi' | 'blue' | 'emerald' | 'violet' | 'amber' | 'cyan';
+
+const REPORT_CARDS = [
+  {
+    type: 'alunos',
+    titleKey: 'item.students.title',
+    descriptionKey: 'item.students.description',
+    metaKey: 'item.students.meta',
+    tone: 'blue',
+    Icon: Users,
+  },
+  {
+    type: 'livros',
+    titleKey: 'item.books.title',
+    descriptionKey: 'item.books.description',
+    metaKey: 'item.books.meta',
+    tone: 'lumi',
+    Icon: BookOpen,
+  },
+  {
+    type: 'exemplares',
+    titleKey: 'item.copies.title',
+    descriptionKey: 'item.copies.description',
+    metaKey: 'item.copies.meta',
+    tone: 'emerald',
+    Icon: Layers,
+  },
+  {
+    type: 'emprestimos',
+    titleKey: 'item.loans.title',
+    descriptionKey: 'item.loans.description',
+    metaKey: 'item.loans.meta',
+    tone: 'violet',
+    Icon: ArrowRightLeft,
+  },
+  {
+    type: 'cursos',
+    titleKey: 'item.courses.title',
+    descriptionKey: 'item.courses.description',
+    metaKey: 'item.courses.meta',
+    tone: 'amber',
+    Icon: GraduationCap,
+    direct: true,
+  },
+  {
+    type: 'estatisticas',
+    titleKey: 'item.statistics.title',
+    descriptionKey: 'item.statistics.description',
+    metaKey: 'item.statistics.meta',
+    tone: 'cyan',
+    Icon: FileBarChart2,
+    direct: true,
+  },
+] as const satisfies ReadonlyArray<{
+  type: ReportType;
+  titleKey: string;
+  descriptionKey: string;
+  metaKey: string;
+  tone: ReportTone;
+  Icon: ReportIcon;
+  direct?: boolean;
+}>;
+
+const TONE_CLASSES: Record<ReportTone, string> = {
+  lumi: 'bg-lumi-50 dark:bg-lumi-500/10 text-lumi-primary dark:text-lumi-label',
+  blue: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  emerald:
+    'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  violet:
+    'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400',
+  amber:
+    'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400',
+  cyan: 'bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+};
+
+interface ReportItemPropsExt extends ReportItemProps {
+  tone: keyof typeof TONE_CLASSES;
+  Icon: ReportIcon;
+}
+
+const ReportItem = ({
+  title,
+  description,
+  buttonLabel,
+  metaLabel,
+  formatLabel,
+  tone,
+  Icon,
+  onGenerate,
+}: ReportItemPropsExt) => (
+  <article className="group rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-5 hover:shadow-card transition-all">
+    <div className="flex items-start gap-4">
+      <div
+        className={`w-12 h-12 rounded-xl ${TONE_CLASSES[tone]} flex items-center justify-center shrink-0`}
+      >
+        <Icon className="h-6 w-6" />
       </div>
-      <div>
-        <h3 className="font-semibold text-gray-800 dark:text-white">{title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 sm:mt-0">
-          {description}
-        </p>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white">
+              {title}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              {description}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onGenerate}
+            className="h-9 px-4 rounded-lg bg-lumi-primary text-white text-sm font-bold hover:bg-lumi-primary-hover shrink-0 inline-flex items-center gap-1.5"
+          >
+            <AddIcon className="h-4 w-4" />
+            {buttonLabel}
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          <span className="pill pill-purple">
+            <span className="dot" />
+            {metaLabel}
+          </span>
+          <span className="pill pill-info">
+            <span className="dot" />
+            {formatLabel}
+          </span>
+        </div>
       </div>
     </div>
-    <button
-      onClick={onGenerate}
-      className="flex items-center justify-center gap-2 font-semibold text-white py-2 px-4 rounded-lg shadow-md bg-lumi-primary hover:bg-lumi-primary-hover transform hover:scale-105 active:scale-95 w-full sm:w-auto shrink-0"
-    >
-      <span>Gerar</span>
-    </button>
-  </div>
+  </article>
 );
 
 interface ModalFiltrosProps {
   isOpen: boolean;
   onClose: () => void;
-  tipoRelatorio: 'alunos' | 'livros' | 'exemplares' | 'emprestimos' | null;
+  tipoRelatorio: ReportType | null;
   titulo: string;
 }
 
@@ -76,6 +202,7 @@ function ModalFiltrosRelatorio({
   tipoRelatorio,
   titulo,
 }: ModalFiltrosProps) {
+  const { t } = useTranslation('report');
   const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isDynamicDataLoading, setIsDynamicDataLoading] = useState(false);
@@ -109,85 +236,88 @@ function ModalFiltrosRelatorio({
   const cursosOpts = useMemo(() => {
     if (!cursosData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.all'), value: '' },
       ...cursosData.map((c) => ({ label: c.nome, value: c.id })),
     ];
-  }, [cursosData]);
+  }, [cursosData, t]);
 
   const modulosOpts = useMemo(() => {
     if (!modulosData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.all'), value: '' },
       ...modulosData.map((m) => ({ label: m.nome, value: m.id })),
     ];
-  }, [modulosData]);
+  }, [modulosData, t]);
 
   const turnoOpts = useMemo(() => {
     if (!turnosData) return [];
     return [
-      { label: 'Todos', value: '' },
-      ...turnosData.map((t) => ({ label: t.nome, value: t.id })),
+      { label: t('filter.all'), value: '' },
+      ...turnosData.map((item) => ({ label: item.nome, value: item.id })),
     ];
-  }, [turnosData]);
+  }, [turnosData, t]);
 
   const generosOpts = useMemo(() => {
     if (!generosData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.all'), value: '' },
       ...generosData.map((g) => ({ label: g.nome, value: g.nome })),
     ];
-  }, [generosData]);
+  }, [generosData, t]);
 
   const cddOpts = useMemo(() => {
     if (!cddsData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.all'), value: '' },
       ...cddsData.map((c) => ({
         label: `${c.id} - ${c.nome}`,
         value: c.id,
       })),
     ];
-  }, [cddsData]);
+  }, [cddsData, t]);
 
   const penalidadeOpts = useMemo(() => {
     if (!penalidadeData) return [];
     return [
-      { label: 'Todas', value: '' },
+      { label: t('filter.all_feminine'), value: '' },
       ...penalidadeData.map((p) => ({ label: p.status, value: p.nome })),
     ];
-  }, [penalidadeData]);
+  }, [penalidadeData, t]);
 
   const classificacaoOpts = useMemo(() => {
     if (!classificacaoData) return [];
     return [
-      { label: 'Todas', value: '' },
+      { label: t('filter.all_feminine'), value: '' },
       ...classificacaoData.map((c) => ({ label: c.status, value: c.nome })),
     ];
-  }, [classificacaoData]);
+  }, [classificacaoData, t]);
 
   const tipoCapaOpts = useMemo(() => {
     if (!tipoCapaData) return [];
     return [
-      { label: 'Todas', value: '' },
-      ...tipoCapaData.map((t) => ({ label: t.status, value: t.nome })),
+      { label: t('filter.all_feminine'), value: '' },
+      ...tipoCapaData.map((item) => ({
+        label: item.status,
+        value: item.nome,
+      })),
     ];
-  }, [tipoCapaData]);
+  }, [tipoCapaData, t]);
 
   const statusLivroOpts = useMemo(() => {
     if (!statusLivroData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.all'), value: '' },
       ...statusLivroData.map((s) => ({ label: s.status, value: s.nome })),
     ];
-  }, [statusLivroData]);
+  }, [statusLivroData, t]);
 
   const statusEmpOpts = useMemo(() => {
     if (!statusEmpData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.all'), value: '' },
       ...statusEmpData.map((s) => ({ label: s.status, value: s.nome })),
     ];
-  }, [statusEmpData]);
+  }, [statusEmpData, t]);
 
   useEffect(() => {
     if (isOpen && tipoRelatorio) {
@@ -197,7 +327,7 @@ function ModalFiltrosRelatorio({
 
       const carregarDadosDinamicos = async () => {
         try {
-          const promises = [];
+          const promises: Array<Promise<void>> = [];
 
           if (['livros', 'exemplares', 'emprestimos'].includes(tipoRelatorio)) {
             promises.push(
@@ -214,13 +344,16 @@ function ModalFiltrosRelatorio({
                     value: isbn,
                   }),
                 );
-                setLivrosSelectOpts([{ label: 'Todos', value: '' }, ...opts]);
+                setLivrosSelectOpts([
+                  { label: t('filter.all'), value: '' },
+                  ...opts,
+                ]);
 
                 const autoresUnicos = Array.from(
                   new Set(res.content.map((l) => l.autor).filter(Boolean)),
                 ).sort();
                 setAutoresOpts([
-                  { label: 'Todos', value: '' },
+                  { label: t('filter.all'), value: '' },
                   ...autoresUnicos.map((a) => ({ label: a, value: a })),
                 ]);
 
@@ -228,7 +361,7 @@ function ModalFiltrosRelatorio({
                   new Set(res.content.map((l) => l.editora).filter(Boolean)),
                 ).sort();
                 setEditorasOpts([
-                  { label: 'Todas', value: '' },
+                  { label: t('filter.all_feminine'), value: '' },
                   ...editorasUnicas.map((e) => ({ label: e, value: e })),
                 ]);
               }),
@@ -239,17 +372,20 @@ function ModalFiltrosRelatorio({
             promises.push(
               buscarAlunosParaAdmin('', 0, 1000).then((res) => {
                 const opts = res.content.map((a) => ({
-                  label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
+                  label: `${a.nomeCompleto} (${t('filter.registration_abbr')}: ${a.matricula})`,
                   value: a.matricula,
                 }));
-                setAlunosSelectOpts([{ label: 'Todos', value: '' }, ...opts]);
+                setAlunosSelectOpts([
+                  { label: t('filter.all'), value: '' },
+                  ...opts,
+                ]);
               }),
             );
           }
 
           await Promise.all(promises);
         } catch (error) {
-          console.error('Erro ao carregar dados dinâmicos', error);
+          console.error('Error loading dynamic report data', error);
         } finally {
           setIsDynamicDataLoading(false);
         }
@@ -257,7 +393,7 @@ function ModalFiltrosRelatorio({
 
       carregarDadosDinamicos();
     }
-  }, [isOpen, tipoRelatorio]);
+  }, [isOpen, tipoRelatorio, t]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -313,7 +449,7 @@ function ModalFiltrosRelatorio({
         axios.isCancel(error) ||
         (error instanceof Error && error.name === 'CanceledError')
       ) {
-        console.log('Download cancelado pelo usuário');
+        console.log('Report download cancelled by user');
         return;
       }
 
@@ -321,16 +457,14 @@ function ModalFiltrosRelatorio({
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         addToast({
           type: 'warning',
-          title: 'Sem dados',
-          description:
-            'Nenhum registro encontrado para os filtros selecionados.',
+          title: t('toast.no_data.title'),
+          description: t('toast.no_data.description'),
         });
       } else {
         addToast({
           type: 'error',
-          title: 'Erro ao gerar',
-          description:
-            'Erro ao gerar o relatório. Verifique se há dados para este período.',
+          title: t('toast.error.title'),
+          description: t('toast.error.description'),
         });
       }
     } finally {
@@ -349,7 +483,7 @@ function ModalFiltrosRelatorio({
   };
 
   const labelClass =
-    'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+    'mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300';
 
   const isInitialLoading =
     isDynamicDataLoading ||
@@ -367,29 +501,31 @@ function ModalFiltrosRelatorio({
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[300px] pb-10 px-8">
-          <div className="transform scale-110">
+        <div className="flex min-h-[300px] flex-col items-center justify-center px-8 pb-10">
+          <div className="scale-110">
             <LoadingIcon />
           </div>
 
-          <p className="text-lg font-bold text-lumi-primary dark:text-lumi-label animate-pulse mb-3">
-            {progress === 100 ? 'Download Iniciado!' : 'Gerando PDF...'}
+          <p className="mb-3 animate-pulse text-lg font-bold text-lumi-primary dark:text-lumi-label">
+            {progress === 100
+              ? t('loading.download_started')
+              : t('loading.generating')}
           </p>
 
-          <div className="w-full max-w-xs bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden mb-6">
+          <div className="mb-6 h-2.5 w-full max-w-xs overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="bg-lumi-primary h-2.5 rounded-full duration-500 ease-out"
+              className="h-2.5 rounded-full bg-lumi-primary duration-500 ease-out"
               style={{ width: `${progress}%` }}
-            ></div>
+            />
           </div>
 
           {progress < 100 && (
             <button
               type="button"
               onClick={handleCancelar}
-              className="text-sm font-bold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 rounded-md"
+              className="rounded-md px-4 py-2 text-sm font-bold text-red-500 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
             >
-              Cancelar
+              {t('button.cancel')}
             </button>
           )}
         </div>
@@ -398,12 +534,12 @@ function ModalFiltrosRelatorio({
 
     if (isInitialLoading) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[300px] pb-20">
-          <div className="transform scale-110">
+        <div className="flex min-h-[300px] flex-col items-center justify-center pb-20">
+          <div className="scale-110">
             <LoadingIcon />
           </div>
-          <p className="text-lg font-semibold text-lumi-primary animate-pulse -mt-12">
-            Carregando filtros...
+          <p className="-mt-12 animate-pulse text-lg font-semibold text-lumi-primary">
+            {t('loading.filters')}
           </p>
         </div>
       );
@@ -411,22 +547,22 @@ function ModalFiltrosRelatorio({
 
     return (
       <form onSubmit={handleBaixar} className="space-y-4">
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mb-4 border border-blue-100 dark:border-blue-800">
+        <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
           <p className="text-sm text-blue-800 dark:text-blue-200">
-            Deixe em branco os filtros para trazer todos os registros.
+            {t('hint.empty_filters')}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-1 gap-4 border-b border-gray-200 pb-4 dark:border-gray-700 md:grid-cols-2">
           <CustomDatePicker
-            label="Data Início"
+            label={t('filter.start_date')}
             id="dataInicio"
             name="dataInicio"
             value={filtros.dataInicio || ''}
             onChange={handleInputChange}
           />
           <CustomDatePicker
-            label="Data Fim"
+            label={t('filter.end_date')}
             id="dataFim"
             name="dataFim"
             value={filtros.dataFim || ''}
@@ -434,46 +570,44 @@ function ModalFiltrosRelatorio({
           />
         </div>
 
-        {/* --- FILTROS ESPECÍFICOS --- */}
-
         {tipoRelatorio === 'alunos' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className={labelClass}>Curso</label>
-                <CustomSelect
+                <label className={labelClass}>{t('filter.course')}</label>
+                <SearchableSelect
                   value={filtros.idCurso || ''}
                   onChange={(val) => handleSelectChange('idCurso', val)}
-                  placeholder="Selecione o Curso"
+                  placeholder={t('filter.select_course')}
                   options={cursosOpts}
                 />
               </div>
               <div>
-                <label className={labelClass}>Módulo</label>
+                <label className={labelClass}>{t('filter.module')}</label>
                 <CustomSelect
                   value={filtros.idModulo || ''}
                   onChange={(val) => handleSelectChange('idModulo', val)}
-                  placeholder="Selecione o Módulo"
+                  placeholder={t('filter.select_module')}
                   options={modulosOpts}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className={labelClass}>Turno</label>
+                <label className={labelClass}>{t('filter.shift')}</label>
                 <CustomSelect
                   value={filtros.idTurno || ''}
                   onChange={(val) => handleSelectChange('idTurno', val)}
-                  placeholder="Selecione o Turno"
+                  placeholder={t('filter.select_shift')}
                   options={turnoOpts}
                 />
               </div>
               <div>
-                <label className={labelClass}>Penalidade</label>
+                <label className={labelClass}>{t('filter.penalty')}</label>
                 <CustomSelect
                   value={filtros.penalidade || ''}
                   onChange={(val) => handleSelectChange('penalidade', val)}
-                  placeholder="Selecione a Penalidade"
+                  placeholder={t('filter.select_penalty')}
                   options={penalidadeOpts}
                 />
               </div>
@@ -483,37 +617,37 @@ function ModalFiltrosRelatorio({
 
         {tipoRelatorio === 'livros' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SearchableSelect
-                label="Gênero"
+                label={t('filter.genre')}
                 value={filtros.genero || ''}
                 onChange={(val) => handleSelectChange('genero', val)}
                 options={generosOpts}
               />
               <SearchableSelect
-                label="Autor"
+                label={t('filter.author')}
                 value={filtros.autor || ''}
                 onChange={(val) => handleSelectChange('autor', val)}
                 options={autoresOpts}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SearchableSelect
-                label="Editora"
+                label={t('filter.publisher')}
                 value={filtros.editora || ''}
                 onChange={(val) => handleSelectChange('editora', val)}
                 options={editorasOpts}
               />
               <SearchableSelect
-                label="CDD"
+                label={t('filter.cdd')}
                 value={filtros.cdd || ''}
                 onChange={(val) => handleSelectChange('cdd', val)}
                 options={cddOpts}
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className={labelClass}>Classificação</label>
+                <label className={labelClass}>{t('filter.age_rating')}</label>
                 <CustomSelect
                   value={filtros.classificacaoEtaria || ''}
                   onChange={(val) =>
@@ -523,11 +657,11 @@ function ModalFiltrosRelatorio({
                 />
               </div>
               <div>
-                <label className={labelClass}>Capa</label>
+                <label className={labelClass}>{t('filter.cover_type')}</label>
                 <CustomSelect
                   value={filtros.tipoCapa || ''}
                   onChange={(val) => handleSelectChange('tipoCapa', val)}
-                  placeholder="Selecione o Tipo da Capa"
+                  placeholder={t('filter.select_cover_type')}
                   options={tipoCapaOpts}
                 />
               </div>
@@ -536,9 +670,9 @@ function ModalFiltrosRelatorio({
         )}
 
         {tipoRelatorio === 'exemplares' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className={labelClass}>Status do Exemplar</label>
+              <label className={labelClass}>{t('filter.copy_status')}</label>
               <CustomSelect
                 value={filtros.statusLivro || ''}
                 onChange={(val) => handleSelectChange('statusLivro', val)}
@@ -546,7 +680,7 @@ function ModalFiltrosRelatorio({
               />
             </div>
             <SearchableSelect
-              label="Livro (Nome ou ISBN)"
+              label={t('filter.book')}
               value={filtros.isbnOuTombo || ''}
               onChange={(val) => handleSelectChange('isbnOuTombo', val)}
               options={livrosSelectOpts}
@@ -556,9 +690,9 @@ function ModalFiltrosRelatorio({
 
         {tipoRelatorio === 'emprestimos' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label className={labelClass}>Status</label>
+                <label className={labelClass}>{t('filter.status')}</label>
                 <CustomSelect
                   value={filtros.statusEmprestimo || ''}
                   onChange={(val) =>
@@ -568,24 +702,24 @@ function ModalFiltrosRelatorio({
                 />
               </div>
               <div>
-                <label className={labelClass}>Curso</label>
-                <CustomSelect
+                <label className={labelClass}>{t('filter.course')}</label>
+                <SearchableSelect
                   value={filtros.idCurso || ''}
                   onChange={(val) => handleSelectChange('idCurso', val)}
-                  placeholder="Selecione o Curso"
+                  placeholder={t('filter.select_course')}
                   options={cursosOpts}
                 />
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SearchableSelect
-                label="Aluno (Nome ou Matrícula)"
+                label={t('filter.student_lookup')}
                 value={filtros.matriculaAluno || ''}
                 onChange={(val) => handleSelectChange('matriculaAluno', val)}
                 options={alunosSelectOpts}
               />
               <SearchableSelect
-                label="Livro (Nome ou ISBN)"
+                label={t('filter.book')}
                 value={filtros.isbnOuTombo || ''}
                 onChange={(val) => handleSelectChange('isbnOuTombo', val)}
                 options={livrosSelectOpts}
@@ -594,17 +728,17 @@ function ModalFiltrosRelatorio({
           </>
         )}
 
-        <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform active:scale-95"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-6 py-3 font-bold text-white shadow-lg transition-all duration-200 hover:bg-green-700 active:scale-95"
           >
             <img
               src={DownloadIcon}
-              className="w-5 h-5 invert brightness-0"
+              className="h-5 w-5 invert brightness-0"
               alt=""
             />
-            <span>Baixar PDF</span>
+            <span>{t('button.download_pdf')}</span>
           </button>
         </div>
       </form>
@@ -619,71 +753,123 @@ function ModalFiltrosRelatorio({
   );
 }
 
+const INSIGHT_CARDS = [
+  { key: 'titles', field: 'livros', tone: 'lumi', Icon: LibraryBig },
+  { key: 'readers', field: 'alunos', tone: 'blue', Icon: Users },
+  { key: 'active_loans', field: 'emprestimosAtivos', tone: 'violet', Icon: ArrowRightLeft },
+  { key: 'overdue', field: 'atrasados', tone: 'amber', Icon: AlertTriangle },
+] as const;
+
 export function RelatoriosPage() {
+  const { t } = useTranslation('report');
+  const { addToast } = useToast();
+  const { data: stats } = useDashboardStats();
   const [modalOpen, setModalOpen] = useState(false);
+  const [downloadingType, setDownloadingType] = useState<ReportType | null>(
+    null,
+  );
   const [selectedReport, setSelectedReport] = useState<{
-    type: 'alunos' | 'livros' | 'exemplares' | 'emprestimos';
+    type: ReportType;
     title: string;
   } | null>(null);
 
-  const handleOpenModal = (
-    type: 'alunos' | 'livros' | 'exemplares' | 'emprestimos',
-    title: string,
-  ) => {
-    setSelectedReport({ type, title });
-    setModalOpen(true);
+  const handleGenerate = async (card: (typeof REPORT_CARDS)[number]) => {
+    const title = t(card.titleKey);
+    const isDirect = 'direct' in card && card.direct;
+    if (!isDirect) {
+      setSelectedReport({ type: card.type, title });
+      setModalOpen(true);
+      return;
+    }
+
+    setDownloadingType(card.type);
+    addToast({
+      type: 'info',
+      title: t('toast.generating.title'),
+      description: t('toast.generating.description'),
+    });
+    try {
+      await baixarRelatorioPDF(card.type, {});
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        addToast({
+          type: 'warning',
+          title: t('toast.no_data.title'),
+          description: t('toast.no_data.description'),
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: t('toast.error.title'),
+          description: t('toast.error.description'),
+        });
+      }
+    } finally {
+      setDownloadingType(null);
+    }
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 mb-6 shrink-0 select-none">
-        <div className="p-2 bg-lumi-primary/10 dark:bg-lumi-primary/20 rounded-full shrink-0">
-          <ReportPaperIcon className="w-8 h-8 text-lumi-primary dark:text-lumi-label" />
+    <section className="space-y-5">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-lumi-gradient flex items-center justify-center text-white shadow-glowSoft shrink-0">
+          <FileBarChart2 className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
-            Central de Relatórios
+          <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
+            {t('page.eyebrow')}
+          </div>
+          <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white">
+            {t('page.title')}
           </h1>
-          <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-            Escolha um tipo de relatório, aplique filtros (caso necessário) e
-            baixe o PDF.
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            {t('page.subtitle')}
           </p>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-dark-card rounded-lg shadow-md flex-grow overflow-y-auto border border-gray-100 dark:border-gray-700">
-        <div className="p-6">
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
-            <ReportItem
-              title="Relatório de Alunos"
-              description="Lista de alunos com filtros por curso, módulo, turno, penalidade e data de inclusão."
-              onGenerate={() =>
-                handleOpenModal('alunos', 'Relatório de Alunos')
-              }
-            />
-            <ReportItem
-              title="Relatório de Livros"
-              description="Catálogo de livros com filtros por gênero, autor, editora, CDD, capa e data de lançamento."
-              onGenerate={() =>
-                handleOpenModal('livros', 'Relatório de Livros')
-              }
-            />
-            <ReportItem
-              title="Relatório de Exemplares"
-              description="Inventário físico com filtros por status, livro e data de inclusão."
-              onGenerate={() =>
-                handleOpenModal('exemplares', 'Relatório de Exemplares')
-              }
-            />
-            <ReportItem
-              title="Relatório de Empréstimos"
-              description="Histórico de movimentações com filtros por período, status, aluno e livro."
-              onGenerate={() =>
-                handleOpenModal('emprestimos', 'Relatório de Empréstimos')
-              }
-            />
+      {/* Panorama da biblioteca (dados reais) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {INSIGHT_CARDS.map(({ key, field, tone, Icon }) => (
+          <div
+            key={key}
+            className="flex items-center gap-3 rounded-xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-4"
+          >
+            <div
+              className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${TONE_CLASSES[tone]}`}
+            >
+              <Icon className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                {t(`insight.${key}`)}
+              </div>
+              <div className="font-display font-bold text-xl text-gray-800 dark:text-white">
+                {stats?.[field] ?? '—'}
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {REPORT_CARDS.map((card) => (
+          <ReportItem
+            key={card.type}
+            title={t(card.titleKey)}
+            description={t(card.descriptionKey)}
+            metaLabel={t(card.metaKey)}
+            formatLabel={t('card.format_pdf')}
+            buttonLabel={
+              downloadingType === card.type
+                ? t('loading.generating')
+                : t('button.generate')
+            }
+            tone={card.tone}
+            Icon={card.Icon}
+            onGenerate={() => handleGenerate(card)}
+          />
+        ))}
       </div>
 
       <ModalFiltrosRelatorio
@@ -692,6 +878,6 @@ export function RelatoriosPage() {
         tipoRelatorio={selectedReport?.type || null}
         titulo={selectedReport?.title || ''}
       />
-    </div>
+    </section>
   );
 }
