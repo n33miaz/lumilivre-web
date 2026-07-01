@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { ThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,6 +15,13 @@ import LogoutIcon from '../../assets/icons/logout.svg?react';
 import ToolsIcon from '../../assets/icons/tools.svg?react';
 import AlertIcon from '../../assets/icons/alert.svg?react';
 import { LocaleSwitcher } from '../../components/ui/LocaleSwitcher';
+import { ConfirmModal } from '../../components/ui/ConfirmModal';
+import { useToast } from '../../contexts/ToastContext';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
+import {
+  updateSettings,
+  type LibraryType,
+} from '../../services/settingsService';
 
 type ThemeValue = 'light' | 'dark' | 'system';
 
@@ -107,9 +115,15 @@ function NotifSwitch({ checked, onChange, ariaLabel }: NotifSwitchProps) {
 export function ConfiguracoesPage() {
   const { t } = useTranslation('settings');
   const { theme, setTheme } = useContext(ThemeContext);
-  const { logoutWithAnimation } = useAuth();
+  const { user, logoutWithAnimation } = useAuth();
+  const { addToast } = useToast();
+  const queryClient = useQueryClient();
+  const { libraryType } = useLibraryConfig();
+  const isAdmin = user?.role === 'ADMIN';
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [pendingLibraryType, setPendingLibraryType] =
+    useState<LibraryType | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     () => localStorage.getItem('lumilivre.notifications.enabled') !== 'false',
   );
@@ -120,6 +134,46 @@ export function ConfiguracoesPage() {
       localStorage.setItem('lumilivre.notifications.enabled', String(next));
       return next;
     });
+  };
+
+  const updateLibraryTypeMutation = useMutation({
+    mutationFn: updateSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['library-settings'] });
+      addToast({
+        type: 'success',
+        title: t('library.type.success.title', {
+          defaultValue: 'Tipo de biblioteca atualizado',
+        }),
+        description: t('library.type.success.description', {
+          defaultValue: 'A alteração já vale para o painel e o aplicativo.',
+        }),
+      });
+    },
+    onError: () => {
+      addToast({
+        type: 'error',
+        title: t('library.type.error.title', {
+          defaultValue: 'Erro ao alterar tipo de biblioteca',
+        }),
+        description: t('library.type.error.description', {
+          defaultValue:
+            'Não foi possível salvar a configuração. Tente novamente.',
+        }),
+      });
+    },
+  });
+
+  const handleLibraryTypeChange = (next: LibraryType) => {
+    if (next !== libraryType) {
+      setPendingLibraryType(next);
+    }
+  };
+
+  const confirmLibraryTypeChange = () => {
+    if (pendingLibraryType) {
+      updateLibraryTypeMutation.mutate(pendingLibraryType);
+    }
   };
 
   useEffect(() => {
@@ -138,6 +192,32 @@ export function ConfiguracoesPage() {
         onClose={() => setIsPasswordModalOpen(false)}
       />
 
+      <ConfirmModal
+        isOpen={pendingLibraryType !== null}
+        title={t('library.type.confirm.title', {
+          defaultValue: 'Alterar tipo de biblioteca?',
+        })}
+        message={
+          pendingLibraryType === 'STANDARD'
+            ? t('library.type.confirm.to_standard', {
+                defaultValue:
+                  'A Biblioteca Padrão oculta os recursos acadêmicos em todo o sistema (painel e aplicativo): curso, módulo e turno dão lugar a uma categoria genérica, e as páginas de Classificação e TCC deixam de ser exibidas.\n\nNenhum dado é excluído — ao voltar para Escolar, tudo reaparece.',
+              })
+            : t('library.type.confirm.to_school', {
+                defaultValue:
+                  'A Biblioteca Escolar reativa os recursos acadêmicos em todo o sistema (painel e aplicativo): curso, módulo e turno voltam a ser obrigatórios no cadastro de leitores, e as páginas de Classificação e TCC voltam a ser exibidas.',
+              })
+        }
+        confirmText={t('library.type.confirm.confirm', {
+          defaultValue: 'Alterar',
+        })}
+        cancelText={t('library.type.confirm.cancel', {
+          defaultValue: 'Cancelar',
+        })}
+        onConfirm={confirmLibraryTypeChange}
+        onCancel={() => setPendingLibraryType(null)}
+      />
+
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-lumi-gradient flex items-center justify-center text-white shadow-glowSoft">
@@ -145,7 +225,9 @@ export function ConfiguracoesPage() {
           </div>
           <div>
             <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white">
-              {t('page.title.librarian', { defaultValue: 'Olá, Bibliotecário!' })}
+              {t('page.title.librarian', {
+                defaultValue: 'Olá, Bibliotecário!',
+              })}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {t('page.subtitle', {
@@ -165,6 +247,55 @@ export function ConfiguracoesPage() {
       </div>
 
       <div className="space-y-6">
+        {isAdmin && (
+          <div>
+            <SectionTitle>
+              {t('section.library', { defaultValue: 'Biblioteca' })}
+            </SectionTitle>
+            <SettingsRow
+              icon={<ToolsIcon className="w-6 h-6" />}
+              title={t('library.type.title', {
+                defaultValue: 'Tipo de biblioteca',
+              })}
+              description={t('library.type.description', {
+                defaultValue:
+                  'Escolar usa curso, módulo, turno, ranking e TCC. Padrão usa categoria e oculta recursos acadêmicos.',
+              })}
+              action={
+                <div className="inline-flex p-1 rounded-xl bg-gray-100 dark:bg-white/5">
+                  {(
+                    [
+                      [
+                        'SCHOOL',
+                        t('library.type.school', { defaultValue: 'Escolar' }),
+                      ],
+                      [
+                        'STANDARD',
+                        t('library.type.standard', { defaultValue: 'Padrão' }),
+                      ],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      disabled={updateLibraryTypeMutation.isPending}
+                      aria-pressed={libraryType === value}
+                      onClick={() => handleLibraryTypeChange(value)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-bold transition ${
+                        libraryType === value
+                          ? 'bg-white dark:bg-lumi-primary text-lumi-primary dark:text-white shadow-md'
+                          : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              }
+            />
+          </div>
+        )}
+
         <div>
           <SectionTitle>
             {t('section.appearance', { defaultValue: 'Aparência' })}
@@ -181,8 +312,7 @@ export function ConfiguracoesPage() {
             }
             title={t('theme.title', { defaultValue: 'Tema' })}
             description={t('theme.description', {
-              defaultValue:
-                'Escolha sua preferência de tons na plataforma.',
+              defaultValue: 'Escolha sua preferência de tons na plataforma.',
             })}
             action={
               <ThemePicker
@@ -207,7 +337,7 @@ export function ConfiguracoesPage() {
             title={t('app.android.title', { defaultValue: 'Android' })}
             description={t('app.android.description', {
               defaultValue:
-                'Baixe a versão mais recente (APK) do aplicativo para alunos.',
+                'Baixe a versão mais recente (APK) do aplicativo para leitores.',
             })}
             action={
               <a
@@ -252,9 +382,7 @@ export function ConfiguracoesPage() {
               description={t('language.description', {
                 defaultValue: 'Português (Brasil) · English (US)',
               })}
-              action={
-                <LocaleSwitcher />
-              }
+              action={<LocaleSwitcher />}
             />
             <SettingsRow
               icon={<AlertIcon className="w-6 h-6" />}
@@ -262,8 +390,7 @@ export function ConfiguracoesPage() {
                 defaultValue: 'Notificações por email',
               })}
               description={t('notification.description', {
-                defaultValue:
-                  'Receba resumos diários por email institucional.',
+                defaultValue: 'Receba resumos diários por email institucional.',
               })}
               action={
                 <NotifSwitch
