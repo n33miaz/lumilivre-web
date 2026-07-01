@@ -31,7 +31,7 @@ const createWrapper = () => {
 
 const mockPayload: tccService.TccPayload = {
   titulo: 'TCC de Teste',
-  alunos: 'Aluno A, Aluno B',
+  leitores: 'Leitor A, Leitor B',
   orientadores: 'Prof. C',
   curso_id: 1,
   anoConclusao: '2025',

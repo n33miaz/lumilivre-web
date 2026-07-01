@@ -300,7 +300,7 @@ export function LivrosPage() {
     const mapaEmprestimos = new Map<string, string>();
     if (emprestimosAtivos) {
       emprestimosAtivos.forEach((emp: EmprestimoAtivoDTO) => {
-        if (emp.tombo) mapaEmprestimos.set(emp.tombo, emp.alunoNome);
+        if (emp.tombo) mapaEmprestimos.set(emp.tombo, emp.leitorNome);
       });
     }
     const lista = exemplaresData.map((ex) => ({

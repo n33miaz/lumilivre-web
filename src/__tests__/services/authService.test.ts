@@ -29,7 +29,7 @@ describe('authService', () => {
         role: 'ADMIN',
         token: 'jwt-token-123',
         initialPasswordChange: false,
-        studentRegistrationNumber: '2024001',
+        readerRegistrationNumber: '2024001',
       },
     });
 
@@ -40,7 +40,7 @@ describe('authService', () => {
       password: '1234',
     });
     expect(result.token).toBe('jwt-token-123');
-    expect(result.matriculaAluno).toBe('2024001');
+    expect(result.matriculaLeitor).toBe('2024001');
   });
 
   it('validarTokenReset returns true for a valid v2 token', async () => {

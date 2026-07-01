@@ -30,7 +30,7 @@ const createWrapper = () => {
 };
 
 const mockPayload = {
-  aluno_matricula: '12345',
+  leitor_matricula: '12345',
   exemplar_tombo: 'T001',
   data_emprestimo: '11/03/2026 10:00:00',
   data_devolucao: '18/03/2026 10:00:00',
@@ -60,7 +60,7 @@ describe('Hook: useCreateLoan', () => {
   });
 
   it('deve exibir toast de erro ao falhar no cadastro', async () => {
-    mockedCadastrar.mockRejectedValue(new Error('Aluno com penalidade'));
+    mockedCadastrar.mockRejectedValue(new Error('Leitor com penalidade'));
 
     const { result } = renderHook(() => useCreateLoan(), {
       wrapper: createWrapper(),

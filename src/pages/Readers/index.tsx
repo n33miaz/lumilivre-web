@@ -5,14 +5,15 @@ import { Users } from 'lucide-react';
 import { Modal } from '../../components/ui/Modal';
 import { TableSearch } from '../../components/ui/TableSearch';
 import { TableFooter } from '../../components/ui/TableFooter';
-import { StudentModalNew } from '../../features/students/StudentModalNew';
-import { StudentFilter } from '../../features/students/StudentFilter';
-import { ModalStudentDetails } from '../../features/students/StudentModalDetails';
+import { ReaderModalNew } from '../../features/readers/ReaderModalNew';
+import { ReaderFilter } from '../../features/readers/ReaderFilter';
+import { ModalReaderDetails } from '../../features/readers/ReaderModalDetails';
 import { formatarNome } from '../../utils/formatters';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
-import { useAlunos } from '../../hooks/queries/useStudentQueries';
+import { useLeitores } from '../../hooks/queries/useReaderQueries';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
-import { type ListaAluno } from '../../services/studentService';
+import { type ListaLeitor } from '../../services/readerService';
 
 type StatusPenalidade =
   | 'sem-penalidade'
@@ -21,7 +22,7 @@ type StatusPenalidade =
   | 'bloqueio'
   | 'banimento';
 
-type AlunoDisplay = ListaAluno & {
+type LeitorDisplay = ListaLeitor & {
   nascimentoDate: Date;
   penalidadeStatus: StatusPenalidade;
 };
@@ -146,8 +147,9 @@ function BanIcon() {
   );
 }
 
-export function AlunosPage() {
-  const { t, i18n } = useTranslation('student');
+export function LeitoresPage() {
+  const { t, i18n } = useTranslation('reader');
+  const { features } = useLibraryConfig();
   const [currentPage, setCurrentPage] = useState(1);
   const [termoBusca, setTermoBusca] = useState('');
   const [filtroAtivo, setFiltroAtivo] = useState('');
@@ -164,12 +166,12 @@ export function AlunosPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetalhesOpen, setIsDetalhesOpen] = useState(false);
-  const [alunoSelecionado, setAlunoSelecionado] = useState<ListaAluno | null>(
+  const [leitorSelecionado, setLeitorSelecionado] = useState<ListaLeitor | null>(
     null,
   );
 
   const [sortConfig] = useState<{
-    key: keyof AlunoDisplay;
+    key: keyof LeitorDisplay;
     direction: 'asc' | 'desc';
   }>({ key: 'nomeCompleto', direction: 'asc' });
 
@@ -204,7 +206,7 @@ export function AlunosPage() {
     isLoading,
     isError,
     refetch,
-  } = useAlunos(
+  } = useLeitores(
     currentPage - 1,
     itemsPerPage || 10,
     sortString,
@@ -212,7 +214,7 @@ export function AlunosPage() {
     activeFilters,
   );
 
-  const alunos = useMemo<AlunoDisplay[]>(() => {
+  const leitores = useMemo<LeitorDisplay[]>(() => {
     if (!pageData?.content) return [];
 
     const toStatusPenalidade = (status: string | null): StatusPenalidade => {
@@ -244,9 +246,9 @@ export function AlunosPage() {
       bloqueio: 0,
       banimento: 0,
     } as Record<StatusPenalidade, number>;
-    alunos.forEach((aluno) => {
-      counters[aluno.penalidadeStatus] =
-        (counters[aluno.penalidadeStatus] ?? 0) + 1;
+    leitores.forEach((leitor) => {
+      counters[leitor.penalidadeStatus] =
+        (counters[leitor.penalidadeStatus] ?? 0) + 1;
     });
 
     return [
@@ -287,7 +289,7 @@ export function AlunosPage() {
         filterCode: 'BLOQUEIO',
       },
     ];
-  }, [alunos, t]);
+  }, [leitores, t]);
 
   const handleBadgeFilter = (code: string) => {
     const next = code === '' ? '' : penaltyBadge === code ? '' : code;
@@ -325,14 +327,14 @@ export function AlunosPage() {
     setFiltroAtivo(termoBusca);
   };
 
-  const handleAbrirDetalhes = (aluno: ListaAluno) => {
-    setAlunoSelecionado(aluno);
+  const handleAbrirDetalhes = (leitor: ListaLeitor) => {
+    setLeitorSelecionado(leitor);
     setIsDetalhesOpen(true);
   };
 
   const handleFecharDetalhes = (foiAtualizado?: boolean) => {
     setIsDetalhesOpen(false);
-    setAlunoSelecionado(null);
+    setLeitorSelecionado(null);
     if (foiAtualizado) refetch();
   };
 
@@ -365,16 +367,16 @@ export function AlunosPage() {
     <section className="flex min-h-0 flex-1 flex-col gap-5">
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title={t('modal.new.title')} />
-        <StudentModalNew
+        <ReaderModalNew
           onClose={() => setIsModalOpen(false)}
           onSuccess={refetch}
         />
       </Modal>
 
-      <ModalStudentDetails
+      <ModalReaderDetails
         isOpen={isDetalhesOpen}
         onClose={handleFecharDetalhes}
-        aluno={alunoSelecionado}
+        leitor={leitorSelecionado}
       />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -387,7 +389,7 @@ export function AlunosPage() {
               {t('page.eyebrow', { defaultValue: 'Comunidade' })}
             </div>
             <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
-              {t('page.title', { defaultValue: 'Alunos' })}
+              {t('page.title', { defaultValue: 'Leitores' })}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {t('page.subtitle', {
@@ -470,7 +472,7 @@ export function AlunosPage() {
             {t('common:action.advanced_filter')}
           </button>
           {isFilterOpen && (
-            <StudentFilter
+            <ReaderFilter
               isOpen={isFilterOpen}
               onClose={() => setIsFilterOpen(false)}
               filters={filterParams}
@@ -502,7 +504,9 @@ export function AlunosPage() {
                   {t('table.column.name')}
                 </th>
                 <th className="text-center px-5 py-3.5">
-                  {t('table.column.course')}
+                  {features.academicFields
+                    ? t('table.column.course')
+                    : t('table.column.category', { defaultValue: 'Categoria' })}
                 </th>
                 <th className="text-center px-5 py-3.5">
                   {t('table.column.birth_date')}
@@ -531,7 +535,7 @@ export function AlunosPage() {
                     {t('error.load')}
                   </td>
                 </tr>
-              ) : alunos.length === 0 ? (
+              ) : leitores.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -541,11 +545,11 @@ export function AlunosPage() {
                   </td>
                 </tr>
               ) : (
-                alunos.map((aluno) => {
-                  const pill = pillForStatus(aluno.penalidadeStatus);
+                leitores.map((leitor) => {
+                  const pill = pillForStatus(leitor.penalidadeStatus);
                   return (
                     <tr
-                      key={aluno.matricula}
+                      key={leitor.matricula}
                       className="border-t border-gray-100 dark:border-white/5 row-hover"
                     >
                       <td className="px-5 py-3 text-center">
@@ -555,25 +559,27 @@ export function AlunosPage() {
                         </span>
                       </td>
                       <td className="px-5 py-3 text-center font-mono text-xs text-gray-500">
-                        {aluno.matricula}
+                        {leitor.matricula}
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-center gap-3">
                           <span className="font-semibold text-gray-800 dark:text-white truncate">
-                            {formatarNome(aluno.nomeCompleto)}
+                            {formatarNome(leitor.nomeCompleto)}
                           </span>
                         </div>
                       </td>
                       <td className="px-5 py-3 text-center text-gray-600 dark:text-gray-300">
-                        {aluno.cursoNome}
+                        {features.academicFields
+                          ? leitor.cursoNome
+                          : leitor.readerCategory || '—'}
                       </td>
                       <td className="px-5 py-3 text-center text-gray-600 dark:text-gray-300 text-sm">
-                        {aluno.nascimentoDate.toLocaleDateString(i18n.language)}
+                        {leitor.nascimentoDate.toLocaleDateString(i18n.language)}
                       </td>
                       <td className="px-5 py-3 text-center">
                         <button
                           type="button"
-                          onClick={() => handleAbrirDetalhes(aluno)}
+                          onClick={() => handleAbrirDetalhes(leitor)}
                           className="pill pill-purple hover:bg-lumi-primary hover:text-white"
                         >
                           {t('common:button.details')}

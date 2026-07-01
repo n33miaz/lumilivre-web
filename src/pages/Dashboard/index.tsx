@@ -72,8 +72,8 @@ interface EmprestimoVencer {
   id: string;
   livro: string;
   isbn: string;
-  aluno: string;
-  alunoMatricula: string;
+  leitor: string;
+  leitorMatricula: string;
   tombo: string;
   retirada: string;
   devolucao: string;
@@ -83,8 +83,8 @@ interface EmprestimoVencer {
 
 interface SolicitacaoDisplay {
   id: string;
-  aluno: string;
-  alunoMatricula?: string;
+  leitor: string;
+  leitorMatricula?: string;
   livro: string;
   exemplarTombo?: string;
   solicitacao: Date;
@@ -105,7 +105,7 @@ const PERIOD_MONTHS: Record<'30d' | '60d' | '90d', number> = {
  * visual. Mantidos como constantes para não remontar a cada render.
  */
 const SPARK_BOOKS = [8, 10, 13, 18, 16, 21, 23, 25];
-const SPARK_STUDENTS = [10, 14, 11, 17, 19, 16, 21, 24];
+const SPARK_READERS = [10, 14, 11, 17, 19, 16, 21, 24];
 const SPARK_OVERDUE = [22, 18, 20, 14, 16, 11, 9, 7];
 
 /** Client-side pagination for the small dashboard widget tables. */
@@ -166,7 +166,7 @@ export function DashboardPage() {
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState<{
     id: string;
-    alunoMatricula: string;
+    leitorMatricula: string;
     livroIsbn: string;
     livroNome?: string;
     exemplarTombo: string;
@@ -177,8 +177,8 @@ export function DashboardPage() {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<{
     id: string;
-    alunoNome: string;
-    alunoMatricula?: string;
+    leitorNome: string;
+    leitorMatricula?: string;
     livroNome: string;
     exemplarTombo?: string;
     dataSolicitacao: string;
@@ -188,8 +188,8 @@ export function DashboardPage() {
     if (!solicitacoes.data) return [];
     return solicitacoes.data.map((s) => ({
       id: s.id,
-      aluno: s.alunoNome,
-      alunoMatricula: s.alunoMatricula,
+      leitor: s.leitorNome,
+      leitorMatricula: s.leitorMatricula,
       livro: s.livroNome,
       exemplarTombo: s.exemplarTombo,
       solicitacao: new Date(s.dataSolicitacao),
@@ -220,8 +220,8 @@ export function DashboardPage() {
           id: e.id,
           livro: e.livroNome,
           isbn: '-',
-          aluno: e.alunoNome,
-          alunoMatricula: e.alunoMatricula,
+          leitor: e.leitorNome,
+          leitorMatricula: e.leitorMatricula,
           tombo: e.tombo,
           rawDevolucao: e.dataDevolucao,
           retirada: e.dataEmprestimo || '-',
@@ -401,8 +401,8 @@ export function DashboardPage() {
           statsData.livros,
         ],
         [
-          t('card.total_students', { defaultValue: 'Total de Alunos' }),
-          statsData.alunos,
+          t('card.total_readers', { defaultValue: 'Total de Leitores' }),
+          statsData.leitores,
         ],
       );
     }
@@ -507,7 +507,7 @@ export function DashboardPage() {
   const handleAbrirDetalhesEmprestimo = (item: EmprestimoVencer) => {
     setSelectedLoan({
       id: item.id,
-      alunoMatricula: item.alunoMatricula,
+      leitorMatricula: item.leitorMatricula,
       exemplarTombo: item.tombo,
       dataDevolucao: item.rawDevolucao,
       livroIsbn: item.isbn,
@@ -526,8 +526,8 @@ export function DashboardPage() {
   const handleAbrirDetalhesSolicitacao = (item: SolicitacaoDisplay) => {
     setSelectedRequest({
       id: item.id,
-      alunoNome: item.aluno,
-      alunoMatricula: item.alunoMatricula,
+      leitorNome: item.leitor,
+      leitorMatricula: item.leitorMatricula,
       livroNome: item.livro,
       exemplarTombo: item.exemplarTombo,
       dataSolicitacao: item.rawDataSolicitacao,
@@ -629,15 +629,15 @@ export function DashboardPage() {
           sparkline={SPARK_BOOKS}
         />
         <StatCard
-          to="/admin/students"
+          to="/admin/readers"
           Icon={UsersIcon}
-          title={t('stat.students')}
-          value={statsData?.alunos ?? 0}
+          title={t('stat.readers')}
+          value={statsData?.leitores ?? 0}
           tone="blue"
           isLoading={isStatsLoading}
           hasError={!!statsError}
           animate={shouldAnimateStats}
-          sparkline={SPARK_STUDENTS}
+          sparkline={SPARK_READERS}
         />
         <StatCard
           to="/admin/loans"
@@ -896,7 +896,7 @@ export function DashboardPage() {
                 <thead className="tbl-head-light text-[11px] font-bold uppercase">
                   <tr>
                     <th className="text-left px-5 py-3">
-                      {t('table.column.student')}
+                      {t('table.column.reader')}
                     </th>
                     <th className="text-left px-5 py-3">
                       {t('table.column.book')}
@@ -914,7 +914,7 @@ export function DashboardPage() {
                       className="border-t border-gray-100 dark:border-white/5 row-hover"
                     >
                       <td className="px-5 py-3 font-semibold dark:text-gray-200">
-                        {formatarNome(item.aluno)}
+                        {formatarNome(item.leitor)}
                       </td>
                       <td className="px-5 py-3 text-gray-600 dark:text-gray-300 max-w-[240px] truncate">
                         {item.livro}
@@ -983,7 +983,7 @@ export function DashboardPage() {
                 <thead className="tbl-head-light text-[11px] font-bold uppercase">
                   <tr>
                     <th className="text-left px-5 py-3">
-                      {t('table.column.student')}
+                      {t('table.column.reader')}
                     </th>
                     <th className="text-left px-5 py-3">
                       {t('table.column.book')}
@@ -1001,7 +1001,7 @@ export function DashboardPage() {
                       className="border-t border-gray-100 dark:border-white/5 row-hover"
                     >
                       <td className="px-5 py-3 font-semibold dark:text-gray-200">
-                        {formatarNome(item.aluno)}
+                        {formatarNome(item.leitor)}
                       </td>
                       <td className="px-5 py-3 text-gray-600 dark:text-gray-300 max-w-[240px] truncate">
                         {item.livro}

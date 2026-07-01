@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -7,12 +7,13 @@ import {
   useCursos,
   useModulos,
   useTurnos,
-} from '../../hooks/queries/useStudentQueries';
+} from '../../hooks/queries/useReaderQueries';
 import {
-  studentSchema,
-  type StudentFormData,
-} from '../../schemas/studentSchema';
+  buildReaderSchema,
+  type ReaderFormData,
+} from '../../schemas/readerSchema';
 import { useToast } from '../../contexts/ToastContext';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
 import { Label } from '../../components/ui/Label';
 import { Input } from '../../components/ui/Input';
@@ -20,22 +21,27 @@ import { CustomSelect } from '../../components/ui/CustomSelect';
 import { SearchableSelect } from '../../components/ui/SearchableSelect';
 import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
 
-interface StudentFormProps {
+interface ReaderFormProps {
   formId: string;
-  initialData?: Partial<StudentFormData>;
+  initialData?: Partial<ReaderFormData>;
   readOnly?: boolean;
-  onSubmit: (data: StudentFormData) => void;
+  onSubmit: (data: ReaderFormData) => void;
   isSubmitting?: boolean;
 }
 
-export function StudentForm({
+export function ReaderForm({
   formId,
   initialData,
   readOnly = false,
   onSubmit,
-}: StudentFormProps) {
+}: ReaderFormProps) {
   const { addToast } = useToast();
+  const { features } = useLibraryConfig();
   const [isCepLoading, setIsCepLoading] = useState(false);
+  const schema = useMemo(
+    () => buildReaderSchema(features.academicFields),
+    [features.academicFields],
+  );
 
   const { data: cursosList } = useCursos();
   const { data: modulosList } = useModulos();
@@ -61,8 +67,8 @@ export function StudentForm({
     setValue,
     reset,
     formState: { errors },
-  } = useForm<StudentFormData>({
-    resolver: zodResolver(studentSchema),
+  } = useForm<ReaderFormData>({
+    resolver: zodResolver(schema),
     defaultValues: initialData || { cursoId: '', turnoId: '', moduloId: '' },
   });
 
@@ -149,77 +155,89 @@ export function StudentForm({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {features.academicFields ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <Label requiredIndicator={!readOnly}>Curso</Label>
+            <Controller
+              name="cursoId"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <SearchableSelect
+                    value={String(field.value ?? '')}
+                    onChange={field.onChange}
+                    options={cursosOptions}
+                    placeholder="Selecione"
+                    disabled={readOnly}
+                  />
+                  {errors.cursoId && (
+                    <span className="text-xs text-red-500 mt-1">
+                      {errors.cursoId.message}
+                    </span>
+                  )}
+                </div>
+              )}
+            />
+          </div>
+          <div>
+            <Label requiredIndicator={!readOnly}>Turno</Label>
+            <Controller
+              name="turnoId"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <CustomSelect
+                    value={String(field.value ?? '')}
+                    onChange={field.onChange}
+                    options={turnoOptions}
+                    placeholder="Selecione"
+                    disabled={readOnly}
+                  />
+                  {errors.turnoId && (
+                    <span className="text-xs text-red-500 mt-1">
+                      {errors.turnoId.message}
+                    </span>
+                  )}
+                </div>
+              )}
+            />
+          </div>
+          <div>
+            <Label requiredIndicator={!readOnly}>Módulo</Label>
+            <Controller
+              name="moduloId"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <CustomSelect
+                    value={String(field.value ?? '')}
+                    onChange={field.onChange}
+                    options={modulosOptions}
+                    placeholder="Selecione"
+                    disabled={readOnly}
+                  />
+                  {errors.moduloId && (
+                    <span className="text-xs text-red-500 mt-1">
+                      {errors.moduloId.message}
+                    </span>
+                  )}
+                </div>
+              )}
+            />
+          </div>
+        </div>
+      ) : (
         <div>
-          <Label requiredIndicator={!readOnly}>Curso</Label>
-          <Controller
-            name="cursoId"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <SearchableSelect
-                  value={String(field.value)}
-                  onChange={field.onChange}
-                  options={cursosOptions}
-                  placeholder="Selecione"
-                  disabled={readOnly}
-                />
-                {errors.cursoId && (
-                  <span className="text-xs text-red-500 mt-1">
-                    {errors.cursoId.message}
-                  </span>
-                )}
-              </div>
-            )}
+          <Label htmlFor="readerCategory">Categoria/Grupo</Label>
+          <Input
+            id="readerCategory"
+            {...register('readerCategory')}
+            error={errors.readerCategory?.message}
+            disabled={readOnly}
           />
         </div>
-        <div>
-          <Label requiredIndicator={!readOnly}>Turno</Label>
-          <Controller
-            name="turnoId"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <CustomSelect
-                  value={String(field.value)}
-                  onChange={field.onChange}
-                  options={turnoOptions}
-                  placeholder="Selecione"
-                  disabled={readOnly}
-                />
-                {errors.turnoId && (
-                  <span className="text-xs text-red-500 mt-1">
-                    {errors.turnoId.message}
-                  </span>
-                )}
-              </div>
-            )}
-          />
-        </div>
-        <div>
-          <Label requiredIndicator={!readOnly}>Módulo</Label>
-          <Controller
-            name="moduloId"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <CustomSelect
-                  value={String(field.value)}
-                  onChange={field.onChange}
-                  options={modulosOptions}
-                  placeholder="Selecione"
-                  disabled={readOnly}
-                />
-                {errors.moduloId && (
-                  <span className="text-xs text-red-500 mt-1">
-                    {errors.moduloId.message}
-                  </span>
-                )}
-              </div>
-            )}
-          />
-        </div>
-      </div>
+      )}
       <hr className="border-gray-200 dark:border-gray-700 my-2" />
       <div className="grid grid-cols-12 gap-4">
         <div className="col-span-4 md:col-span-3">

@@ -23,7 +23,7 @@ const mockedApi = vi.mocked(api);
 
 const mockTccPayload: TccPayload = {
   titulo: 'Sistema de Gestao Bibliotecaria',
-  alunos: 'Joao, Maria',
+  leitores: 'Joao, Maria',
   orientadores: 'Prof. Silva',
   curso_id: 1,
   anoConclusao: '2025',
@@ -48,7 +48,7 @@ describe('thesisService', () => {
       params: { q: 'Sistema' },
     });
     expect(result[0].titulo).toBe('TCC Teste');
-    expect(result[0].alunos).toBe('Joao');
+    expect(result[0].leitores).toBe('Joao');
   });
 
   it('buscarTccPorId uses v2 detail route', async () => {

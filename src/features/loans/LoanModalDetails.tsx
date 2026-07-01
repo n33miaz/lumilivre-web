@@ -18,8 +18,8 @@ import { type LoanFormData } from '../../schemas/loanSchema';
 
 interface EmprestimoDados {
   id: string;
-  alunoMatricula: string;
-  alunoNome?: string;
+  leitorMatricula: string;
+  leitorNome?: string;
   livroIsbn: string;
   livroNome?: string;
   exemplarTombo: string;
@@ -89,7 +89,7 @@ export function ModalLoanDetails({
     try {
       const payload: EmprestimoPayload = {
         id: emprestimoAtual?.id,
-        aluno_matricula: data.aluno_matricula,
+        leitor_matricula: data.leitor_matricula,
         exemplar_tombo: data.exemplar_tombo,
         data_emprestimo: data.data_emprestimo,
         data_devolucao: data.data_devolucao,
@@ -116,8 +116,8 @@ export function ModalLoanDetails({
   };
 
   const initialData = emprestimoAtual ? {
-    aluno_matricula: emprestimoAtual.alunoMatricula,
-    alunoNome: emprestimoAtual.alunoNome,
+    leitor_matricula: emprestimoAtual.leitorMatricula,
+    leitorNome: emprestimoAtual.leitorNome,
     livro_id: livroIdEncontrado,
     livroNome: emprestimoAtual.livroNome,
     exemplar_tombo: emprestimoAtual.exemplarTombo,

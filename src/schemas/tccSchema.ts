@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const tccSchema = z.object({
   titulo: z.string().min(1, 'O título é obrigatório'),
-  alunos: z.string().min(1, 'Informe os alunos'),
+  leitores: z.string().min(1, 'Informe os leitores'),
   orientadores: z.string().optional(),
   curso_id: z.coerce.number().min(1, 'Selecione um curso válido'),
   anoConclusao: z.string().min(4, 'Ano inválido'),

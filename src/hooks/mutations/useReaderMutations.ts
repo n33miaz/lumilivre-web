@@ -1,43 +1,43 @@
 import { createMutationHook } from '../useGenericMutation';
 import {
-  cadastrarAluno,
-  atualizarAluno,
-  excluirAluno,
-  resetarSenhaAluno,
-  type AlunoPayload,
-} from '../../services/studentService';
+  cadastrarLeitor,
+  atualizarLeitor,
+  excluirLeitor,
+  resetarSenhaLeitor,
+  type LeitorPayload,
+} from '../../services/readerService';
 
-const STUDENT_QUERY_KEY = ['alunos'];
+const READER_QUERY_KEY = ['leitores'];
 
 // --- Criação ---
-export const useCreateStudent = createMutationHook<unknown, AlunoPayload>({
-  mutationFn: (payload) => cadastrarAluno(payload),
-  queryKey: STUDENT_QUERY_KEY,
-  successMessage: 'Aluno cadastrado com sucesso!',
-  errorMessage: 'Erro ao cadastrar aluno.',
+export const useCreateReader = createMutationHook<unknown, LeitorPayload>({
+  mutationFn: (payload) => cadastrarLeitor(payload),
+  queryKey: READER_QUERY_KEY,
+  successMessage: 'Leitor cadastrado com sucesso!',
+  errorMessage: 'Erro ao cadastrar leitor.',
 });
 
 // --- Atualização ---
-interface UpdateStudentVariables {
+interface UpdateReaderVariables {
   matricula: string;
-  payload: AlunoPayload;
+  payload: LeitorPayload;
 }
-export const useUpdateStudent = createMutationHook<
+export const useUpdateReader = createMutationHook<
   unknown,
-  UpdateStudentVariables
+  UpdateReaderVariables
 >({
-  mutationFn: ({ matricula, payload }) => atualizarAluno(matricula, payload),
-  queryKey: STUDENT_QUERY_KEY,
-  successMessage: 'Aluno atualizado com sucesso!',
-  errorMessage: 'Erro ao atualizar aluno.',
+  mutationFn: ({ matricula, payload }) => atualizarLeitor(matricula, payload),
+  queryKey: READER_QUERY_KEY,
+  successMessage: 'Leitor atualizado com sucesso!',
+  errorMessage: 'Erro ao atualizar leitor.',
 });
 
 // --- Exclusão ---
-export const useDeleteStudent = createMutationHook<unknown, string>({
-  mutationFn: (matricula) => excluirAluno(matricula),
-  queryKey: STUDENT_QUERY_KEY,
-  successMessage: 'Aluno excluído com sucesso!',
-  errorMessage: 'Erro ao excluir aluno.',
+export const useDeleteReader = createMutationHook<unknown, string>({
+  mutationFn: (matricula) => excluirLeitor(matricula),
+  queryKey: READER_QUERY_KEY,
+  successMessage: 'Leitor excluído com sucesso!',
+  errorMessage: 'Erro ao excluir leitor.',
 });
 
 // --- Reset de Senha ---
@@ -45,11 +45,11 @@ import { useMutation } from '@tanstack/react-query';
 import { useToast } from '../../contexts/ToastContext';
 import { getErrorMessage } from '../../utils/errorHandler';
 
-export function useResetStudentPassword() {
+export function useResetReaderPassword() {
   const { addToast } = useToast();
 
   return useMutation({
-    mutationFn: (matricula: string) => resetarSenhaAluno(matricula),
+    mutationFn: (matricula: string) => resetarSenhaLeitor(matricula),
     onSuccess: (_, matricula) => {
       addToast({
         type: 'success',

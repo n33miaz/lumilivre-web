@@ -144,7 +144,7 @@ export function NotificationsBell() {
                   <div className="flex-1">
                     <div className="text-sm text-gray-700 dark:text-gray-200">
                       {t('notifications.new_request', {
-                        name: req.alunoNome,
+                        name: req.leitorNome,
                         defaultValue: 'Nova solicitação de {{name}}',
                       })}
                     </div>

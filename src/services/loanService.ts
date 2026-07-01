@@ -40,8 +40,8 @@ const mapLoanListItem = (item: Record<string, unknown>): EmprestimoListagemDTO =
   ),
   livroNome: (item.bookTitle as string) ?? '',
   livroTombo: (item.copyCode as string) ?? '',
-  nomeAluno: (item.studentName as string) ?? '',
-  matriculaAluno: (item.studentRegistrationNumber as string) ?? '',
+  nomeLeitor: (item.readerName as string) ?? '',
+  matriculaLeitor: (item.readerRegistrationNumber as string) ?? '',
   curso: (item.courseName as string) ?? '',
   dataEmprestimo: (item.borrowedAt as string) ?? '',
   dataDevolucao: (item.dueAt as string) ?? '',
@@ -53,8 +53,8 @@ export interface EmprestimoListagemDTO {
   statusEmprestimo: 'ATIVO' | 'ATRASADO' | 'CONCLUIDO';
   livroNome: string;
   livroTombo: string;
-  nomeAluno: string;
-  matriculaAluno: string;
+  nomeLeitor: string;
+  matriculaLeitor: string;
   curso: string;
   dataEmprestimo: string;
   /** Data combinada de devolução (dueAt). */
@@ -66,15 +66,15 @@ export interface EmprestimoListagemDTO {
 export interface EmprestimoAtivoDTO {
   id: string;
   livroNome: string;
-  alunoNome: string;
-  alunoMatricula: string;
+  leitorNome: string;
+  leitorMatricula: string;
   tombo: string;
   dataEmprestimo: string;
   dataDevolucao: string;
   statusEmprestimo: 'ATIVO' | 'ATRASADO' | 'CONCLUIDO';
 }
 
-export interface AlunoRanking {
+export interface LeitorRanking {
   matricula: string;
   nome: string;
   emprestimosCount: number;
@@ -87,7 +87,7 @@ export interface EmprestimoFilterParams {
   dataDevolucaoInicio?: string;
   tombo?: string;
   livroNome?: string;
-  alunoNome?: string;
+  leitorNome?: string;
   page?: number;
   size?: number;
   sort?: string;
@@ -95,7 +95,7 @@ export interface EmprestimoFilterParams {
 
 export interface EmprestimoPayload {
   id?: string | number;
-  aluno_matricula: string;
+  leitor_matricula: string;
   exemplar_tombo: string;
   data_emprestimo: string;
   data_devolucao: string;
@@ -131,7 +131,7 @@ export const buscarEmprestimosAvancado = async (
               : undefined,
       copyCode: params.tombo,
       bookTitle: params.livroNome,
-      studentName: params.alunoNome,
+      readerName: params.leitorNome,
       borrowedAt: params.dataEmprestimo,
       dueAt: params.dataDevolucao,
       dueAtStart: params.dataDevolucaoInicio,
@@ -163,8 +163,8 @@ export const buscarEmprestimosAtivosEAtrasados = async (): Promise<
   return (response.data || []).map((item: Record<string, unknown>) => ({
     id: item.id as string,
     livroNome: item.bookTitle as string,
-    alunoNome: item.studentName as string,
-    alunoMatricula: item.studentRegistrationNumber as string,
+    leitorNome: item.readerName as string,
+    leitorMatricula: item.readerRegistrationNumber as string,
     tombo: item.copyCode as string,
     dataEmprestimo: item.borrowedAt as string,
     dataDevolucao: item.dueAt as string,
@@ -179,14 +179,14 @@ export const buscarRanking = async (
   cursoId?: number,
   moduloId?: number,
   turnoId?: number,
-): Promise<AlunoRanking[]> => {
+): Promise<LeitorRanking[]> => {
   const params: Record<string, number> = { top };
 
   if (cursoId) params.courseId = cursoId;
   if (moduloId) params.academicModuleId = moduloId;
   if (turnoId) params.studyShiftId = turnoId;
 
-  const response = await api.get('/api/students/ranking', { params });
+  const response = await api.get('/api/readers/ranking', { params });
   return (response.data || []).map((item: Record<string, unknown>) => ({
     matricula: item.registrationNumber as string,
     nome: item.fullName as string,
@@ -194,19 +194,19 @@ export const buscarRanking = async (
   }));
 };
 
-export const buscarHistoricoAluno = async (matricula: string) => {
-  const response = await api.get(`/api/loans/student/${matricula}/history`);
+export const buscarHistoricoLeitor = async (matricula: string) => {
+  const response = await api.get(`/api/loans/reader/${matricula}/history`);
   return response.data;
 };
 
-export const buscarEmprestimosAtivosAluno = async (matricula: string) => {
-  const response = await api.get(`/api/loans/student/${matricula}`);
+export const buscarEmprestimosAtivosLeitor = async (matricula: string) => {
+  const response = await api.get(`/api/loans/reader/${matricula}`);
   return response.data;
 };
 
 export const cadastrarEmprestimo = async (payload: EmprestimoPayload) => {
   const response = await api.post('/api/loans', {
-    studentRegistrationNumber: payload.aluno_matricula,
+    readerRegistrationNumber: payload.leitor_matricula,
     copyCode: payload.exemplar_tombo,
     borrowedAt: toOffsetDateTime(payload.data_emprestimo),
     dueAt: toOffsetDateTime(payload.data_devolucao),
@@ -219,7 +219,7 @@ export const atualizarEmprestimo = async (
   payload: EmprestimoPayload,
 ) => {
   const response = await api.put(`/api/loans/${id}`, {
-    studentRegistrationNumber: payload.aluno_matricula,
+    readerRegistrationNumber: payload.leitor_matricula,
     copyCode: payload.exemplar_tombo,
     borrowedAt: toOffsetDateTime(payload.data_emprestimo),
     dueAt: toOffsetDateTime(payload.data_devolucao),

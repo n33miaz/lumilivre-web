@@ -129,9 +129,9 @@ export function LoanModalRequest({
               <Input value={dataFormatada} disabled />
             </div>
             <div>
-              <Label>{t('form.field.student')}</Label>
+              <Label>{t('form.field.reader')}</Label>
               <Input
-                value={`${solicitacaoAtual?.alunoNome} (${t('request.registration_abbr')}: ${solicitacaoAtual?.alunoMatricula})`}
+                value={`${solicitacaoAtual?.leitorNome} (${t('request.registration_abbr')}: ${solicitacaoAtual?.leitorMatricula})`}
                 disabled
               />
             </div>

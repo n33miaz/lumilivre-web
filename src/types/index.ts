@@ -8,7 +8,7 @@ export interface Emprestimo {
       imagem: string | null;
     };
   };
-  aluno: {
+  leitor: {
     nomeCompleto: string;
   };
   dataEmprestimo: string;

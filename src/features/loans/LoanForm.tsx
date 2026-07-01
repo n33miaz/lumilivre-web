@@ -1,7 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAlunosOptions } from '../../hooks/queries/useStudentQueries';
+import { useLeitoresOptions } from '../../hooks/queries/useReaderQueries';
 import {
   useLivrosOptions,
   useExemplares,
@@ -17,7 +17,7 @@ import { CustomDatePicker } from '../../components/ui/CustomDatePicker';
 interface LoanFormProps {
   formId: string;
   initialData?: Partial<LoanFormData> & {
-    alunoNome?: string;
+    leitorNome?: string;
     livroNome?: string;
   };
   readOnly?: boolean;
@@ -47,7 +47,7 @@ export function LoanForm({
     defaultValues: {
       data_emprestimo: initialData?.data_emprestimo || hoje,
       data_devolucao: initialData?.data_devolucao || devolucaoStr,
-      aluno_matricula: initialData?.aluno_matricula || '',
+      leitor_matricula: initialData?.leitor_matricula || '',
       livro_id: initialData?.livro_id || '',
       exemplar_tombo: initialData?.exemplar_tombo || '',
     },
@@ -61,25 +61,25 @@ export function LoanForm({
       reset({
         data_emprestimo: initialData.data_emprestimo || hoje,
         data_devolucao: initialData.data_devolucao || devolucaoStr,
-        aluno_matricula: initialData.aluno_matricula || '',
+        leitor_matricula: initialData.leitor_matricula || '',
         livro_id: initialData.livro_id || '',
         exemplar_tombo: initialData.exemplar_tombo || '',
       });
     }
   }, [initialData, reset, hoje, devolucaoStr]);
 
-  const { data: alunosData } = useAlunosOptions();
+  const { data: leitoresData } = useLeitoresOptions();
   const { data: livrosData } = useLivrosOptions();
   const { data: exemplaresData, isLoading: isLoadingExemplares } =
     useExemplares(Number(livroIdSelecionado));
 
-  const alunosOptions = useMemo(
+  const leitoresOptions = useMemo(
     () =>
-      alunosData?.map((a) => ({
+      leitoresData?.map((a) => ({
         label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
         value: a.matricula,
       })) || [],
-    [alunosData],
+    [leitoresData],
   );
 
   const livrosOptions = useMemo(
@@ -137,27 +137,27 @@ export function LoanForm({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label requiredIndicator={!readOnly}>Aluno</Label>
+          <Label requiredIndicator={!readOnly}>Leitor</Label>
           {readOnly ? (
             <Input
               disabled
-              value={initialData?.alunoNome || watch('aluno_matricula')}
+              value={initialData?.leitorNome || watch('leitor_matricula')}
             />
           ) : (
             <Controller
-              name="aluno_matricula"
+              name="leitor_matricula"
               control={control}
               render={({ field }) => (
                 <div>
                   <SearchableSelect
                     value={field.value}
                     onChange={field.onChange}
-                    options={alunosOptions}
-                    placeholder="Selecione o aluno"
+                    options={leitoresOptions}
+                    placeholder="Selecione o leitor"
                   />
-                  {errors.aluno_matricula && (
+                  {errors.leitor_matricula && (
                     <span className="text-xs text-red-500 mt-1">
-                      {errors.aluno_matricula.message}
+                      {errors.leitor_matricula.message}
                     </span>
                   )}
                 </div>

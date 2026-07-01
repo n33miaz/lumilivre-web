@@ -37,8 +37,8 @@ interface EmprestimoDisplay {
   livro: string;
   isbn: string;
   tombo: string;
-  aluno: string;
-  matriculaAluno: string;
+  leitor: string;
+  matriculaLeitor: string;
   curso: string;
   emprestimo: string;
   devolucao: string;
@@ -76,7 +76,7 @@ const filtroAtrasadosObj = {
   dataDevolucao: '',
   tombo: '',
   livroNome: '',
-  alunoNome: '',
+  leitorNome: '',
 };
 
 function PlusIcon() {
@@ -141,7 +141,7 @@ export function EmprestimosPage() {
   const [isDetalhesOpen, setIsDetalhesOpen] = useState(false);
   const [emprestimoSelecionado, setEmprestimoSelecionado] = useState<{
     id: string;
-    alunoMatricula: string;
+    leitorMatricula: string;
     livroIsbn: string;
     livroNome?: string;
     exemplarTombo: string;
@@ -161,7 +161,7 @@ export function EmprestimosPage() {
       dataDevolucao: '',
       tombo: '',
       livroNome: '',
-      alunoNome: '',
+      leitorNome: '',
     };
   });
 
@@ -201,7 +201,7 @@ export function EmprestimosPage() {
       status: 'status',
       tombo: 'bookCopy.copyCode',
       livro: 'bookCopy.book.title',
-      aluno: 'student.fullName',
+      leitor: 'reader.fullName',
       emprestimo: 'borrowedAt',
       devolucao: 'dueAt',
     };
@@ -272,8 +272,8 @@ export function EmprestimosPage() {
           livro: item.livroNome,
           isbn: '',
           tombo: item.livroTombo,
-          aluno: item.nomeAluno,
-          matriculaAluno: item.matriculaAluno,
+          leitor: item.nomeLeitor,
+          matriculaLeitor: item.matriculaLeitor,
           curso: item.curso || '-',
           emprestimo: formatarDataIso(item.dataEmprestimo),
           devolucao: formatarDataIso(item.dataDevolucao),
@@ -386,7 +386,7 @@ export function EmprestimosPage() {
       dataDevolucao: '',
       tombo: '',
       livroNome: '',
-      alunoNome: '',
+      leitorNome: '',
     });
     setActiveFilters({});
     setIsFilterOpen(false);
@@ -395,7 +395,7 @@ export function EmprestimosPage() {
   const handleAbrirDetalhes = (item: EmprestimoDisplay) => {
     setEmprestimoSelecionado({
       id: item.rawId,
-      alunoMatricula: item.matriculaAluno,
+      leitorMatricula: item.matriculaLeitor,
       livroIsbn: item.isbn,
       livroNome: item.livro,
       exemplarTombo: item.tombo,
@@ -554,7 +554,7 @@ export function EmprestimosPage() {
                   {t('table.column.book')}
                 </th>
                 <th className="text-center px-5 py-3.5">
-                  {t('table.column.student')}
+                  {t('table.column.reader')}
                 </th>
                 <th className="text-center px-5 py-3.5">
                   {t('table.column.borrowed_at')}
@@ -610,7 +610,7 @@ export function EmprestimosPage() {
                         {emp.livro}
                       </td>
                       <td className="px-5 py-3 text-center font-semibold text-gray-800 dark:text-white truncate">
-                        {formatarNome(emp.aluno)}
+                        {formatarNome(emp.leitor)}
                       </td>
                       <td className="px-5 py-3 text-center text-gray-600 dark:text-gray-300 text-sm">
                         {emp.emprestimo}

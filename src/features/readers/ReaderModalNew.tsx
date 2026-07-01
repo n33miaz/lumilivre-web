@@ -1,32 +1,35 @@
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
-import { StudentForm } from './StudentForm';
-import { useCreateStudent } from '../../hooks/mutations/useStudentMutations';
-import type { AlunoPayload } from '../../services/studentService';
-import { type StudentFormData } from '../../schemas/studentSchema';
+import { ReaderForm } from './ReaderForm';
+import { useCreateReader } from '../../hooks/mutations/useReaderMutations';
+import type { LeitorPayload } from '../../services/readerService';
+import { type ReaderFormData } from '../../schemas/readerSchema';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
-interface StudentModalNewProps {
+interface ReaderModalNewProps {
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function StudentModalNew({ onClose, onSuccess }: StudentModalNewProps) {
-  const { mutateAsync: createStudent, isPending } = useCreateStudent();
+export function ReaderModalNew({ onClose, onSuccess }: ReaderModalNewProps) {
+  const { mutateAsync: createReader, isPending } = useCreateReader();
+  const { features } = useLibraryConfig();
 
-  const handleSubmit = async (data: StudentFormData) => {
+  const handleSubmit = async (data: ReaderFormData) => {
     try {
       const payload = {
         ...data,
         cpf: data.cpf ? data.cpf.replace(/\D/g, '') : undefined,
         celular: data.celular ? data.celular.replace(/\D/g, '') : undefined,
         cep: data.cep ? data.cep.replace(/\D/g, '') : undefined,
-        cursoId: Number(data.cursoId),
-        turnoId: Number(data.turnoId),
-        moduloId: Number(data.moduloId),
+        cursoId: features.academicFields ? Number(data.cursoId) : undefined,
+        turnoId: features.academicFields ? Number(data.turnoId) : undefined,
+        moduloId: features.academicFields ? Number(data.moduloId) : undefined,
+        readerCategory: features.academicFields ? undefined : data.readerCategory,
         numero_casa: Number(data.numero_casa) || 0,
       };
 
-      await createStudent(payload as unknown as AlunoPayload);
+      await createReader(payload as unknown as LeitorPayload);
       onSuccess();
       onClose();
     } catch (error) {
@@ -37,16 +40,16 @@ export function StudentModalNew({ onClose, onSuccess }: StudentModalNewProps) {
   return (
     <>
       <Modal.Body>
-        <StudentForm formId="form-novo-aluno" onSubmit={handleSubmit} />
+        <ReaderForm formId="form-novo-leitor" onSubmit={handleSubmit} />
       </Modal.Body>
       <Modal.Footer>
         <Button
           type="submit"
-          form="form-novo-aluno"
+          form="form-novo-leitor"
           isLoading={isPending}
           className="w-full"
         >
-          CADASTRAR ALUNO
+          CADASTRAR LEITOR
         </Button>
       </Modal.Footer>
     </>

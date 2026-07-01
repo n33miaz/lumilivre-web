@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 
 import ptBRCommon from './locales/pt-BR/common.json';
 import ptBRAuth from './locales/pt-BR/auth.json';
-import ptBRStudent from './locales/pt-BR/student.json';
+import ptBRReader from './locales/pt-BR/reader.json';
 import ptBRBook from './locales/pt-BR/book.json';
 import ptBRLoan from './locales/pt-BR/loan.json';
 import ptBRSettings from './locales/pt-BR/settings.json';
@@ -18,7 +18,7 @@ import ptBRDownload from './locales/pt-BR/download.json';
 
 import enUSCommon from './locales/en-US/common.json';
 import enUSAuth from './locales/en-US/auth.json';
-import enUSStudent from './locales/en-US/student.json';
+import enUSReader from './locales/en-US/reader.json';
 import enUSBook from './locales/en-US/book.json';
 import enUSLoan from './locales/en-US/loan.json';
 import enUSSettings from './locales/en-US/settings.json';
@@ -52,7 +52,7 @@ i18n
       'pt-BR': {
         common: ptBRCommon,
         auth: ptBRAuth,
-        student: ptBRStudent,
+        reader: ptBRReader,
         book: ptBRBook,
         loan: ptBRLoan,
         settings: ptBRSettings,
@@ -67,7 +67,7 @@ i18n
       'en-US': {
         common: enUSCommon,
         auth: enUSAuth,
-        student: enUSStudent,
+        reader: enUSReader,
         book: enUSBook,
         loan: enUSLoan,
         settings: enUSSettings,

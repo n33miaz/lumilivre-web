@@ -66,9 +66,9 @@ describe('Servicos de lookup', () => {
         data: [
           {
             courseName: 'Info',
-            studentCount: 30,
+            readerCount: 30,
             totalLoans: 100,
-            avgLoansPerStudent: 3.3,
+            avgLoansPerReader: 3.3,
           },
         ],
       });
@@ -76,7 +76,7 @@ describe('Servicos de lookup', () => {
       const result = await buscarEstatisticasCursos();
 
       expect(mockedApi.get).toHaveBeenCalledWith('/api/courses/statistics');
-      expect(result[0].quantidadeAlunos).toBe(30);
+      expect(result[0].quantidadeLeitores).toBe(30);
     });
 
     it('buscarEstatisticasGrafico: usa endpoints v2', async () => {

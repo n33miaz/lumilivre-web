@@ -7,9 +7,10 @@ import {
   useCursos,
   useModulos,
   useTurnos,
-} from '../../hooks/queries/useStudentQueries';
+} from '../../hooks/queries/useReaderQueries';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
-interface StudentFilterProps {
+interface ReaderFilterProps {
   isOpen: boolean;
   onClose: () => void;
   filters: {
@@ -29,17 +30,18 @@ interface Option {
   value: string | number;
 }
 
-export function StudentFilter({
+export function ReaderFilter({
   isOpen,
   onClose,
   filters,
   onFilterChange,
   onApply,
   onClear,
-}: StudentFilterProps) {
+}: ReaderFilterProps) {
   const { data: cursosData, isLoading: isLoadingCursos } = useCursos();
   const { data: modulosData, isLoading: isLoadingModulos } = useModulos();
   const { data: turnosData, isLoading: isLoadingTurnos } = useTurnos();
+  const { features } = useLibraryConfig();
 
   const isLoading = isLoadingCursos || isLoadingModulos || isLoadingTurnos;
 
@@ -109,39 +111,41 @@ export function StudentFilter({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className={labelStyles}>Curso</label>
-              <SearchableSelect
-                value={filters.cursoNome}
-                onChange={(val) => onFilterChange('cursoNome', val)}
-                options={cursoOptions}
-                placeholder="Selecione o Curso"
-              />
-            </div>
+          {features.academicFields && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className={labelStyles}>Curso</label>
+                <SearchableSelect
+                  value={filters.cursoNome}
+                  onChange={(val) => onFilterChange('cursoNome', val)}
+                  options={cursoOptions}
+                  placeholder="Selecione o Curso"
+                />
+              </div>
 
-            <div>
-              <label className={labelStyles}>Turno</label>
-              <CustomSelect
-                value={filters.turno}
-                onChange={(val) => onFilterChange('turno', val)}
-                options={turnoOptions}
-                placeholder="Selecione o Turno"
-                invertArrow={true}
-              />
-            </div>
+              <div>
+                <label className={labelStyles}>Turno</label>
+                <CustomSelect
+                  value={filters.turno}
+                  onChange={(val) => onFilterChange('turno', val)}
+                  options={turnoOptions}
+                  placeholder="Selecione o Turno"
+                  invertArrow={true}
+                />
+              </div>
 
-            <div>
-              <label className={labelStyles}>Módulo</label>
-              <CustomSelect
-                value={filters.modulo}
-                onChange={(val) => onFilterChange('modulo', val)}
-                options={moduloOptions}
-                placeholder="Selecione o Módulo"
-                invertArrow={true}
-              />
+              <div>
+                <label className={labelStyles}>Módulo</label>
+                <CustomSelect
+                  value={filters.modulo}
+                  onChange={(val) => onFilterChange('modulo', val)}
+                  options={moduloOptions}
+                  placeholder="Selecione o Módulo"
+                  invertArrow={true}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </FilterPanel>

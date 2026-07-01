@@ -1,10 +1,10 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
-  buscarAlunosParaAdmin,
-  buscarAlunosAvancado,
-  type AlunoFilterParams,
-  buscarAlunoPorMatricula,
-} from '../../services/studentService';
+  buscarLeitoresParaAdmin,
+  buscarLeitoresAvancado,
+  type LeitorFilterParams,
+  buscarLeitorPorMatricula,
+} from '../../services/readerService';
 
 import {
   buscarCursos,
@@ -19,40 +19,40 @@ const STATIC_DATA_CONFIG = {
   refetchOnMount: false,
 };
 
-export function useAlunos(
+export function useLeitores(
   page: number,
   size: number,
   sort: string,
   termoBusca: string,
-  filtrosAvancados: AlunoFilterParams,
+  filtrosAvancados: LeitorFilterParams,
 ) {
   return useQuery({
-    queryKey: ['alunos', page, size, sort, termoBusca, filtrosAvancados],
+    queryKey: ['leitores', page, size, sort, termoBusca, filtrosAvancados],
     queryFn: () => {
       const temFiltro = Object.values(filtrosAvancados).some((v) => !!v);
       if (temFiltro) {
-        return buscarAlunosAvancado({ ...filtrosAvancados, page, size, sort });
+        return buscarLeitoresAvancado({ ...filtrosAvancados, page, size, sort });
       }
-      return buscarAlunosParaAdmin(termoBusca, page, size, sort);
+      return buscarLeitoresParaAdmin(termoBusca, page, size, sort);
     },
     placeholderData: keepPreviousData,
     staleTime: 1000 * 60 * 5,
   });
 }
 
-export function useAlunosOptions() {
+export function useLeitoresOptions() {
   return useQuery({
-    queryKey: ['alunos-options'],
+    queryKey: ['leitores-options'],
     queryFn: () =>
-      buscarAlunosParaAdmin('', 0, 1000).then((res) => res.content),
+      buscarLeitoresParaAdmin('', 0, 1000).then((res) => res.content),
     staleTime: 1000 * 60 * 5,
   });
 }
 
-export function useAlunoDetalhes(matricula?: string) {
+export function useLeitorDetalhes(matricula?: string) {
   return useQuery({
-    queryKey: ['aluno', matricula],
-    queryFn: () => buscarAlunoPorMatricula(matricula!).then((res) => res.data),
+    queryKey: ['leitor', matricula],
+    queryFn: () => buscarLeitorPorMatricula(matricula!).then((res) => res.data),
     enabled: !!matricula,
   });
 }

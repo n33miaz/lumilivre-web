@@ -5,7 +5,7 @@ const mapPenalty = (
   penalty?: { code?: string; label?: string } | null,
 ): string | null => penalty?.code ?? null;
 
-const mapStudentSummary = (item: Record<string, unknown>) => ({
+const mapReaderSummary = (item: Record<string, unknown>) => ({
   penalidade: mapPenalty(
     item.penaltyCode as { code?: string; label?: string } | null,
   ),
@@ -17,10 +17,11 @@ const mapStudentSummary = (item: Record<string, unknown>) => ({
   cursoNome: (item.courseName as string) ?? '',
   turnoNome: (item.studyShiftName as string | undefined) ?? undefined,
   moduloNome: (item.academicModuleName as string | undefined) ?? undefined,
+  readerCategory: (item.readerCategory as string | undefined) ?? '',
   cursoId: (item.courseId as number | undefined) ?? undefined,
 });
 
-const mapStudentDetail = (item: Record<string, unknown>) => ({
+const mapReaderDetail = (item: Record<string, unknown>) => ({
   matricula: item.registrationNumber as string,
   nomeCompleto: item.fullName as string,
   cpf: (item.cpf as string) ?? '',
@@ -40,40 +41,42 @@ const mapStudentDetail = (item: Record<string, unknown>) => ({
   cursoNome: (item.courseName as string) ?? '',
   turnoNome: (item.studyShiftName as string) ?? '',
   moduloNome: (item.academicModuleName as string) ?? '',
+  readerCategory: (item.readerCategory as string) ?? '',
   penalidade: mapPenalty(
     item.penaltyCode as { code?: string; label?: string } | null,
   ),
   foto: (item.avatarUrl as string) ?? '',
 });
 
-const toStudentRequest = (studentData: AlunoPayload) => ({
-  registrationNumber: studentData.matricula,
-  fullName: studentData.nomeCompleto,
-  cpf: studentData.cpf,
-  phoneNumber: studentData.celular,
-  birthDate: studentData.dataNascimento,
-  email: studentData.email,
-  courseId: studentData.cursoId,
-  studyShiftId: studentData.turnoId,
-  academicModuleId: studentData.moduloId,
-  postalCode: studentData.cep,
-  street: studentData.logradouro,
-  district: studentData.bairro,
-  city: studentData.localidade,
-  stateCode: studentData.uf,
-  streetNumber: studentData.numero_casa,
-  addressComplement: studentData.complemento,
-  penaltyCode: studentData.penalidade,
+const toReaderRequest = (readerData: LeitorPayload) => ({
+  registrationNumber: readerData.matricula,
+  fullName: readerData.nomeCompleto,
+  cpf: readerData.cpf,
+  phoneNumber: readerData.celular,
+  birthDate: readerData.dataNascimento,
+  email: readerData.email,
+  courseId: readerData.cursoId,
+  studyShiftId: readerData.turnoId,
+  academicModuleId: readerData.moduloId,
+  readerCategory: readerData.readerCategory,
+  postalCode: readerData.cep,
+  street: readerData.logradouro,
+  district: readerData.bairro,
+  city: readerData.localidade,
+  stateCode: readerData.uf,
+  streetNumber: readerData.numero_casa,
+  addressComplement: readerData.complemento,
+  penaltyCode: readerData.penalidade,
 });
 
-export const getContagemAlunos = async (): Promise<number> => {
-  const response = await api.get('/api/students', {
+export const getContagemLeitores = async (): Promise<number> => {
+  const response = await api.get('/api/readers', {
     params: { page: 0, size: 1 },
   });
   return response.data.totalElements || 0;
 };
 
-export interface ListaAluno {
+export interface ListaLeitor {
   penalidade: string | null;
   matricula: string;
   nomeCompleto: string;
@@ -81,36 +84,38 @@ export interface ListaAluno {
   email: string;
   celular: string;
   cursoNome: string;
+  readerCategory?: string;
   turnoNome?: string;
   moduloNome?: string;
   cursoId?: number;
 }
 
-export const buscarAlunosParaAdmin = async (
+export const buscarLeitoresParaAdmin = async (
   texto?: string,
   page = 0,
   size = 10,
   sort = 'fullName,asc',
-): Promise<Page<ListaAluno>> => {
-  const response = await api.get('/api/students', {
+): Promise<Page<ListaLeitor>> => {
+  const response = await api.get('/api/readers', {
     params: { q: texto, page, size, sort },
   });
   return {
     ...response.data,
-    content: (response.data.content || []).map(mapStudentSummary),
+    content: (response.data.content || []).map(mapReaderSummary),
   };
 };
 
-export interface AlunoPayload {
+export interface LeitorPayload {
   matricula: string;
   nomeCompleto: string;
   cpf: string;
   celular?: string;
   dataNascimento?: string;
   email: string;
-  cursoId: number;
-  turnoId: number;
-  moduloId: number;
+  cursoId?: number;
+  turnoId?: number;
+  moduloId?: number;
+  readerCategory?: string;
   cep?: string;
   logradouro?: string;
   bairro?: string;
@@ -123,12 +128,12 @@ export interface AlunoPayload {
   penalidade?: string;
 }
 
-export const cadastrarAluno = async (alunoData: AlunoPayload) => {
-  const response = await api.post('/api/students', toStudentRequest(alunoData));
+export const cadastrarLeitor = async (leitorData: LeitorPayload) => {
+  const response = await api.post('/api/readers', toReaderRequest(leitorData));
   return response.data;
 };
 
-export interface AlunoFilterParams {
+export interface LeitorFilterParams {
   penalidade?: string;
   matricula?: string;
   nome?: string;
@@ -143,10 +148,10 @@ export interface AlunoFilterParams {
   sort?: string;
 }
 
-export const buscarAlunosAvancado = async (
-  params: AlunoFilterParams,
-): Promise<Page<ListaAluno>> => {
-  const response = await api.get('/api/students/search', {
+export const buscarLeitoresAvancado = async (
+  params: LeitorFilterParams,
+): Promise<Page<ListaLeitor>> => {
+  const response = await api.get('/api/readers/search', {
     params: {
       penalty: params.penalidade,
       registrationNumber: params.matricula,
@@ -161,34 +166,34 @@ export const buscarAlunosAvancado = async (
   });
   return {
     ...response.data,
-    content: (response.data.content || []).map(mapStudentSummary),
+    content: (response.data.content || []).map(mapReaderSummary),
   };
 };
 
-export const buscarAlunoPorMatricula = async (matricula: string) => {
-  const response = await api.get(`/api/students/${matricula}`);
-  return { ...response, data: mapStudentDetail(response.data) };
+export const buscarLeitorPorMatricula = async (matricula: string) => {
+  const response = await api.get(`/api/readers/${matricula}`);
+  return { ...response, data: mapReaderDetail(response.data) };
 };
 
-export const atualizarAluno = async (
+export const atualizarLeitor = async (
   matricula: string,
-  alunoData: AlunoPayload,
+  leitorData: LeitorPayload,
 ) => {
   const response = await api.put(
-    `/api/students/${matricula}`,
-    toStudentRequest(alunoData),
+    `/api/readers/${matricula}`,
+    toReaderRequest(leitorData),
   );
   return response.data;
 };
 
-export const resetarSenhaAluno = async (matricula: string) => {
+export const resetarSenhaLeitor = async (matricula: string) => {
   const response = await api.patch(
-    `/api/students/${matricula}/reset-password`,
+    `/api/readers/${matricula}/reset-password`,
   );
   return response.data;
 };
 
-export const excluirAluno = async (matricula: string) => {
-  const response = await api.delete(`/api/students/${matricula}`);
+export const excluirLeitor = async (matricula: string) => {
+  const response = await api.delete(`/api/readers/${matricula}`);
   return response.data;
 };

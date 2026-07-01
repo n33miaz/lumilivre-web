@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { RoleProtectedRoute } from './components/RoleProtectedRoute';
+import { FeatureGate } from './components/FeatureGate';
 import { MainLayout } from './layouts/MainLayout';
 import { LoadingIcon } from './components/ui/LoadingIcon';
 
@@ -14,14 +15,30 @@ import { MudarSenhaPage } from './pages/Auth/ChangePassword';
 import { DownloadAppPage } from './pages/Download';
 
 // Rotas Protegidas (Lazy Loaded)
-const DashboardPage = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.DashboardPage })));
-const LivrosPage = lazy(() => import('./pages/Books').then((m) => ({ default: m.LivrosPage })));
-const AlunosPage = lazy(() => import('./pages/Students').then((m) => ({ default: m.AlunosPage })));
-const EmprestimosPage = lazy(() => import('./pages/Loans').then((m) => ({ default: m.EmprestimosPage })));
-const TccPage = lazy(() => import('./pages/TCC').then((m) => ({ default: m.TccPage })));
-const ClassificacaoPage = lazy(() => import('./pages/Ranking').then((m) => ({ default: m.ClassificacaoPage })));
-const RelatoriosPage = lazy(() => import('./pages/Reports').then((m) => ({ default: m.RelatoriosPage })));
-const ConfiguracoesPage = lazy(() => import('./pages/Settings').then((m) => ({ default: m.ConfiguracoesPage })));
+const DashboardPage = lazy(() =>
+  import('./pages/Dashboard').then((m) => ({ default: m.DashboardPage })),
+);
+const LivrosPage = lazy(() =>
+  import('./pages/Books').then((m) => ({ default: m.LivrosPage })),
+);
+const LeitoresPage = lazy(() =>
+  import('./pages/Readers').then((m) => ({ default: m.LeitoresPage })),
+);
+const EmprestimosPage = lazy(() =>
+  import('./pages/Loans').then((m) => ({ default: m.EmprestimosPage })),
+);
+const TccPage = lazy(() =>
+  import('./pages/TCC').then((m) => ({ default: m.TccPage })),
+);
+const ClassificacaoPage = lazy(() =>
+  import('./pages/Ranking').then((m) => ({ default: m.ClassificacaoPage })),
+);
+const RelatoriosPage = lazy(() =>
+  import('./pages/Reports').then((m) => ({ default: m.RelatoriosPage })),
+);
+const ConfiguracoesPage = lazy(() =>
+  import('./pages/Settings').then((m) => ({ default: m.ConfiguracoesPage })),
+);
 
 const PageLoader = () => (
   <div className="flex items-center justify-center h-full min-h-[400px]">
@@ -55,12 +72,19 @@ function App() {
         <Route
           path="dashboard"
           element={
-            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']} fallback="/admin/ranking">
+            <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
               <DashboardPage />
             </RoleProtectedRoute>
           }
         />
-        <Route path="ranking" element={<ClassificacaoPage />} />
+        <Route
+          path="ranking"
+          element={
+            <FeatureGate feature="ranking">
+              <ClassificacaoPage />
+            </FeatureGate>
+          }
+        />
         <Route path="settings" element={<ConfiguracoesPage />} />
 
         <Route
@@ -72,10 +96,10 @@ function App() {
           }
         />
         <Route
-          path="students"
+          path="readers"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
-              <AlunosPage />
+              <LeitoresPage />
             </RoleProtectedRoute>
           }
         />
@@ -91,7 +115,9 @@ function App() {
           path="theses"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
-              <TccPage />
+              <FeatureGate feature="thesis">
+                <TccPage />
+              </FeatureGate>
             </RoleProtectedRoute>
           }
         />

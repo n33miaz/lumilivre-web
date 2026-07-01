@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { getContagemLivros } from '../services/bookService';
-import { getContagemAlunos } from '../services/studentService';
+import { getContagemLeitores } from '../services/readerService';
 import {
   getContagemEmprestimosTotais,
   getContagemAtrasados,
@@ -18,13 +18,13 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const [livros, alunos, emprestimosAtivos, atrasados] = await Promise.all([
+      const [livros, leitores, emprestimosAtivos, atrasados] = await Promise.all([
         getContagemLivros(),
-        getContagemAlunos(),
+        getContagemLeitores(),
         getContagemEmprestimosTotais(),
         getContagemAtrasados(),
       ]);
-      return { livros, alunos, emprestimosAtivos, atrasados };
+      return { livros, leitores, emprestimosAtivos, atrasados };
     },
     staleTime: 1000 * 60 * 5, // 5 minutos
   });

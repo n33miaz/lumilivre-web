@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { FilterPanel } from '../../components/ui/FilterPanel';
 import { CustomSelect } from '../../components/ui/CustomSelect';
 import { SearchableSelect } from '../../components/ui/SearchableSelect';
-import { useCursos } from '../../hooks/queries/useStudentQueries';
+import { useCursos } from '../../hooks/queries/useReaderQueries';
 
 interface TccFilterProps {
   isOpen: boolean;
