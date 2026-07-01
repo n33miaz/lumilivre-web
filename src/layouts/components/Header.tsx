@@ -81,9 +81,9 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
           capability: 'canManageBooks',
         },
         {
-          path: '/admin/students',
-          label: t('nav:students'),
-          capability: 'canManageStudents',
+          path: '/admin/readers',
+          label: t('nav:readers'),
+          capability: 'canManageReaders',
         },
         {
           path: '/admin/loans',

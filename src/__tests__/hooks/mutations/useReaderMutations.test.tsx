@@ -3,12 +3,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-import { useCreateStudent } from '../../../hooks/mutations/useStudentMutations';
-import * as alunoService from '../../../services/studentService';
-import type { AlunoPayload } from '../../../services/studentService';
+import { useCreateReader } from '../../../hooks/mutations/useReaderMutations';
+import * as leitorService from '../../../services/readerService';
+import type { LeitorPayload } from '../../../services/readerService';
 
-vi.mock('../../../services/studentService');
-const mockedCadastrarAluno = vi.mocked(alunoService.cadastrarAluno);
+vi.mock('../../../services/readerService');
+const mockedCadastrarLeitor = vi.mocked(leitorService.cadastrarLeitor);
 
 const mockAddToast = vi.fn();
 vi.mock('../../../contexts/ToastContext', () => ({
@@ -26,35 +26,35 @@ const createWrapper = () => {
   );
 };
 
-describe('Hook de Mutação: useCreateStudent', () => {
+describe('Hook de Mutação: useCreateReader', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  const mockAlunoPayload = {
-    nomeCompleto: 'Aluno de Teste',
+  const mockLeitorPayload = {
+    nomeCompleto: 'Leitor de Teste',
     matricula: '12345',
     email: 'teste@email.com',
     cursoId: 1,
     turnoId: 1,
     moduloId: 1,
-  } as AlunoPayload;
+  } as LeitorPayload;
 
-  it('deve chamar a API e exibir um toast de sucesso ao criar um aluno', async () => {
-    mockedCadastrarAluno.mockResolvedValue({ id: 1, ...mockAlunoPayload });
+  it('deve chamar a API e exibir um toast de sucesso ao criar um leitor', async () => {
+    mockedCadastrarLeitor.mockResolvedValue({ id: 1, ...mockLeitorPayload });
 
-    const { result } = renderHook(() => useCreateStudent(), {
+    const { result } = renderHook(() => useCreateReader(), {
       wrapper: createWrapper(),
     });
 
-    await result.current.mutateAsync(mockAlunoPayload);
+    await result.current.mutateAsync(mockLeitorPayload);
 
     await waitFor(() => {
-      expect(mockedCadastrarAluno).toHaveBeenCalledWith(mockAlunoPayload);
+      expect(mockedCadastrarLeitor).toHaveBeenCalledWith(mockLeitorPayload);
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Aluno cadastrado com sucesso!',
+          description: 'Leitor cadastrado com sucesso!',
         }),
       );
     });
@@ -62,14 +62,14 @@ describe('Hook de Mutação: useCreateStudent', () => {
 
   it('deve exibir um toast de erro se a chamada da API falhar', async () => {
     const errorMessage = 'Matrícula já existe';
-    mockedCadastrarAluno.mockRejectedValue(new Error(errorMessage));
+    mockedCadastrarLeitor.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useCreateStudent(), {
+    const { result } = renderHook(() => useCreateReader(), {
       wrapper: createWrapper(),
     });
 
     try {
-      await result.current.mutateAsync(mockAlunoPayload);
+      await result.current.mutateAsync(mockLeitorPayload);
     } catch {
       // O erro é esperado e capturado, o teste pode continuar
     }

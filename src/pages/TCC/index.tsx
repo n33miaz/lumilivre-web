@@ -259,7 +259,7 @@ export function TccPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {paginatedData.map((tcc) => {
-              const alunos = (tcc.alunos || '')
+              const leitores = (tcc.leitores || '')
                 .split(',')
                 .map((s) => s.trim())
                 .filter(Boolean)
@@ -286,10 +286,10 @@ export function TccPage() {
                   </div>
                   <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
-                      {t('authors_label', { defaultValue: 'Alunos' })}
+                      {t('authors_label', { defaultValue: 'Leitores' })}
                     </div>
                     <div className="flex items-center -space-x-2">
-                      {alunos.map((name, idx) => (
+                      {leitores.map((name, idx) => (
                         <span
                           key={`${name}-${idx}`}
                           title={name}

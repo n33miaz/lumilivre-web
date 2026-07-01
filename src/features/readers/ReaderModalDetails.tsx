@@ -5,36 +5,37 @@ import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
 import { LoadingIcon } from '../../components/ui/LoadingIcon';
 import { Button } from '../../components/ui/Button';
-import { StudentForm } from './StudentForm';
+import { ReaderForm } from './ReaderForm';
 import { Label } from '../../components/ui/Label';
 import { CustomSelect } from '../../components/ui/CustomSelect';
 
 import LockIcon from '../../assets/icons/lock.svg?react';
 
 import {
-  type AlunoPayload,
-  type ListaAluno,
-} from '../../services/studentService';
+  type LeitorPayload,
+  type ListaLeitor,
+} from '../../services/readerService';
 import { useEnum } from '../../hooks/queries/useBookQueries';
-import { useAlunoDetalhes } from '../../hooks/queries/useStudentQueries';
+import { useLeitorDetalhes } from '../../hooks/queries/useReaderQueries';
 import {
-  useUpdateStudent,
-  useDeleteStudent,
-  useResetStudentPassword,
-} from '../../hooks/mutations/useStudentMutations';
-import { type StudentFormData } from '../../schemas/studentSchema';
+  useUpdateReader,
+  useDeleteReader,
+  useResetReaderPassword,
+} from '../../hooks/mutations/useReaderMutations';
+import { type ReaderFormData } from '../../schemas/readerSchema';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
-interface ModalStudentDetailsProps {
-  aluno: ListaAluno | null;
+interface ModalReaderDetailsProps {
+  leitor: ListaLeitor | null;
   isOpen: boolean;
   onClose: (foiAtualizado?: boolean) => void;
 }
 
-export function ModalStudentDetails({
-  aluno,
+export function ModalReaderDetails({
+  leitor,
   isOpen,
   onClose,
-}: ModalStudentDetailsProps) {
+}: ModalReaderDetailsProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [confirmAction, setConfirmAction] = useState<
     'excluir' | 'resetSenha' | null
@@ -42,28 +43,29 @@ export function ModalStudentDetails({
   const [penalidade, setPenalidade] = useState('');
 
   const { data: penalidadesData } = useEnum('PENALIDADE');
-  const { mutateAsync: updateStudent, isPending: isUpdating } =
-    useUpdateStudent();
-  const { mutateAsync: deleteStudent, isPending: isDeleting } =
-    useDeleteStudent();
+  const { mutateAsync: updateReader, isPending: isUpdating } =
+    useUpdateReader();
+  const { mutateAsync: deleteReader, isPending: isDeleting } =
+    useDeleteReader();
   const { mutateAsync: resetPassword, isPending: isResetting } =
-    useResetStudentPassword();
+    useResetReaderPassword();
+  const { features } = useLibraryConfig();
 
   // Mantém o último dado válido durante a animação de saída
-  const alunoRef = useRef(aluno);
+  const leitorRef = useRef(leitor);
   useEffect(() => {
-    if (aluno) alunoRef.current = aluno;
-  }, [aluno]);
-  const alunoAtual = aluno ?? alunoRef.current;
+    if (leitor) leitorRef.current = leitor;
+  }, [leitor]);
+  const leitorAtual = leitor ?? leitorRef.current;
 
-  const { data: alunoDetalhes, isLoading: isLoadingDetalhes } =
-    useAlunoDetalhes(isOpen ? alunoAtual?.matricula : undefined);
+  const { data: leitorDetalhes, isLoading: isLoadingDetalhes } =
+    useLeitorDetalhes(isOpen ? leitorAtual?.matricula : undefined);
 
   useEffect(() => {
-    if (alunoDetalhes) {
-      setPenalidade(alunoDetalhes.penalidade || '');
+    if (leitorDetalhes) {
+      setPenalidade(leitorDetalhes.penalidade || '');
     }
-  }, [alunoDetalhes]);
+  }, [leitorDetalhes]);
 
   const penalidadeOptions = useMemo(
     () => [
@@ -77,27 +79,28 @@ export function ModalStudentDetails({
   useEffect(() => {
     if (isOpen) {
       setIsEditMode(false);
-      setPenalidade(alunoAtual?.penalidade || '');
+      setPenalidade(leitorAtual?.penalidade || '');
     }
-  }, [isOpen, alunoAtual]);
+  }, [isOpen, leitorAtual]);
 
-  const handleSubmit = async (data: StudentFormData) => {
+  const handleSubmit = async (data: ReaderFormData) => {
     try {
       const payload = {
         ...data,
         cpf: data.cpf?.replace(/\D/g, ''),
         celular: data.celular?.replace(/\D/g, ''),
         cep: data.cep?.replace(/\D/g, ''),
-        cursoId: Number(data.cursoId),
-        turnoId: Number(data.turnoId),
-        moduloId: Number(data.moduloId),
+        cursoId: features.academicFields ? Number(data.cursoId) : undefined,
+        turnoId: features.academicFields ? Number(data.turnoId) : undefined,
+        moduloId: features.academicFields ? Number(data.moduloId) : undefined,
+        readerCategory: features.academicFields ? undefined : data.readerCategory,
         numero_casa: Number(data.numero_casa) || 0,
         penalidade,
       };
 
-      await updateStudent({
-        matricula: alunoAtual?.matricula ?? '',
-        payload: payload as unknown as AlunoPayload,
+      await updateReader({
+        matricula: leitorAtual?.matricula ?? '',
+        payload: payload as unknown as LeitorPayload,
       });
       setIsEditMode(false);
       onClose(true);
@@ -108,7 +111,7 @@ export function ModalStudentDetails({
 
   const executarResetSenha = async () => {
     try {
-      await resetPassword(alunoAtual?.matricula ?? '');
+      await resetPassword(leitorAtual?.matricula ?? '');
       setConfirmAction(null);
     } catch (error) {
       console.error(error);
@@ -117,7 +120,7 @@ export function ModalStudentDetails({
 
   const executarExclusao = async () => {
     try {
-      await deleteStudent(alunoAtual?.matricula ?? '');
+      await deleteReader(leitorAtual?.matricula ?? '');
       setConfirmAction(null);
       onClose(true);
     } catch (error) {
@@ -127,18 +130,18 @@ export function ModalStudentDetails({
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
-      <Modal.Header title={isEditMode ? 'Editar Aluno' : 'Detalhes do Aluno'} />
+      <Modal.Header title={isEditMode ? 'Editar Leitor' : 'Detalhes do Leitor'} />
       <Modal.Body>
         {isLoadingDetalhes ? (
           <LoadingIcon />
         ) : (
-          alunoAtual && (
+          leitorAtual && (
             <div className="space-y-4">
-              <StudentForm
-                formId="form-edit-aluno"
+              <ReaderForm
+                formId="form-edit-leitor"
                 initialData={
-                  alunoDetalhes
-                    ? { ...alunoDetalhes, penalidade: alunoDetalhes.penalidade ?? undefined }
+                  leitorDetalhes
+                    ? { ...leitorDetalhes, penalidade: leitorDetalhes.penalidade ?? undefined }
                     : undefined
                 }
                 readOnly={!isEditMode}
@@ -165,7 +168,7 @@ export function ModalStudentDetails({
             isEditMode={isEditMode}
             isUpdating={isUpdating}
             isDeleting={isDeleting}
-            formId="form-edit-aluno"
+            formId="form-edit-leitor"
             onEdit={() => setIsEditMode(true)}
             onCancel={() => setIsEditMode(false)}
             onDelete={() => setConfirmAction('excluir')}
@@ -203,11 +206,11 @@ export function ModalStudentDetails({
       </Modal.Footer>
       <ConfirmModal
         isOpen={confirmAction !== null}
-        title={confirmAction === 'excluir' ? 'Excluir Aluno' : 'Resetar Senha'}
+        title={confirmAction === 'excluir' ? 'Excluir Leitor' : 'Resetar Senha'}
         message={
           confirmAction === 'excluir'
-            ? `Tem certeza que deseja excluir o aluno ${alunoAtual?.nomeCompleto}?`
-            : `A senha será redefinida para a matrícula: ${alunoAtual?.matricula}. Deseja continuar?`
+            ? `Tem certeza que deseja excluir o leitor ${leitorAtual?.nomeCompleto}?`
+            : `A senha será redefinida para a matrícula: ${leitorAtual?.matricula}. Deseja continuar?`
         }
         isDestructive={confirmAction === 'excluir'}
         onConfirm={

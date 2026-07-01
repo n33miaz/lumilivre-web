@@ -3,7 +3,7 @@ import api from './api';
 export interface TccResponse {
   id: string;
   titulo: string;
-  alunos: string;
+  leitores: string;
   orientadores: string;
   curso: string;
   anoConclusao: string;
@@ -16,7 +16,7 @@ export interface TccResponse {
 
 export interface TccPayload {
   titulo: string;
-  alunos: string;
+  leitores: string;
   orientadores: string;
   curso_id: number;
   anoConclusao: string;
@@ -34,7 +34,7 @@ export interface TccFilterParams {
 const toTccResponse = (item: Record<string, unknown>): TccResponse => ({
   id: String(item.id ?? ''),
   titulo: (item.title as string) ?? '',
-  alunos: (item.authors as string) ?? '',
+  leitores: (item.authors as string) ?? '',
   orientadores: (item.advisors as string) ?? '',
   curso: (item.courseName as string) ?? '',
   anoConclusao: (item.completionYear as string) ?? '',
@@ -47,7 +47,7 @@ const toTccResponse = (item: Record<string, unknown>): TccResponse => ({
 
 const toThesisRequest = (tccData: TccPayload) => ({
   title: tccData.titulo,
-  authors: tccData.alunos,
+  authors: tccData.leitores,
   advisors: tccData.orientadores,
   courseId: tccData.curso_id,
   completionYear: tccData.anoConclusao,

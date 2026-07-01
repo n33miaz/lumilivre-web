@@ -18,7 +18,7 @@ import {
   type ReportType,
 } from '../../services/reportService';
 import { buscarLivrosParaAdmin } from '../../services/bookService';
-import { buscarAlunosParaAdmin } from '../../services/studentService';
+import { buscarLeitoresParaAdmin } from '../../services/readerService';
 import { useDashboardStats } from '../../hooks/useDashboardQueries';
 
 import {
@@ -30,7 +30,7 @@ import {
   useCursos,
   useModulos,
   useTurnos,
-} from '../../hooks/queries/useStudentQueries';
+} from '../../hooks/queries/useReaderQueries';
 
 import { useToast } from '../../contexts/ToastContext';
 import { Modal } from '../../components/ui/Modal';
@@ -62,10 +62,10 @@ type ReportTone = 'lumi' | 'blue' | 'emerald' | 'violet' | 'amber' | 'cyan';
 
 const REPORT_CARDS = [
   {
-    type: 'alunos',
-    titleKey: 'item.students.title',
-    descriptionKey: 'item.students.description',
-    metaKey: 'item.students.meta',
+    type: 'leitores',
+    titleKey: 'item.readers.title',
+    descriptionKey: 'item.readers.description',
+    metaKey: 'item.readers.meta',
     tone: 'blue',
     Icon: Users,
   },
@@ -228,7 +228,7 @@ function ModalFiltrosRelatorio({
   const [autoresOpts, setAutoresOpts] = useState<Option[]>([]);
   const [editorasOpts, setEditorasOpts] = useState<Option[]>([]);
   const [livrosSelectOpts, setLivrosSelectOpts] = useState<Option[]>([]);
-  const [alunosSelectOpts, setAlunosSelectOpts] = useState<Option[]>([]);
+  const [leitoresSelectOpts, setLeitoresSelectOpts] = useState<Option[]>([]);
 
   const [progress, setProgress] = useState(0);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -370,12 +370,12 @@ function ModalFiltrosRelatorio({
 
           if (tipoRelatorio === 'emprestimos') {
             promises.push(
-              buscarAlunosParaAdmin('', 0, 1000).then((res) => {
+              buscarLeitoresParaAdmin('', 0, 1000).then((res) => {
                 const opts = res.content.map((a) => ({
                   label: `${a.nomeCompleto} (${t('filter.registration_abbr')}: ${a.matricula})`,
                   value: a.matricula,
                 }));
-                setAlunosSelectOpts([
+                setLeitoresSelectOpts([
                   { label: t('filter.all'), value: '' },
                   ...opts,
                 ]);
@@ -570,7 +570,7 @@ function ModalFiltrosRelatorio({
           />
         </div>
 
-        {tipoRelatorio === 'alunos' && (
+        {tipoRelatorio === 'leitores' && (
           <>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
@@ -713,10 +713,10 @@ function ModalFiltrosRelatorio({
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <SearchableSelect
-                label={t('filter.student_lookup')}
-                value={filtros.matriculaAluno || ''}
-                onChange={(val) => handleSelectChange('matriculaAluno', val)}
-                options={alunosSelectOpts}
+                label={t('filter.reader_lookup')}
+                value={filtros.matriculaLeitor || ''}
+                onChange={(val) => handleSelectChange('matriculaLeitor', val)}
+                options={leitoresSelectOpts}
               />
               <SearchableSelect
                 label={t('filter.book')}
@@ -755,7 +755,7 @@ function ModalFiltrosRelatorio({
 
 const INSIGHT_CARDS = [
   { key: 'titles', field: 'livros', tone: 'lumi', Icon: LibraryBig },
-  { key: 'readers', field: 'alunos', tone: 'blue', Icon: Users },
+  { key: 'readers', field: 'leitores', tone: 'blue', Icon: Users },
   { key: 'active_loans', field: 'emprestimosAtivos', tone: 'violet', Icon: ArrowRightLeft },
   { key: 'overdue', field: 'atrasados', tone: 'amber', Icon: AlertTriangle },
 ] as const;

@@ -9,7 +9,7 @@ interface LoginResponse {
   id: string;
   email: string;
   role: string;
-  matriculaAluno?: string;
+  matriculaLeitor?: string;
   token: string;
   isInitialPassword: boolean;
 }
@@ -25,7 +25,7 @@ export const login = async (
     id: response.data.id,
     email: response.data.email,
     role: response.data.role,
-    matriculaAluno: response.data.studentRegistrationNumber,
+    matriculaLeitor: response.data.readerRegistrationNumber,
     token: response.data.token,
     isInitialPassword: response.data.initialPasswordChange,
   };

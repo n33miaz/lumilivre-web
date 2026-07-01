@@ -7,7 +7,7 @@ describe('navigationOrder', () => {
       expect(routeOrder).toEqual([
         '/admin/dashboard',
         '/admin/books',
-        '/admin/students',
+        '/admin/readers',
         '/admin/loans',
         '/admin/theses',
         '/admin/ranking',
@@ -33,7 +33,7 @@ describe('navigationOrder', () => {
     it('deve retornar o indice correto para rotas conhecidas', () => {
       expect(getRouteIndex('/admin/dashboard')).toBe(0);
       expect(getRouteIndex('/admin/books')).toBe(1);
-      expect(getRouteIndex('/admin/students')).toBe(2);
+      expect(getRouteIndex('/admin/readers')).toBe(2);
       expect(getRouteIndex('/admin/loans')).toBe(3);
       expect(getRouteIndex('/admin/settings')).toBe(7);
     });
@@ -44,7 +44,7 @@ describe('navigationOrder', () => {
 
     it('deve ignorar query strings ao determinar o indice', () => {
       expect(getRouteIndex('/admin/books?page=1')).toBe(1);
-      expect(getRouteIndex('/admin/students?search=teste&page=2')).toBe(2);
+      expect(getRouteIndex('/admin/readers?search=teste&page=2')).toBe(2);
     });
   });
 });

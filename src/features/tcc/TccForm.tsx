@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { useCursos } from '../../hooks/queries/useStudentQueries';
+import { useCursos } from '../../hooks/queries/useReaderQueries';
 import { tccSchema, type TccFormData } from '../../schemas/tccSchema';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -48,7 +48,7 @@ export function TccForm({
     resolver: zodResolver(tccSchema) as unknown as Resolver<TccFormData>,
     defaultValues: {
       titulo: initialData?.titulo || '',
-      alunos: initialData?.alunos || '',
+      leitores: initialData?.leitores || '',
       orientadores: initialData?.orientadores || '',
       // @ts-expect-error - O tipo pode ser misto
       curso_id: initialData?.curso_id || initialData?.curso || 0,
@@ -134,13 +134,13 @@ export function TccForm({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="alunos" requiredIndicator={!readOnly}>
-              Alunos
+            <Label htmlFor="leitores" requiredIndicator={!readOnly}>
+              Leitores
             </Label>
             <Input
-              id="alunos"
-              {...register('alunos')}
-              error={errors.alunos?.message}
+              id="leitores"
+              {...register('leitores')}
+              error={errors.leitores?.message}
               disabled={readOnly}
             />
           </div>

@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { loanSchema } from '../../schemas/loanSchema';
 import { bookSchema } from '../../schemas/bookSchema';
-import { studentSchema } from '../../schemas/studentSchema';
+import { readerSchema } from '../../schemas/readerSchema';
 import { tccSchema } from '../../schemas/tccSchema';
 
 describe('Schema: loanSchema', () => {
   it('deve validar um empréstimo válido', () => {
     const validData = {
-      aluno_matricula: '2024001',
+      leitor_matricula: '2024001',
       livro_id: '1',
       exemplar_tombo: 'T001',
       data_emprestimo: '11/03/2026',
@@ -19,7 +19,7 @@ describe('Schema: loanSchema', () => {
 
   it('deve rejeitar quando campos obrigatórios estão vazios', () => {
     const invalidData = {
-      aluno_matricula: '',
+      leitor_matricula: '',
       livro_id: '',
       exemplar_tombo: '',
       data_emprestimo: '',
@@ -29,7 +29,7 @@ describe('Schema: loanSchema', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       const paths = result.error.issues.map((i) => i.path[0]);
-      expect(paths).toContain('aluno_matricula');
+      expect(paths).toContain('leitor_matricula');
       expect(paths).toContain('livro_id');
       expect(paths).toContain('exemplar_tombo');
     }
@@ -37,7 +37,7 @@ describe('Schema: loanSchema', () => {
 
   it('deve rejeitar datas com menos de 10 caracteres', () => {
     const invalidData = {
-      aluno_matricula: '2024001',
+      leitor_matricula: '2024001',
       livro_id: '1',
       exemplar_tombo: 'T001',
       data_emprestimo: '11/03',
@@ -109,33 +109,33 @@ describe('Schema: bookSchema', () => {
   });
 });
 
-describe('Schema: studentSchema', () => {
-  it('deve validar um aluno com dados obrigatórios', () => {
-    const validStudent = {
+describe('Schema: readerSchema', () => {
+  it('deve validar um leitor com dados obrigatórios', () => {
+    const validReader = {
       nomeCompleto: 'João da Silva',
       matricula: '2024001',
       cursoId: 1,
       turnoId: 1,
       moduloId: 1,
     };
-    const result = studentSchema.safeParse(validStudent);
+    const result = readerSchema.safeParse(validReader);
     expect(result.success).toBe(true);
   });
 
   it('deve rejeitar nome com menos de 3 caracteres', () => {
-    const invalidStudent = {
+    const invalidReader = {
       nomeCompleto: 'Jo',
       matricula: '2024001',
       cursoId: 1,
       turnoId: 1,
       moduloId: 1,
     };
-    const result = studentSchema.safeParse(invalidStudent);
+    const result = readerSchema.safeParse(invalidReader);
     expect(result.success).toBe(false);
   });
 
   it('deve rejeitar e-mail inválido', () => {
-    const invalidStudent = {
+    const invalidReader = {
       nomeCompleto: 'João da Silva',
       matricula: '2024001',
       email: 'email-invalido',
@@ -143,12 +143,12 @@ describe('Schema: studentSchema', () => {
       turnoId: 1,
       moduloId: 1,
     };
-    const result = studentSchema.safeParse(invalidStudent);
+    const result = readerSchema.safeParse(invalidReader);
     expect(result.success).toBe(false);
   });
 
   it('deve aceitar e-mail vazio como opcional', () => {
-    const validStudent = {
+    const validReader = {
       nomeCompleto: 'João da Silva',
       matricula: '2024001',
       email: '',
@@ -156,19 +156,19 @@ describe('Schema: studentSchema', () => {
       turnoId: 1,
       moduloId: 1,
     };
-    const result = studentSchema.safeParse(validStudent);
+    const result = readerSchema.safeParse(validReader);
     expect(result.success).toBe(true);
   });
 
   it('deve rejeitar matrícula vazia', () => {
-    const invalidStudent = {
+    const invalidReader = {
       nomeCompleto: 'João da Silva',
       matricula: '',
       cursoId: 1,
       turnoId: 1,
       moduloId: 1,
     };
-    const result = studentSchema.safeParse(invalidStudent);
+    const result = readerSchema.safeParse(invalidReader);
     expect(result.success).toBe(false);
   });
 });
@@ -177,7 +177,7 @@ describe('Schema: tccSchema', () => {
   it('deve validar um TCC com dados completos', () => {
     const validTcc = {
       titulo: 'Título do TCC',
-      alunos: 'João, Maria',
+      leitores: 'João, Maria',
       curso_id: 1,
       anoConclusao: '2025',
       semestreConclusao: '1',
@@ -189,7 +189,7 @@ describe('Schema: tccSchema', () => {
   it('deve rejeitar TCC sem título', () => {
     const invalidTcc = {
       titulo: '',
-      alunos: 'João',
+      leitores: 'João',
       curso_id: 1,
       anoConclusao: '2025',
       semestreConclusao: '1',
@@ -201,7 +201,7 @@ describe('Schema: tccSchema', () => {
   it('deve rejeitar ano de conclusão com menos de 4 caracteres', () => {
     const invalidTcc = {
       titulo: 'Título',
-      alunos: 'João',
+      leitores: 'João',
       curso_id: 1,
       anoConclusao: '25',
       semestreConclusao: '1',
@@ -213,7 +213,7 @@ describe('Schema: tccSchema', () => {
   it('deve ter ativo como true por padrão', () => {
     const data = {
       titulo: 'Título',
-      alunos: 'João',
+      leitores: 'João',
       curso_id: 1,
       anoConclusao: '2025',
       semestreConclusao: '1',

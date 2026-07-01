@@ -16,12 +16,12 @@ export interface FiltrosRelatorio {
   statusLivro?: string;
   isbnOuTombo?: string;
   statusEmprestimo?: string;
-  matriculaAluno?: string;
+  matriculaLeitor?: string;
 }
 
 const endpointByType = {
   emprestimos: 'loans',
-  alunos: 'students',
+  leitores: 'readers',
   livros: 'books',
   exemplares: 'copies',
   cursos: 'courses',
@@ -61,7 +61,7 @@ const toReportParams = (
   appendParam(params, 'startDate', filtros.dataInicio);
   appendParam(params, 'endDate', filtros.dataFim);
 
-  if (tipo === 'alunos') {
+  if (tipo === 'leitores') {
     appendParam(params, 'academicModuleId', filtros.idModulo);
     appendParam(params, 'courseId', filtros.idCurso);
     appendParam(params, 'studyShiftId', filtros.idTurno);
@@ -93,7 +93,7 @@ const toReportParams = (
       statusLoanMap[filtros.statusEmprestimo || ''] ??
         filtros.statusEmprestimo,
     );
-    appendParam(params, 'studentRegistrationNumber', filtros.matriculaAluno);
+    appendParam(params, 'readerRegistrationNumber', filtros.matriculaLeitor);
     appendParam(params, 'courseId', filtros.idCurso);
     appendParam(params, 'isbnOrCopyCode', filtros.isbnOuTombo);
     appendParam(params, 'academicModuleId', filtros.idModulo);

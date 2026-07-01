@@ -76,7 +76,7 @@ describe('AuthContext — logout on 401', () => {
       });
     });
 
-    await expect(api.get('/api/students/me')).rejects.toBeDefined();
+    await expect(api.get('/api/readers/me')).rejects.toBeDefined();
 
     await waitFor(() => expect(result.current.isAuthenticated).toBe(false));
   });

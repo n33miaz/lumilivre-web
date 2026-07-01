@@ -11,8 +11,8 @@ import {
   getContagemEmprestimosTotais,
   buscarEmprestimosAtivosEAtrasados,
   buscarRanking,
-  buscarHistoricoAluno,
-  buscarEmprestimosAtivosAluno,
+  buscarHistoricoLeitor,
+  buscarEmprestimosAtivosLeitor,
 } from '../../services/loanService';
 
 vi.mock('../../services/api', () => ({
@@ -35,14 +35,14 @@ describe('loanService', () => {
     mockedApi.post.mockResolvedValue({ data: { id: 'loan-1' } });
 
     await cadastrarEmprestimo({
-      aluno_matricula: '12345',
+      leitor_matricula: '12345',
       exemplar_tombo: '001',
       data_emprestimo: '2026-03-11',
       data_devolucao: '2026-03-18',
     });
 
     expect(mockedApi.post).toHaveBeenCalledWith('/api/loans', {
-      studentRegistrationNumber: '12345',
+      readerRegistrationNumber: '12345',
       copyCode: '001',
       borrowedAt: '2026-03-11T12:00:00-03:00',
       dueAt: '2026-03-18T12:00:00-03:00',
@@ -53,14 +53,14 @@ describe('loanService', () => {
     mockedApi.put.mockResolvedValue({ data: { id: 'loan-1' } });
 
     await atualizarEmprestimo('loan-1', {
-      aluno_matricula: '12345',
+      leitor_matricula: '12345',
       exemplar_tombo: '001',
       data_emprestimo: '2026-03-11',
       data_devolucao: '2026-03-25',
     });
 
     expect(mockedApi.put).toHaveBeenCalledWith('/api/loans/loan-1', {
-      studentRegistrationNumber: '12345',
+      readerRegistrationNumber: '12345',
       copyCode: '001',
       borrowedAt: '2026-03-11T12:00:00-03:00',
       dueAt: '2026-03-25T12:00:00-03:00',
@@ -87,8 +87,8 @@ describe('loanService', () => {
             status: { code: 'ACTIVE' },
             bookTitle: 'Livro A',
             copyCode: 'T001',
-            studentName: 'Joao',
-            studentRegistrationNumber: '2024001',
+            readerName: 'Joao',
+            readerRegistrationNumber: '2024001',
           },
         ],
       },
@@ -138,8 +138,8 @@ describe('loanService', () => {
           id: 'loan-1',
           status: { code: 'OVERDUE' },
           bookTitle: 'Livro A',
-          studentName: 'Joao',
-          studentRegistrationNumber: '2024001',
+          readerName: 'Joao',
+          readerRegistrationNumber: '2024001',
           copyCode: 'T001',
         },
       ],
@@ -153,34 +153,34 @@ describe('loanService', () => {
     expect(result[0].statusEmprestimo).toBe('ATRASADO');
   });
 
-  it('buscarRanking uses v2 student ranking filters', async () => {
+  it('buscarRanking uses v2 reader ranking filters', async () => {
     mockedApi.get.mockResolvedValue({
       data: [{ registrationNumber: '001', fullName: 'Joao', emprestimosCount: 10 }],
     });
 
     const result = await buscarRanking(5, 1, 2, 3);
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/students/ranking', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/readers/ranking', {
       params: { top: 5, courseId: 1, academicModuleId: 2, studyShiftId: 3 },
     });
     expect(result[0].nome).toBe('Joao');
   });
 
-  it('student loan history routes use v2', async () => {
+  it('reader loan history routes use v2', async () => {
     mockedApi.get
       .mockResolvedValueOnce({ data: [{ id: 'history-1' }] })
       .mockResolvedValueOnce({ data: [{ id: 'active-1' }] });
 
-    await buscarHistoricoAluno('2024001');
-    await buscarEmprestimosAtivosAluno('2024001');
+    await buscarHistoricoLeitor('2024001');
+    await buscarEmprestimosAtivosLeitor('2024001');
 
     expect(mockedApi.get).toHaveBeenNthCalledWith(
       1,
-      '/api/loans/student/2024001/history',
+      '/api/loans/reader/2024001/history',
     );
     expect(mockedApi.get).toHaveBeenNthCalledWith(
       2,
-      '/api/loans/student/2024001',
+      '/api/loans/reader/2024001',
     );
   });
 });

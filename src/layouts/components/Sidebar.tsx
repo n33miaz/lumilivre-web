@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '../../contexts/AuthContext';
+import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 import {
   hasCapability,
   type Capability,
@@ -27,6 +28,7 @@ const navLinks: {
   labelKey: string;
   Icon: LucideIcon;
   capability: string;
+  feature?: 'ranking' | 'thesis';
 }[] = [
   {
     path: '/admin/dashboard',
@@ -41,10 +43,10 @@ const navLinks: {
     capability: 'canManageBooks',
   },
   {
-    path: '/admin/students',
-    labelKey: 'students',
+    path: '/admin/readers',
+    labelKey: 'readers',
     Icon: Users,
-    capability: 'canManageStudents',
+    capability: 'canManageReaders',
   },
   {
     path: '/admin/loans',
@@ -57,12 +59,14 @@ const navLinks: {
     labelKey: 'tcc',
     Icon: GraduationCap,
     capability: 'canManageTcc',
+    feature: 'thesis',
   },
   {
     path: '/admin/ranking',
     labelKey: 'ranking',
     Icon: Trophy,
     capability: 'canViewRanking',
+    feature: 'ranking',
   },
   {
     path: '/admin/reports',
@@ -139,8 +143,10 @@ export function Sidebar({
 }: SidebarProps) {
   const { t } = useTranslation('nav');
   const { user } = useAuth();
+  const { features } = useLibraryConfig();
   const visibleNavLinks = navLinks.filter((link) =>
-    hasCapability(user?.role, link.capability as Capability),
+    hasCapability(user?.role, link.capability as Capability)
+    && (!link.feature || features[link.feature]),
   );
   const canViewSettings = hasCapability(user?.role, 'canViewSettings');
 

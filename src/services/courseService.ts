@@ -14,9 +14,9 @@ export interface CursoPayload {
 
 export interface CursoEstatistica {
   nomeCurso: string;
-  quantidadeAlunos: number;
+  quantidadeLeitores: number;
   totalEmprestimos: number;
-  mediaEmprestimosPorAluno: number;
+  mediaEmprestimosPorLeitor: number;
 }
 
 export interface EstatisticaGrafico {
@@ -58,9 +58,9 @@ export const buscarEstatisticasCursos = async (): Promise<
   const response = await api.get('/api/courses/statistics');
   return (response.data || []).map((item: Record<string, unknown>) => ({
     nomeCurso: item.courseName as string,
-    quantidadeAlunos: item.studentCount as number,
+    quantidadeLeitores: item.readerCount as number,
     totalEmprestimos: item.totalLoans as number,
-    mediaEmprestimosPorAluno: item.avgLoansPerStudent as number,
+    mediaEmprestimosPorLeitor: item.avgLoansPerReader as number,
   }));
 };
 

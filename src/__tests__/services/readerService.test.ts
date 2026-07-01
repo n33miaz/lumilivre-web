@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
-  buscarAlunosParaAdmin,
-  cadastrarAluno,
-  excluirAluno,
-  buscarAlunoPorMatricula,
-  type AlunoPayload,
-} from '../../services/studentService';
+  buscarLeitoresParaAdmin,
+  cadastrarLeitor,
+  excluirLeitor,
+  buscarLeitorPorMatricula,
+  type LeitorPayload,
+} from '../../services/readerService';
 import api from '../../services/api';
 
 vi.mock('../../services/api', () => ({
@@ -20,12 +20,12 @@ vi.mock('../../services/api', () => ({
 
 const mockedApi = vi.mocked(api);
 
-describe('studentService', () => {
+describe('readerService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('buscarAlunosParaAdmin uses v2 and maps student summaries', async () => {
+  it('buscarLeitoresParaAdmin uses v2 and maps reader summaries', async () => {
     mockedApi.get.mockResolvedValue({
       data: {
         content: [
@@ -40,36 +40,36 @@ describe('studentService', () => {
       },
     });
 
-    const result = await buscarAlunosParaAdmin();
+    const result = await buscarLeitoresParaAdmin();
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/students', {
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/readers', {
       params: { q: undefined, page: 0, size: 10, sort: 'fullName,asc' },
     });
     expect(result.content[0].matricula).toBe('001');
     expect(result.content[0].nomeCompleto).toBe('Joao');
   });
 
-  it('cadastrarAluno sends the v2 payload', async () => {
-    const alunoData: AlunoPayload = {
+  it('cadastrarLeitor sends the v2 payload', async () => {
+    const leitorData: LeitorPayload = {
       matricula: '2024001',
-      nomeCompleto: 'Novo Aluno',
+      nomeCompleto: 'Novo Leitor',
       cpf: '12345678900',
-      email: 'aluno@email.com',
+      email: 'leitor@email.com',
       cursoId: 1,
       turnoId: 2,
       moduloId: 3,
     };
     mockedApi.post.mockResolvedValue({ data: { registrationNumber: '2024001' } });
 
-    await cadastrarAluno(alunoData);
+    await cadastrarLeitor(leitorData);
 
-    expect(mockedApi.post).toHaveBeenCalledWith('/api/students', {
+    expect(mockedApi.post).toHaveBeenCalledWith('/api/readers', {
       registrationNumber: '2024001',
-      fullName: 'Novo Aluno',
+      fullName: 'Novo Leitor',
       cpf: '12345678900',
       phoneNumber: undefined,
       birthDate: undefined,
-      email: 'aluno@email.com',
+      email: 'leitor@email.com',
       courseId: 1,
       studyShiftId: 2,
       academicModuleId: 3,
@@ -84,7 +84,7 @@ describe('studentService', () => {
     });
   });
 
-  it('buscarAlunoPorMatricula maps v2 detail into the legacy UI shape', async () => {
+  it('buscarLeitorPorMatricula maps v2 detail into the legacy UI shape', async () => {
     mockedApi.get.mockResolvedValue({
       data: {
         registrationNumber: '001',
@@ -93,18 +93,18 @@ describe('studentService', () => {
       },
     });
 
-    const result = await buscarAlunoPorMatricula('001');
+    const result = await buscarLeitorPorMatricula('001');
 
-    expect(mockedApi.get).toHaveBeenCalledWith('/api/students/001');
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/readers/001');
     expect(result.data.nomeCompleto).toBe('Joao');
     expect(result.data.foto).toBe('https://example.com/avatar.png');
   });
 
-  it('excluirAluno deletes by registration number in v2', async () => {
+  it('excluirLeitor deletes by registration number in v2', async () => {
     mockedApi.delete.mockResolvedValue({ data: undefined });
 
-    await excluirAluno('2024001');
+    await excluirLeitor('2024001');
 
-    expect(mockedApi.delete).toHaveBeenCalledWith('/api/students/2024001');
+    expect(mockedApi.delete).toHaveBeenCalledWith('/api/readers/2024001');
   });
 });

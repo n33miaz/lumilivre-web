@@ -2,8 +2,8 @@ import api from './api';
 
 export interface SolicitacaoPendente {
   id: string;
-  alunoNome: string;
-  alunoMatricula?: string;
+  leitorNome: string;
+  leitorMatricula?: string;
   livroNome: string;
   exemplarTombo?: string;
   dataSolicitacao: string;
@@ -13,8 +13,8 @@ const toSolicitacaoPendente = (
   item: Record<string, unknown>,
 ): SolicitacaoPendente => ({
   id: String(item.id ?? ''),
-  alunoNome: (item.studentName as string) ?? '',
-  alunoMatricula: (item.studentRegistrationNumber as string) ?? undefined,
+  leitorNome: (item.readerName as string) ?? '',
+  leitorMatricula: (item.readerRegistrationNumber as string) ?? undefined,
   livroNome: (item.bookTitle as string) ?? '',
   exemplarTombo: (item.copyCode as string) ?? undefined,
   dataSolicitacao: (item.requestedAt as string) ?? '',

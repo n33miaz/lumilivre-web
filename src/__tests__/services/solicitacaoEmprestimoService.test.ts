@@ -24,8 +24,8 @@ describe('loanRequestService', () => {
       data: [
         {
           id: 'req-1',
-          studentName: 'Joao',
-          studentRegistrationNumber: '2024001',
+          readerName: 'Joao',
+          readerRegistrationNumber: '2024001',
           bookTitle: 'Dom Casmurro',
           copyCode: 'T001',
           requestedAt: '2026-03-10T10:00:00Z',
@@ -38,7 +38,7 @@ describe('loanRequestService', () => {
     expect(mockedApi.get).toHaveBeenCalledWith(
       '/api/loan-requests/pending',
     );
-    expect(result[0].alunoNome).toBe('Joao');
+    expect(result[0].leitorNome).toBe('Joao');
     expect(result[0].livroNome).toBe('Dom Casmurro');
   });
 

@@ -16,7 +16,7 @@ export function LoanModalNew({ onClose, onSuccess }: LoanModalNewProps) {
   const handleSubmit = async (data: LoanFormData) => {
     try {
       const payload: EmprestimoPayload = {
-        aluno_matricula: data.aluno_matricula,
+        leitor_matricula: data.leitor_matricula,
         exemplar_tombo: data.exemplar_tombo,
         data_emprestimo: data.data_emprestimo,
         data_devolucao: data.data_devolucao,

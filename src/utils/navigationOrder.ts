@@ -1,7 +1,7 @@
 export const routeOrder = [
   '/admin/dashboard',
   '/admin/books',
-  '/admin/students',
+  '/admin/readers',
   '/admin/loans',
   '/admin/theses',
   '/admin/ranking',

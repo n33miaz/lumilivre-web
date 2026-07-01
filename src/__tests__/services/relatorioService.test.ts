@@ -69,11 +69,11 @@ describe('reportService', () => {
     } as unknown as HTMLElement);
     mockedApi.get.mockResolvedValue({ data: new Blob(), headers: {} });
 
-    await baixarRelatorioPDF('alunos', {});
+    await baixarRelatorioPDF('leitores', {});
 
     expect(setAttribute).toHaveBeenCalledWith(
       'download',
-      'relatorio-alunos.pdf',
+      'relatorio-leitores.pdf',
     );
   });
 

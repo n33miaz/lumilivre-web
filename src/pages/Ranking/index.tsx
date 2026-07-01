@@ -14,7 +14,7 @@ import {
   Legend,
 } from 'recharts';
 
-import { type AlunoRanking } from '../../services/loanService';
+import { type LeitorRanking } from '../../services/loanService';
 import { type EstatisticaGrafico } from '../../services/courseService';
 import { CustomSelect } from '../../components/ui/CustomSelect';
 import { SearchableSelect } from '../../components/ui/SearchableSelect';
@@ -31,7 +31,7 @@ import {
   useEstatisticasGrafico,
   useModulos,
   useTurnos,
-} from '../../hooks/queries/useStudentQueries';
+} from '../../hooks/queries/useReaderQueries';
 
 const BAR_WIDTH = 40;
 const MIN_GAP = 20;
@@ -105,11 +105,11 @@ function PieChartCard({ title, data, emptyMessage }: PieCardProps) {
 }
 
 interface PodiumProps {
-  aluno?: AlunoRanking;
+  leitor?: LeitorRanking;
   position: 1 | 2 | 3;
 }
 
-function PodiumItem({ aluno, position }: PodiumProps) {
+function PodiumItem({ leitor, position }: PodiumProps) {
   const { t } = useTranslation('ranking');
 
   const config = {
@@ -151,7 +151,7 @@ function PodiumItem({ aluno, position }: PodiumProps) {
 
   const cfg = config[position];
   const Medal = cfg.Medal;
-  const firstName = aluno?.nome.split(' ')[0]?.toUpperCase() ?? '—';
+  const firstName = leitor?.nome.split(' ')[0]?.toUpperCase() ?? '—';
 
   return (
     <div className={`flex-1 flex flex-col items-center ${cfg.order}`}>
@@ -160,7 +160,7 @@ function PodiumItem({ aluno, position }: PodiumProps) {
       >
         <Medal className="w-5 h-5" />
       </div>
-      {aluno ? (
+      {leitor ? (
         <>
           <div className="font-display font-extrabold text-sm dark:text-white">
             {firstName}
@@ -168,7 +168,7 @@ function PodiumItem({ aluno, position }: PodiumProps) {
           <div
             className={`text-[10px] font-mono ${cfg.badgeClass} px-2 py-0.5 rounded-full mt-1`}
           >
-            {t('books_count', { count: aluno.emprestimosCount })}
+            {t('books_count', { count: leitor.emprestimosCount })}
           </div>
         </>
       ) : (
@@ -305,9 +305,9 @@ export function ClassificacaoPage() {
             </h3>
           </div>
           <div className="flex items-end justify-center gap-3 h-72">
-            <PodiumItem aluno={podiumData[1]} position={2} />
-            <PodiumItem aluno={podiumData[0]} position={1} />
-            <PodiumItem aluno={podiumData[2]} position={3} />
+            <PodiumItem leitor={podiumData[1]} position={2} />
+            <PodiumItem leitor={podiumData[0]} position={1} />
+            <PodiumItem leitor={podiumData[2]} position={3} />
           </div>
         </div>
 
@@ -343,7 +343,7 @@ export function ClassificacaoPage() {
           <div className="flex items-center gap-2">
             <span className="w-1 h-5 rounded bg-lumi-primary" />
             <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white">
-              {t('section.top_students')}
+              {t('section.top_readers')}
             </h3>
           </div>
           <div className="flex items-center gap-2 flex-wrap">

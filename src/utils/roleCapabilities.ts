@@ -2,7 +2,7 @@
 export const ROLE_CAPABILITIES = {
   ADMIN: {
     canManageUsers: true,
-    canManageStudents: true,
+    canManageReaders: true,
     canManageBooks: true,
     canManageLoans: true,
     canManageTcc: true,
@@ -13,7 +13,7 @@ export const ROLE_CAPABILITIES = {
   },
   BIBLIOTECARIO: {
     canManageUsers: false,
-    canManageStudents: true,
+    canManageReaders: true,
     canManageBooks: true,
     canManageLoans: true,
     canManageTcc: true,
@@ -22,9 +22,9 @@ export const ROLE_CAPABILITIES = {
     canViewRanking: true,
     canViewSettings: true,
   },
-  ALUNO: {
+  LEITOR: {
     canManageUsers: false,
-    canManageStudents: false,
+    canManageReaders: false,
     canManageBooks: false,
     canManageLoans: false,
     canManageTcc: false,
@@ -38,13 +38,16 @@ export const ROLE_CAPABILITIES = {
 export type UserRole = keyof typeof ROLE_CAPABILITIES;
 export type Capability = keyof (typeof ROLE_CAPABILITIES)[UserRole];
 
-export function hasCapability(role: string | undefined, capability: Capability): boolean {
+export function hasCapability(
+  role: string | undefined,
+  capability: Capability,
+): boolean {
   if (!role || !(role in ROLE_CAPABILITIES)) return false;
   return ROLE_CAPABILITIES[role as UserRole][capability];
 }
 
 export function getDefaultRouteForRole(role: string | undefined): string {
-  return hasCapability(role, 'canViewDashboard')
-    ? '/admin/dashboard'
-    : '/admin/ranking';
+  if (hasCapability(role, 'canViewDashboard')) return '/admin/dashboard';
+  if (hasCapability(role, 'canViewRanking')) return '/admin/ranking';
+  return '/admin/settings';
 }
