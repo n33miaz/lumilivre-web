@@ -10,11 +10,13 @@ export interface LibraryFeatures {
 
 export interface LibrarySettings {
   libraryType: LibraryType;
+  readerCanEditAvatar: boolean;
   features: LibraryFeatures;
 }
 
 export const defaultLibrarySettings: LibrarySettings = {
   libraryType: 'SCHOOL',
+  readerCanEditAvatar: true,
   features: {
     academicFields: true,
     ranking: true,
@@ -29,7 +31,13 @@ export const getSettings = async (): Promise<LibrarySettings> => {
 
 export const updateSettings = async (
   libraryType: LibraryType,
+  readerCanEditAvatar?: boolean,
 ): Promise<LibrarySettings> => {
-  const response = await api.put('/api/settings', { libraryType });
+  // `readerCanEditAvatar` é opcional no backend: quando `undefined`, o
+  // JSON.stringify do axios remove a chave e a flag atual é preservada.
+  const response = await api.put('/api/settings', {
+    libraryType,
+    readerCanEditAvatar,
+  });
   return response.data;
 };

@@ -8,6 +8,7 @@ import ptBRReader from './locales/pt-BR/reader.json';
 import ptBRBook from './locales/pt-BR/book.json';
 import ptBRLoan from './locales/pt-BR/loan.json';
 import ptBRSettings from './locales/pt-BR/settings.json';
+import ptBRAdmin from './locales/pt-BR/admin.json';
 import ptBRNav from './locales/pt-BR/nav.json';
 import ptBRRanking from './locales/pt-BR/ranking.json';
 import ptBRReport from './locales/pt-BR/report.json';
@@ -22,6 +23,7 @@ import enUSReader from './locales/en-US/reader.json';
 import enUSBook from './locales/en-US/book.json';
 import enUSLoan from './locales/en-US/loan.json';
 import enUSSettings from './locales/en-US/settings.json';
+import enUSAdmin from './locales/en-US/admin.json';
 import enUSNav from './locales/en-US/nav.json';
 import enUSRanking from './locales/en-US/ranking.json';
 import enUSReport from './locales/en-US/report.json';
@@ -56,6 +58,7 @@ i18n
         book: ptBRBook,
         loan: ptBRLoan,
         settings: ptBRSettings,
+        admin: ptBRAdmin,
         nav: ptBRNav,
         ranking: ptBRRanking,
         report: ptBRReport,
@@ -71,6 +74,7 @@ i18n
         book: enUSBook,
         loan: enUSLoan,
         settings: enUSSettings,
+        admin: enUSAdmin,
         nav: enUSNav,
         ranking: enUSRanking,
         report: enUSReport,
