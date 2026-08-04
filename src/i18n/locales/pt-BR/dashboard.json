@@ -52,6 +52,8 @@
   "chart.top_books": "Top Livros",
   "chart.overdue": "Atrasos",
   "chart.no_data": "Sem dados",
+  "chart.error": "Não foi possível carregar este gráfico.",
+  "chart.retry": "Tentar novamente",
   "chart.no_overdue": "Sem atrasos",
   "chart.loans_by_month": "Empréstimos por Mês",
   "chart.top_most_borrowed": "Livros Mais Emprestados",

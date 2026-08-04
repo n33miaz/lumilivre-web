@@ -716,6 +716,10 @@ export function DashboardPage() {
                 ) : undefined
               }
               isLoading={isAnalyticsLoading}
+              isError={statsGerenciais.isError}
+              errorMessage={t('chart.error')}
+              onRetry={() => statsGerenciais.refetch()}
+              retryLabel={t('chart.retry')}
               isEmpty={statusChartData.length === 0}
               emptyMessage={t('chart.no_data')}
             >
@@ -762,6 +766,10 @@ export function DashboardPage() {
                 ) : undefined
               }
               isLoading={isAnalyticsLoading}
+              isError={emprestimosPorMes.isError}
+              errorMessage={t('chart.error')}
+              onRetry={() => emprestimosPorMes.refetch()}
+              retryLabel={t('chart.retry')}
               isEmpty={monthlyChartData.length === 0}
               emptyMessage={t('chart.no_data')}
             >
@@ -788,6 +796,10 @@ export function DashboardPage() {
                 ) : undefined
               }
               isLoading={isAnalyticsLoading}
+              isError={topLivros.isError}
+              errorMessage={t('chart.error')}
+              onRetry={() => topLivros.refetch()}
+              retryLabel={t('chart.retry')}
               isEmpty={topBooksChartData.length === 0}
               emptyMessage={t('chart.no_data')}
             >
@@ -821,6 +833,10 @@ export function DashboardPage() {
                 ) : undefined
               }
               isLoading={isAnalyticsLoading}
+              isError={statsGerenciais.isError}
+              errorMessage={t('chart.error')}
+              onRetry={() => statsGerenciais.refetch()}
+              retryLabel={t('chart.retry')}
               isEmpty={dueStatusChartData.length === 0}
               emptyMessage={t('chart.no_overdue')}
             >

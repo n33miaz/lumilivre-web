@@ -10,7 +10,9 @@ export interface DashboardGerencialStats {
 }
 
 export interface TopLivroDashboard {
-  livroId: number;
+  // Identificador usado como chave de lista/render — mantido como string,
+  // coerente com o mapper (`String(item.bookId)`). WS-04.
+  livroId: string;
   titulo: string;
   autor: string | null;
   imagem: string | null;

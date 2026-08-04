@@ -6,6 +6,10 @@ interface ChartCardProps {
   badge?: ReactNode;
   isLoading?: boolean;
   isEmpty?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
+  onRetry?: () => void;
+  retryLabel?: string;
   emptyMessage?: string;
   emptyIcon?: ReactNode;
   children: ReactNode;
@@ -17,6 +21,10 @@ export function ChartCard({
   badge,
   isLoading = false,
   isEmpty = false,
+  isError = false,
+  errorMessage,
+  onRetry,
+  retryLabel,
   emptyMessage,
   emptyIcon,
   children,
@@ -40,6 +48,8 @@ export function ChartCard({
       <div className="h-56 flex-1 min-h-0">
         {isLoading ? (
           <ChartSkeleton />
+        ) : isError ? (
+          <ChartError message={errorMessage} onRetry={onRetry} retryLabel={retryLabel} />
         ) : isEmpty ? (
           <ChartEmpty icon={emptyIcon} message={emptyMessage} />
         ) : (
@@ -79,6 +89,48 @@ function ChartEmpty({
     <div className="h-full flex flex-col items-center justify-center text-sm text-gray-400 dark:text-gray-500 gap-2">
       {icon ?? <DefaultEmptyIcon />}
       {message && <span>{message}</span>}
+    </div>
+  );
+}
+
+function ChartError({
+  message,
+  onRetry,
+  retryLabel,
+}: {
+  message?: string;
+  onRetry?: () => void;
+  retryLabel?: string;
+}) {
+  return (
+    <div
+      role="alert"
+      className="h-full flex flex-col items-center justify-center text-sm text-red-500 dark:text-red-400 gap-2 text-center px-4"
+    >
+      <svg
+        aria-hidden="true"
+        width="34"
+        height="34"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+        <path d="M12 9v4M12 17h.01" />
+      </svg>
+      {message && <span>{message}</span>}
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-1 px-3 h-8 rounded-lg border border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-300 text-xs font-bold hover:bg-red-50 dark:hover:bg-red-500/10"
+        >
+          {retryLabel ?? 'Tentar novamente'}
+        </button>
+      )}
     </div>
   );
 }

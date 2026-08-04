@@ -52,6 +52,8 @@
   "chart.top_books": "Top Books",
   "chart.overdue": "Overdue",
   "chart.no_data": "No data",
+  "chart.error": "Could not load this chart.",
+  "chart.retry": "Try again",
   "chart.no_overdue": "No overdue loans",
   "chart.loans_by_month": "Loans by Month",
   "chart.top_most_borrowed": "Most Borrowed Books",
