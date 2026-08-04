@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { usePresence } from '../../hooks/usePresence';
@@ -9,8 +10,12 @@ interface FilterPanelProps {
   onApply: () => void;
   onClear: () => void;
   onClose: () => void;
-  width?: string;
+  /** Largura máxima em px do painel (default 600). */
+  width?: number;
 }
+
+const GAP = 8;
+const MARGIN = 16;
 
 export function FilterPanel({
   isOpen,
@@ -18,11 +23,42 @@ export function FilterPanel({
   onApply,
   onClear,
   onClose,
-  width = 'md:w-[600px]', // Valor padrão agora inclui o prefixo md:
+  width = 600,
 }: FilterPanelProps) {
   const { t } = useTranslation('common');
   const { shouldRender, isClosing } = usePresence(isOpen);
   const panelRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  // Posiciona o painel ancorado ao gatilho (#filter-toggle-button), alinhado à
+  // direita. Portalado em document.body (position: fixed) para NUNCA ser cortado
+  // por overflow/transform de ancestrais (bug do SlideStage no Books) — WS-05.
+  useLayoutEffect(() => {
+    if (!shouldRender) return;
+
+    const reposition = () => {
+      const trigger = document.getElementById('filter-toggle-button');
+      const vw = window.innerWidth;
+      const panelWidth = Math.min(width, vw - 2 * MARGIN);
+      if (!trigger) {
+        setPos({ top: 72, left: vw - panelWidth - MARGIN, width: panelWidth });
+        return;
+      }
+      const r = trigger.getBoundingClientRect();
+      const top = r.bottom + GAP;
+      let left = r.right - panelWidth;
+      left = Math.max(MARGIN, Math.min(left, vw - panelWidth - MARGIN));
+      setPos({ top, left, width: panelWidth });
+    };
+
+    reposition();
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+  }, [shouldRender, width]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -32,9 +68,7 @@ export function FilterPanel({
       const toggleButton = document.getElementById('filter-toggle-button');
 
       const isInsideDropdownPortal = target.closest('[id^="dropdown-portal-"]');
-      const isInsideDatePickerPortal = target.closest(
-        '[id^="datepicker-portal-"]',
-      );
+      const isInsideDatePickerPortal = target.closest('[id^="datepicker-portal-"]');
 
       if (
         panelRef.current &&
@@ -52,13 +86,14 @@ export function FilterPanel({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen, onClose]);
 
-  if (!shouldRender) return null;
+  if (!shouldRender || !pos) return null;
 
-  return (
+  return createPortal(
     <div
       ref={panelRef}
-      className={`absolute top-full -right-2 mt-2 origin-top-right bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 z-[70] select-none
-        w-[calc(100vw-2rem)] sm:w-[calc(100vw-4rem)] max-w-[95vw] ${width}
+      id="filter-panel-portal"
+      style={{ position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 9999 }}
+      className={`origin-top-right bg-white dark:bg-dark-card rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 select-none
         ${isClosing ? 'animate-slide-down-out' : 'animate-slide-down'}
         `}
     >
@@ -80,6 +115,7 @@ export function FilterPanel({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
