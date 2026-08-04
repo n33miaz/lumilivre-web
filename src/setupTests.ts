@@ -1,6 +1,49 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// Node >= 22 define localStorage/sessionStorage como getters globais
+// experimentais (undefined sem --localstorage-file), sombreando os do jsdom
+// no ambiente do vitest. Polyfill em memória com a API completa de Storage.
+class MemoryStorage implements Storage {
+  private store = new Map<string, string>();
+
+  get length(): number {
+    return this.store.size;
+  }
+  clear(): void {
+    this.store.clear();
+  }
+  getItem(key: string): string | null {
+    return this.store.has(key) ? this.store.get(key)! : null;
+  }
+  key(index: number): string | null {
+    return [...this.store.keys()][index] ?? null;
+  }
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+  setItem(key: string, value: string): void {
+    this.store.set(key, String(value));
+  }
+}
+
+if (typeof globalThis.localStorage?.clear !== 'function') {
+  // Expõe a classe como `Storage` para que vi.spyOn(Storage.prototype, ...)
+  // continue interceptando as chamadas dos testes.
+  Object.defineProperty(globalThis, 'Storage', {
+    value: MemoryStorage,
+    writable: true,
+    configurable: true,
+  });
+  for (const name of ['localStorage', 'sessionStorage'] as const) {
+    Object.defineProperty(globalThis, name, {
+      value: new MemoryStorage(),
+      writable: true,
+      configurable: true,
+    });
+  }
+}
+
 // Mock do window.matchMedia para o jsdom
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

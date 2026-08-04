@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { LocaleSwitcher } from '../../../components/ui/LocaleSwitcher';
@@ -82,7 +82,7 @@ describe('Componente: LocaleSwitcher', () => {
     expect(setLocale).toHaveBeenCalledWith('en-US');
   });
 
-  it('fecha o menu ao pressionar Escape', () => {
+  it('fecha o menu ao pressionar Escape', async () => {
     mockUseLocale.mockReturnValue({
       locale: 'pt-BR',
       setLocale: vi.fn(),
@@ -97,7 +97,10 @@ describe('Componente: LocaleSwitcher', () => {
     fireEvent.keyDown(screen.getByRole('listbox'), { key: 'Escape' });
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    // usePresence mantém o menu montado durante a animação de saída (~160ms).
+    await waitFor(() =>
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument(),
+    );
   });
 
   it('navega entre opções com ArrowDown e seleciona com Enter', () => {

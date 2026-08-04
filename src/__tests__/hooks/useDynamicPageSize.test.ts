@@ -4,7 +4,10 @@ import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
 import { type RefObject } from 'react';
 
 function createMockContainerRef(height: number): RefObject<HTMLElement> {
-  const element = { clientHeight: height } as HTMLElement;
+  const element = {
+    clientHeight: height,
+    getBoundingClientRect: () => ({ height }) as DOMRect,
+  } as unknown as HTMLElement;
   return { current: element };
 }
 
@@ -15,6 +18,13 @@ describe('useDynamicPageSize', () => {
   beforeEach(() => {
     mockObserve = vi.fn();
     mockDisconnect = vi.fn();
+
+    // O hook mede no próximo frame; roda o rAF sincronamente no teste.
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    });
+    vi.stubGlobal('cancelAnimationFrame', () => {});
 
     // ResizeObserver deve ser mockado como classe (constructor function)
     globalThis.ResizeObserver = vi.fn(function (this: unknown) {
