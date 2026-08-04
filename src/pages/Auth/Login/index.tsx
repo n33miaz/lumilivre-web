@@ -101,7 +101,8 @@ export function LoginPage() {
         navigate(getDefaultRouteForRole(userToStore.role));
       }, 500);
     } catch (err) {
-      console.error('Erro no login:', err);
+      // SEC-20: NÃO logar o AxiosError (o config.data carrega usuário+senha).
+      console.error('Falha no login', (err as { response?: { status?: number } })?.response?.status ?? '');
 
       addToast({
         type: 'error',

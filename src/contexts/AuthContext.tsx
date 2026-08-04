@@ -9,6 +9,7 @@ import {
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
+import { queryClient } from '../services/queryClient';
 
 interface User {
   id: string;
@@ -90,6 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     clearPersistedUser();
     delete api.defaults.headers.common['Authorization'];
+    // Limpa o cache do TanStack para que dados/PII do usuário anterior não
+    // vazem para o próximo login numa máquina compartilhada (SEC-08).
+    queryClient.clear();
     navigate('/login');
   }, [navigate]);
 
@@ -100,7 +104,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       persistUser(updatedUser);
     }
   }, [user]);
-
 
   const completeTour = useCallback(() => {
     // Best-effort: registra a conclusão no backend (idempotente). Se falhar,

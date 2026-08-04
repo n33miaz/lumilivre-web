@@ -41,7 +41,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </LocaleProvider>
         </ToastProvider>
       </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+      {import.meta.env.DEV && (
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
+      )}
     </QueryClientProvider>
   </React.StrictMode>,
 );
