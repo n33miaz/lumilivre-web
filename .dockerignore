@@ -23,7 +23,6 @@ playwright.config.ts
 # IDE / docs
 .idea/
 .vscode/
-docs/
 README.md
 LICENSE
 
