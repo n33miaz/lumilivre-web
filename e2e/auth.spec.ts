@@ -48,7 +48,7 @@ test.describe('Login Page', () => {
     );
 
     // Mock all dashboard API calls to prevent errors
-    await page.route('**/api/students**', (route) =>
+    await page.route('**/api/readers**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

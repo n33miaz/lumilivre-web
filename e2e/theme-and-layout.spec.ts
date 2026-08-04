@@ -44,7 +44,7 @@ async function mockAllApiCalls(page: Page) {
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/students**', (r) =>
+  await page.route('**/api/readers**', (r) =>
     r.fulfill({
       status: 200,
       contentType: 'application/json',

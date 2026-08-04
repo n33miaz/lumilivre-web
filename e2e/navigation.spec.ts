@@ -66,7 +66,7 @@ async function mockAllApis(page: Page) {
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/students**', (route) =>
+  await page.route('**/api/readers**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -94,7 +94,7 @@ async function mockAllApis(page: Page) {
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/theses**', (route) =>
+  await page.route('**/api/contents**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -151,9 +151,9 @@ test.describe('Protected Routes — Unauthenticated', () => {
   const protectedPaths = [
     '/admin/dashboard',
     '/admin/books',
-    '/admin/students',
+    '/admin/readers',
     '/admin/loans',
-    '/admin/theses',
+    '/admin/contents',
     '/admin/ranking',
     '/admin/reports',
     '/admin/settings',
@@ -194,13 +194,13 @@ test.describe('Sidebar Navigation — Authenticated', () => {
     await page.waitForURL('**/admin/books', { timeout: 5000 });
     expect(page.url()).toContain('/admin/books');
 
-    // Navigate to Alunos
+    // Navigate to Leitores
     await page
       .locator('aside')
-      .getByRole('link', { name: /alunos/i })
+      .getByRole('link', { name: /leitores/i })
       .click();
-    await page.waitForURL('**/admin/students', { timeout: 5000 });
-    expect(page.url()).toContain('/admin/students');
+    await page.waitForURL('**/admin/readers', { timeout: 5000 });
+    expect(page.url()).toContain('/admin/readers');
   });
 });
 
@@ -246,7 +246,7 @@ test.describe('Session Expiry', () => {
         body: JSON.stringify({ content: [], totalElements: 0, totalPages: 0 }),
       }),
     );
-    await page.route('**/api/students**', (route) =>
+    await page.route('**/api/readers**', (route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

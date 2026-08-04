@@ -45,7 +45,7 @@ async function mockProtectedApis(page: Page) {
       body: JSON.stringify([]),
     }),
   );
-  await page.route('**/api/students**', (route) =>
+  await page.route('**/api/readers**', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -128,7 +128,7 @@ test.describe('Acessibilidade critica', () => {
   const protectedPages = [
     '/admin/dashboard',
     '/admin/books',
-    '/admin/students',
+    '/admin/readers',
     '/admin/loans',
   ] as const;
 
