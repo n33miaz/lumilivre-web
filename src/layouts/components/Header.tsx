@@ -205,7 +205,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
       </div>
 
       {/* Global search */}
-      <div className="hidden md:flex flex-1 max-w-xl mx-6">
+      <div data-tour="global-search" className="hidden md:flex flex-1 max-w-xl mx-6">
         <div className="relative w-full">
           <SearchIcon className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input

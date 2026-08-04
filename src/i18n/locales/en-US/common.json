@@ -61,5 +61,22 @@
   "button.details": "DETAILS",
   "button.generate": "Generate",
   "locale.switch_aria": "Switch language",
-  "footer.signature": "LumiLivre v{{version}} © 2026 - Developed by <author>Neemias Manso</author>"
+  "footer.signature": "LumiLivre v{{version}} © 2026 - Developed by <author>Neemias Manso</author>",
+  "tour.skip": "Skip",
+  "tour.next": "Next",
+  "tour.back": "Back",
+  "tour.finish": "Finish",
+  "tour.step_of": "{{current}} of {{total}}",
+  "tour.welcome.title": "Welcome to LumiLivre!",
+  "tour.welcome.body": "Let's take a quick tour of the panel's main areas. It takes less than a minute.",
+  "tour.sidebar.title": "Navigation",
+  "tour.sidebar.body": "Use the sidebar to reach Home, Books, Readers, Loans, Contents and more. Hover to expand it or pin it in place.",
+  "tour.search.title": "Global search",
+  "tour.search.body": "Quickly jump to any screen. You can also open it with Ctrl/⌘ + K.",
+  "tour.notifications.title": "Notifications",
+  "tour.notifications.body": "Keep an eye here: overdue loans and new requests show up in real time.",
+  "tour.settings.title": "Settings",
+  "tour.settings.body": "Adjust library type, language, theme and — if you're an admin — app version, audit and users.",
+  "tour.finish.title": "All set!",
+  "tour.finish.body": "You're ready to explore. This tour won't show again."
 }

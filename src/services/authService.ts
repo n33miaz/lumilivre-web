@@ -12,6 +12,7 @@ interface LoginResponse {
   matriculaLeitor?: string;
   token: string;
   isInitialPassword: boolean;
+  guidedTourCompleted: boolean;
 }
 
 export const login = async (
@@ -28,6 +29,9 @@ export const login = async (
     matriculaLeitor: response.data.readerRegistrationNumber,
     token: response.data.token,
     isInitialPassword: response.data.initialPasswordChange,
+    // Campo ausente (backend antigo) conta como tour já concluído para nunca
+    // disparar o tour inesperadamente em sessões existentes.
+    guidedTourCompleted: response.data.guidedTourCompleted ?? true,
   };
 };
 

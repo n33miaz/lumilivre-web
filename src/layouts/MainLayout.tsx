@@ -8,6 +8,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { getRouteIndex } from '../utils/navigationOrder';
 import { MandatoryPasswordChangeModal } from '../pages/Auth/components/MandatoryPasswordChangeModal';
+import { GuidedTour } from '../components/GuidedTour';
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -67,6 +68,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
       }`}
     >
       <MandatoryPasswordChangeModal />
+      <GuidedTour />
 
       <Header
         isSidebarExpanded={isSidebarExpanded}

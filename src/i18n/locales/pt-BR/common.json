@@ -61,5 +61,22 @@
   "button.details": "DETALHES",
   "button.generate": "Gerar",
   "locale.switch_aria": "Trocar idioma",
-  "footer.signature": "LumiLivre v{{version}} © 2026 - Desenvolvido por <author>Neemias Manso</author>"
+  "footer.signature": "LumiLivre v{{version}} © 2026 - Desenvolvido por <author>Neemias Manso</author>",
+  "tour.skip": "Pular",
+  "tour.next": "Próximo",
+  "tour.back": "Voltar",
+  "tour.finish": "Concluir",
+  "tour.step_of": "{{current}} de {{total}}",
+  "tour.welcome.title": "Bem-vindo(a) ao LumiLivre!",
+  "tour.welcome.body": "Vamos dar um tour rápido pelas principais áreas do painel. Leva menos de um minuto.",
+  "tour.sidebar.title": "Navegação",
+  "tour.sidebar.body": "Use o menu lateral para acessar Início, Livros, Leitores, Empréstimos, Conteúdos e mais. Passe o mouse para expandir ou fixe com o alfinete.",
+  "tour.search.title": "Busca global",
+  "tour.search.body": "Encontre rapidamente qualquer tela do sistema. Você também pode abrir com Ctrl/⌘ + K.",
+  "tour.notifications.title": "Notificações",
+  "tour.notifications.body": "Fique de olho aqui: empréstimos em atraso e novas solicitações aparecem em tempo real.",
+  "tour.settings.title": "Configurações",
+  "tour.settings.body": "Ajuste o tipo de biblioteca, idioma, tema e — se você for administrador — versão do app, auditoria e usuários.",
+  "tour.finish.title": "Tudo pronto!",
+  "tour.finish.body": "Você já pode explorar. Este tour não aparecerá novamente."
 }

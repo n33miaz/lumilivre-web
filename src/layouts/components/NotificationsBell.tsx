@@ -66,7 +66,7 @@ export function NotificationsBell() {
   const isEmpty = overdueCount === 0 && requests.length === 0;
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} data-tour="notifications" className="relative">
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}

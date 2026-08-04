@@ -16,6 +16,7 @@ interface User {
   role: string;
   token: string;
   isInitialPassword?: boolean;
+  guidedTourCompleted?: boolean;
 }
 
 type StoredUser = Omit<User, 'token'> & { token?: string };
@@ -73,6 +74,7 @@ interface AuthContextType {
   logout: () => void;
   logoutWithAnimation: () => void;
   completePasswordChange: () => void;
+  completeTour: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,6 +96,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const completePasswordChange = useCallback(() => {
     if (user) {
       const updatedUser = { ...user, isInitialPassword: false };
+      setUser(updatedUser);
+      persistUser(updatedUser);
+    }
+  }, [user]);
+
+
+  const completeTour = useCallback(() => {
+    // Best-effort: registra a conclusão no backend (idempotente). Se falhar,
+    // o flip local abaixo evita reabrir o tour nesta sessão e o backend volta
+    // a informar guidedTourCompleted=false no próximo login.
+    api.post('/api/users/me/complete-tour').catch((error) => {
+      console.warn('Falha ao registrar a conclusão do tour guiado:', error);
+    });
+    if (user) {
+      const updatedUser = { ...user, guidedTourCompleted: true };
       setUser(updatedUser);
       persistUser(updatedUser);
     }
@@ -199,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         logoutWithAnimation,
         completePasswordChange,
+        completeTour,
       }}
     >
       {children}

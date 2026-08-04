@@ -83,6 +83,7 @@ export function LoginPage() {
         role: responseData.role,
         token: responseData.token,
         isInitialPassword: responseData.isInitialPassword,
+        guidedTourCompleted: responseData.guidedTourCompleted,
       };
 
       setAuthUser(userToStore);

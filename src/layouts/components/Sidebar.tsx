@@ -167,6 +167,7 @@ export function Sidebar({
 
   return (
     <aside
+      data-tour="sidebar"
       className={`h-full bg-sidebar-gradient text-gray-200 flex flex-col shrink-0 transition-[width,transform] duration-300 shadow-[8px_0_24px_rgba(0,0,0,0.18)] select-none
       ${isExpanded ? 'w-56 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'}
       ${isPinned ? 'md:relative' : 'md:absolute md:inset-y-0 md:left-0 md:z-40'}
