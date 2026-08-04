@@ -8,7 +8,7 @@ export const contentSchema = z.object({
   advisors: z.string().optional(),
   completionYear: z.string().optional(),
   completionSemester: z.string().optional(),
-  // NEW-01: só URL http(s) — vai para o app e é aberta via url_launcher.
+  // Só URL http(s) — vai para o app e é aberta via url_launcher.
   externalUrl: z
     .string()
     .trim()

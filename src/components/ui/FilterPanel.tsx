@@ -32,7 +32,7 @@ export function FilterPanel({
 
   // Posiciona o painel ancorado ao gatilho (#filter-toggle-button), alinhado à
   // direita. Portalado em document.body (position: fixed) para NUNCA ser cortado
-  // por overflow/transform de ancestrais (bug do SlideStage no Books) — WS-05.
+  // por overflow/transform de ancestrais (bug do SlideStage no Books).
   useLayoutEffect(() => {
     if (!shouldRender) return;
 

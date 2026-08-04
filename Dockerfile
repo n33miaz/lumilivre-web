@@ -1,5 +1,5 @@
 # =============================================================================
-#  LumiLivre Web — multi-stage Docker build (EX-01)
+#  LumiLivre Web — multi-stage Docker build
 # -----------------------------------------------------------------------------
 #  Build:  docker build --build-arg VITE_API_BASE_URL=https://api.exemplo.com \
 #            -t lumilivre-web:dev .

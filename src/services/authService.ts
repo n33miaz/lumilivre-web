@@ -45,7 +45,7 @@ export const requestPasswordReset = async (
         'Se um e-mail correspondente for encontrado, um link para redefinição será enviado.',
     };
   } catch {
-    // SEC-20: não logar o erro cru (carrega o e-mail no config.data).
+    // Não logar o erro cru (carrega o e-mail no config.data).
     console.error('Falha ao solicitar redefinição de senha');
     return {
       mensagem:
@@ -59,7 +59,7 @@ export const validarTokenReset = async (token: string): Promise<boolean> => {
     const response = await api.get(`/api/auth/validate-token/${token}`);
     return response.data.valid === true;
   } catch {
-    // SEC-20: o AxiosError expõe a URL com o token de reset.
+    // O AxiosError expõe a URL com o token de reset.
     console.error('Falha ao validar token de redefinição');
     return false;
   }
@@ -76,7 +76,7 @@ export const mudarSenhaComToken = async (
     });
     return response.data;
   } catch (error) {
-    // SEC-20: config.data carrega {token, newPassword}; não logar o erro cru.
+    // Config.data carrega {token, newPassword}; não logar o erro cru.
     console.error('Falha ao redefinir a senha com token');
     throw error;
   }

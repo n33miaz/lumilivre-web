@@ -14,7 +14,7 @@ export const appVersionSchema = z.object({
   buildMinimo: buildField,
   forcarAtualizacao: z.boolean(),
   mensagemAtualizacao: z.string().optional().or(z.literal('')),
-  // NEW-01: aceitar apenas URL http(s) — o app abre este valor via url_launcher.
+  // Aceitar apenas URL http(s) — o app abre este valor via url_launcher.
   urlLoja: z
     .string()
     .trim()

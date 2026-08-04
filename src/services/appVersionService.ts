@@ -1,6 +1,6 @@
 import api from './api';
 
-/** Plataformas suportadas para o controle de versão do app (WS-08/WS-09). */
+/** Plataformas suportadas para o controle de versão do app. */
 export type AppPlatform = 'ANDROID' | 'IOS';
 
 /** Tipo interno (pt-BR) da versão do app, mapeado da resposta EN da API. */

@@ -21,7 +21,7 @@ export const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 30, // 30 minutos
       refetchOnWindowFocus: false,
       retry: shouldRetry,
-      // Backoff exponencial (cap 15s) para sobreviver ao cold start da API (EX-02).
+      // Backoff exponencial (cap 15s) para sobreviver ao cold start da API.
       retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 15000),
     },
   },

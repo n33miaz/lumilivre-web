@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearPersistedUser();
     delete api.defaults.headers.common['Authorization'];
     // Limpa o cache do TanStack para que dados/PII do usuário anterior não
-    // vazem para o próximo login numa máquina compartilhada (SEC-08).
+    // vazem para o próximo login numa máquina compartilhada.
     queryClient.clear();
     navigate('/login');
   }, [navigate]);
@@ -168,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           logout();
         }
-        // EX-02: erro de rede / 5xx NÃO desloga mais — é indisponibilidade
+        // Erro de rede / 5xx NÃO desloga mais — é indisponibilidade
         // (cold start do Render). O ApiHealthContext detecta, exibe o modal
         // "reativando o servidor" e retoma as chamadas quando a API volta.
         return Promise.reject(error);
