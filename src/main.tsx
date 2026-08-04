@@ -15,6 +15,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { LocaleProvider } from './contexts/LocaleContext';
 import { LibraryConfigProvider } from './contexts/LibraryConfigContext';
+import { ApiHealthProvider } from './contexts/ApiHealthContext';
+import { ApiWakingModal } from './components/ApiWakingModal';
 import { queryClient } from './services/queryClient';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -24,15 +26,18 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <ToastProvider>
           <LocaleProvider>
             <QueryErrorBridge />
-            <BrowserRouter>
-              <AuthProvider>
-                <LibraryConfigProvider>
-                  <ErrorBoundary>
-                    <App />
-                  </ErrorBoundary>
-                </LibraryConfigProvider>
-              </AuthProvider>
-            </BrowserRouter>
+            <ApiHealthProvider>
+              <ApiWakingModal />
+              <BrowserRouter>
+                <AuthProvider>
+                  <LibraryConfigProvider>
+                    <ErrorBoundary>
+                      <App />
+                    </ErrorBoundary>
+                  </LibraryConfigProvider>
+                </AuthProvider>
+              </BrowserRouter>
+            </ApiHealthProvider>
           </LocaleProvider>
         </ToastProvider>
       </ThemeProvider>

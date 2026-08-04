@@ -78,5 +78,11 @@
   "tour.settings.title": "Settings",
   "tour.settings.body": "Adjust library type, language, theme and — if you're an admin — app version, audit and users.",
   "tour.finish.title": "All set!",
-  "tour.finish.body": "You're ready to explore. This tour won't show again."
+  "tour.finish.body": "You're ready to explore. This tour won't show again.",
+  "apiHealth.title": "Waking the server…",
+  "apiHealth.waking_message": "The server was asleep to save resources. We're bringing it back — this usually takes up to ~1 minute. You didn't lose anything; the screen will resume on its own.",
+  "apiHealth.elapsed": "Waiting for {{seconds}}s…",
+  "apiHealth.retry_now": "Try now",
+  "apiHealth.down_title": "Server still unavailable",
+  "apiHealth.down_message": "We couldn't wake the server in time. Please try again shortly, or contact support if it persists."
 }

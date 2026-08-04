@@ -164,22 +164,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           logout();
-        } else if (
-          !error.response &&
-          (error.code === 'ERR_NETWORK' || error.message === 'Network Error') &&
-          user &&
-          !onAuthRoute
-        ) {
-          console.warn('Servidor indisponível. Realizando logout...');
-
-          addToast({
-            type: 'error',
-            title: 'Erro de Conexão',
-            description: 'O servidor não está respondendo. Você foi desconectado.',
-          });
-
-          logout();
         }
+        // EX-02: erro de rede / 5xx NÃO desloga mais — é indisponibilidade
+        // (cold start do Render). O ApiHealthContext detecta, exibe o modal
+        // "reativando o servidor" e retoma as chamadas quando a API volta.
         return Promise.reject(error);
       },
     );

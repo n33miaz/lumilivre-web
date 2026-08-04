@@ -78,5 +78,11 @@
   "tour.settings.title": "Configurações",
   "tour.settings.body": "Ajuste o tipo de biblioteca, idioma, tema e — se você for administrador — versão do app, auditoria e usuários.",
   "tour.finish.title": "Tudo pronto!",
-  "tour.finish.body": "Você já pode explorar. Este tour não aparecerá novamente."
+  "tour.finish.body": "Você já pode explorar. Este tour não aparecerá novamente.",
+  "apiHealth.title": "Reativando o servidor…",
+  "apiHealth.waking_message": "O servidor estava em repouso para economizar recursos. Estamos religando — isso costuma levar até ~1 minuto. Você não perdeu nada; a tela volta sozinha.",
+  "apiHealth.elapsed": "Aguardando há {{seconds}}s…",
+  "apiHealth.retry_now": "Tentar agora",
+  "apiHealth.down_title": "Servidor ainda indisponível",
+  "apiHealth.down_message": "Não conseguimos reativar o servidor a tempo. Tente novamente em alguns instantes ou contate o suporte se persistir."
 }

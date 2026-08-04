@@ -17,8 +17,27 @@ describe('queryClient', () => {
     expect(defaults.queries?.refetchOnWindowFocus).toBe(false);
   });
 
-  it('deve ter retry configurado como 1', () => {
-    const defaults = queryClient.getDefaultOptions();
-    expect(defaults.queries?.retry).toBe(1);
+  it('não repete erros 4xx (exceto 408/429)', () => {
+    const retry = queryClient.getDefaultOptions().queries?.retry as (
+      failureCount: number,
+      error: unknown,
+    ) => boolean;
+    expect(typeof retry).toBe('function');
+
+    expect(retry(0, { response: { status: 404 } })).toBe(false);
+    expect(retry(0, { response: { status: 403 } })).toBe(false);
+    expect(retry(0, { response: { status: 429 } })).toBe(true);
+    expect(retry(0, { response: { status: 408 } })).toBe(true);
+  });
+
+  it('repete rede/5xx até 4 tentativas (cold start)', () => {
+    const retry = queryClient.getDefaultOptions().queries?.retry as (
+      failureCount: number,
+      error: unknown,
+    ) => boolean;
+
+    expect(retry(0, new Error('Network Error'))).toBe(true);
+    expect(retry(3, { response: { status: 503 } })).toBe(true);
+    expect(retry(4, { response: { status: 503 } })).toBe(false);
   });
 });
