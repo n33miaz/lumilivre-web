@@ -1,56 +1,54 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
-import { TccForm } from './TccForm';
+import { ContentForm } from './ContentForm';
 
-import { type TccResponse, type TccPayload } from '../../services/thesisService';
+import { type ContentPayload, type ContentResponse } from '../../services/contentService';
 import {
-  useUpdateTcc,
-  useDeleteTcc,
-} from '../../hooks/mutations/useTccMutations';
-import { type TccFormData } from '../../schemas/tccSchema';
+  useUpdateContent,
+  useDeleteContent,
+} from '../../hooks/mutations/useContentMutations';
 
-interface TccModalDetailsProps {
-  tcc: TccResponse | null;
+interface ContentModalDetailsProps {
+  content: ContentResponse | null;
   isOpen: boolean;
   onClose: (foiAlterado?: boolean) => void;
 }
 
-export function TccModalDetails({
-  tcc,
+export function ContentModalDetails({
+  content,
   isOpen,
   onClose,
-}: TccModalDetailsProps) {
+}: ContentModalDetailsProps) {
+  const { t } = useTranslation('contents');
   const [isEditMode, setIsEditMode] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
-  const { mutateAsync: updateTcc, isPending: isUpdating } = useUpdateTcc();
-  const { mutateAsync: deleteTcc, isPending: isDeleting } = useDeleteTcc();
+  const { mutateAsync: updateContent, isPending: isUpdating } = useUpdateContent();
+  const { mutateAsync: deleteContent, isPending: isDeleting } = useDeleteContent();
 
   // Mantém o último dado válido durante a animação de saída
-  const tccRef = useRef(tcc);
+  const contentRef = useRef(content);
   useEffect(() => {
-    if (tcc) tccRef.current = tcc;
-  }, [tcc]);
-  const tccAtual = tcc ?? tccRef.current;
+    if (content) contentRef.current = content;
+  }, [content]);
+  const atual = content ?? contentRef.current;
 
   useEffect(() => {
     if (isOpen) setIsEditMode(false);
   }, [isOpen]);
 
   const handleSubmit = async (
-    data: TccFormData,
-    filePdf: File | null,
-    fileFoto: File | null,
+    payload: ContentPayload,
+    coverFile: File | null,
+    docFile: File | null,
   ) => {
+    if (!atual) return;
     try {
-      await updateTcc({
-        id: tccAtual?.id ?? 0,
-        payload: data as TccPayload,
-        filePdf,
-        fileFoto,
-      });
+      await updateContent({ id: atual.id, payload, coverFile, docFile });
       setIsEditMode(false);
       onClose(true);
     } catch (error) {
@@ -59,19 +57,22 @@ export function TccModalDetails({
   };
 
   const executarExclusao = async () => {
-    await deleteTcc(tccAtual?.id ?? 0);
+    if (!atual) return;
+    await deleteContent(atual.id);
     setConfirmAction(null);
     onClose(true);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
-      <Modal.Header title={isEditMode ? 'Editar TCC' : 'Detalhes do TCC'} />
+      <Modal.Header
+        title={isEditMode ? t('modal.edit.title') : t('modal.details.title')}
+      />
       <Modal.Body>
-        {tccAtual && (
-          <TccForm
-            formId="form-edit-tcc"
-            initialData={tccAtual}
+        {atual && (
+          <ContentForm
+            formId="form-edit-conteudo"
+            initialData={atual}
             readOnly={!isEditMode}
             onSubmit={handleSubmit}
           />
@@ -82,7 +83,7 @@ export function TccModalDetails({
         isEditMode={isEditMode}
         isUpdating={isUpdating}
         isDeleting={isDeleting}
-        formId="form-edit-tcc"
+        formId="form-edit-conteudo"
         onEdit={() => setIsEditMode(true)}
         onCancel={() => setIsEditMode(false)}
         onDelete={() => setConfirmAction('excluir')}
@@ -90,8 +91,8 @@ export function TccModalDetails({
 
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}
-        title="Excluir TCC"
-        message={`Tem certeza que deseja excluir o TCC "${tccAtual?.titulo}"?`}
+        title={t('confirm.delete.title')}
+        message={t('confirm.delete.message', { title: atual?.title })}
         isDestructive={true}
         onConfirm={executarExclusao}
         onCancel={() => setConfirmAction(null)}

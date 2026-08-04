@@ -11,7 +11,7 @@ import ptBRSettings from './locales/pt-BR/settings.json';
 import ptBRNav from './locales/pt-BR/nav.json';
 import ptBRRanking from './locales/pt-BR/ranking.json';
 import ptBRReport from './locales/pt-BR/report.json';
-import ptBRTcc from './locales/pt-BR/tcc.json';
+import ptBRContents from './locales/pt-BR/contents.json';
 import ptBRDashboard from './locales/pt-BR/dashboard.json';
 import ptBRLanding from './locales/pt-BR/landing.json';
 import ptBRDownload from './locales/pt-BR/download.json';
@@ -25,7 +25,7 @@ import enUSSettings from './locales/en-US/settings.json';
 import enUSNav from './locales/en-US/nav.json';
 import enUSRanking from './locales/en-US/ranking.json';
 import enUSReport from './locales/en-US/report.json';
-import enUSTcc from './locales/en-US/tcc.json';
+import enUSContents from './locales/en-US/contents.json';
 import enUSDashboard from './locales/en-US/dashboard.json';
 import enUSLanding from './locales/en-US/landing.json';
 import enUSDownload from './locales/en-US/download.json';
@@ -59,7 +59,7 @@ i18n
         nav: ptBRNav,
         ranking: ptBRRanking,
         report: ptBRReport,
-        tcc: ptBRTcc,
+        contents: ptBRContents,
         dashboard: ptBRDashboard,
         landing: ptBRLanding,
         download: ptBRDownload,
@@ -74,7 +74,7 @@ i18n
         nav: enUSNav,
         ranking: enUSRanking,
         report: enUSReport,
-        tcc: enUSTcc,
+        contents: enUSContents,
         dashboard: enUSDashboard,
         landing: enUSLanding,
         download: enUSDownload,

@@ -91,9 +91,9 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
           capability: 'canManageLoans',
         },
         {
-          path: '/admin/theses',
-          label: t('nav:tcc'),
-          capability: 'canManageTcc',
+          path: '/admin/contents',
+          label: t('nav:contents'),
+          capability: 'canManageContents',
         },
         {
           path: '/admin/ranking',

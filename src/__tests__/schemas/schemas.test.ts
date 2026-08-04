@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { loanSchema } from '../../schemas/loanSchema';
 import { bookSchema } from '../../schemas/bookSchema';
 import { readerSchema } from '../../schemas/readerSchema';
-import { tccSchema } from '../../schemas/tccSchema';
+import { contentSchema } from '../../schemas/contentSchema';
 
 describe('Schema: loanSchema', () => {
   it('deve validar um empréstimo válido', () => {
@@ -173,55 +173,33 @@ describe('Schema: readerSchema', () => {
   });
 });
 
-describe('Schema: tccSchema', () => {
-  it('deve validar um TCC com dados completos', () => {
-    const validTcc = {
-      titulo: 'Título do TCC',
-      leitores: 'João, Maria',
-      curso_id: 1,
-      anoConclusao: '2025',
-      semestreConclusao: '1',
-    };
-    const result = tccSchema.safeParse(validTcc);
+describe('Schema: contentSchema', () => {
+  it('deve validar um conteúdo com dados mínimos', () => {
+    const valid = { contentType: 'ANNOUNCEMENT', title: 'Comunicado importante' };
+    const result = contentSchema.safeParse(valid);
     expect(result.success).toBe(true);
   });
 
-  it('deve rejeitar TCC sem título', () => {
-    const invalidTcc = {
-      titulo: '',
-      leitores: 'João',
-      curso_id: 1,
-      anoConclusao: '2025',
-      semestreConclusao: '1',
-    };
-    const result = tccSchema.safeParse(invalidTcc);
+  it('deve rejeitar conteúdo sem título', () => {
+    const invalid = { contentType: 'ANNOUNCEMENT', title: '' };
+    const result = contentSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 
-  it('deve rejeitar ano de conclusão com menos de 4 caracteres', () => {
-    const invalidTcc = {
-      titulo: 'Título',
-      leitores: 'João',
-      curso_id: 1,
-      anoConclusao: '25',
-      semestreConclusao: '1',
-    };
-    const result = tccSchema.safeParse(invalidTcc);
+  it('deve rejeitar tipo de conteúdo inválido', () => {
+    const invalid = { contentType: 'FOO', title: 'Título' };
+    const result = contentSchema.safeParse(invalid);
     expect(result.success).toBe(false);
   });
 
-  it('deve ter ativo como true por padrão', () => {
-    const data = {
-      titulo: 'Título',
-      leitores: 'João',
-      curso_id: 1,
-      anoConclusao: '2025',
-      semestreConclusao: '1',
-    };
-    const result = tccSchema.safeParse(data);
+  it('deve aplicar defaults de visibilidade', () => {
+    const result = contentSchema.safeParse({ contentType: 'WORK', title: 'Trabalho' });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.ativo).toBe(true);
+      expect(result.data.published).toBe(true);
+      expect(result.data.pinned).toBe(false);
+      expect(result.data.audienceScope).toBe('ALL');
+      expect(result.data.displayOrder).toBe(0);
     }
   });
 });

@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import {
   BookMarked,
   FileText,
-  GraduationCap,
   HandHelping,
   LayoutDashboard,
+  Megaphone,
   Pin,
   Settings2,
   Trophy,
@@ -28,7 +28,7 @@ const navLinks: {
   labelKey: string;
   Icon: LucideIcon;
   capability: string;
-  feature?: 'ranking' | 'thesis';
+  feature?: 'ranking' | 'contents';
 }[] = [
   {
     path: '/admin/dashboard',
@@ -55,11 +55,11 @@ const navLinks: {
     capability: 'canManageLoans',
   },
   {
-    path: '/admin/theses',
-    labelKey: 'tcc',
-    Icon: GraduationCap,
-    capability: 'canManageTcc',
-    feature: 'thesis',
+    path: '/admin/contents',
+    labelKey: 'contents',
+    Icon: Megaphone,
+    capability: 'canManageContents',
+    feature: 'contents',
   },
   {
     path: '/admin/ranking',

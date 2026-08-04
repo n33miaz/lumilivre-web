@@ -27,8 +27,8 @@ const LeitoresPage = lazy(() =>
 const EmprestimosPage = lazy(() =>
   import('./pages/Loans').then((m) => ({ default: m.EmprestimosPage })),
 );
-const TccPage = lazy(() =>
-  import('./pages/TCC').then((m) => ({ default: m.TccPage })),
+const ConteudosPage = lazy(() =>
+  import('./pages/Conteudos').then((m) => ({ default: m.ConteudosPage })),
 );
 const ClassificacaoPage = lazy(() =>
   import('./pages/Ranking').then((m) => ({ default: m.ClassificacaoPage })),
@@ -112,11 +112,11 @@ function App() {
           }
         />
         <Route
-          path="theses"
+          path="contents"
           element={
             <RoleProtectedRoute allowedRoles={['ADMIN', 'BIBLIOTECARIO']}>
-              <FeatureGate feature="thesis">
-                <TccPage />
+              <FeatureGate feature="contents">
+                <ConteudosPage />
               </FeatureGate>
             </RoleProtectedRoute>
           }

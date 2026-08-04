@@ -1,15 +1,18 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GraduationCap } from 'lucide-react';
+import { Megaphone, Paperclip, GraduationCap, Pin } from 'lucide-react';
 
 import { Modal } from '../../components/ui/Modal';
 import { TableSearch } from '../../components/ui/TableSearch';
-import { TccModalNew } from '../../features/tcc/TccModalNew';
-import { TccModalDetails } from '../../features/tcc/TccModalDetails';
-import { TccFilter } from '../../features/tcc/TccFilter';
+import { ContentModalNew } from '../../features/contents/ContentModalNew';
+import { ContentModalDetails } from '../../features/contents/ContentModalDetails';
+import { ContentFilter } from '../../features/contents/ContentFilter';
 import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
-import { useTccs } from '../../hooks/queries/useTccQueries';
-import { type TccResponse } from '../../services/thesisService';
+import { useConteudos } from '../../hooks/queries/useContentQueries';
+import {
+  type ContentResponse,
+  type ContentFilterParams,
+} from '../../services/contentService';
 
 function PlusIcon() {
   return (
@@ -29,70 +32,42 @@ function PlusIcon() {
   );
 }
 
-function GraduationIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-      <path d="M6 12v5c3 3 9 3 12 0v-5" />
-    </svg>
-  );
-}
+const TYPE_ICON: Record<string, typeof Megaphone> = {
+  ANNOUNCEMENT: Megaphone,
+  ATTACHMENT: Paperclip,
+  WORK: GraduationCap,
+};
 
-const AVATAR_COLORS = [
-  'bg-lumi-gradient',
-  'bg-blue-500',
-  'bg-pink-500',
-  'bg-emerald-500',
-  'bg-orange-500',
-];
+const STATUS_PILL: Record<string, string> = {
+  PUBLISHED: 'pill pill-success',
+  SCHEDULED: 'pill pill-warn',
+  EXPIRED: 'pill pill-info',
+  HIDDEN: 'pill pill-info',
+};
 
-function authorInitials(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase())
-      .join('') || 'TC'
-  );
-}
-
-export function TccPage() {
-  const { t } = useTranslation('tcc');
+export function ConteudosPage() {
+  const { t } = useTranslation('contents');
   const [termoBusca, setTermoBusca] = useState('');
   const [termoBuscaAtivo, setTermoBuscaAtivo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterParams, setFilterParams] = useState({
-    cursoId: '',
-    semestre: '',
-    ano: '',
+  const [filterParams, setFilterParams] = useState<ContentFilterParams>({
+    type: '',
+    scope: '',
+    courseId: '',
+    year: '',
   });
-  const [activeFilters, setActiveFilters] = useState({});
+  const [activeFilters, setActiveFilters] = useState<ContentFilterParams>({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetalhesOpen, setIsDetalhesOpen] = useState(false);
-  const [selectedTcc, setSelectedTcc] = useState<TccResponse | null>(null);
-
-  const [sortConfig] = useState<{
-    key: keyof TccResponse;
-    direction: 'asc' | 'desc';
-  }>({ key: 'titulo', direction: 'asc' });
+  const [selected, setSelected] = useState<ContentResponse | null>(null);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const dynamicPageSize = useDynamicPageSize(tableContainerRef, {
-    rowHeight: 280,
+    rowHeight: 260,
     footerHeight: 0,
   });
 
@@ -101,28 +76,21 @@ export function TccPage() {
   }, [dynamicPageSize]);
 
   const {
-    data: tccs = [],
+    data: conteudos = [],
     isLoading,
     error,
     refetch,
-  } = useTccs(termoBuscaAtivo, activeFilters);
+  } = useConteudos(termoBuscaAtivo, activeFilters);
 
-  const filteredData = useMemo(() => {
-    const data = [...tccs];
-    data.sort((a, b) => {
-      const valA = a[sortConfig.key] || '';
-      const valB = b[sortConfig.key] || '';
-      if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-    return data;
-  }, [tccs, sortConfig]);
+  const sorted = useMemo(() => {
+    // A API já ordena por destaque/ordem/data; mantém essa ordem.
+    return [...conteudos];
+  }, [conteudos]);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage, itemsPerPage]);
+    return sorted.slice(start, start + itemsPerPage);
+  }, [sorted, currentPage, itemsPerPage]);
 
   const handleApplyFilters = () => {
     setCurrentPage(1);
@@ -134,7 +102,7 @@ export function TccPage() {
 
   const handleClearFilters = () => {
     setCurrentPage(1);
-    setFilterParams({ cursoId: '', semestre: '', ano: '' });
+    setFilterParams({ type: '', scope: '', courseId: '', year: '' });
     setActiveFilters({});
     setIsFilterOpen(false);
   };
@@ -146,49 +114,50 @@ export function TccPage() {
     setCurrentPage(1);
   };
 
-  const handleOpenDetalhes = (tcc: TccResponse) => {
-    setSelectedTcc(tcc);
+  const handleOpenDetalhes = (c: ContentResponse) => {
+    setSelected(c);
     setIsDetalhesOpen(true);
   };
 
   const handleCloseDetalhes = (foiAlterado?: boolean) => {
     setIsDetalhesOpen(false);
-    setSelectedTcc(null);
+    setSelected(null);
     if (foiAlterado) refetch();
+  };
+
+  const audienceLabel = (c: ContentResponse) => {
+    if (c.audienceScope.code === 'COURSE') return c.courseName ?? c.audienceScope.label;
+    if (c.audienceScope.code === 'MODULE') return c.academicModuleName ?? c.audienceScope.label;
+    if (c.audienceScope.code === 'SHIFT') return c.studyShiftName ?? c.audienceScope.label;
+    return c.audienceScope.label;
   };
 
   return (
     <section className="space-y-5">
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title={t('modal.new.title')} />
-        <TccModalNew
-          onClose={() => setIsModalOpen(false)}
-          onSuccess={refetch}
-        />
+        <ContentModalNew onClose={() => setIsModalOpen(false)} onSuccess={refetch} />
       </Modal>
-      <TccModalDetails
+      <ContentModalDetails
         isOpen={isDetalhesOpen}
         onClose={handleCloseDetalhes}
-        tcc={selectedTcc}
+        content={selected}
       />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lumi-primary/10 text-lumi-primary dark:bg-lumi-label/10 dark:text-lumi-label">
-            <GraduationCap className="h-6 w-6" />
+            <Megaphone className="h-6 w-6" />
           </span>
           <div>
             <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
-              {t('page.eyebrow', { defaultValue: 'Produção acadêmica' })}
+              {t('page.eyebrow')}
             </div>
             <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
-              {t('page.title', { defaultValue: 'TCCs' })}
+              {t('page.title')}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {t('page.subtitle', {
-                defaultValue:
-                  'Banco de Trabalhos de Conclusão de Curso digitalizados.',
-              })}
+              {t('page.subtitle')}
             </p>
           </div>
         </div>
@@ -224,7 +193,7 @@ export function TccPage() {
             {t('common:action.advanced_filter')}
           </button>
           {isFilterOpen && (
-            <TccFilter
+            <ContentFilter
               isOpen={isFilterOpen}
               onClose={() => setIsFilterOpen(false)}
               filters={filterParams}
@@ -248,7 +217,7 @@ export function TccPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-gray-100 dark:bg-white/5 min-h-[240px] animate-pulse"
+                className="rounded-2xl bg-gray-100 dark:bg-white/5 min-h-[220px] animate-pulse"
               />
             ))}
           </div>
@@ -258,53 +227,51 @@ export function TccPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {paginatedData.map((tcc) => {
-              const leitores = (tcc.leitores || '')
-                .split(',')
-                .map((s) => s.trim())
-                .filter(Boolean)
-                .slice(0, 5);
+            {paginatedData.map((c) => {
+              const TypeIcon = TYPE_ICON[c.contentType.code] ?? Megaphone;
+              const snippet = c.contentType.code === 'WORK' ? c.authors : c.body;
               return (
                 <article
-                  key={tcc.id}
-                  className="group rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-5 hover:shadow-card hover:-translate-y-0.5 transition-all"
+                  key={c.id}
+                  className="group rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-5 hover:shadow-card hover:-translate-y-0.5 transition-all flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="w-11 h-11 rounded-xl bg-lumi-gradient text-white flex items-center justify-center shadow-glowSoft">
-                      <GraduationIcon />
+                      <TypeIcon className="w-5 h-5" />
                     </div>
-                    <span className="pill pill-purple">
-                      <span className="dot" />
-                      {tcc.anoConclusao}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {c.pinned && (
+                        <Pin className="w-4 h-4 text-lumi-primary dark:text-lumi-label" fill="currentColor" />
+                      )}
+                      <span className={STATUS_PILL[c.status.code] ?? 'pill pill-gray'}>
+                        <span className="dot" />
+                        {c.status.label}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white line-clamp-3">
-                    {tcc.titulo}
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-lumi-primary dark:text-lumi-label mb-1">
+                    {c.contentType.label}
+                  </div>
+                  <h3 className="font-display font-bold text-lg text-gray-900 dark:text-white line-clamp-2">
+                    {c.title}
                   </h3>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 font-mono">
-                    {tcc.curso}
-                  </div>
-                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/5">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1.5">
-                      {t('authors_label', { defaultValue: 'Leitores' })}
-                    </div>
-                    <div className="flex items-center -space-x-2">
-                      {leitores.map((name, idx) => (
-                        <span
-                          key={`${name}-${idx}`}
-                          title={name}
-                          className={`w-7 h-7 rounded-full ${
-                            AVATAR_COLORS[idx % AVATAR_COLORS.length]
-                          } text-white text-[10px] font-bold flex items-center justify-center ring-2 ring-white dark:ring-dark-card`}
-                        >
-                          {authorInitials(name)}
-                        </span>
-                      ))}
-                    </div>
+                  {snippet && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2">
+                      {snippet}
+                    </p>
+                  )}
+                  <div className="mt-3 pt-3 border-t border-gray-100 dark:border-white/5 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                    <span className="font-mono">{audienceLabel(c)}</span>
+                    {c.contentType.code === 'WORK' && c.completionYear && (
+                      <span className="pill pill-purple">
+                        <span className="dot" />
+                        {c.completionYear}
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleOpenDetalhes(tcc)}
+                    onClick={() => handleOpenDetalhes(c)}
                     className="mt-4 w-full h-9 rounded-lg bg-lumi-50 dark:bg-white/5 text-lumi-primary dark:text-lumi-label text-sm font-bold hover:bg-lumi-100 dark:hover:bg-white/10"
                   >
                     {t('common:button.details')}
@@ -315,13 +282,13 @@ export function TccPage() {
           </div>
         )}
 
-        {filteredData.length > itemsPerPage && (
+        {sorted.length > itemsPerPage && (
           <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
             <span>
               {t('common:items_range', {
                 start: (currentPage - 1) * itemsPerPage + 1,
-                end: Math.min(currentPage * itemsPerPage, filteredData.length),
-                total: filteredData.length,
+                end: Math.min(currentPage * itemsPerPage, sorted.length),
+                total: sorted.length,
               })}
             </span>
             <div className="flex items-center gap-1.5">
@@ -340,15 +307,10 @@ export function TccPage() {
                 type="button"
                 onClick={() =>
                   setCurrentPage((p) =>
-                    Math.min(
-                      Math.ceil(filteredData.length / itemsPerPage),
-                      p + 1,
-                    ),
+                    Math.min(Math.ceil(sorted.length / itemsPerPage), p + 1),
                   )
                 }
-                disabled={
-                  currentPage >= Math.ceil(filteredData.length / itemsPerPage)
-                }
+                disabled={currentPage >= Math.ceil(sorted.length / itemsPerPage)}
                 className="px-3 h-8 rounded-lg border border-gray-200 dark:border-white/10 hover:border-lumi-primary disabled:opacity-40 text-xs font-bold"
               >
                 ›

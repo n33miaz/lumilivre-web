@@ -5,7 +5,7 @@ export type LibraryType = 'SCHOOL' | 'STANDARD';
 export interface LibraryFeatures {
   academicFields: boolean;
   ranking: boolean;
-  thesis: boolean;
+  contents: boolean;
 }
 
 export interface LibrarySettings {
@@ -18,7 +18,7 @@ export const defaultLibrarySettings: LibrarySettings = {
   features: {
     academicFields: true,
     ranking: true,
-    thesis: true,
+    contents: true,
   },
 };
 

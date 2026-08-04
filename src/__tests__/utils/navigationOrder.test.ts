@@ -9,7 +9,7 @@ describe('navigationOrder', () => {
         '/admin/books',
         '/admin/readers',
         '/admin/loans',
-        '/admin/theses',
+        '/admin/contents',
         '/admin/ranking',
         '/admin/reports',
         '/admin/settings',
