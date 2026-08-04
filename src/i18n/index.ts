@@ -32,9 +32,21 @@ import enUSDashboard from './locales/en-US/dashboard.json';
 import enUSLanding from './locales/en-US/landing.json';
 import enUSDownload from './locales/en-US/download.json';
 
+// EX-03: Espanhol, Mandarim e Hindi. Início pelos namespaces de chrome
+// (common + nav); os demais caem em en-US via `fallbackLng` até serem traduzidos.
+import esESCommon from './locales/es-ES/common.json';
+import esESNav from './locales/es-ES/nav.json';
+import zhCNCommon from './locales/zh-CN/common.json';
+import zhCNNav from './locales/zh-CN/nav.json';
+import hiINCommon from './locales/hi-IN/common.json';
+import hiINNav from './locales/hi-IN/nav.json';
+
 export const LOCALES = [
   { code: 'pt-BR', label: 'Português', short: 'PT' },
   { code: 'en-US', label: 'English', short: 'EN' },
+  { code: 'es-ES', label: 'Español', short: 'ES' },
+  { code: 'zh-CN', label: '中文', short: '中' },
+  { code: 'hi-IN', label: 'हिन्दी', short: 'HI' },
 ] as const;
 
 export type SupportedLocale = (typeof LOCALES)[number]['code'];
@@ -83,8 +95,18 @@ i18n
         landing: enUSLanding,
         download: enUSDownload,
       },
+      // Idiomas novos (EX-03): chrome traduzido (common+nav); o resto usa o
+      // fallback en-US -> pt-BR até a tradução completa dos demais namespaces.
+      'es-ES': { common: esESCommon, nav: esESNav },
+      'zh-CN': { common: zhCNCommon, nav: zhCNNav },
+      'hi-IN': { common: hiINCommon, nav: hiINNav },
     },
-    fallbackLng: DEFAULT_LOCALE,
+    fallbackLng: {
+      'es-ES': ['en-US', 'pt-BR'],
+      'zh-CN': ['en-US', 'pt-BR'],
+      'hi-IN': ['en-US', 'pt-BR'],
+      default: [DEFAULT_LOCALE],
+    },
     defaultNS: 'common',
     supportedLngs: SUPPORTED_LOCALES,
     detection: {

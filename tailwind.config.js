@@ -5,8 +5,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        inter: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        // Noto Sans SC (chinês) e Noto Sans Devanagari (hindi) entram como
+        // fallback: o navegador usa a primeira fonte da pilha que tenha o glifo,
+        // então zh-CN/hi-IN renderizam sem "tofu" sem troca por locale (EX-03).
+        inter: ['Inter', 'Noto Sans SC', 'Noto Sans Devanagari', 'system-ui', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'Noto Sans SC', 'Noto Sans Devanagari', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
       colors: {
