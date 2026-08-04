@@ -19,6 +19,9 @@ export const readerSchema = z.object({
   numero_casa: z.union([z.string(), z.number()]).optional(),
   complemento: z.string().optional(),
   penalidade: z.string().optional(),
+  // Foto: só a URL atual (preview). O arquivo novo é passado à parte no submit
+  // (padrão do BookForm), sem validação zod.
+  foto: z.string().optional(),
 });
 
 export type ReaderFormData = z.infer<typeof readerSchema>;

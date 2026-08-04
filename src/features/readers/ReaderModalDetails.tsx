@@ -83,7 +83,7 @@ export function ModalReaderDetails({
     }
   }, [isOpen, leitorAtual]);
 
-  const handleSubmit = async (data: ReaderFormData) => {
+  const handleSubmit = async (data: ReaderFormData, avatarFile: File | null) => {
     try {
       const payload = {
         ...data,
@@ -101,6 +101,7 @@ export function ModalReaderDetails({
       await updateReader({
         matricula: leitorAtual?.matricula ?? '',
         payload: payload as unknown as LeitorPayload,
+        avatarFile,
       });
       setIsEditMode(false);
       onClose(true);

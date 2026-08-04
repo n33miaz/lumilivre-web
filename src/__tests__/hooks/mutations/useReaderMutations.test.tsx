@@ -9,6 +9,7 @@ import type { LeitorPayload } from '../../../services/readerService';
 
 vi.mock('../../../services/readerService');
 const mockedCadastrarLeitor = vi.mocked(leitorService.cadastrarLeitor);
+const mockedUploadReaderAvatar = vi.mocked(leitorService.uploadReaderAvatar);
 
 const mockAddToast = vi.fn();
 vi.mock('../../../contexts/ToastContext', () => ({
@@ -47,7 +48,7 @@ describe('Hook de Mutação: useCreateReader', () => {
       wrapper: createWrapper(),
     });
 
-    await result.current.mutateAsync(mockLeitorPayload);
+    await result.current.mutateAsync({ payload: mockLeitorPayload });
 
     await waitFor(() => {
       expect(mockedCadastrarLeitor).toHaveBeenCalledWith(mockLeitorPayload);
@@ -56,6 +57,25 @@ describe('Hook de Mutação: useCreateReader', () => {
           type: 'success',
           description: 'Leitor cadastrado com sucesso!',
         }),
+      );
+    });
+  });
+
+  it('deve encadear o upload do avatar quando um arquivo é enviado', async () => {
+    mockedCadastrarLeitor.mockResolvedValue({ id: 1, ...mockLeitorPayload });
+    mockedUploadReaderAvatar.mockResolvedValue(undefined as never);
+    const avatarFile = new File(['x'], 'foto.png', { type: 'image/png' });
+
+    const { result } = renderHook(() => useCreateReader(), {
+      wrapper: createWrapper(),
+    });
+
+    await result.current.mutateAsync({ payload: mockLeitorPayload, avatarFile });
+
+    await waitFor(() => {
+      expect(mockedUploadReaderAvatar).toHaveBeenCalledWith(
+        mockLeitorPayload.matricula,
+        avatarFile,
       );
     });
   });
@@ -69,7 +89,7 @@ describe('Hook de Mutação: useCreateReader', () => {
     });
 
     try {
-      await result.current.mutateAsync(mockLeitorPayload);
+      await result.current.mutateAsync({ payload: mockLeitorPayload });
     } catch {
       // O erro é esperado e capturado, o teste pode continuar
     }

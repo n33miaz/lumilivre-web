@@ -15,7 +15,7 @@ export function ReaderModalNew({ onClose, onSuccess }: ReaderModalNewProps) {
   const { mutateAsync: createReader, isPending } = useCreateReader();
   const { features } = useLibraryConfig();
 
-  const handleSubmit = async (data: ReaderFormData) => {
+  const handleSubmit = async (data: ReaderFormData, avatarFile: File | null) => {
     try {
       const payload = {
         ...data,
@@ -29,7 +29,10 @@ export function ReaderModalNew({ onClose, onSuccess }: ReaderModalNewProps) {
         numero_casa: Number(data.numero_casa) || 0,
       };
 
-      await createReader(payload as unknown as LeitorPayload);
+      await createReader({
+        payload: payload as unknown as LeitorPayload,
+        avatarFile,
+      });
       onSuccess();
       onClose();
     } catch (error) {

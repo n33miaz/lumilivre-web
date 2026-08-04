@@ -186,6 +186,16 @@ export const atualizarLeitor = async (
   return response.data;
 };
 
+export const uploadReaderAvatar = async (matricula: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post(
+    `/api/readers/${matricula}/avatar`,
+    formData,
+  );
+  return response.data;
+};
+
 export const resetarSenhaLeitor = async (matricula: string) => {
   const response = await api.patch(
     `/api/readers/${matricula}/reset-password`,
