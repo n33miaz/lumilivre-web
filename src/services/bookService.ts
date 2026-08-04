@@ -1,4 +1,5 @@
 import api from './api';
+import { bustCover } from '../utils/coverCache';
 
 import type { Page } from '../types';
 
@@ -304,6 +305,9 @@ export const uploadCapaLivro = async (id: number | string, file: File) => {
   formData.append('file', file);
 
   const response = await api.post(`/api/books/${id}/cover`, formData);
+  // Furar o cache: a URL da capa costuma ser a mesma após substituição, então
+  // invalidamos a resolução memorizada e forçamos `?v=` novo em todas as telas.
+  bustCover(id);
   return response.data;
 };
 

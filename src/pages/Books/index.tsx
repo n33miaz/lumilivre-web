@@ -273,6 +273,7 @@ export function LivrosPage() {
       autor: response.autor,
       editora: response.editora,
       quantidade: 0,
+      imagem: response.imagem,
     };
     setTempBookCreated(novoLivro);
     setIsConfirmModalOpen(true);
@@ -819,6 +820,7 @@ export function LivrosPage() {
                           >
                             <BookCover
                               title={book.nome}
+                              bookId={book.id}
                               coverUrl={book.imagem}
                               isbn={book.isbn}
                               className="aspect-[3/4] rounded-xl flex items-end p-3 text-white transition group-hover:-translate-y-0.5 group-hover:shadow-card"
@@ -916,6 +918,7 @@ export function LivrosPage() {
                 <div className="flex items-center gap-4">
                   <BookCover
                     title={selectedBook?.nome ?? ''}
+                    bookId={selectedBook?.id}
                     coverUrl={selectedBook?.imagem}
                     isbn={selectedBook?.isbn}
                     className="w-14 h-20 shrink-0 rounded-lg"
@@ -950,19 +953,19 @@ export function LivrosPage() {
                 <table className="w-full text-sm">
                   <thead className="tbl-head-dark text-[11px] font-bold uppercase tracking-wider">
                     <tr>
-                      <th className="text-left px-5 py-3.5">
+                      <th className="text-left px-5 py-2.5">
                         {t('copy.table.column.status')}
                       </th>
-                      <th className="text-left px-5 py-3.5">
+                      <th className="text-left px-5 py-2.5">
                         {t('copy.table.column.code')}
                       </th>
-                      <th className="text-left px-5 py-3.5">
+                      <th className="text-left px-5 py-2.5">
                         {t('copy.table.column.location')}
                       </th>
-                      <th className="text-left px-5 py-3.5">
+                      <th className="text-left px-5 py-2.5">
                         {t('copy.table.column.responsible')}
                       </th>
-                      <th className="text-right px-5 py-3.5">
+                      <th className="text-right px-5 py-2.5">
                         {t('common:actions')}
                       </th>
                     </tr>
@@ -1003,22 +1006,22 @@ export function LivrosPage() {
                             key={ex.tomboExemplar}
                             className="border-t border-gray-100 dark:border-white/5 row-hover"
                           >
-                            <td className="px-5 py-3">
+                            <td className="px-5 py-2 align-middle">
                               <span className={pill.class}>
                                 <span className="dot" />
                                 {pill.label}
                               </span>
                             </td>
-                            <td className="px-5 py-3 font-mono font-semibold text-gray-800 dark:text-white">
+                            <td className="px-5 py-2 align-middle font-mono font-semibold text-gray-800 dark:text-white">
                               {ex.tomboExemplar}
                             </td>
-                            <td className="px-5 py-3 text-gray-600 dark:text-gray-300">
+                            <td className="px-5 py-2 align-middle text-gray-600 dark:text-gray-300">
                               {ex.localizacao_fisica || '-'}
                             </td>
-                            <td className="px-5 py-3 text-gray-600 dark:text-gray-300">
+                            <td className="px-5 py-2 align-middle text-gray-600 dark:text-gray-300">
                               {ex.responsavel || '-'}
                             </td>
-                            <td className="px-5 py-3 text-right">
+                            <td className="px-5 py-2 align-middle text-right">
                               <button
                                 type="button"
                                 onClick={() => handleAbrirDetalhesExemplar(ex)}

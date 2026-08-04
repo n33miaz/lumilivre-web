@@ -46,25 +46,26 @@ export function ExempleForm({
   });
 
   return (
-    <form id={formId} onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form id={formId} onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Aviso de Empréstimo (se não estiver disponível) */}
       {initialData?.status && initialData.status !== 'DISPONIVEL' && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 mb-4 rounded-md border border-yellow-100 dark:border-yellow-800/30">
-          <label className="block text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase mb-1">
+        <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-md border border-yellow-100 dark:border-yellow-800/30">
+          <span className="block text-xs font-bold text-yellow-700 dark:text-yellow-500 uppercase mb-1">
             Emprestado para
-          </label>
+          </span>
           <p className="text-sm font-medium text-gray-800 dark:text-white">
             {initialData.responsavel || '-'}
           </p>
         </div>
       )}
 
+      {/* Contexto do livro (somente leitura). */}
       <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-4">
+        <div className="col-span-12 sm:col-span-4">
           <Label htmlFor="livroIsbn">ISBN</Label>
           <Input id="livroIsbn" value={livroIsbn} disabled />
         </div>
-        <div className="col-span-8">
+        <div className="col-span-12 sm:col-span-8">
           <Label htmlFor="livroNome">Livro</Label>
           <Input id="livroNome" value={livroNome} disabled />
         </div>
