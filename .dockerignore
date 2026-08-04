@@ -1,0 +1,34 @@
+# Dependências e outputs (rebuildados dentro da imagem)
+node_modules/
+dist/
+
+# VCS / CI
+.git/
+.github/
+.gitignore
+
+# Env local — o build usa o ARG VITE_API_BASE_URL, nunca o .env do checkout
+.env
+.env.*
+!.env.example
+
+# Testes / tooling que não entram no bundle
+e2e/
+test-results/
+playwright-report/
+coverage/
+playwright.config.ts
+.code-review-graph/
+
+# IDE / docs
+.idea/
+.vscode/
+docs/
+README.md
+LICENSE
+
+# Docker (evita invalidar cache ao editar o próprio Dockerfile)
+Dockerfile
+.dockerignore
+
+*.log
