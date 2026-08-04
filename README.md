@@ -3,9 +3,9 @@
   <a href="https://n33miaz.github.io/n33miaz-links/#lumitcc"><img width="100%" src="https://github-stats-api-rfi2.onrender.com/api/banner?title=LumiLivre&subtitle=Library%20Management%20System&tag=(TCC)%20Bachelor%27s%20Thesis&title_color=762075&text_color=c9d1d9&v=1" /></a>
 
   <!-- Pins-->
-  <a href="https://n33miaz.github.io/n33miaz-links/#lumiweb"><img src="https://github-stats-api-rfi2.onrender.com/api/pin?username=n33miaz&repo=lumilivre-web&custom_title=WebSite&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270&show_description=false&v=1" /></a>
-  <a href="https://n33miaz.github.io/n33miaz-links/#lumiapp"><img src="https://github-stats-api-rfi2.onrender.com/api/pin?username=n33miaz&repo=lumilivre-app&custom_title=Application&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270&show_description=false&v=1" /></a>
-  <a href="https://n33miaz.github.io/n33miaz-links/#lumiapi"><img src="https://github-stats-api-rfi2.onrender.com/api/pin?username=n33miaz&repo=lumilivre-api&custom_title=API%20Restfull&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270&show_description=false&v=1" /></a>
+  <a href="https://github.com/n33miaz/lumilivre-web"><img src="https://github-stats-api-rfi2.onrender.com/api/pin?username=n33miaz&repo=lumilivre-web&custom_title=WebSite&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270&show_description=false&v=1" /></a>
+  <a href="https://github.com/n33miaz/lumilivre-app"><img src="https://github-stats-api-rfi2.onrender.com/api/pin?username=n33miaz&repo=lumilivre-app&custom_title=Application&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270&show_description=false&v=1" /></a>
+  <a href="https://github.com/n33miaz/lumilivre-api"><img src="https://github-stats-api-rfi2.onrender.com/api/pin?username=n33miaz&repo=lumilivre-api&custom_title=API%20Restfull&bg_color=0d1117&title_color=762075&text_color=c9d1d9&icon_color=762075&hide_border=true&min_width=270&show_description=false&v=1" /></a>
 </div>
 
 <br/>
@@ -24,12 +24,18 @@
 <br/>
 
 <div align="center">
-  <h1>Sobre o Projeto</h1>
+  <h1>LumiLivre Web</h1>
+  <p><em>Painel administrativo e landing pública do ecossistema LumiLivre.</em></p>
 </div>
 
-O **LumiLivre Web** é o painel administrativo central do ecossistema, voltado para **bibliotecários e gestores**. Desenvolvido em **React** com **TypeScript**, ele oferece uma interface robusta e responsiva para o gerenciamento completo do acervo, usuários e fluxo de empréstimos.
+O **LumiLivre Web** é a interface de trabalho de bibliotecários e gestores:
+catalogar o acervo, controlar exemplares, movimentar empréstimos, aprovar
+solicitações do app, publicar avisos no mural e acompanhar o dashboard. Inclui
+também a landing pública e a página de download do app.
 
-A aplicação foi construída com foco em produtividade, utilizando **TailwindCSS** para estilização moderna e **React Query** para gerenciamento eficiente de estado e cache, garantindo que os dados administrativos estejam sempre sincronizados com o backend.
+Construído em React 19 com TypeScript estrito, TanStack Query para estado remoto
+e Tailwind para estilo. A interface é bilíngue (português e inglês) com mais três
+idiomas parciais.
 
 <br/>
 
@@ -45,74 +51,112 @@ A aplicação foi construída com foco em produtividade, utilizando **TailwindCS
   <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Dashboard" style="border-radius: 10px; margin: 5px;">
 </div>
 <div align="center">
-  <img src="src/assets/images/prints/books_dark-new.png" width="45%" alt="Livros (Modo: Dark)" style="border-radius: 10px; margin: 5px;">
-  <img src="src/assets/images/prints/exemples_dark.png" width="45%" alt="Livros - Criar Novo (Modo: Dark)" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/books_dark-new.png" width="45%" alt="Livros (tema escuro)" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/exemples_dark.png" width="45%" alt="Exemplares (tema escuro)" style="border-radius: 10px; margin: 5px;">
 </div>
 <div align="center">
-  <img src="src/assets/images/prints/students.png" width="45%" alt="Alunos" style="border-radius: 10px; margin: 5px;">
-  <img src="src/assets/images/prints/students-details.png" width="45%" alt="Alunos - Botão Detalhes" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/students.png" width="45%" alt="Leitores" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/students-details.png" width="45%" alt="Detalhes do leitor" style="border-radius: 10px; margin: 5px;">
 </div>
 
-<br/>
-
-<div align="center">
-  <h1>Stack Técnica</h1>
-</div>
+## Stack
 
 | Camada | Tecnologia |
 |--------|------------|
 | Linguagem | TypeScript 5.8 (strict) |
 | UI | React 19.1 + Vite 6.3 |
-| Roteamento | React Router DOM 7.6 com `RoleProtectedRoute` |
-| HTTP | Axios 1.12 (`src/api/mutator.ts`) |
+| Roteamento | React Router DOM 7.6 com `ProtectedRoute` e `RoleProtectedRoute` |
+| HTTP | Axios 1.12 (`src/services/api.ts`) |
 | Estado remoto | TanStack Query 5.90 |
 | Formulários | React Hook Form 7.71 + Zod 4.3 |
-| Estilo | TailwindCSS 3.4, Framer Motion, Lottie, SVGR |
-| Dados | Recharts 3.4 (gráficos) + export CSV/PDF |
-| Testes | Vitest 4, Testing Library, jsdom, **Playwright + @axe-core** |
-| Contratos | **Orval** (codegen a partir de `/v3/api-docs`) |
+| Estilo | TailwindCSS 3.4, Framer Motion, SVGR |
+| Gráficos | Recharts 3.4 |
+| Exportação | ExcelJS (XLSX) e jsPDF |
+| i18n | i18next 26 + react-i18next 17, com detector de idioma |
+| Efeitos | OGL (fundo WebGL da tela de login) |
+| Ícones | Lucide |
+| Testes | Vitest 4, Testing Library, jsdom, Playwright + `@axe-core` |
 | Qualidade | ESLint 9, Prettier 3.6 |
 
-<br/>
+## Rodando local
 
-<div align="center">
-  <h1>Funcionalidades Principais</h1>
-</div>
+Requer Node 20 (versão usada no CI e na imagem Docker) e uma API acessível.
 
-### 📊 Dashboard & Gestão
+```powershell
+npm install
+Copy-Item .env.example .env    # aponte VITE_API_BASE_URL para a sua API
+npm run dev                    # http://localhost:5173
+```
 
-- **Dashboard analítico** com Recharts (barras/pizza), export **CSV e PDF**, métricas agregadas por views materializadas da API.
-- **Controle de Acervo:** cadastro completo de livros (busca automática por ISBN), exemplares físicos e TCCs.
-- **Gestão de Usuários:** administração de alunos, cursos, turnos e módulos, com histórico detalhado por leitor.
+Se você não quer subir a API à mão, o `docker-compose.yml` do repositório de
+orquestração [`lumilivre`](https://github.com/n33miaz/lumilivre) levanta
+PostgreSQL, API e este painel já populados com dados de demonstração:
 
-### 🔄 Fluxo de Empréstimos
+```powershell
+docker compose up -d --build   # painel em http://localhost:5173
+```
 
-- **Solicitações e Reservas:** aprovação/rejeição de pedidos mobile; reservas FIFO quando não há exemplar disponível.
-- **Movimentação:** registro de retiradas e devoluções, com cálculo automático de datas.
-- **Penalidades:** bloqueio automático para alunos com devoluções em atraso.
+Credenciais de demonstração do stack local: `admin` / `admin`.
 
-### 📑 Relatórios & Ferramentas
+### Scripts
 
-- **Relatórios PDF** para acervo, alunos e movimentações.
-- **Ranking** de leitores.
-- **Importação em Massa** via planilhas Excel.
+| Comando | O que faz |
+|---------|-----------|
+| `npm run dev` | Servidor de desenvolvimento (5173) |
+| `npm run build` | Typecheck (`tsc -b`) e build de produção |
+| `npm run preview` | Serve o build em 4173 |
+| `npm start` | Serve `dist/` com `serve` |
+| `npm test` | Vitest em watch |
+| `npm run test:coverage` | Vitest com cobertura |
+| `npm run test:e2e` | Playwright — **exige `npm run build` antes** |
+| `npm run lint` | ESLint |
 
-### ⚙️ Recursos Técnicos
+## Configuração
 
-- **Guardas por papel:** `RoleProtectedRoute` + `roleCapabilities` filtram rotas e menus conforme o perfil (ADMIN / BIBLIOTECARIO / ALUNO).
-- **UX unificada de erro:** `ErrorBoundary`, `QueryErrorBridge` e `queryErrorHandler` categorizam erros em validação/autorização/rede/inesperado.
-- **Dark Mode** nativo (`ThemeContext`).
-- **Performance:** paginação dinâmica, cache TanStack Query e lazy loading de rotas.
-- **Acessibilidade:** bateria `@axe-core/playwright` em 5 rotas críticas (Login, Dashboard, Livros, Alunos, Empréstimos).
-- **Contratos gerados:** `orval.config.ts` materializa tipos e hooks React Query a partir do OpenAPI da API.
+Uma única variável, resolvida em **tempo de build** — o Vite embute o valor no
+bundle, então cada ambiente precisa do seu próprio build:
 
-<br/>
+| Variável | Uso |
+|----------|-----|
+| `VITE_API_BASE_URL` | URL base da API (ex.: `http://localhost:8080`) |
 
-<div align="center">
-  <h1>Arquitetura do Sistema</h1>
-</div>
+No Docker ela entra como build arg:
 
-Utilizamos uma arquitetura cliente-servidor moderna baseada em microsserviços e nuvem para garantir escalabilidade.
+```powershell
+docker build --build-arg VITE_API_BASE_URL=https://sua-api.exemplo.com -t lumilivre-web .
+docker run -p 5173:80 lumilivre-web
+```
+
+A imagem é multi-stage: build com Node, runtime em nginx (`nginx.conf`) servindo
+a SPA com fallback de rota, gzip, cache imutável nos assets com hash e cabeçalhos
+de segurança (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`).
+
+## Funcionalidades
+
+**Acervo** — cadastro de livros com busca automática de metadados por ISBN,
+gestão de exemplares físicos com tombo e localização, gêneros e classificação
+Dewey.
+
+**Leitores** — cadastro completo com endereço por CEP, curso, turno e módulo
+acadêmico; foto de perfil; histórico de empréstimos por leitor.
+
+**Empréstimos** — registro de retirada e devolução com cálculo de datas,
+renovação, aprovação e rejeição das solicitações vindas do app, e penalidade
+automática por atraso.
+
+**Mural** — publicação de avisos e trabalhos acadêmicos para o app do leitor,
+com controle de público (todos, curso, módulo ou turno), destaque e janela de
+publicação.
+
+**Dashboard** — métricas agregadas servidas por views materializadas da API,
+gráficos Recharts e exportação em XLSX e PDF.
+
+**Relatórios** — PDF de acervo, leitores e movimentações.
+
+**Administração** — usuários e papéis, configurações da biblioteca, versão
+mínima do app, e visualizadores da trilha de acessos e da auditoria de negócio.
+
+## Arquitetura
 
 ```mermaid
 flowchart TD
@@ -123,94 +167,83 @@ flowchart TD
     classDef storage fill:#3ECF8E,stroke:#fff,stroke-width:2px,color:#fff;
     classDef external fill:#ddd,stroke:#333,stroke-width:1px,color:#000,stroke-dasharray: 5 5;
 
-    UserMobile["Application (Aluno)"]:::mobile
-    UserWeb["WebSite (Bibliotecário)"]:::web
+    UserMobile["App do leitor"]:::mobile
+    UserWeb["Painel administrativo"]:::web
 
     subgraph Cloud["-"]
         direction TB
-        API["API RestFull"]:::api
+        API["LumiLivre API"]:::api
         DB[("PostgreSQL")]:::db
-        Storage["Supabase Storage"]:::storage
+        Storage["Storage local ou Supabase"]:::storage
     end
 
     External["Google Books / BrasilAPI"]:::external
 
-    UserMobile -->|REST API / JSON| API
-    UserWeb -->|REST API / JSON| API
+    UserMobile -->|REST + JWT| API
+    UserWeb -->|REST + JWT| API
 
     API -->|JPA / Hibernate| DB
-    API -->|Upload Capas e PDF's| Storage
-    API -.->|Consulta Metadados| External
+    API -->|Capas e anexos| Storage
+    API -.->|Metadados por ISBN| External
 ```
 
-### Estrutura interna
+### Estrutura
 
 ```
 src/
   App.tsx · main.tsx
+  api/               (mutator Axios)
   components/        (ui, shared, ErrorBoundary, QueryErrorBridge, RoleProtectedRoute)
-  contexts/          (AuthContext, ThemeContext, ToastContext)
-  features/          (books, loans, students, tcc)
+  contexts/          (AuthContext, ThemeContext, ToastContext, LocaleContext)
+  features/          (admin, books, contents, landing, loans, readers, users)
   hooks/             (queries/, mutations/)
+  i18n/              (locales/, configuração e detector)
   layouts/
-  pages/             (Auth, Books, Loans, Students, Start, TCC, Ranking, Reports, Settings, Download)
+  pages/             (Auth, Books, Conteudos, Dashboard, Download, Landing,
+                      Loans, Ranking, Readers, Reports, Settings)
   schemas/           (Zod)
-  services/          (camada HTTP; em migração para src/api gerado)
+  services/          (camada HTTP)
+  types/
   utils/             (errorHandler, queryErrorHandler, roleCapabilities, dashboardExport)
-  api/               (mutator Axios + tipos/hooks gerados pelo Orval)
-e2e/                 (Playwright + a11y)
+e2e/                 (Playwright: navegação, auth, tema, acessibilidade)
 ```
 
-<br/>
+Rotas administrativas: `/admin/dashboard`, `/admin/books`, `/admin/readers`,
+`/admin/loans`, `/admin/contents`, `/admin/ranking`, `/admin/reports`,
+`/admin/settings`. Públicas: `/`, `/login`, `/forgot-password`,
+`/change-password`, `/download`.
 
-<div align="center">
-  <h1>Segurança</h1>
-</div>
+## Idiomas
 
-- **Rotas protegidas** com `ProtectedRoute` + **perfil** com `RoleProtectedRoute`.
-- **Gestão de Sessão** via `AuthContext` (token em `sessionStorage`, logout automático em 401/403).
-- **Validação de Dados** rigorosa (React Hook Form + Zod) antes de cada request.
-- **Variáveis de ambiente**: `.env.example` documenta `VITE_API_BASE_URL`.
+Português e inglês estão completos nos 14 namespaces. Espanhol, mandarim e hindi
+traduzem o *chrome* da interface (`common` e `nav`) e caem para inglês e depois
+português no restante, configurado via `fallbackLng` — nenhuma chave crua aparece
+na tela. As fontes Noto para CJK e devanágari são carregadas como fallback no
+`index.html`.
 
-<br/>
+## Qualidade
 
-<div align="center">
-  <h1>Como rodar localmente</h1>
-</div>
+- **Guardas por papel** — `RoleProtectedRoute` e `roleCapabilities` filtram rotas
+  e itens de menu conforme o perfil (ADMIN, BIBLIOTECARIO, LEITOR).
+- **Tratamento unificado de erro** — `ErrorBoundary`, `QueryErrorBridge` e
+  `queryErrorHandler` categorizam falhas em validação, autorização, rede e
+  inesperado; erro de rede não desloga o usuário.
+- **Tema claro e escuro** nativo.
+- **Performance** — paginação dinâmica pela altura disponível, cache do TanStack
+  Query e lazy loading das rotas.
+- **Acessibilidade** — bateria `@axe-core/playwright` sobre a landing, o login e
+  as quatro telas administrativas principais.
+- **Segurança de sessão** — o cache de queries é limpo no logout para que dados
+  de um usuário não vazem para o próximo em máquina compartilhada.
 
-```powershell
-# 1. Variáveis de ambiente
-copy .env.example .env
-# Preencha VITE_API_BASE_URL (ex.: http://localhost:8080)
+## Licença
 
-# 2. Instalar e subir
-npm install
-npm run dev            # dev server em http://localhost:5173
-
-# 3. Testes
-npm run lint
-npm test
-npm run test:coverage
-npm run test:e2e
-
-# 4. Codegen de tipos a partir do OpenAPI da API
-npm run api:gen
-
-# 5. Build
-npm run build
-npm start              # servir /dist com serve
-```
+**Proprietário — todos os direitos reservados.** Veja [`LICENSE`](LICENSE). O
+código é publicado para leitura, estudo e avaliação técnica; qualquer uso, cópia
+ou execução em produção requer licença comercial — **ncormino@gmail.com**.
 
 <br/>
 
 <div align="center">
-  <h1>Licença</h1>
-</div>
-
-**Proprietário — Todos os direitos reservados.** O código-fonte é público apenas para leitura, estudo e avaliação. Qualquer uso, cópia, modificação ou execução em produção requer licença comercial mediante negociação. Veja [`LICENSE`](LICENSE). Interessados: **ncormino@gmail.com**.
-
-<br/>
-
-<div align="center">
-  <sub>LumiLivre © 2026 - Todos os direitos reservados.</sub>
+  <sub>LumiLivre © 2026 — Gestão de bibliotecas escolares · Todos os direitos reservados.</sub>
 </div>
