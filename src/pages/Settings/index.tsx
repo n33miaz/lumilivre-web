@@ -23,6 +23,7 @@ import {
   type LibraryType,
 } from '../../services/settingsService';
 import { AppVersionTab } from '../../features/admin/AppVersionTab';
+import { apkLinkProps } from '../../utils/apkDownload';
 import { AuditTab } from '../../features/admin/AuditTab';
 import { UsersTab } from '../../features/users/UsersTab';
 
@@ -306,8 +307,7 @@ export function ConfiguracoesPage() {
           description={t('app.android.description')}
           action={
             <a
-              href="/lumilivre.apk"
-              download="LumiLivre.apk"
+              {...apkLinkProps()}
               className="h-9 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm inline-flex items-center gap-2"
             >
               {t('app.android.button')}

@@ -25,6 +25,7 @@ import {
   ShaderBackground,
 } from '../../../components/ui/ShaderBackground';
 import { login as apiLogin } from '../../../services/authService';
+import { apkLinkProps } from '../../../utils/apkDownload';
 
 import LogoIcon from '../../../assets/icons/logo.svg?react';
 import UserIcon from '../../../assets/icons/users.svg?react';
@@ -297,8 +298,7 @@ export function LoginPage() {
 
             <div className="mt-6 border-t border-gray-200 pt-5 dark:border-white/10">
               <a
-                href="/lumilivre.apk"
-                download="LumiLivre.apk"
+                {...apkLinkProps()}
                 onPointerMove={handleButtonPointerMove}
                 onPointerEnter={handleButtonPointerEnter}
                 onPointerLeave={handleButtonPointerLeave}

@@ -113,23 +113,64 @@ Credenciais de demonstração do stack local: `admin` / `admin`.
 
 ## Configuração
 
-Uma única variável, resolvida em **tempo de build** — o Vite embute o valor no
-bundle, então cada ambiente precisa do seu próprio build:
+Variáveis resolvidas em **tempo de build** — o Vite embute o valor no bundle,
+então cada ambiente precisa do seu próprio build:
 
 | Variável | Uso |
 |----------|-----|
 | `VITE_API_BASE_URL` | URL base da API (ex.: `http://localhost:8080`) |
+| `VITE_APK_URL` | Endereço do APK do app (asset de GitHub Release). Opcional: sem ela, `/download` mostra aviso e link das releases |
 
-No Docker ela entra como build arg:
+No Docker elas entram como build args:
 
 ```powershell
-docker build --build-arg VITE_API_BASE_URL=https://sua-api.exemplo.com -t lumilivre-web .
+docker build `
+  --build-arg VITE_API_BASE_URL=https://sua-api.exemplo.com `
+  --build-arg VITE_APK_URL=https://github.com/n33miaz/lumilivre-app/releases/latest/download/lumilivre.apk `
+  -t lumilivre-web .
 docker run -p 5173:80 lumilivre-web
 ```
 
-A imagem é multi-stage: build com Node, runtime em nginx (`nginx.conf`) servindo
-a SPA com fallback de rota, gzip, cache imutável nos assets com hash e cabeçalhos
-de segurança (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`).
+A imagem é multi-stage: build com Node, runtime em nginx servindo a SPA com
+fallback de rota, gzip (inclusive os `.gz` pré-comprimidos do build), cache
+imutável nos assets com hash, `no-cache` no `index.html` e os cabeçalhos de
+segurança.
+
+O `nginx.conf` é instalado como **template**: o entrypoint da imagem oficial roda
+`envsubst` na subida e injeta a origem da API no `connect-src` da CSP, a partir
+do mesmo build arg que o bundle usa. Cabeçalhos servidos:
+
+| Cabeçalho | Valor |
+|-----------|-------|
+| `Content-Security-Policy` | `default-src 'self'` com `script-src 'self'` (sem `unsafe-inline`/`unsafe-eval`), fontes do Google liberadas, imagens só por HTTPS e `connect-src` na API |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` (`preload` comentado — só com registro em hstspreload.org) |
+| `X-Frame-Options` · `X-Content-Type-Options` · `Referrer-Policy` · `Permissions-Policy` | `DENY` · `nosniff` · `strict-origin-when-cross-origin` · câmera/microfone/localização negados |
+
+> ⚠️ Produção precisa servir pela **imagem nginx**. `npm start` (`serve -s dist`)
+> é só conveniência local: não aplica nenhum destes cabeçalhos.
+
+### App Android (APK)
+
+O binário **não é versionado** aqui — 56 MB dentro do git inflavam todo clone e
+todo build. Ele é publicado como release do
+[`lumilivre-app`](https://github.com/n33miaz/lumilivre-app) e o site só aponta
+para lá (`/download`, botão do login e Configurações → Aplicativo).
+
+Para publicar uma versão nova:
+
+1. Gere o APK assinado no repositório do app
+   (`flutter build apk --release --obfuscate --split-debug-info=build/symbols`).
+2. Crie a release no `lumilivre-app` com a tag da versão e anexe o arquivo
+   **com o nome `lumilivre.apk`**:
+   ```powershell
+   gh release create v2.1.0 build/app/outputs/flutter-apk/app-release.apk `
+     --repo n33miaz/lumilivre-app --title "LumiLivre App v2.1.0"
+   ```
+3. Rebuild do web apontando `VITE_APK_URL` para o asset. Usando
+   `releases/latest/download/lumilivre.apk`, o endereço segue valendo para as
+   próximas releases e não precisa de novo build a cada versão.
+4. Atualize a versão mínima em Configurações → Aplicativo se a release for
+   obrigatória (força update no app).
 
 ## Funcionalidades
 
@@ -231,6 +272,10 @@ na tela. As fontes Noto para CJK e devanágari são carregadas como fallback no
 - **Tema claro e escuro** nativo.
 - **Performance** — paginação dinâmica pela altura disponível, cache do TanStack
   Query e lazy loading das rotas.
+- **Peso dos assets** — imagem importada com `?picture` sai do build em WebP
+  (1440px) com PNG de fallback via `<picture>`, e os assets de texto ganham `.gz`
+  em nível 9 que o nginx serve direto. Vale por convenção: qualquer arquivo novo
+  em `assets/images/prints/` entra no pipeline sem tocar na configuração.
 - **Acessibilidade** — bateria `@axe-core/playwright` sobre a landing, o login e
   as quatro telas administrativas principais.
 - **Segurança de sessão** — o cache de queries é limpo no logout para que dados

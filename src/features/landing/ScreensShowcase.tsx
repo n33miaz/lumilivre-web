@@ -4,24 +4,25 @@ import { useTranslation } from 'react-i18next';
 import { useIsDark } from '../../hooks/useIsDark';
 import { Icon } from './Icon';
 
-import dashboardLight from '../../assets/images/prints/dashboard.png';
-import dashboardDark from '../../assets/images/prints/dashboard_dark.png';
-import booksLight from '../../assets/images/prints/books-new.png';
-import booksDark from '../../assets/images/prints/books_dark-new.png';
-import loansLight from '../../assets/images/prints/loans.png';
-import loansDark from '../../assets/images/prints/loans_dark.png';
-import rankingLight from '../../assets/images/prints/ranking.png';
-import rankingDark from '../../assets/images/prints/ranking_dark.png';
-import reportsLight from '../../assets/images/prints/reports.png';
-import reportsDark from '../../assets/images/prints/reports_dark.png';
+// `?picture` = WebP + PNG de fallback gerados no build (ver vite.config.ts).
+import dashboardLight from '../../assets/images/prints/dashboard.png?picture';
+import dashboardDark from '../../assets/images/prints/dashboard_dark.png?picture';
+import booksLight from '../../assets/images/prints/books-new.png?picture';
+import booksDark from '../../assets/images/prints/books_dark-new.png?picture';
+import loansLight from '../../assets/images/prints/loans.png?picture';
+import loansDark from '../../assets/images/prints/loans_dark.png?picture';
+import rankingLight from '../../assets/images/prints/ranking.png?picture';
+import rankingDark from '../../assets/images/prints/ranking_dark.png?picture';
+import reportsLight from '../../assets/images/prints/reports.png?picture';
+import reportsDark from '../../assets/images/prints/reports_dark.png?picture';
 
 interface Screen {
   key: string;
   tab: string;
   title: string;
   description: string;
-  light: string;
-  dark: string;
+  light: ImagetoolsPicture;
+  dark: ImagetoolsPicture;
 }
 
 /**
@@ -181,17 +182,31 @@ export function ScreensShowcase() {
                 </span>
               </div>
               <div className="relative aspect-[16/10] bg-gray-50 dark:bg-ink-950">
-                {screens.map((screen, index) => (
-                  <img
-                    key={screen.key}
-                    src={isDark ? screen.dark : screen.light}
-                    alt={screen.title}
-                    loading="lazy"
-                    className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${
-                      active === index ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  />
-                ))}
+                {screens.map((screen, index) => {
+                  const print = isDark ? screen.dark : screen.light;
+                  return (
+                    // O <picture> não é posicionado, então o absolute do <img>
+                    // continua se resolvendo contra a moldura acima — o
+                    // empilhamento com fade entre abas segue igual.
+                    <picture key={screen.key}>
+                      {Object.entries(print.sources).map(([format, srcset]) => (
+                        <source
+                          key={format}
+                          srcSet={srcset}
+                          type={`image/${format}`}
+                        />
+                      ))}
+                      <img
+                        src={print.img.src}
+                        alt={screen.title}
+                        loading="lazy"
+                        className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${
+                          active === index ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      />
+                    </picture>
+                  );
+                })}
               </div>
             </div>
           </div>

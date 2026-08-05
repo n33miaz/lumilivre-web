@@ -4,17 +4,21 @@ import { Link } from 'react-router-dom';
 
 import LogoIcon from '../../assets/icons/logo.svg?react';
 import DownloadIcon from '../../assets/icons/upload.svg?react';
+import { apkLinkProps, resolveApkUrl } from '../../utils/apkDownload';
 
 export function DownloadAppPage() {
   const { t } = useTranslation('download');
+  const apkUrl = resolveApkUrl();
 
   useEffect(() => {
+    if (!apkUrl) return;
+
     const timer = setTimeout(() => {
-      window.location.href = '/lumilivre.apk';
+      window.location.href = apkUrl;
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [apkUrl]);
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-lumi-radial p-6 dark:bg-dark-background">
@@ -27,21 +31,20 @@ export function DownloadAppPage() {
           {t('eyebrow')}
         </span>
         <h1 className="mt-2 font-display text-3xl font-extrabold text-gray-900 dark:text-white">
-          {t('title')}
+          {apkUrl ? t('title') : t('unconfigured.title')}
         </h1>
 
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-gray-500 dark:text-gray-400">
-          {t('message')}
+          {apkUrl ? t('message') : t('unconfigured.message')}
         </p>
 
         <div className="mt-8 space-y-4">
           <a
-            href="/lumilivre.apk"
-            download="LumiLivre.apk"
+            {...apkLinkProps()}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-4 text-sm font-extrabold text-white shadow-sm transition-all duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300 focus:ring-offset-2 active:scale-95 dark:focus:ring-offset-dark-card"
           >
             <DownloadIcon className="h-5 w-5" />
-            {t('button.retry')}
+            {apkUrl ? t('button.retry') : t('button.releases')}
           </a>
 
           <Link

@@ -2,6 +2,11 @@
 node_modules/
 dist/
 
+# Binários locais do app (APK vem de GitHub Release, ver README) — mandar 56 MB
+# no contexto de build só para o Docker descartar é desperdício puro.
+artifacts/
+*.apk
+
 # VCS / CI
 .git/
 .github/

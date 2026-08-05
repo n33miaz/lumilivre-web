@@ -3,5 +3,8 @@
   "title": "Downloading LumiLivre",
   "message": "The app should start downloading shortly.",
   "button.retry": "Click if download has not started",
+  "button.releases": "See published versions",
+  "unconfigured.title": "Download unavailable",
+  "unconfigured.message": "This build did not receive the app address. Download the latest version straight from the app repository releases.",
   "link.return_to_admin": "Go to admin panel"
 }

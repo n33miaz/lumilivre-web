@@ -29,6 +29,12 @@ coverage/
 *.sln
 *.sw?
 
+# Binário do app não mora no repositório do web: 56 MB versionados inflavam todo
+# clone e cada build. O APK é publicado como GitHub Release do lumilivre-app e a
+# tela /download aponta para lá via VITE_APK_URL (ver README).
+*.apk
+/artifacts/
+
 # Playwright
 /test-results/
 /playwright-report/

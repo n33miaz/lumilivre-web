@@ -3,5 +3,8 @@
   "title": "Baixando LumiLivre",
   "message": "O aplicativo deve começar a baixar em instantes.",
   "button.retry": "Clique se não iniciou",
+  "button.releases": "Ver versões publicadas",
+  "unconfigured.title": "Download indisponível",
+  "unconfigured.message": "Este build não recebeu o endereço do aplicativo. Baixe a versão mais recente direto das releases do repositório do app.",
   "link.return_to_admin": "Ir para o site administrativo"
 }
