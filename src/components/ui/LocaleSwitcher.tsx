@@ -105,7 +105,9 @@ export function LocaleSwitcher({
         className="row-hover flex h-9 items-center gap-2 px-3 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-lumi-primary dark:hover:text-lumi-label active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary"
       >
         <Languages className="h-4 w-4" />
-        <span className="text-lumi-primary dark:text-lumi-label">
+        {/* lumi-200 no escuro: o rosa #C964C5 sobre a pastilha translúcida do
+            login fica em 3,7:1, abaixo do AA para 14px. */}
+        <span className="text-lumi-primary dark:text-lumi-200">
           {current.short}
         </span>
         <svg

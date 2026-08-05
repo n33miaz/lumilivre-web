@@ -1,17 +1,42 @@
 import {
+  useEffect,
+  useRef,
   useState,
+  type ComponentType,
   type FocusEvent as ReactFocusEvent,
   type FormEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { ScanLine, Smartphone } from 'lucide-react';
+import {
+  Clock,
+  Compass,
+  FileSpreadsheet,
+  FileText,
+  ListOrdered,
+  Keyboard,
+  MapPin,
+  Megaphone,
+  Palette,
+  ScanLine,
+  SlidersHorizontal,
+  Smartphone,
+  ToggleRight,
+  Trophy,
+} from 'lucide-react';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { useIsDark } from '../../../hooks/useIsDark';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import { useScrollReveal } from '../../../hooks/useScrollReveal';
+import {
+  readLastShownTips,
+  rememberLoginTips,
+  selectLoginTips,
+  type LoginTipIcon,
+} from '../../../features/auth/loginTips';
 import { ThemeToggle } from '../../../layouts/components/ThemeToggle';
 import { LocaleSwitcher } from '../../../components/ui/LocaleSwitcher';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
@@ -38,18 +63,24 @@ import { getDefaultRouteForRole } from '../../../utils/roleCapabilities';
 const DOWNLOAD_SHADER: [string, string, string] = ['#047857', '#059669', '#10B981'];
 const DOWNLOAD_HIGHLIGHT = '#A7F3D0';
 
-const heroFeatures = [
-  {
-    Icon: ScanLine,
-    titleKey: 'login.hero.feature.isbn.title',
-    descKey: 'login.hero.feature.isbn.desc',
-  },
-  {
-    Icon: Smartphone,
-    titleKey: 'login.hero.feature.app.title',
-    descKey: 'login.hero.feature.app.desc',
-  },
-];
+// Ícone por dica. O acervo (`features/auth/loginTips.ts`) guarda só o nome, para
+// ficar livre de React e poder ser testado sozinho.
+const TIP_ICONS: Record<LoginTipIcon, ComponentType<{ className?: string }>> = {
+  scan: ScanLine,
+  queue: ListOrdered,
+  clock: Clock,
+  toggle: ToggleRight,
+  report: FileText,
+  export: FileSpreadsheet,
+  board: Megaphone,
+  trophy: Trophy,
+  phone: Smartphone,
+  keyboard: Keyboard,
+  filter: SlidersHorizontal,
+  pin: MapPin,
+  compass: Compass,
+  palette: Palette,
+};
 
 export function LoginPage() {
   const { t } = useTranslation('auth');
@@ -66,6 +97,19 @@ export function LoginPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
+
+  // Conjunto de dicas desta visita: sorteado uma vez na montagem, excluindo o
+  // conjunto da visita anterior. A gravação vem depois, num efeito, para que o
+  // duplo render do StrictMode não consuma duas rotações.
+  const [tips] = useState(() =>
+    selectLoginTips({ exclude: readLastShownTips() }),
+  );
+  const brandPanelRef = useRef<HTMLElement>(null);
+  useScrollReveal(brandPanelRef);
+
+  useEffect(() => {
+    rememberLoginTips(tips);
+  }, [tips]);
 
   const navigate = useNavigate();
   const { login: setAuthUser } = useAuth();
@@ -139,9 +183,14 @@ export function LoginPage() {
   };
 
   return (
+    // `grid-cols-1` explícito (= minmax(0, 1fr)) em vez da coluna implícita
+    // `auto`: o rótulo do botão de download usa `truncate`, e `white-space:
+    // nowrap` faz a largura mínima do conteúdo ser o texto inteiro. A coluna
+    // `auto` obedecia e ficava com 368px num aparelho de 320px, empurrando o
+    // cartão para fora da tela (o `overflow-hidden` escondia, em vez de rolar).
     <main
       className={`
-        login-shell login-enter relative min-h-screen grid select-none overflow-hidden lg:grid-cols-2
+        login-shell login-enter relative min-h-screen grid grid-cols-1 select-none overflow-hidden lg:grid-cols-2
         ${isExiting ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
       `}
     >
@@ -161,51 +210,84 @@ export function LoginPage() {
       )}
       <div className="login-divider hidden lg:block" aria-hidden="true" />
 
-      <section className="login-brand-panel relative z-10 hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex">
-        <div className="absolute inset-0 grid-pattern opacity-20" />
+      <section
+        ref={brandPanelRef}
+        className="login-brand-panel relative z-10 hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
+      >
+        <div aria-hidden="true" className="absolute inset-0 grid-pattern opacity-20" />
 
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
-            <LogoIcon className="w-7 h-7 text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+            <LogoIcon className="h-7 w-7 text-white" />
           </div>
           <div>
-            <h1 className="font-display font-extrabold text-3xl tracking-tight">
+            <h1 className="font-display text-3xl font-extrabold tracking-tight">
               {t('login.title')}
             </h1>
-            <div className="text-sm text-white/70 -mt-0.5">
+            <div className="-mt-0.5 text-sm text-white/70">
               {t('login.hero.tagline')}
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 max-w-lg space-y-5">
-          <h2 className="font-display font-extrabold text-5x1 xl:text-6xl leading-[1.05]">
+        <div className="relative z-10 max-w-lg space-y-6">
+          {/* `text-5x1` era erro de digitação: a classe não existia e o h2 caía no
+              tamanho herdado. Corrigido para a escala de verdade. */}
+          <h2
+            data-reveal
+            className="font-display text-4xl font-extrabold leading-[1.06] xl:text-5xl"
+          >
             {t('login.headline.start')}{' '}
-            <span className="text-lumi-100">
-              {t('login.headline.highlight')}
-            </span>
-            .
+            <span className="text-lumi-100">{t('login.headline.highlight')}</span>.
           </h2>
-          <p className="text-white/80 text-lg leading-relaxed">
+
+          <p
+            data-reveal
+            data-reveal-delay="1"
+            className="text-[17px] leading-relaxed text-white/80"
+          >
             {t('login.subtitle')}
           </p>
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            {heroFeatures.map(({ Icon, titleKey, descKey }) => (
-              <div
-                key={titleKey}
-                className="flex items-start gap-3 rounded-xl bg-white/10 backdrop-blur p-3.5"
-              >
-                <Icon className="h-5 w-5 shrink-0 text-lumi-100" />
-                <div>
-                  <div className="text-sm font-display font-bold leading-tight">
-                    {t(titleKey)}
-                  </div>
-                  <div className="text-xs text-white/70 leading-tight mt-0.5">
-                    {t(descKey)}
-                  </div>
-                </div>
-              </div>
-            ))}
+
+          <div className="space-y-3">
+            <div
+              data-reveal
+              data-reveal-delay="2"
+              className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/50"
+            >
+              {t('login.tips.eyebrow')}
+              <span aria-hidden="true" className="h-px flex-1 bg-white/15" />
+            </div>
+
+            {/* Conjunto diferente a cada acesso, nunca repetindo o anterior (ver
+                `features/auth/loginTips.ts`). Empilhado em vez de duas colunas: a
+                dica tem uma frase inteira de explicação, que em coluna estreita
+                virava três linhas quebradas. */}
+            <ul className="space-y-2.5">
+              {tips.map((tip, index) => {
+                const TipIcon = TIP_ICONS[tip.icon];
+                return (
+                  <li
+                    key={tip.id}
+                    data-reveal
+                    data-reveal-delay={String(index + 3)}
+                    className="group flex items-start gap-3.5 rounded-xl border border-white/10 bg-white/10 p-3.5 backdrop-blur transition-[background-color,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.16]"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 transition-colors duration-300 group-hover:bg-white/25">
+                      <TipIcon className="h-[18px] w-[18px] text-lumi-100" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-display text-sm font-bold leading-tight">
+                        {t(`login.tip.${tip.id}.title`)}
+                      </span>
+                      <span className="mt-1 block text-xs leading-snug text-white/75">
+                        {t(`login.tip.${tip.id}.desc`)}
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         </div>
 
@@ -213,14 +295,14 @@ export function LoginPage() {
           <Trans
             t={t}
             i18nKey="login.hero.footer"
-            values={{ version: __APP_VERSION__ }}
+            values={{ version: __APP_VERSION__, year: new Date().getFullYear() }}
             components={{
-              repo: (
-                <a
-                  href="https://github.com/n33miaz/lumilivre"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold transition-colors hover:text-lumi-label"
+              // Aponta para a landing (rota real) em vez do endereço de
+              // repositório que estava aqui e não existe.
+              site: (
+                <Link
+                  to="/"
+                  className="font-semibold underline decoration-white/30 underline-offset-2 transition-colors hover:text-lumi-label"
                 />
               ),
             }}
@@ -246,7 +328,9 @@ export function LoginPage() {
 
           <div className="login-card rounded-3xl p-5 sm:p-8">
             <div className="mb-7 text-center">
-              <h2 className="font-display text-4xl font-extrabold text-gray-900 dark:text-white">
+              {/* Um degrau menor até `sm`: em 320px "Bem-Vindo(a)" quebrava em
+                  duas linhas no tamanho cheio. */}
+              <h2 className="font-display text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
                 {t('login.form.welcome')}
               </h2>
               <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
@@ -304,7 +388,9 @@ export function LoginPage() {
                 onPointerLeave={handleButtonPointerLeave}
                 onFocus={handleButtonFocus}
                 onBlur={handleButtonBlur}
-                className="btn-download btn-shader group relative flex w-full items-center justify-center overflow-hidden rounded-xl px-4 py-4 text-base font-extrabold text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                // Padding e corpo menores até `sm` para o rótulo caber inteiro em
+                // 320px — o `truncate` cortava "…ANDROID" rente à borda.
+                className="btn-download btn-shader group relative flex w-full items-center justify-center overflow-hidden rounded-xl px-3 py-4 text-[13px] font-extrabold text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:px-4 sm:text-base"
               >
                 {/* Same hover-driven shader light as the submit button. */}
                 <ShaderBackground

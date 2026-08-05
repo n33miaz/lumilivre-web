@@ -46,7 +46,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
 
       {/* Container Fixo no Topo Direito */}
-      <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 w-full max-w-sm pointer-events-none">
+      {/* `max-w-sm` (384px) é mais largo que um celular de 320–375px: com
+          `right-4`, a pilha saía pela esquerda da tela. O teto por viewport
+          desconta as duas margens e mantém o toast inteiro visível. */}
+      <div className="fixed top-4 right-4 z-[9999] flex w-full max-w-[min(24rem,calc(100vw-2rem))] flex-col gap-2 pointer-events-none">
         {messages.map((message) => (
           <Toast key={message.id} message={message} onRemove={removeToast} />
         ))}

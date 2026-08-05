@@ -72,7 +72,10 @@ export function InputFloatingLabel({
               : 'translate-x-7 -translate-y-1/2 scale-100'
           }
 
-          ${error ? 'text-red-500' : 'text-lumi-label'}
+          ${/* No claro, #C964C5 sobre branco dá 3,4:1 — abaixo do mínimo AA
+                para texto de 16px. O roxo primário sobe para 9,4:1 e o rosa
+                fica só no escuro, onde rende 5,1:1 sobre o cartão. */ ''}
+          ${error ? 'text-red-500' : 'text-lumi-primary dark:text-lumi-label'}
         `}
       >
         {label}
