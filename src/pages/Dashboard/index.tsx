@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { FileDown, FileSpreadsheet, RefreshCw } from 'lucide-react';
@@ -27,6 +27,10 @@ import { Modal } from '../../components/ui/Modal';
 import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 import { LoanModalRequest } from '../../features/loans/LoanModalRequest';
 import { formatarNome } from '../../utils/formatters';
+import {
+  useTablePageSize,
+  type PageSizeChoice,
+} from '../../hooks/useTablePageSize';
 import { useToast } from '../../contexts/ToastContext';
 import {
   useDashboardViewAlerts,
@@ -108,24 +112,47 @@ const SPARK_BOOKS = [8, 10, 13, 18, 16, 21, 23, 25];
 const SPARK_READERS = [10, 14, 11, 17, 19, 16, 21, 24];
 const SPARK_OVERDUE = [22, 18, 20, 14, 16, 11, 9, 7];
 
-/** Client-side pagination for the small dashboard widget tables. */
-function useClientPagination<T>(items: T[], initialSize = 10) {
+/**
+ * Paginação no cliente das tabelas-widget do dashboard (as listas vêm inteiras
+ * da API). O tamanho de página segue o mesmo contrato das telas grandes: Auto
+ * mede o card e enche a altura disponível, e a escolha manual fica persistida.
+ */
+function useClientPagination<T>(
+  items: T[],
+  tableId: string,
+  containerRef: RefObject<HTMLElement | null>,
+) {
+  const { pageSizeChoice, itemsPerPage, setPageSize } = useTablePageSize(
+    tableId,
+    containerRef,
+    // headerHeight cobre o cabeçalho do card + o thead sticky.
+    { rowHeight: 45, headerHeight: 110, footerHeight: 50 },
+  );
   const [page, setPage] = useState(1);
-  const [size, setSize] = useState(initialSize);
-  const totalPages = Math.max(1, Math.ceil(items.length / size));
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
   const currentPage = Math.min(page, totalPages);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
-  const paged = items.slice((currentPage - 1) * size, currentPage * size);
+  const paged = items.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  const changePageSize = (value: PageSizeChoice) => {
+    setPageSize(value);
+    setPage(1);
+  };
+
   return {
     paged,
     page: currentPage,
     setPage,
-    size,
-    setSize,
+    size: itemsPerPage,
+    pageSizeChoice,
+    changePageSize,
     totalPages,
     total: items.length,
   };
@@ -232,8 +259,18 @@ export function DashboardPage() {
       .filter((item) => item.statusVencimento !== 'ativo');
   }, [emprestimos.data, i18n.language]);
 
-  const requestsPagination = useClientPagination(solicitacoesProcessadas);
-  const overduePagination = useClientPagination(emprestimosProcessados);
+  const requestsCardRef = useRef<HTMLDivElement>(null);
+  const overdueCardRef = useRef<HTMLDivElement>(null);
+  const requestsPagination = useClientPagination(
+    solicitacoesProcessadas,
+    'dashboard.requests',
+    requestsCardRef,
+  );
+  const overduePagination = useClientPagination(
+    emprestimosProcessados,
+    'dashboard.overdue',
+    overdueCardRef,
+  );
 
   const statusChartData = useMemo(() => {
     const data = statsGerenciais.data;
@@ -555,7 +592,10 @@ export function DashboardPage() {
   }, [i18n.language]);
 
   return (
-    <section className="space-y-6">
+    // Coluna flex limitada: é o que permite ao stage (e às duas tabelas dentro
+    // dele) ocupar exatamente a altura que sobra, com o rodapé de paginação
+    // sempre visível em vez de empurrado para fora da tela.
+    <section className="flex min-h-0 flex-1 flex-col gap-6">
       <ModalLoanDetails
         isOpen={isLoanModalOpen}
         onClose={handleFecharDetalhesEmprestimo}
@@ -568,7 +608,7 @@ export function DashboardPage() {
       />
 
       {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
             {t('page.eyebrow', { defaultValue: 'Visão geral' })} · {todayLabel}
@@ -616,7 +656,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="shrink-0 grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           to="/admin/books"
           Icon={BookIcon}
@@ -670,7 +710,7 @@ export function DashboardPage() {
       </div>
 
       {/* View toggle */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="shrink-0 flex items-center justify-between flex-wrap gap-3">
         <DashboardViewToggle
           value={view}
           onChange={setView}
@@ -689,7 +729,7 @@ export function DashboardPage() {
 
       {/* Slide stage */}
       <SlideStage
-        className="min-h-0"
+        className="min-h-0 flex-1"
         trackClassName="items-stretch"
         itemClassName=""
         currentIndex={view === 'analytics' ? 0 : 1}
@@ -698,7 +738,7 @@ export function DashboardPage() {
         views={[
           <div
             key="analytics"
-            className="grid grid-cols-1 lg:grid-cols-2 gap-4 pr-1"
+            className="grid min-h-0 flex-1 grid-cols-1 content-start gap-4 overflow-y-auto custom-scrollbar pr-1 lg:grid-cols-2"
           >
             <ChartCard
               eyebrow={t('chart.general_distribution_eyebrow', {
@@ -864,9 +904,10 @@ export function DashboardPage() {
 
           <div
             key="tables"
-            className="grid grid-cols-1 xl:grid-cols-2 gap-4 pl-1"
+            className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto custom-scrollbar pl-1 xl:grid-cols-2 xl:overflow-hidden"
           >
             <DashboardTableCard
+              containerRef={requestsCardRef}
               title={t('section.requests')}
               subtitle={t('section.requests.subtitle', {
                 defaultValue: 'Aguardam aprovação do bibliotecário',
@@ -893,6 +934,9 @@ export function DashboardPage() {
                 solicitacoesProcessadas.length > 0 ? (
                   <TableFooter
                     viewMode="exception"
+                    allowAutoPageSize
+                    pageSizeValue={requestsPagination.pageSizeChoice}
+                    onPageSizeChange={requestsPagination.changePageSize}
                     pagination={{
                       currentPage: requestsPagination.page,
                       totalPages: requestsPagination.totalPages,
@@ -900,10 +944,6 @@ export function DashboardPage() {
                       totalItems: requestsPagination.total,
                     }}
                     onPageChange={requestsPagination.setPage}
-                    onItemsPerPageChange={(size) => {
-                      requestsPagination.setSize(size);
-                      requestsPagination.setPage(1);
-                    }}
                   />
                 ) : undefined
               }
@@ -954,6 +994,7 @@ export function DashboardPage() {
             </DashboardTableCard>
 
             <DashboardTableCard
+              containerRef={overdueCardRef}
               title={t('section.overdue_due')}
               subtitle={t('section.overdue_due.subtitle', {
                 defaultValue: 'Empréstimos ativos próximos da data limite',
@@ -980,6 +1021,9 @@ export function DashboardPage() {
                 emprestimosProcessados.length > 0 ? (
                   <TableFooter
                     viewMode="exception"
+                    allowAutoPageSize
+                    pageSizeValue={overduePagination.pageSizeChoice}
+                    onPageSizeChange={overduePagination.changePageSize}
                     pagination={{
                       currentPage: overduePagination.page,
                       totalPages: overduePagination.totalPages,
@@ -987,10 +1031,6 @@ export function DashboardPage() {
                       totalItems: overduePagination.total,
                     }}
                     onPageChange={overduePagination.setPage}
-                    onItemsPerPageChange={(size) => {
-                      overduePagination.setSize(size);
-                      overduePagination.setPage(1);
-                    }}
                   />
                 ) : undefined
               }
@@ -1106,6 +1146,7 @@ export function DashboardPage() {
 }
 
 interface DashboardTableCardProps {
+  containerRef: RefObject<HTMLDivElement | null>;
   title: string;
   subtitle: string;
   badge?: React.ReactNode;
@@ -1118,6 +1159,7 @@ interface DashboardTableCardProps {
 }
 
 function DashboardTableCard({
+  containerRef,
   title,
   subtitle,
   badge,
@@ -1130,8 +1172,13 @@ function DashboardTableCard({
 }: DashboardTableCardProps) {
   const showContent = !isLoading && !error && !empty;
   return (
-    <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden flex flex-col">
-      <div className="px-5 py-4 border-b border-gray-200/70 dark:border-white/5 flex items-center justify-between gap-3">
+    // `min-h-[280px] xl:min-h-0`: em duas colunas (xl) o card divide a altura do
+    // stage; empilhado, um piso evita que as duas tabelas fiquem de 2 linhas.
+    <div
+      ref={containerRef}
+      className="flex min-h-[280px] flex-col overflow-hidden rounded-2xl border border-gray-200/70 bg-white dark:border-white/5 dark:bg-dark-card xl:min-h-0"
+    >
+      <div className="shrink-0 px-5 py-4 border-b border-gray-200/70 dark:border-white/5 flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="font-display font-bold text-lg text-gray-900 dark:text-white truncate">
             {title}
@@ -1142,7 +1189,7 @@ function DashboardTableCard({
         </div>
         {badge && <div className="shrink-0">{badge}</div>}
       </div>
-      <div className="tbl-scroll tbl-short flex-1">
+      <div className="tbl-scroll tbl-fill min-h-0 flex-1">
         {isLoading ? (
           <div className="p-8 text-center text-sm text-gray-400">…</div>
         ) : error ? (

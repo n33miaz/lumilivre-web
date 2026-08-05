@@ -45,7 +45,12 @@ export function ChartCard({
         {badge && <div className="shrink-0">{badge}</div>}
       </div>
 
-      <div className="h-56 flex-1 min-h-0">
+      {/* `grow` em vez de `flex-1`: `flex-1` é `flex: 1 1 0%`, e com base 0 dentro
+          de uma coluna flex de altura automática esta área colapsava para 0px — os
+          gráficos não apareciam e o ResponsiveContainer media -1×-1 (era a origem
+          do aviso do recharts no console). Com `grow` + piso de 14rem a área tem
+          altura própria e ainda cresce quando o card recebe altura definida. */}
+      <div className="h-56 min-h-[14rem] grow">
         {isLoading ? (
           <ChartSkeleton />
         ) : isError ? (
