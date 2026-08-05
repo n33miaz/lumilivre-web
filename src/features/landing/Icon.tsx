@@ -5,23 +5,19 @@ type IconName =
   | 'book-open'
   | 'moon'
   | 'sun'
-  | 'home'
-  | 'book'
-  | 'arrow-left-right'
-  | 'users'
-  | 'search'
   | 'user'
   | 'server'
   | 'monitor'
   | 'smartphone'
   | 'sparkles'
-  | 'graduation-cap'
+  | 'arrow-left-right'
+  | 'arrow-right'
+  | 'bookmark'
+  | 'megaphone'
   | 'mail'
   | 'file-text'
-  | 'git-fork'
-  | 'git-pull-request'
-  | 'message-circle'
-  | 'heart';
+  | 'check'
+  | 'minus';
 
 interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {
   name: IconName;
@@ -54,39 +50,6 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M20 12h2" />
       <path d="m6.34 17.66-1.41 1.41" />
       <path d="m19.07 4.93-1.41 1.41" />
-    </>
-  ),
-  home: (
-    <>
-      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </>
-  ),
-  book: (
-    <>
-      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" />
-    </>
-  ),
-  'arrow-left-right': (
-    <>
-      <path d="M8 3 4 7l4 4" />
-      <path d="M4 7h16" />
-      <path d="m16 21 4-4-4-4" />
-      <path d="M20 17H4" />
-    </>
-  ),
-  users: (
-    <>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </>
-  ),
-  search: (
-    <>
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
     </>
   ),
   user: (
@@ -125,11 +88,25 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M5 18H3" />
     </>
   ),
-  'graduation-cap': (
+  'arrow-left-right': (
     <>
-      <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
-      <path d="M22 10v6" />
-      <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+      <path d="M8 3 4 7l4 4" />
+      <path d="M4 7h16" />
+      <path d="m16 21 4-4-4-4" />
+      <path d="M20 17H4" />
+    </>
+  ),
+  'arrow-right': (
+    <>
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </>
+  ),
+  bookmark: <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />,
+  megaphone: (
+    <>
+      <path d="m3 11 18-5v12L3 14v-3z" />
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
     </>
   ),
   mail: (
@@ -147,32 +124,17 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M16 17H8" />
     </>
   ),
-  'git-fork': (
-    <>
-      <circle cx="12" cy="18" r="3" />
-      <circle cx="6" cy="6" r="3" />
-      <circle cx="18" cy="6" r="3" />
-      <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" />
-      <path d="M12 12v3" />
-    </>
-  ),
-  'git-pull-request': (
-    <>
-      <circle cx="18" cy="18" r="3" />
-      <circle cx="6" cy="6" r="3" />
-      <path d="M13 6h3a2 2 0 0 1 2 2v7" />
-      <path d="M6 9v12" />
-    </>
-  ),
-  'message-circle': (
-    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
-  ),
-  heart: (
-    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z" />
-  ),
+  check: <path d="M20 6 9 17l-5-5" />,
+  minus: <path d="M5 12h14" />,
 };
 
-export function Icon({ name, size = 20, strokeWidth = 2, className = '', ...rest }: IconProps) {
+export function Icon({
+  name,
+  size = 20,
+  strokeWidth = 2,
+  className = '',
+  ...rest
+}: IconProps) {
   return (
     <svg
       width={size}

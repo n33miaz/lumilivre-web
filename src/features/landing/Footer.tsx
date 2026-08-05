@@ -6,51 +6,55 @@ import { Icon } from './Icon';
 
 const REPOS = ['lumilivre-api', 'lumilivre-web', 'lumilivre-app'];
 
+const LINK_CLASS =
+  'rounded text-gray-700 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-gray-300 dark:hover:text-lumi-200';
+
 export function Footer() {
   const { t } = useTranslation('landing');
   const year = new Date().getFullYear();
 
   const projectLinks = useMemo(
     () => [
-      { label: t('footer.link.docs'), href: '#ecosystem' },
+      { label: t('footer.link.screens'), href: '#screens' },
+      { label: t('footer.link.engineering'), href: '#engineering' },
       {
         label: t('footer.link.license'),
         href: 'https://github.com/n33miaz/lumilivre-web/blob/master/LICENSE',
       },
-      { label: t('footer.link.coc'), href: '#community' },
+      { label: t('footer.link.contact'), href: '#contact' },
     ],
     [t],
   );
 
   return (
-    <footer className="border-t border-gray-200 dark:border-gray-800 px-6 py-16">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-10 mb-12">
+    <footer className="border-t border-gray-200 px-6 py-16 dark:border-gray-800">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-12 grid gap-10 md:grid-cols-4">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2.5 mb-4">
+            <div className="mb-4 flex items-center gap-2.5">
               <LogoIcon className="h-7 w-7 text-lumi-500" />
-              <span className="font-extrabold text-lg">LumiLivre</span>
+              <span className="text-lg font-extrabold">LumiLivre</span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-md">
+            <p className="max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
               {t('footer.description')}
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-500">
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
               {t('footer.heading.repos')}
-            </h4>
+            </h2>
             <ul className="space-y-2.5 text-sm">
-              {REPOS.map((r) => (
-                <li key={r}>
+              {REPOS.map((repo) => (
+                <li key={repo}>
                   <a
-                    href={`https://github.com/n33miaz/${r}`}
+                    href={`https://github.com/n33miaz/${repo}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-gray-700 dark:text-gray-300 hover:text-lumi-500 inline-flex items-center gap-1.5 font-mono"
+                    className={`inline-flex items-center gap-1.5 font-mono ${LINK_CLASS}`}
                   >
                     <Icon name="github" size={14} />
-                    {r}
+                    {repo}
                   </a>
                 </li>
               ))}
@@ -58,27 +62,30 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 uppercase tracking-wider text-gray-500">
+            <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
               {t('footer.heading.project')}
-            </h4>
+            </h2>
             <ul className="space-y-2.5 text-sm">
-              {projectLinks.map((l) => (
-                <li key={l.label}>
-                  <a
-                    href={l.href}
-                    target={l.href.startsWith('http') ? '_blank' : undefined}
-                    rel={l.href.startsWith('http') ? 'noreferrer' : undefined}
-                    className="text-gray-700 dark:text-gray-300 hover:text-lumi-500"
-                  >
-                    {l.label}
-                  </a>
-                </li>
-              ))}
+              {projectLinks.map((link) => {
+                const external = link.href.startsWith('http');
+                return (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      target={external ? '_blank' : undefined}
+                      rel={external ? 'noreferrer' : undefined}
+                      className={LINK_CLASS}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-8 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400 md:flex-row">
           <div>{t('footer.copyright', { year })}</div>
           <div className="font-mono">{t('footer.location')}</div>
         </div>

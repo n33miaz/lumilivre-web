@@ -1,214 +1,171 @@
-import { useState } from 'react';
+import { useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useIsDark } from '../../hooks/useIsDark';
-import { Icon } from './Icon';
-
-// `?picture` = WebP + PNG de fallback gerados no build (ver vite.config.ts).
-import dashboardLight from '../../assets/images/prints/dashboard.png?picture';
-import dashboardDark from '../../assets/images/prints/dashboard_dark.png?picture';
-import booksLight from '../../assets/images/prints/books-new.png?picture';
-import booksDark from '../../assets/images/prints/books_dark-new.png?picture';
-import loansLight from '../../assets/images/prints/loans.png?picture';
-import loansDark from '../../assets/images/prints/loans_dark.png?picture';
-import rankingLight from '../../assets/images/prints/ranking.png?picture';
-import rankingDark from '../../assets/images/prints/ranking_dark.png?picture';
-import reportsLight from '../../assets/images/prints/reports.png?picture';
-import reportsDark from '../../assets/images/prints/reports_dark.png?picture';
+import { BrowserFrame } from './BrowserFrame';
+import { PrintPicture } from './PrintPicture';
+import { PRINTS, type ScreenPrint } from './prints';
+import { SectionHeader } from './SectionHeader';
 
 interface Screen {
-  key: string;
+  key: keyof typeof PRINTS;
   tab: string;
   title: string;
   description: string;
-  light: ImagetoolsPicture;
-  dark: ImagetoolsPicture;
+  alt: string;
+  print: ScreenPrint;
 }
 
+const TAB_ID_PREFIX = 'screens-tab-';
+const PANEL_ID = 'screens-panel';
+
 /**
- * Vitrine das telas reais do sistema — deixa o visitante percorrer as principais
- * áreas do painel (Dashboard, Acervo, Empréstimos, Classificação, Relatórios)
- * com troca animada e reação ao tema (claro/escuro), espelhando o site.
+ * Vitrine das telas reais do painel — Visão gerencial, Acervo, Empréstimos,
+ * Ranking e Relatórios — com troca por fade e reação ao tema claro/escuro.
+ *
+ * A troca é sempre manual: um carrossel automático rouba o controle de quem está
+ * lendo a legenda. As abas seguem o padrão ARIA de tablist (setas, Home/End,
+ * um único ponto de tabulação), e as camadas invisíveis do fade saem da árvore
+ * de acessibilidade para o leitor de tela não anunciar as cinco telas juntas.
  */
 export function ScreensShowcase() {
   const { t } = useTranslation('landing');
   const isDark = useIsDark();
   const [active, setActive] = useState(0);
+  const tablistRef = useRef<HTMLDivElement>(null);
 
-  const screens: Screen[] = [
-    {
-      key: 'dashboard',
-      tab: t('screens.dashboard.tab', { defaultValue: 'Dashboard' }),
-      title: t('screens.dashboard.title', {
-        defaultValue: 'Visão gerencial em tempo real',
-      }),
-      description: t('screens.dashboard.desc', {
-        defaultValue:
-          'KPIs, gráficos de empréstimos, top de livros e pendências — tudo em uma tela, com exportação de relatórios.',
-      }),
-      light: dashboardLight,
-      dark: dashboardDark,
-    },
-    {
-      key: 'books',
-      tab: t('screens.books.tab', { defaultValue: 'Acervo' }),
-      title: t('screens.books.title', {
-        defaultValue: 'Catálogo completo com exemplares',
-      }),
-      description: t('screens.books.desc', {
-        defaultValue:
-          'Busca por ISBN, visualização em lista ou grade, controle de exemplares e filtros avançados.',
-      }),
-      light: booksLight,
-      dark: booksDark,
-    },
-    {
-      key: 'loans',
-      tab: t('screens.loans.tab', { defaultValue: 'Empréstimos' }),
-      title: t('screens.loans.title', {
-        defaultValue: 'Empréstimos e devoluções sem fricção',
-      }),
-      description: t('screens.loans.desc', {
-        defaultValue:
-          'Controle de retiradas, prazos e atrasos, com notificações automáticas por e-mail aos leitores.',
-      }),
-      light: loansLight,
-      dark: loansDark,
-    },
-    {
-      key: 'ranking',
-      tab: t('screens.ranking.tab', { defaultValue: 'Classificação' }),
-      title: t('screens.ranking.title', {
-        defaultValue: 'Engajamento que motiva a leitura',
-      }),
-      description: t('screens.ranking.desc', {
-        defaultValue:
-          'Ranking de leitores por curso, módulo e turno, com gráficos de participação da comunidade.',
-      }),
-      light: rankingLight,
-      dark: rankingDark,
-    },
-    {
-      key: 'reports',
-      tab: t('screens.reports.tab', { defaultValue: 'Relatórios' }),
-      title: t('screens.reports.title', {
-        defaultValue: 'Relatórios prontos para impressão',
-      }),
-      description: t('screens.reports.desc', {
-        defaultValue:
-          'Exporte empréstimos, exemplares e estatísticas em PDF, em português ou inglês.',
-      }),
-      light: reportsLight,
-      dark: reportsDark,
-    },
-  ];
+  const screens: Screen[] = useMemo(
+    () =>
+      (['dashboard', 'books', 'loans', 'ranking', 'reports'] as const).map(
+        (key) => ({
+          key,
+          tab: t(`screens.${key}.tab`),
+          title: t(`screens.${key}.title`),
+          description: t(`screens.${key}.desc`),
+          alt: t(`screens.${key}.alt`),
+          print: PRINTS[key],
+        }),
+      ),
+    [t],
+  );
 
   const current = screens[active];
 
+  const focusTab = (index: number) => {
+    setActive(index);
+    tablistRef.current
+      ?.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+      .item(index)
+      ?.focus();
+  };
+
+  const handleTablistKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const last = screens.length - 1;
+    switch (event.key) {
+      case 'ArrowRight':
+        focusTab(active === last ? 0 : active + 1);
+        break;
+      case 'ArrowLeft':
+        focusTab(active === 0 ? last : active - 1);
+        break;
+      case 'Home':
+        focusTab(0);
+        break;
+      case 'End':
+        focusTab(last);
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+  };
+
   return (
-    <section id="screens" className="relative overflow-hidden py-24">
-      <div className="absolute inset-0 grid-pattern opacity-40" />
-      <div className="relative max-w-6xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-lumi-100 dark:bg-lumi-500/20 text-lumi-700 dark:text-lumi-200 text-xs font-bold mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-lumi-500 animate-pulse-soft" />
-            {t('screens.eyebrow', { defaultValue: 'O sistema por dentro' })}
-          </span>
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
-            {t('screens.title', { defaultValue: 'Conheça as telas principais' })}
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            {t('screens.subtitle', {
-              defaultValue:
-                'Uma plataforma completa para a biblioteca escolar — do acervo ao engajamento dos leitores.',
-            })}
-          </p>
+    <section
+      id="screens"
+      className="relative overflow-hidden bg-gray-50 py-24 dark:bg-ink-900/40 sm:py-28"
+    >
+      <div aria-hidden="true" className="absolute inset-0 grid-pattern opacity-40" />
+      <div className="relative mx-auto max-w-6xl px-6">
+        <SectionHeader
+          eyebrow={t('screens.eyebrow')}
+          title={t('screens.title')}
+          lead={t('screens.subtitle')}
+        />
+
+        <div
+          ref={tablistRef}
+          role="tablist"
+          aria-label={t('screens.aria.tablist')}
+          onKeyDown={handleTablistKeyDown}
+          data-reveal
+          data-reveal-delay="3"
+          className="mb-10 flex flex-wrap justify-center gap-2"
+        >
+          {screens.map((screen, index) => {
+            const selected = active === index;
+            return (
+              <button
+                key={screen.key}
+                id={`${TAB_ID_PREFIX}${screen.key}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-controls={PANEL_ID}
+                // Um só ponto de tabulação no grupo: dentro dele a navegação é
+                // por seta, como manda o padrão de tablist.
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setActive(index)}
+                className={`rounded-full px-4 py-2 text-sm font-bold transition-[background-color,color,box-shadow,transform] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-ink-900 ${
+                  selected
+                    ? 'bg-lumi-gradient text-white shadow-glowSoft'
+                    : 'bg-white text-gray-600 hover:-translate-y-px hover:text-lumi-600 dark:bg-white/5 dark:text-gray-300 dark:hover:text-lumi-200'
+                }`}
+              >
+                {screen.tab}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {screens.map((screen, index) => (
-            <button
-              key={screen.key}
-              type="button"
-              onClick={() => setActive(index)}
-              aria-pressed={active === index}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${
-                active === index
-                  ? 'bg-lumi-gradient text-white shadow-glowSoft'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
-              }`}
-            >
-              {screen.tab}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid lg:grid-cols-5 gap-10 items-center">
-          {/* Caption */}
-          <div className="lg:col-span-2 order-2 lg:order-1">
-            <h3 className="text-2xl font-black tracking-tight mb-3">
+        <div
+          id={PANEL_ID}
+          role="tabpanel"
+          aria-labelledby={`${TAB_ID_PREFIX}${current.key}`}
+          className="grid items-center gap-10 lg:grid-cols-5"
+        >
+          <div
+            data-reveal
+            data-reveal-delay="4"
+            className="order-2 lg:order-1 lg:col-span-2"
+          >
+            <h3 className="mb-3 font-display text-2xl font-black tracking-tight text-gray-900 dark:text-white">
               {current.title}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="leading-relaxed text-gray-600 dark:text-gray-400">
               {current.description}
             </p>
-            <div className="mt-6 flex gap-2">
+          </div>
+
+          <div
+            data-reveal
+            data-reveal-delay="5"
+            className="order-1 lg:order-2 lg:col-span-3"
+          >
+            <BrowserFrame path={current.print.path}>
               {screens.map((screen, index) => (
-                <button
+                <PrintPicture
                   key={screen.key}
-                  type="button"
-                  aria-label={screen.tab}
-                  onClick={() => setActive(index)}
-                  className={`h-1.5 rounded-full transition-all ${
-                    active === index
-                      ? 'w-8 bg-lumi-500'
-                      : 'w-2 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400'
+                  print={screen.print}
+                  isDark={isDark}
+                  alt={screen.alt}
+                  hiddenFromReaders={active !== index}
+                  className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${
+                    active === index ? 'opacity-100' : 'opacity-0'
                   }`}
                 />
               ))}
-            </div>
-          </div>
-
-          {/* Browser-framed preview */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-ink-900 shadow-2xl overflow-hidden">
-              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-gray-100 dark:border-white/5">
-                <span className="w-3 h-3 rounded-full bg-red-400" />
-                <span className="w-3 h-3 rounded-full bg-amber-400" />
-                <span className="w-3 h-3 rounded-full bg-emerald-400" />
-                <span className="ml-3 inline-flex items-center gap-1.5 text-[11px] text-gray-400">
-                  <Icon name="book-open" size={12} /> app.lumilivre.com.br
-                </span>
-              </div>
-              <div className="relative aspect-[16/10] bg-gray-50 dark:bg-ink-950">
-                {screens.map((screen, index) => {
-                  const print = isDark ? screen.dark : screen.light;
-                  return (
-                    // O <picture> não é posicionado, então o absolute do <img>
-                    // continua se resolvendo contra a moldura acima — o
-                    // empilhamento com fade entre abas segue igual.
-                    <picture key={screen.key}>
-                      {Object.entries(print.sources).map(([format, srcset]) => (
-                        <source
-                          key={format}
-                          srcSet={srcset}
-                          type={`image/${format}`}
-                        />
-                      ))}
-                      <img
-                        src={print.img.src}
-                        alt={screen.title}
-                        loading="lazy"
-                        className={`absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-500 ${
-                          active === index ? 'opacity-100' : 'opacity-0'
-                        }`}
-                      />
-                    </picture>
-                  );
-                })}
-              </div>
-            </div>
+            </BrowserFrame>
           </div>
         </div>
       </div>

@@ -112,6 +112,19 @@ body {
   color: transparent;
 }
 
+/* No escuro, as pontas #762075 do degradê ficam em 2,1:1 contra o fundo — abaixo
+   do mínimo até para texto grande. A escala sobe um degrau e as pontas passam a
+   5,7:1, mantendo o mesmo desenho de cor. */
+.dark .landing-root .gradient-text {
+  background: linear-gradient(135deg, #c964c5 0%, #e9a7e6 50%, #c964c5 100%);
+}
+
+/* Cada seção é destino de âncora e a barra de navegação é fixa: sem esta margem,
+   clicar em "Engenharia" encosta o título embaixo do cabeçalho. */
+.landing-root section[id] {
+  scroll-margin-top: 5rem;
+}
+
 .landing-root .blob {
   position: absolute;
   border-radius: 50%;
@@ -1076,6 +1089,57 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================================
+   Revelação no scroll (landing) — `hooks/useScrollReveal.ts`.
+   O estado escondido depende de `data-reveal-ready`, escrito
+   pelo hook: sem JS nada fica invisível. Fora de @layer para
+   vencer as utilities do Tailwind e a regra global de
+   transition-colors. Longhands de propósito: o atalho
+   `transition` zeraria o `transition-delay` do escalonamento.
+   ============================================================ */
+[data-reveal-ready] [data-reveal] {
+  opacity: 0;
+  /* translate3d (e não translateY) para a revelação nascer numa camada de
+     composição própria — a rolagem não repinta o resto da seção. */
+  transform: translate3d(0, 16px, 0);
+  transition-property: opacity, transform;
+  transition-duration: 620ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-reveal-ready] [data-reveal][data-revealed] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Escalonamento por atributo, não por style inline: a CSP desta imagem não
+   libera 'unsafe-inline' em style-src. */
+[data-reveal-delay='1'] {
+  transition-delay: 70ms;
+}
+[data-reveal-delay='2'] {
+  transition-delay: 140ms;
+}
+[data-reveal-delay='3'] {
+  transition-delay: 210ms;
+}
+[data-reveal-delay='4'] {
+  transition-delay: 280ms;
+}
+[data-reveal-delay='5'] {
+  transition-delay: 350ms;
+}
+
+/* Inclinação do print do hero conforme o ponteiro. As variáveis chegam por
+   CSSOM (`el.style.setProperty`), como no `buttonLight` dos botões — nunca por
+   atributo `style`, que a CSP bloquearia. Só transform: zero custo de layout. */
+.tilt-stage {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  transform: perspective(1400px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
    prefers-reduced-motion: quem pede menos movimento continua
    vendo a mudança de estado, só sem o trajeto. Fica fora de
    @layer de propósito — regra sem camada vence as utilities do
@@ -1086,6 +1150,27 @@ input[type='date']::-webkit-calendar-picker-indicator {
    não decoração.
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
+  /* O `scroll-behavior: smooth` do @layer base transforma cada âncora da
+     landing numa rolagem animada de página inteira — exatamente o movimento
+     que este usuário pediu para não ter. */
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Rede de segurança: o hook já não marca `data-reveal-ready` neste modo, mas
+     se marcasse, o conteúdo continuaria visível e parado. */
+  [data-reveal-ready] [data-reveal],
+  [data-reveal-ready] [data-reveal][data-revealed] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .tilt-stage {
+    transform: none;
+    transition: none;
+  }
+
   .animate-fade-in,
   .animate-fade-out,
   .animate-grow-in,
