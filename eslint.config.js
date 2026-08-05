@@ -28,6 +28,25 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // A CSP do nginx não libera 'unsafe-eval'. Todo zod entra por
+      // src/schemas/zod.ts, que desliga o JIT (o motivo está lá); import direto
+      // faz voltar a violação de CSP no console de toda tela com formulário.
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'zod',
+              message:
+                "Importe { z } de 'src/schemas/zod' — o import direto reativa o JIT do zod e viola a CSP.",
+            },
+          ],
+        },
+      ],
     },
+  },
+  {
+    files: ['src/schemas/zod.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   },
 );

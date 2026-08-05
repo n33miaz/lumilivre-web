@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { z } from '../../schemas/zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { Label } from '../../components/ui/Label';

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zod';
 
 export const bookSchema = z.object({
   isbn: z.string().min(10, 'ISBN deve ter no mínimo 10 caracteres'),

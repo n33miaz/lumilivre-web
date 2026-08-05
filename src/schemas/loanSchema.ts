@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zod';
 
 export const loanSchema = z.object({
   leitor_matricula: z.string().min(1, 'Selecione um leitor'),

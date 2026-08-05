@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zod';
 
 // Campos de build vêm de <input type="number"> como string; validamos como
 // inteiro não-negativo e convertemos para número no submit.

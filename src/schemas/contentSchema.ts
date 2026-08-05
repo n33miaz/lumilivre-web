@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zod';
 
 export const contentSchema = z.object({
   contentType: z.enum(['ANNOUNCEMENT', 'ATTACHMENT', 'WORK']),
