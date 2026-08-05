@@ -63,15 +63,27 @@ body {
 .nav-pill:hover {
   transition-duration: 0s;
 }
-.row-hover {
+.row-hover,
+.row-hover-danger {
   transition: background-color 0.55s ease;
+}
+.row-hover:hover,
+.row-hover-danger:hover {
+  transition-duration: 0s;
 }
 .row-hover:hover {
   background-color: rgba(118, 32, 117, 0.06);
-  transition-duration: 0s;
 }
 .dark .row-hover:hover {
   background-color: rgba(201, 100, 197, 0.08);
+}
+/* Mesmo tempo do `.row-hover`, tinta vermelha: itens destrutivos de menu (sair,
+   excluir) precisam continuar sinalizando risco sem sair do ritmo dos vizinhos. */
+.row-hover-danger:hover {
+  background-color: rgba(239, 68, 68, 0.08);
+}
+.dark .row-hover-danger:hover {
+  background-color: rgba(239, 68, 68, 0.14);
 }
 
 /* Landing-only helpers (used pela rota publica em /) */
@@ -902,6 +914,13 @@ input[type='date']::-webkit-calendar-picker-indicator {
     transform-origin: top center;
   }
 
+  /* Par de saída do `.animate-slide-up`: usado pelos popovers ancorados na base
+     (legenda de status do rodapé), que sobem ao abrir e precisam descer ao fechar. */
+  .animate-slide-up-out {
+    animation: slideUpOut 0.16s ease-in forwards;
+    transform-origin: bottom center;
+  }
+
   /* Reverse-of-open close for overlays (paired com .animate-slide-down via
      usePresence): espelha exatamente o slideDown — some encolhendo e subindo,
      em vez de reaproveitar uma animação de entrada. */
@@ -993,6 +1012,17 @@ input[type='date']::-webkit-calendar-picker-indicator {
     }
   }
 
+  @keyframes slideUpOut {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+  }
+
   @keyframes slideDownOut {
     from {
       opacity: 1;
@@ -1045,6 +1075,46 @@ input[type='date']::-webkit-calendar-picker-indicator {
   }
 }
 
+/* ============================================================
+   prefers-reduced-motion: quem pede menos movimento continua
+   vendo a mudança de estado, só sem o trajeto. Fica fora de
+   @layer de propósito — regra sem camada vence as utilities do
+   Tailwind e o `transition` inline do SlideStage precisa do
+   !important porque style inline não perde para folha.
+   O spinner de carregamento (`animate-spin-smooth`) e o `ping`
+   das notificações ficam de fora: são indicadores de estado,
+   não decoração.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-grow-in,
+  .animate-shrink-out,
+  .animate-slide-down,
+  .animate-slide-down-out,
+  .animate-slide-up,
+  .animate-slide-up-out,
+  .animate-slide-in-right,
+  .animate-slide-in-left,
+  .animate-float,
+  .animate-marquee,
+  .animate-popIn,
+  .animate-pulse-soft,
+  .animate-shimmer {
+    animation: none;
+  }
+
+  [data-slide-track] {
+    transition: none !important;
+  }
+
+  .row-hover,
+  .row-hover-danger,
+  .nav-pill {
+    transition-duration: 0.01ms;
+  }
+}
+
 /* Print: neutraliza slides para PDF mostrar tudo */
 @media print {
   [data-dashboard-block='analytics'] {
@@ -1053,6 +1123,14 @@ input[type='date']::-webkit-calendar-picker-indicator {
   }
   [data-dashboard-block='tables'] {
     display: block !important;
+  }
+  /* O stage e as views agora são colunas flex limitadas com scroll interno;
+     no papel isso cortaria conteúdo. */
+  [data-dashboard-block],
+  [data-dashboard-block] .tbl-scroll {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
   }
   [data-slide-track] {
     transform: none !important;

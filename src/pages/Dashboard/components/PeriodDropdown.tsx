@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Calendar, ChevronDown } from 'lucide-react';
 
 import { CustomDatePicker } from '../../../components/ui/CustomDatePicker';
+import { usePresence } from '../../../hooks/usePresence';
 
 export type DashboardPeriod = '30d' | '60d' | '90d' | 'ytd' | 'custom';
 
@@ -40,6 +41,8 @@ export function PeriodDropdown({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState<CustomRange>(customRange);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Tinha entrada (`animate-slide-down`) e nenhuma saída.
+  const { shouldRender, isClosing } = usePresence(open);
 
   useEffect(() => setDraft(customRange), [customRange]);
 
@@ -95,8 +98,12 @@ export function PeriodDropdown({
         />
       </button>
 
-      {open && (
-        <div className="absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 w-64 max-w-[calc(100vw_-_2.5rem)] rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-dark-card shadow-lg p-2 animate-slide-down">
+      {shouldRender && (
+        <div
+          className={`absolute left-0 sm:left-auto sm:right-0 z-50 mt-2 w-64 max-w-[calc(100vw_-_2.5rem)] rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-dark-card shadow-lg p-2 ${
+            isClosing ? 'animate-slide-down-out' : 'animate-slide-down'
+          }`}
+        >
           <div className="space-y-0.5">
             {PRESETS.map((preset) => (
               <button

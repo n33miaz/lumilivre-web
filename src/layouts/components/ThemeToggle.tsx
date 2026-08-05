@@ -35,7 +35,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={handleToggle}
-      className="group h-9 w-9 rounded-lg flex items-center justify-center select-none text-gray-600 hover:bg-lumi-primary/10 hover:text-lumi-primary dark:text-gray-300 dark:hover:bg-white/10 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary transition-all duration-200 ease-out"
+      className="row-hover group h-9 w-9 rounded-lg flex items-center justify-center select-none text-gray-600 hover:text-lumi-primary dark:text-gray-300 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary"
       title={isLight ? t('theme.switch_to_dark') : t('theme.switch_to_light')}
       aria-label={t('aria.toggle_theme')}
     >

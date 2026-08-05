@@ -315,12 +315,14 @@ export function SearchableSelect({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
         className={`
           flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md
           ${
             disabled
               ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed text-gray-400 border-gray-200 dark:border-gray-600'
-              : 'bg-white dark:bg-gray-800 cursor-pointer border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary'
+              : 'row-hover bg-white dark:bg-gray-800 cursor-pointer border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-lumi-primary focus:border-lumi-primary'
           }
           ${isOpen ? 'ring-2 ring-lumi-primary border-lumi-primary' : ''}
         `}

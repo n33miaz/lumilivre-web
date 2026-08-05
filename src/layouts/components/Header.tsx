@@ -124,6 +124,19 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
       .slice(0, 5);
   }, [searchOptions, searchQuery]);
 
+  // A busca global desaparecia seca (render condicional puro). O `usePresence`
+  // mantém a lista montada durante a saída; os resultados são congelados no
+  // fechamento para o painel não esvaziar no meio da animação.
+  const {
+    shouldRender: searchPanelRender,
+    isClosing: searchPanelClosing,
+  } = usePresence(isSearchOpen && searchResults.length > 0);
+  const lastSearchResultsRef = useRef(searchResults);
+  if (searchResults.length > 0) lastSearchResultsRef.current = searchResults;
+  const visibleSearchResults = searchPanelClosing
+    ? lastSearchResultsRef.current
+    : searchResults;
+
   const goToSearchResult = (path: string) => {
     navigate(path);
     setSearchQuery('');
@@ -191,7 +204,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
         <button
           type="button"
           aria-label={t('nav:aria.toggle_sidebar')}
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5"
+          className="row-hover md:hidden p-2 rounded-lg"
           onClick={() => setSidebarExpanded(!isSidebarExpanded)}
         >
           <MenuIcon className="w-5 h-5 fill-current text-gray-600 dark:text-gray-300" />
@@ -232,9 +245,15 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
             <span>⌘</span>K
           </kbd>
 
-          {isSearchOpen && searchResults.length > 0 && (
-            <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card dark:border-white/10 dark:bg-dark-card">
-              {searchResults.map((item) => (
+          {searchPanelRender && (
+            <div
+              className={`absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card dark:border-white/10 dark:bg-dark-card ${
+                searchPanelClosing
+                  ? 'animate-slide-down-out'
+                  : 'animate-slide-down'
+              }`}
+            >
+              {visibleSearchResults.map((item) => (
                 <button
                   key={item.path}
                   type="button"
@@ -264,7 +283,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
               aria-haspopup="menu"
               aria-expanded={isUserMenuOpen}
               aria-label={t('nav:user.menu_aria', { defaultValue: 'Menu' })}
-              className="h-9 pl-1 pr-3 rounded-full bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 flex items-center gap-2 text-sm font-semibold"
+              className="row-hover h-9 pl-1 pr-3 rounded-full bg-gray-100 dark:bg-white/5 flex items-center gap-2 text-sm font-semibold"
             >
               <span className="w-7 h-7 rounded-full bg-lumi-gradient text-white text-xs font-bold flex items-center justify-center">
                 {userInitials}
@@ -333,7 +352,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
                       setIsUserMenuOpen(false);
                       logout?.();
                     }}
-                    className="w-full inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
+                    className="row-hover-danger w-full inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400"
                   >
                     <LogOut className="w-4 h-4" />
                     {t('common:logout', { defaultValue: 'Sair' })}

@@ -2,6 +2,7 @@ import React, {
   useState,
   useRef,
   useEffect,
+  useId,
   useLayoutEffect,
   useCallback,
 } from 'react';
@@ -20,6 +21,8 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
   options: Option[];
   placeholder?: string;
+  /** Nome acessível quando o rótulo visível é só o valor (ex.: "10"). */
+  ariaLabel?: string;
   className?: string;
   icon?: React.ReactNode;
   direction?: 'up' | 'down';
@@ -33,6 +36,7 @@ export function CustomSelect({
   onChange,
   options,
   placeholder,
+  ariaLabel,
   className = '',
   icon,
   buttonClassName = 'px-3 py-2',
@@ -43,6 +47,10 @@ export function CustomSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const resolvedPlaceholder = placeholder ?? t('select');
+  // Id derivado do placeholder colidia quando duas tabelas na mesma tela usavam
+  // o mesmo rótulo (os dois rodapés do Dashboard): `getElementById` devolvia o
+  // portal do vizinho e o clique-fora deixava de fechar. `useId` garante único.
+  const portalId = `dropdown-portal-custom-${useId()}`;
 
   const [menuPlacement, setMenuPlacement] = useState<'up' | 'down'>('down');
 
@@ -96,9 +104,7 @@ export function CustomSelect({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      const dropdownElement = document.getElementById(
-        `dropdown-portal-custom-${resolvedPlaceholder}`,
-      );
+      const dropdownElement = document.getElementById(portalId);
 
       if (
         containerRef.current &&
@@ -114,7 +120,7 @@ export function CustomSelect({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, resolvedPlaceholder]);
+  }, [isOpen, portalId]);
 
   // --- Resetar highlight ao abrir ---
   useEffect(() => {
@@ -231,7 +237,7 @@ export function CustomSelect({
 
     return createPortal(
       <div
-        id={`dropdown-portal-custom-${resolvedPlaceholder}`}
+        id={portalId}
         style={style}
         className={`
           overflow-y-auto custom-scrollbar bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg transition-[opacity,transform] duration-150 ease-out
@@ -282,13 +288,16 @@ export function CustomSelect({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-label={ariaLabel}
         className={`
           flex items-center justify-between w-full px-3 py-2 text-sm border rounded-md
           ${buttonClassName}
           ${
             disabled
               ? 'bg-gray-100 dark:bg-gray-700 cursor-not-allowed border-gray-200 dark:border-gray-600 text-gray-400'
-              : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-lumi-primary'
+              : 'row-hover bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-lumi-primary'
           }
           ${isOpen ? 'ring-2 ring-lumi-primary border-lumi-primary' : ''}
         `}

@@ -73,7 +73,7 @@ export function NotificationsBell() {
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-label={t('aria.notifications', { defaultValue: 'Notificações' })}
-        className="relative h-9 w-9 rounded-lg flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/5"
+        className="row-hover relative h-9 w-9 rounded-lg flex items-center justify-center"
       >
         <Bell className="w-[18px] h-[18px] text-gray-600 dark:text-gray-300" />
         {dotColor && (

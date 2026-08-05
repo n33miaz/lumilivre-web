@@ -244,8 +244,8 @@ export const CustomDatePicker = forwardRef<
               isSelected
                 ? 'bg-lumi-primary text-white font-bold'
                 : isToday
-                  ? 'text-lumi-primary font-bold border border-lumi-primary'
-                  : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'row-hover text-lumi-primary font-bold border border-lumi-primary'
+                  : 'row-hover text-gray-700 dark:text-gray-200'
             }
           `}
         >
@@ -277,7 +277,7 @@ export const CustomDatePicker = forwardRef<
                 : null
             }
             className={`
-              py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 
+              row-hover py-2 text-sm rounded-md
               ${y === viewDate.getFullYear() ? 'bg-lumi-primary/10 text-lumi-primary font-bold' : 'text-gray-700 dark:text-gray-200'}
             `}
           >
@@ -309,7 +309,7 @@ export const CustomDatePicker = forwardRef<
         ref={calendarRef}
         style={style}
         className={`
-          w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-xl overflow-hidden ease-out
+          w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-xl overflow-hidden transition-[opacity,transform] duration-150 ease-out
           ${direction === 'up' ? 'origin-bottom' : 'origin-top'}
           ${
             isOpen
@@ -325,7 +325,7 @@ export const CustomDatePicker = forwardRef<
             <button
               type="button"
               onClick={() => changeMonth(-1)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
+              className="row-hover p-1 rounded-full"
             >
               <ArrowLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </button>
@@ -348,7 +348,7 @@ export const CustomDatePicker = forwardRef<
             <button
               type="button"
               onClick={() => changeMonth(1)}
-              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full"
+              className="row-hover p-1 rounded-full"
             >
               <ArrowRightIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </button>

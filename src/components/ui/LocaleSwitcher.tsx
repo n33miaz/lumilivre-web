@@ -102,7 +102,7 @@ export function LocaleSwitcher({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={ariaLabel}
-        className="flex h-9 items-center gap-2 px-3 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-lumi-primary/10 hover:text-lumi-primary dark:hover:bg-white/10 dark:hover:text-lumi-label active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary transition-all duration-200 ease-out"
+        className="row-hover flex h-9 items-center gap-2 px-3 rounded-lg text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-lumi-primary dark:hover:text-lumi-label active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary"
       >
         <Languages className="h-4 w-4" />
         <span className="text-lumi-primary dark:text-lumi-label">

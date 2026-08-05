@@ -4,6 +4,7 @@ import {
   LocaleMenu,
 } from '../../components/ui/LocaleSwitcher';
 import { useLocaleMenu } from '../../components/ui/localeMenu';
+import { usePresence } from '../../hooks/usePresence';
 
 interface SidebarLocaleSwitcherProps {
   isExpanded: boolean;
@@ -27,6 +28,9 @@ export function SidebarLocaleSwitcher({
     select,
     handleListKeyDown,
   } = useLocaleMenu({ placement: 'right-end' });
+  // Mesmo par entra/sai do `LocaleSwitcher` do header: antes o menu da sidebar
+  // abria animando e sumia seco.
+  const { shouldRender, isClosing } = usePresence(open);
 
   return (
     <div ref={containerRef} className="relative">
@@ -75,13 +79,14 @@ export function SidebarLocaleSwitcher({
         </span>
       </button>
 
-      {open && (
+      {shouldRender && (
         <LocaleMenu
           ariaLabel={ariaLabel}
           locale={locale}
           focusedIndex={focusedIndex}
           itemRefs={itemRefs}
           placementClassName={placementClassName}
+          className={isClosing ? 'animate-slide-down-out' : 'animate-slide-down'}
           onSelect={select}
           onKeyDown={handleListKeyDown}
         />
