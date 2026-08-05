@@ -1,9 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CustomSelect } from '../../components/ui/CustomSelect';
 import { TableFooter } from '../../components/ui/TableFooter';
 import { useAccessLogs, useAuditLogs } from '../../hooks/queries/useAuditQueries';
+import {
+  useTablePageSize,
+  type PageSizeChoice,
+} from '../../hooks/useTablePageSize';
 import type { AuditResult } from '../../services/auditService';
 
 type SubTab = 'access' | 'audit';
@@ -71,16 +75,42 @@ export function AuditTab() {
 
   const [accessPage, setAccessPage] = useState(0);
   const [auditPage, setAuditPage] = useState(0);
-  const [size, setSize] = useState(20);
+
+  // Uma preferência por sub-aba: antes as duas dividiam o mesmo `size` fixo em
+  // 20, valor que nem existia na lista de opções — o seletor mostrava "-".
+  const accessTableRef = useRef<HTMLDivElement>(null);
+  const auditTableRef = useRef<HTMLDivElement>(null);
+  // `observeKey: subTab` porque cada tabela só existe na sua sub-aba: sem isso o
+  // container da aba ainda não montada nunca era medido e ficava no fallback.
+  const accessPageSize = useTablePageSize('admin.access', accessTableRef, {
+    rowHeight: 61,
+    footerHeight: 50,
+    observeKey: subTab,
+  });
+  const auditPageSize = useTablePageSize('admin.audit', auditTableRef, {
+    rowHeight: 61,
+    footerHeight: 50,
+    observeKey: subTab,
+  });
 
   const { data: accessData, isLoading: accessLoading } = useAccessLogs(
-    { ...accessFilters, page: accessPage, size },
+    { ...accessFilters, page: accessPage, size: accessPageSize.itemsPerPage },
     subTab === 'access',
   );
   const { data: auditData, isLoading: auditLoading } = useAuditLogs(
-    { ...auditFilters, page: auditPage, size },
+    { ...auditFilters, page: auditPage, size: auditPageSize.itemsPerPage },
     subTab === 'audit',
   );
+
+  // Paginação do servidor: novo tamanho reinicia a página da sub-aba.
+  const handleAccessPageSizeChange = (value: PageSizeChoice) => {
+    accessPageSize.setPageSize(value);
+    setAccessPage(0);
+  };
+  const handleAuditPageSizeChange = (value: PageSizeChoice) => {
+    auditPageSize.setPageSize(value);
+    setAuditPage(0);
+  };
 
   const resultOptions = useMemo(
     () => [
@@ -284,7 +314,11 @@ export function AuditTab() {
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden">
+          <div
+            ref={accessTableRef}
+            /* Piso de altura só no mobile: os filtros ocupam a tela pequena. */
+            className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden lg:min-h-0"
+          >
             <div className="tbl-scroll tbl-fill min-h-0 flex-1">
               <table className="w-full text-sm">
                 <thead className="tbl-head-dark text-[11px] font-bold uppercase tracking-wider">
@@ -368,17 +402,16 @@ export function AuditTab() {
               </table>
             </div>
             <TableFooter
+              allowAutoPageSize
+              pageSizeValue={accessPageSize.pageSizeChoice}
+              onPageSizeChange={handleAccessPageSizeChange}
               pagination={{
                 currentPage: accessPage + 1,
                 totalPages: accessData?.totalPages ?? 1,
-                itemsPerPage: size,
+                itemsPerPage: accessPageSize.itemsPerPage,
                 totalItems: accessData?.totalElements ?? 0,
               }}
               onPageChange={(p) => setAccessPage(p - 1)}
-              onItemsPerPageChange={(s) => {
-                setSize(s);
-                setAccessPage(0);
-              }}
             />
           </div>
         </>
@@ -467,7 +500,11 @@ export function AuditTab() {
             </div>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden">
+          <div
+            ref={auditTableRef}
+            /* Piso de altura só no mobile: os filtros ocupam a tela pequena. */
+            className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden lg:min-h-0"
+          >
             <div className="tbl-scroll tbl-fill min-h-0 flex-1">
               <table className="w-full text-sm">
                 <thead className="tbl-head-dark text-[11px] font-bold uppercase tracking-wider">
@@ -551,17 +588,16 @@ export function AuditTab() {
               </table>
             </div>
             <TableFooter
+              allowAutoPageSize
+              pageSizeValue={auditPageSize.pageSizeChoice}
+              onPageSizeChange={handleAuditPageSizeChange}
               pagination={{
                 currentPage: auditPage + 1,
                 totalPages: auditData?.totalPages ?? 1,
-                itemsPerPage: size,
+                itemsPerPage: auditPageSize.itemsPerPage,
                 totalItems: auditData?.totalElements ?? 0,
               }}
               onPageChange={(p) => setAuditPage(p - 1)}
-              onItemsPerPageChange={(s) => {
-                setSize(s);
-                setAuditPage(0);
-              }}
             />
           </div>
         </>

@@ -20,7 +20,7 @@ import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 import { useEmprestimos } from '../../hooks/queries/useLoanQueries';
 import { type EmprestimoListagemDTO } from '../../services/loanService';
 import { formatarNome } from '../../utils/formatters';
-import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
+import { useTablePageSize } from '../../hooks/useTablePageSize';
 
 type StatusEmprestimoDisplay =
   | 'ativo'
@@ -182,19 +182,17 @@ export function EmprestimosPage() {
   }, [searchParams]);
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const dynamicPageSizeOptions = useMemo(
-    () => ({ rowHeight: 48, footerHeight: 50 }),
-    [],
-  );
-  const dynamicPageSize = useDynamicPageSize(
+  const { pageSizeChoice, itemsPerPage, setPageSize } = useTablePageSize(
+    'loans',
     tableContainerRef,
-    dynamicPageSizeOptions,
+    { rowHeight: 48, footerHeight: 50 },
   );
-  const [itemsPerPage, setItemsPerPage] = useState(0);
 
-  useEffect(() => {
-    if (dynamicPageSize > 0) setItemsPerPage(dynamicPageSize);
-  }, [dynamicPageSize]);
+  // Paginação do servidor: novo tamanho volta para a primeira página.
+  const handlePageSizeChange = (value: Parameters<typeof setPageSize>[0]) => {
+    setPageSize(value);
+    setCurrentPage(1);
+  };
 
   const sortParam = useMemo(() => {
     const sortMap: Record<string, string> = {
@@ -227,7 +225,7 @@ export function EmprestimosPage() {
     refetch,
   } = useEmprestimos(
     currentPage - 1,
-    itemsPerPage || 10,
+    itemsPerPage,
     sortParam,
     filtroAtivo,
     filtersForHook,
@@ -521,24 +519,26 @@ export function EmprestimosPage() {
           >
             <SlidersIcon /> {t('common:action.advanced_filter')}
           </button>
-          {isFilterOpen && (
-            <LoanFilter
-              isOpen={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
-              filters={filterParams}
-              onFilterChange={(field, value) =>
-                setFilterParams((prev) => ({ ...prev, [field]: value }))
-              }
-              onApply={handleApplyFilters}
-              onClear={handleClearFilters}
-            />
-          )}
+          {/* Montado sempre: quem decide render é o `usePresence` do `FilterPanel`.
+              Desmontar aqui matava a animação de fechamento. */}
+          <LoanFilter
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            filters={filterParams}
+            onFilterChange={(field, value) =>
+              setFilterParams((prev) => ({ ...prev, [field]: value }))
+            }
+            onApply={handleApplyFilters}
+            onClear={handleClearFilters}
+          />
         </div>
       </div>
 
+      {/* Piso de altura só no mobile (ver Leitores): sem ele a tabela ficava com
+          uma linha embaixo dos cards de KPI. Em lg+ o piso sai e ela preenche. */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden"
+        className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden lg:min-h-0"
       >
         <div className="tbl-scroll tbl-fill min-h-0 flex-1">
           <table className="w-full text-sm">
@@ -656,7 +656,9 @@ export function EmprestimosPage() {
         </div>
 
         <TableFooter
-          showPageSizeSelector={false}
+          allowAutoPageSize
+          pageSizeValue={pageSizeChoice}
+          onPageSizeChange={handlePageSizeChange}
           legendItems={[
             { color: 'bg-emerald-500', label: t('legend.active') },
             { color: 'bg-red-500', label: t('legend.overdue') },
@@ -666,7 +668,7 @@ export function EmprestimosPage() {
           pagination={{
             currentPage,
             totalPages: pageData?.totalPages ?? 1,
-            itemsPerPage: itemsPerPage || 10,
+            itemsPerPage,
             totalItems: pageData?.totalElements ?? 0,
           }}
           onPageChange={setCurrentPage}

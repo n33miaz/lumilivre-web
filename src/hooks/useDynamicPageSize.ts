@@ -5,6 +5,13 @@ interface DynamicPageSizeOptions {
   headerHeight?: number;
   footerHeight?: number;
   minRows?: number;
+  /**
+   * Força uma nova medição quando muda. Necessário quando o container só passa a
+   * existir depois de uma troca de aba: `ref.current` mudar não re-executa
+   * effect, então sem esta chave a tabela da aba escondida nunca era medida e
+   * ficava no fallback.
+   */
+  observeKey?: string | number;
 }
 
 /**
@@ -32,6 +39,7 @@ export function useDynamicPageSize(
     headerHeight = 48,
     footerHeight = 56,
     minRows = 5,
+    observeKey,
   } = options;
 
   const [itemsPerPage, setItemsPerPage] = useState(0);
@@ -76,7 +84,7 @@ export function useDynamicPageSize(
       observer.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [containerRef, rowHeight, headerHeight, footerHeight, minRows]);
+  }, [containerRef, rowHeight, headerHeight, footerHeight, minRows, observeKey]);
 
   return itemsPerPage;
 }

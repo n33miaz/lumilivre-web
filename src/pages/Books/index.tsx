@@ -2,7 +2,11 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BookOpen, Layers, Library, PackageX } from 'lucide-react';
 
-import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
+import {
+  usePageSizeChoice,
+  useTablePageSize,
+  type PageSizeChoice,
+} from '../../hooks/useTablePageSize';
 import { Modal } from '../../components/ui/Modal';
 import { TableSearch } from '../../components/ui/TableSearch';
 import { BookCover } from '../../components/ui/BookCover';
@@ -180,24 +184,23 @@ export function LivrosPage() {
   >('all');
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const dynamicPageSizeOptions = useMemo(
-    () => ({ rowHeight: 48, footerHeight: 50 }),
-    [],
-  );
-  const dynamicPageSize = useDynamicPageSize(
-    tableContainerRef,
-    dynamicPageSizeOptions,
-  );
-  const [itemsPerPage, setItemsPerPage] = useState(0);
-
-  useEffect(() => {
-    if (dynamicPageSize > 0) setItemsPerPage(dynamicPageSize);
-  }, [dynamicPageSize]);
+  const {
+    pageSizeChoice: listPageSizeChoice,
+    itemsPerPage,
+    setPageSize: setListPageSize,
+  } = useTablePageSize('books.list', tableContainerRef, {
+    rowHeight: 48,
+    footerHeight: 50,
+  });
 
   // Page size do grid: calculado a partir do espaço disponível para que a grade
   // sempre preencha a tela (sem faixa vazia embaixo) em vez de mostrar só ~10.
   const gridContainerRef = useRef<HTMLDivElement>(null);
-  const [gridPageSize, setGridPageSize] = useState(0);
+  const [gridAutoPageSize, setGridAutoPageSize] = useState(0);
+  // A grade não usa `useTablePageSize` porque o "auto" dela é bidimensional
+  // (colunas × linhas); só a preferência persistida é compartilhada.
+  const { pageSizeChoice: gridPageSizeChoice, setPageSize: setGridPageSize } =
+    usePageSizeChoice('books.grid');
 
   useEffect(() => {
     if (booksViewMode !== 'grid') return;
@@ -215,7 +218,7 @@ export function LivrosPage() {
       const cardWidth = (width - (cols - 1) * gap) / cols;
       const cardHeight = cardWidth * (4 / 3) + 36; // capa 3:4 + rótulo
       const rows = Math.max(1, Math.floor((height + gap) / (cardHeight + gap)));
-      setGridPageSize((prev) => {
+      setGridAutoPageSize((prev) => {
         const next = cols * rows;
         return prev === next ? prev : next;
       });
@@ -235,9 +238,26 @@ export function LivrosPage() {
     };
   }, [booksViewMode]);
 
-  // Tamanho de página efetivo: grade usa o cálculo do grid; lista usa o dinâmico.
+  const gridPageSize =
+    gridPageSizeChoice === 'auto'
+      ? gridAutoPageSize || 12
+      : gridPageSizeChoice;
+
+  // Tamanho de página efetivo: grade usa o cálculo do grid; lista, o auto-fit.
   const effectivePageSize =
-    (booksViewMode === 'grid' ? gridPageSize : itemsPerPage) || 10;
+    booksViewMode === 'grid' ? gridPageSize : itemsPerPage;
+
+  // Paginação do servidor nas duas visões: trocar o tamanho reinicia a página
+  // para não pedir a página 7 de um conjunto que passou a ter 3.
+  const handleListPageSizeChange = (value: PageSizeChoice) => {
+    setListPageSize(value);
+    setCurrentPage(1);
+  };
+
+  const handleGridPageSizeChange = (value: PageSizeChoice) => {
+    setGridPageSize(value);
+    setCurrentPage(1);
+  };
 
   const {
     data: livrosPageData,
@@ -322,6 +342,30 @@ export function LivrosPage() {
     );
   }, [exemplaresProcessados, termoBusca]);
 
+  // Exemplares vêm todos de uma vez (lista por livro), então a paginação é no
+  // cliente — mas o rodapé precisa existir: sem ele a tabela era a única do
+  // sistema sem contagem nem controle de linhas.
+  const copiesContainerRef = useRef<HTMLDivElement>(null);
+  const {
+    pageSizeChoice: copiesPageSizeChoice,
+    itemsPerPage: copiesPerPage,
+    setPageSize: setCopiesPageSize,
+  } = useTablePageSize('books.copies', copiesContainerRef, {
+    rowHeight: 41,
+    footerHeight: 50,
+  });
+  const [copiesPage, setCopiesPage] = useState(1);
+
+  const copiesTotalPages = Math.max(
+    1,
+    Math.ceil(exemplaresFiltrados.length / copiesPerPage),
+  );
+  const copiesCurrentPage = Math.min(copiesPage, copiesTotalPages);
+  const exemplaresPaginados = exemplaresFiltrados.slice(
+    (copiesCurrentPage - 1) * copiesPerPage,
+    copiesCurrentPage * copiesPerPage,
+  );
+
   const handleApplyFilters = () => {
     setCurrentPage(1);
     setTermoBusca('');
@@ -357,6 +401,7 @@ export function LivrosPage() {
     setActiveFilters({});
     setTermoBusca('');
     setCurrentPage(1);
+    setCopiesPage(1);
   }, []);
 
   const handleVoltarParaLivros = () => {
@@ -664,18 +709,20 @@ export function LivrosPage() {
                   <SlidersIcon />
                   {t('common:action.advanced_filter')}
                 </button>
-                {isFilterOpen && (
-                  <BookFilter
-                    isOpen={isFilterOpen}
-                    onClose={() => setIsFilterOpen(false)}
-                    filters={filterParams}
-                    onFilterChange={(field, value) =>
-                      setFilterParams((prev) => ({ ...prev, [field]: value }))
-                    }
-                    onApply={handleApplyFilters}
-                    onClear={handleClearFilters}
-                  />
-                )}
+                {/* Montado sempre: o `FilterPanel` já decide o que renderizar via
+                    `usePresence`. Com o antigo `{isFilterOpen && …}` o painel era
+                    desmontado no mesmo instante em que fechava e a animação de
+                    saída nunca chegava a tocar. */}
+                <BookFilter
+                  isOpen={isFilterOpen}
+                  onClose={() => setIsFilterOpen(false)}
+                  filters={filterParams}
+                  onFilterChange={(field, value) =>
+                    setFilterParams((prev) => ({ ...prev, [field]: value }))
+                  }
+                  onApply={handleApplyFilters}
+                  onClear={handleClearFilters}
+                />
               </div>
             </div>
 
@@ -683,7 +730,9 @@ export function LivrosPage() {
               <div
                 key="books-view-list"
                 ref={tableContainerRef}
-                className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden animate-slide-in-left"
+                // Piso de altura só no mobile: com KPIs + busca acima, "preencher
+                // a altura" deixava a tabela com uma linha. Em lg+ o piso sai.
+                className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden animate-slide-in-left lg:min-h-0"
               >
                 <div className="tbl-scroll tbl-fill min-h-0 flex-1">
                   <table className="w-full text-sm">
@@ -783,11 +832,13 @@ export function LivrosPage() {
                   </table>
                 </div>
                 <TableFooter
-                  showPageSizeSelector={false}
+                  allowAutoPageSize
+                  pageSizeValue={listPageSizeChoice}
+                  onPageSizeChange={handleListPageSizeChange}
                   pagination={{
                     currentPage,
                     totalPages,
-                    itemsPerPage: itemsPerPage || 10,
+                    itemsPerPage,
                     totalItems: livrosPageData?.totalElements ?? 0,
                   }}
                   onPageChange={setCurrentPage}
@@ -854,46 +905,22 @@ export function LivrosPage() {
                         </div>
                       ))}
                 </div>
-                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <span>
-                    {t('common:items_range', {
-                      start:
-                        (currentPage - 1) * effectivePageSize +
-                        (livrosExibidos.length > 0 ? 1 : 0),
-                      end:
-                        (currentPage - 1) * effectivePageSize +
-                        livrosExibidos.length,
-                      total: livrosPageData?.totalElements ?? 0,
-                    })}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      aria-label={t('common:previous')}
-                      title={t('common:previous')}
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="w-8 h-8 rounded-lg border border-gray-200 dark:border-white/10 hover:border-lumi-primary flex items-center justify-center disabled:opacity-40"
-                    >
-                      <ChevronLeftIcon />
-                    </button>
-                    <span className="px-2.5 py-1 rounded-lg bg-lumi-primary text-white text-xs font-bold">
-                      {currentPage}
-                    </span>
-                    <span className="text-xs px-1">/ {totalPages}</span>
-                    <button
-                      type="button"
-                      aria-label={t('common:next')}
-                      title={t('common:next')}
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={currentPage >= totalPages}
-                      className="w-8 h-8 rounded-lg border border-gray-200 dark:border-white/10 hover:border-lumi-primary flex items-center justify-center rotate-180 disabled:opacity-40"
-                    >
-                      <ChevronLeftIcon />
-                    </button>
-                  </div>
+                {/* Mesmo rodapé da visão em lista: o pager próprio da grade não
+                    tinha seletor de linhas e divergia visualmente. */}
+                <div className="shrink-0 overflow-hidden rounded-2xl border border-gray-200/70 bg-white dark:border-white/5 dark:bg-dark-card">
+                  <TableFooter
+                    className="border-t-0"
+                    allowAutoPageSize
+                    pageSizeValue={gridPageSizeChoice}
+                    onPageSizeChange={handleGridPageSizeChange}
+                    pagination={{
+                      currentPage,
+                      totalPages,
+                      itemsPerPage: effectivePageSize,
+                      totalItems: livrosPageData?.totalElements ?? 0,
+                    }}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               </div>
             )}
@@ -948,7 +975,10 @@ export function LivrosPage() {
               </div>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden">
+            <div
+              ref={copiesContainerRef}
+              className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden lg:min-h-0"
+            >
               <div className="tbl-scroll tbl-fill min-h-0 flex-1">
                 <table className="w-full text-sm">
                   <thead className="tbl-head-dark text-[11px] font-bold uppercase tracking-wider">
@@ -999,7 +1029,7 @@ export function LivrosPage() {
                         </td>
                       </tr>
                     ) : (
-                      exemplaresFiltrados.map((ex) => {
+                      exemplaresPaginados.map((ex) => {
                         const pill = statusPillFor(ex.status);
                         return (
                           <tr
@@ -1037,6 +1067,25 @@ export function LivrosPage() {
                   </tbody>
                 </table>
               </div>
+              <TableFooter
+                allowAutoPageSize
+                pageSizeValue={copiesPageSizeChoice}
+                onPageSizeChange={(value) => {
+                  setCopiesPageSize(value);
+                  setCopiesPage(1);
+                }}
+                legendItems={[
+                  { color: 'bg-emerald-500', label: t('legend.available') },
+                  { color: 'bg-amber-500', label: t('legend.borrowed') },
+                ]}
+                pagination={{
+                  currentPage: copiesCurrentPage,
+                  totalPages: copiesTotalPages,
+                  itemsPerPage: copiesPerPage,
+                  totalItems: exemplaresFiltrados.length,
+                }}
+                onPageChange={setCopiesPage}
+              />
             </div>
           </div>,
         ]}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 
@@ -9,7 +9,7 @@ import { ReaderModalNew } from '../../features/readers/ReaderModalNew';
 import { ReaderFilter } from '../../features/readers/ReaderFilter';
 import { ModalReaderDetails } from '../../features/readers/ReaderModalDetails';
 import { formatarNome } from '../../utils/formatters';
-import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
+import { useTablePageSize } from '../../hooks/useTablePageSize';
 import { useLeitores } from '../../hooks/queries/useReaderQueries';
 import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
@@ -176,19 +176,18 @@ export function LeitoresPage() {
   }>({ key: 'nomeCompleto', direction: 'asc' });
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
-  const dynamicPageSizeOptions = useMemo(
-    () => ({ rowHeight: 48, footerHeight: 50 }),
-    [],
-  );
-  const dynamicPageSize = useDynamicPageSize(
+  const { pageSizeChoice, itemsPerPage, setPageSize } = useTablePageSize(
+    'readers',
     tableContainerRef,
-    dynamicPageSizeOptions,
+    { rowHeight: 48, footerHeight: 50 },
   );
-  const [itemsPerPage, setItemsPerPage] = useState(0);
 
-  useEffect(() => {
-    if (dynamicPageSize > 0) setItemsPerPage(dynamicPageSize);
-  }, [dynamicPageSize]);
+  // Paginação é do servidor: trocar o tamanho tem que voltar para a página 1,
+  // senão pedimos a página 7 de um conjunto que agora tem 3.
+  const handlePageSizeChange = (value: Parameters<typeof setPageSize>[0]) => {
+    setPageSize(value);
+    setCurrentPage(1);
+  };
 
   const mapSortKey: Record<string, string> = {
     penalidadeStatus: 'penaltyCode',
@@ -208,7 +207,7 @@ export function LeitoresPage() {
     refetch,
   } = useLeitores(
     currentPage - 1,
-    itemsPerPage || 10,
+    itemsPerPage,
     sortString,
     filtroAtivo,
     activeFilters,
@@ -471,24 +470,28 @@ export function LeitoresPage() {
             <SlidersIcon /> 
             {t('common:action.advanced_filter')}
           </button>
-          {isFilterOpen && (
-            <ReaderFilter
-              isOpen={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
-              filters={filterParams}
-              onFilterChange={(field, value) =>
-                setFilterParams((prev) => ({ ...prev, [field]: value }))
-              }
-              onApply={handleApplyFilters}
-              onClear={handleClearFilters}
-            />
-          )}
+          {/* Montado sempre: quem decide render é o `usePresence` do `FilterPanel`.
+              Desmontar aqui matava a animação de fechamento. */}
+          <ReaderFilter
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            filters={filterParams}
+            onFilterChange={(field, value) =>
+              setFilterParams((prev) => ({ ...prev, [field]: value }))
+            }
+            onApply={handleApplyFilters}
+            onClear={handleClearFilters}
+          />
         </div>
       </div>
 
+      {/* Piso de altura só no mobile: com os cards de KPI e a busca ocupando a
+          tela pequena, "preencher a altura disponível" deixava a tabela com uma
+          linha. Abaixo de lg a página volta a rolar; em lg+ o piso sai e a tabela
+          encosta exatamente no rodapé. */}
       <div
         ref={tableContainerRef}
-        className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden"
+        className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden lg:min-h-0"
       >
         <div className="tbl-scroll tbl-fill min-h-0 flex-1">
           <table className="w-full text-sm">
@@ -593,11 +596,13 @@ export function LeitoresPage() {
           </table>
         </div>
         <TableFooter
-          showPageSizeSelector={false}
+          allowAutoPageSize
+          pageSizeValue={pageSizeChoice}
+          onPageSizeChange={handlePageSizeChange}
           pagination={{
             currentPage,
             totalPages: pageData?.totalPages ?? 1,
-            itemsPerPage: itemsPerPage || 10,
+            itemsPerPage,
             totalItems: pageData?.totalElements ?? 0,
           }}
           onPageChange={setCurrentPage}

@@ -23,6 +23,8 @@
   "page_of": "Página {{page}} de {{total}}",
   "items_range": "{{start}}-{{end}} de {{total}}",
   "rows_per_page": "Linhas por página",
+  "rows_per_page.auto": "Auto",
+  "rows_per_page.auto_aria": "Linhas por página (Auto preenche a tela)",
   "select": "Selecionar",
   "options": "Opções",
   "coming_soon": "Em breve",

@@ -1,13 +1,23 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import {
+  useState,
+  useMemo,
+  useRef,
+  useEffect,
+  type RefObject,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Megaphone, Paperclip, GraduationCap, Pin } from 'lucide-react';
 
 import { Modal } from '../../components/ui/Modal';
 import { TableSearch } from '../../components/ui/TableSearch';
+import { TableFooter } from '../../components/ui/TableFooter';
 import { ContentModalNew } from '../../features/contents/ContentModalNew';
 import { ContentModalDetails } from '../../features/contents/ContentModalDetails';
 import { ContentFilter } from '../../features/contents/ContentFilter';
-import { useDynamicPageSize } from '../../hooks/useDynamicPageSize';
+import {
+  usePageSizeChoice,
+  type PageSizeChoice,
+} from '../../hooks/useTablePageSize';
 import { useConteudos } from '../../hooks/queries/useContentQueries';
 import {
   type ContentResponse,
@@ -45,12 +55,60 @@ const STATUS_PILL: Record<string, string> = {
   HIDDEN: 'pill pill-info',
 };
 
+/** Altura média observada do cartão de conteúdo (título + resumo + rodapé). */
+const CARD_HEIGHT = 286;
+const CARD_GAP = 16;
+
+/**
+ * Quantos cartões cabem na altura livre da grade. As colunas espelham os
+ * breakpoints do Tailwind usados no `grid` (1 / md:2 / lg:3) — sem isso o
+ * cálculo por altura sozinho devolveria uma página curta em telas largas.
+ */
+function useGridAutoPageSize(containerRef: RefObject<HTMLElement | null>) {
+  const [pageSize, setPageSize] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let raf = 0;
+    const apply = () => {
+      const height = el.getBoundingClientRect().height;
+      if (height < CARD_HEIGHT) return;
+      const width = window.innerWidth;
+      const cols = width >= 1024 ? 3 : width >= 768 ? 2 : 1;
+      // Arredonda (em vez de truncar) porque a grade rola por dentro: com
+      // truncamento sobrava meia tela vazia quando cabia 1,8 linha de cartões.
+      const rows = Math.max(
+        1,
+        Math.round((height + CARD_GAP) / (CARD_HEIGHT + CARD_GAP)),
+      );
+      setPageSize((prev) => (prev === cols * rows ? prev : cols * rows));
+    };
+    const measure = () => {
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(apply);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [containerRef]);
+
+  return pageSize;
+}
+
 export function ConteudosPage() {
   const { t } = useTranslation('contents');
   const [termoBusca, setTermoBusca] = useState('');
   const [termoBuscaAtivo, setTermoBuscaAtivo] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(12);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterParams, setFilterParams] = useState<ContentFilterParams>({
@@ -65,15 +123,14 @@ export function ConteudosPage() {
   const [isDetalhesOpen, setIsDetalhesOpen] = useState(false);
   const [selected, setSelected] = useState<ContentResponse | null>(null);
 
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-  const dynamicPageSize = useDynamicPageSize(tableContainerRef, {
-    rowHeight: 260,
-    footerHeight: 0,
-  });
-
-  useEffect(() => {
-    if (dynamicPageSize > 0) setItemsPerPage(Math.max(dynamicPageSize, 6));
-  }, [dynamicPageSize]);
+  // A grade de cartões preenche a altura disponível como as tabelas: mede o
+  // container (já limitado por `flex-1 min-h-0`) e conta quantas linhas de
+  // cartão cabem, multiplicando pelas colunas do breakpoint corrente.
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const autoPageSize = useGridAutoPageSize(gridContainerRef);
+  const { pageSizeChoice, setPageSize } = usePageSizeChoice('contents');
+  const itemsPerPage =
+    pageSizeChoice === 'auto' ? autoPageSize || 6 : pageSizeChoice;
 
   const {
     data: conteudos = [],
@@ -87,10 +144,18 @@ export function ConteudosPage() {
     return [...conteudos];
   }, [conteudos]);
 
+  const totalPages = Math.max(1, Math.ceil(sorted.length / itemsPerPage));
+  const safePage = Math.min(currentPage, totalPages);
+
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
+    const start = (safePage - 1) * itemsPerPage;
     return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
+  }, [sorted, safePage, itemsPerPage]);
+
+  const handlePageSizeChange = (value: PageSizeChoice) => {
+    setPageSize(value);
+    setCurrentPage(1);
+  };
 
   const handleApplyFilters = () => {
     setCurrentPage(1);
@@ -133,7 +198,9 @@ export function ConteudosPage() {
   };
 
   return (
-    <section className="space-y-5">
+    // Coluna flex limitada: a grade rola por dentro e o rodapé de paginação fica
+    // sempre visível, como nas telas de tabela.
+    <section className="flex min-h-0 flex-1 flex-col gap-5">
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <Modal.Header title={t('modal.new.title')} />
         <ContentModalNew onClose={() => setIsModalOpen(false)} onSuccess={refetch} />
@@ -144,7 +211,7 @@ export function ConteudosPage() {
         content={selected}
       />
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="shrink-0 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-lumi-primary/10 text-lumi-primary dark:bg-lumi-label/10 dark:text-lumi-label">
             <Megaphone className="h-6 w-6" />
@@ -170,7 +237,7 @@ export function ConteudosPage() {
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 lg:flex-row">
+      <div className="shrink-0 flex flex-col gap-3 lg:flex-row">
         <TableSearch
           className="flex-1"
           value={termoBusca}
@@ -192,41 +259,47 @@ export function ConteudosPage() {
           >
             {t('common:action.advanced_filter')}
           </button>
-          {isFilterOpen && (
-            <ContentFilter
-              isOpen={isFilterOpen}
-              onClose={() => setIsFilterOpen(false)}
-              filters={filterParams}
-              onFilterChange={(field, value) =>
-                setFilterParams((prev) => ({ ...prev, [field]: value }))
-              }
-              onApply={handleApplyFilters}
-              onClear={handleClearFilters}
-            />
-          )}
+          {/* Montado sempre: quem decide render é o `usePresence` do `FilterPanel`.
+              Desmontar aqui matava a animação de fechamento. */}
+          <ContentFilter
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            filters={filterParams}
+            onFilterChange={(field, value) =>
+              setFilterParams((prev) => ({ ...prev, [field]: value }))
+            }
+            onApply={handleApplyFilters}
+            onClear={handleClearFilters}
+          />
         </div>
       </div>
 
-      <div ref={tableContainerRef}>
-        {error ? (
-          <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-8 text-center text-sm font-semibold text-red-500">
-            {t('error.load')}
-          </div>
-        ) : isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-2xl bg-gray-100 dark:bg-white/5 min-h-[220px] animate-pulse"
-              />
-            ))}
-          </div>
-        ) : paginatedData.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 p-12 text-center text-sm font-semibold text-gray-500 dark:text-gray-400">
-            {t('common:empty')}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        {/* Piso de altura só no mobile: sem ele a grade ficava com meia linha de
+            cartão abaixo do cabeçalho e da busca. Em lg+ preenche o que sobra. */}
+        <div
+          ref={gridContainerRef}
+          className="min-h-[22rem] flex-1 overflow-y-auto custom-scrollbar pr-1 lg:min-h-0"
+        >
+          {error ? (
+            <div className="rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 p-8 text-center text-sm font-semibold text-red-500">
+              {t('error.load')}
+            </div>
+          ) : isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl bg-gray-100 dark:bg-white/5 min-h-[220px] animate-pulse"
+                />
+              ))}
+            </div>
+          ) : paginatedData.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10 p-12 text-center text-sm font-semibold text-gray-500 dark:text-gray-400">
+              {t('common:empty')}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 auto-rows-min content-start md:grid-cols-2 lg:grid-cols-3 gap-4">
             {paginatedData.map((c) => {
               const TypeIcon = TYPE_ICON[c.contentType.code] ?? Megaphone;
               const snippet = c.contentType.code === 'WORK' ? c.authors : c.body;
@@ -279,45 +352,26 @@ export function ConteudosPage() {
                 </article>
               );
             })}
-          </div>
-        )}
-
-        {sorted.length > itemsPerPage && (
-          <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-            <span>
-              {t('common:items_range', {
-                start: (currentPage - 1) * itemsPerPage + 1,
-                end: Math.min(currentPage * itemsPerPage, sorted.length),
-                total: sorted.length,
-              })}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-3 h-8 rounded-lg border border-gray-200 dark:border-white/10 hover:border-lumi-primary disabled:opacity-40 text-xs font-bold"
-              >
-                ‹
-              </button>
-              <span className="px-2.5 py-1 rounded-lg bg-lumi-primary text-white text-xs font-bold">
-                {currentPage}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setCurrentPage((p) =>
-                    Math.min(Math.ceil(sorted.length / itemsPerPage), p + 1),
-                  )
-                }
-                disabled={currentPage >= Math.ceil(sorted.length / itemsPerPage)}
-                className="px-3 h-8 rounded-lg border border-gray-200 dark:border-white/10 hover:border-lumi-primary disabled:opacity-40 text-xs font-bold"
-              >
-                ›
-              </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Mesmo rodapé das tabelas: contagem, linhas por página e navegação. */}
+        <div className="shrink-0 overflow-hidden rounded-2xl border border-gray-200/70 bg-white dark:border-white/5 dark:bg-dark-card">
+          <TableFooter
+            className="border-t-0"
+            allowAutoPageSize
+            pageSizeValue={pageSizeChoice}
+            onPageSizeChange={handlePageSizeChange}
+            pagination={{
+              currentPage: safePage,
+              totalPages,
+              itemsPerPage,
+              totalItems: sorted.length,
+            }}
+            onPageChange={setCurrentPage}
+          />
+        </div>
       </div>
     </section>
   );

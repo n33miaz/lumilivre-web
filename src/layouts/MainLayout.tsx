@@ -1,7 +1,12 @@
-import { type ReactNode, useState, useRef } from 'react';
+import { type ReactNode, useMemo, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  type Variants,
+} from 'framer-motion';
 
 import { useAuth } from '../contexts/AuthContext';
 import { Sidebar } from './components/Sidebar';
@@ -27,37 +32,53 @@ export function MainLayout({ children }: { children: ReactNode }) {
     prevIdxRef.current = currentIdx;
   }
 
-  // Transição de rota enxuta: sem delay de entrada (era 80ms e dava sensação de
-  // travamento), curso menor (3%) e durações mais curtas. Menos transform a
-  // animar = menos trabalho de composição em telas pesadas (tabelas longas),
-  // o que tira a "lag" relatada sem perder a leitura de direção do slide.
-  const variants: Variants = {
-    enter: (direction: number) => ({
-      y: direction > 0 ? '3%' : '-3%',
-      opacity: 0,
-      zIndex: 1,
-      willChange: 'transform, opacity',
-    }),
-    center: {
-      y: '0%',
-      opacity: 1,
-      zIndex: 1,
-      transition: {
-        duration: 0.24,
-        ease: [0.16, 1, 0.3, 1],
+  const prefersReducedMotion = useReducedMotion();
+
+  // Transição de rota: o corte seco reclamado vinha da assimetria (entrada 240ms
+  // contra saída 150ms) somada ao expo-out, que chega quase instantâneo e depois
+  // rasteja — o olho lê isso como "pulo e para". Aqui as durações ficam próximas
+  // e cada sentido usa a curva certa: quem sai acelera (ease-in), quem entra
+  // desacelera (ease-out). O curso caiu para 1,5% porque o movimento agora só
+  // sugere a direção; o peso da transição é o crossfade, que não gera CLS.
+  // Com `prefers-reduced-motion` sobra um fade curtíssimo: a troca de tela
+  // continua legível sem deslocamento algum.
+  const variants: Variants = useMemo(() => {
+    if (prefersReducedMotion) {
+      return {
+        enter: { opacity: 0, zIndex: 1 },
+        center: { opacity: 1, zIndex: 1, transition: { duration: 0.01 } },
+        exit: { opacity: 0, zIndex: 0, transition: { duration: 0.01 } },
+      };
+    }
+
+    return {
+      enter: (direction: number) => ({
+        y: direction > 0 ? '1.5%' : '-1.5%',
+        opacity: 0,
+        zIndex: 1,
+        willChange: 'transform, opacity',
+      }),
+      center: {
+        y: '0%',
+        opacity: 1,
+        zIndex: 1,
+        transition: {
+          duration: 0.28,
+          ease: [0.33, 1, 0.68, 1],
+        },
       },
-    },
-    exit: (direction: number) => ({
-      y: direction > 0 ? '-3%' : '3%',
-      opacity: 0,
-      zIndex: 0,
-      willChange: 'transform, opacity',
-      transition: {
-        duration: 0.15,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    }),
-  };
+      exit: (direction: number) => ({
+        y: direction > 0 ? '-1.5%' : '1.5%',
+        opacity: 0,
+        zIndex: 0,
+        willChange: 'transform, opacity',
+        transition: {
+          duration: 0.22,
+          ease: [0.32, 0, 0.67, 0],
+        },
+      }),
+    };
+  }, [prefersReducedMotion]);
 
   return (
     <div
@@ -123,7 +144,15 @@ export function MainLayout({ children }: { children: ReactNode }) {
               {/* O scroll vive aqui: altura herdada do motion.div (flex-1 min-h-0),
                   separado da animação para que o transform não gere scrollbar. */}
               <div className="h-full overflow-y-auto custom-scrollbar">
-                <div className="relative flex min-h-full flex-col p-5 sm:p-7 lg:p-8 pb-6 max-w-[1600px] mx-auto">
+                {/* `h-full` (e não `min-h-full`): com altura automática esta coluna
+                    flex media os filhos pelo conteúdo, então `flex-1 min-h-0` nas
+                    telas de tabela nunca encolhia de verdade — a tabela crescia
+                    com as linhas e a página passava a rolar, empurrando o rodapé
+                    de paginação para fora da tela. Com altura definida, quem pede
+                    `flex-1 min-h-0` recebe exatamente o que sobra e rola por
+                    dentro; telas de fluxo livre (ranking, relatórios) continuam
+                    transbordando para o scroll deste contêiner. */}
+                <div className="relative flex h-full flex-col p-5 sm:p-7 lg:p-8 pb-6 max-w-[1600px] mx-auto">
                   {children}
                 </div>
               </div>

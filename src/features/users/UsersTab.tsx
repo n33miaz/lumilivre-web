@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../components/ui/Modal';
@@ -7,6 +7,10 @@ import { TableFooter } from '../../components/ui/TableFooter';
 import { UserModalNew } from './UserModalNew';
 import { UserModalDetails } from './UserModalDetails';
 import { useUsuarios } from '../../hooks/queries/useUserQueries';
+import {
+  useTablePageSize,
+  type PageSizeChoice,
+} from '../../hooks/useTablePageSize';
 import type { UsuarioResumo } from '../../services/userService';
 
 export function UsersTab() {
@@ -14,13 +18,28 @@ export function UsersTab() {
   const [termoBusca, setTermoBusca] = useState('');
   const [textoAtivo, setTextoAtivo] = useState('');
   const [page, setPage] = useState(0);
-  const [size, setSize] = useState(10);
+
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const {
+    pageSizeChoice,
+    itemsPerPage: size,
+    setPageSize,
+  } = useTablePageSize('admin.users', tableContainerRef, {
+    rowHeight: 48,
+    footerHeight: 50,
+  });
 
   const [isNewOpen, setIsNewOpen] = useState(false);
   const [selected, setSelected] = useState<UsuarioResumo | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const { data, isLoading, isError } = useUsuarios(textoAtivo, page, size);
+
+  // Paginação do servidor: novo tamanho reinicia a página.
+  const handlePageSizeChange = (value: PageSizeChoice) => {
+    setPageSize(value);
+    setPage(0);
+  };
 
   const handleSearch = () => {
     setPage(0);
@@ -86,7 +105,11 @@ export function UsersTab() {
         placeholder={t('users.search.placeholder')}
       />
 
-      <div className="flex min-h-0 flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden">
+      {/* Piso de altura só no mobile (ver Leitores). */}
+      <div
+        ref={tableContainerRef}
+        className="flex min-h-[22rem] flex-1 flex-col rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 overflow-hidden lg:min-h-0"
+      >
         <div className="tbl-scroll tbl-fill min-h-0 flex-1">
           <table className="w-full text-sm">
             <thead className="tbl-head-dark text-[11px] font-bold uppercase tracking-wider">
@@ -145,6 +168,9 @@ export function UsersTab() {
           </table>
         </div>
         <TableFooter
+          allowAutoPageSize
+          pageSizeValue={pageSizeChoice}
+          onPageSizeChange={handlePageSizeChange}
           pagination={{
             currentPage: page + 1,
             totalPages: data?.totalPages ?? 1,
@@ -152,10 +178,6 @@ export function UsersTab() {
             totalItems: data?.totalElements ?? 0,
           }}
           onPageChange={(p) => setPage(p - 1)}
-          onItemsPerPageChange={(s) => {
-            setSize(s);
-            setPage(0);
-          }}
         />
       </div>
     </div>

@@ -23,6 +23,8 @@
   "page_of": "Page {{page}} of {{total}}",
   "items_range": "{{start}}-{{end}} of {{total}}",
   "rows_per_page": "Rows per page",
+  "rows_per_page.auto": "Auto",
+  "rows_per_page.auto_aria": "Rows per page (Auto fits the screen)",
   "select": "Select",
   "options": "Options",
   "coming_soon": "Coming soon",
