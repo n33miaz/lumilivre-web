@@ -82,14 +82,39 @@ export const mudarSenhaComToken = async (
   }
 };
 
+/**
+ * Troca a senha do usuário autenticado e devolve o **token novo**.
+ *
+ * Trocar a senha revoga no servidor todos os tokens já emitidos — inclusive o
+ * que fez esta requisição. Por isso a rota deixou de responder 204 e passou a
+ * devolver `{ token }`: quem não adotar o token devolvido continua mandando um
+ * JWT morto e cai no primeiro 401 seguinte, logo depois de trocar a senha com
+ * sucesso. O `null` cobre um backend antigo (204 sem corpo).
+ */
 export const changePassword = async (
   registrationNumber: string,
   currentPassword: string,
   newPassword: string,
-): Promise<void> => {
-  await api.put('/api/auth/change-password', {
+): Promise<string | null> => {
+  const response = await api.put('/api/auth/change-password', {
     registrationNumber,
     currentPassword,
     newPassword,
+  });
+  return (response.data?.token as string | undefined) ?? null;
+};
+
+/**
+ * Encerra a sessão no servidor. É esta chamada — e não a limpeza local — que
+ * de fato revoga o token: sem ela o JWT continua válido até expirar, mesmo com
+ * o painel já na tela de login.
+ *
+ * O token vai explícito no cabeçalho porque quem chama limpa o
+ * `api.defaults` logo em seguida, e a corrida deixaria a requisição sair sem
+ * credencial.
+ */
+export const encerrarSessao = async (token: string): Promise<void> => {
+  await api.post('/api/auth/logout', null, {
+    headers: { Authorization: `Bearer ${token}` },
   });
 };

@@ -49,14 +49,17 @@ export function MandatoryPasswordChangeModal() {
     setIsLoading(true);
 
     try {
-      await changePassword('', senhaAtual, novaSenha);
+      // A troca revoga o token que fez a requisição; o devolvido aqui é o que
+      // mantém o usuário dentro do painel logo depois de fechar este modal —
+      // que é obrigatório e vale para todo leitor e bibliotecário novo.
+      const renewedToken = await changePassword('', senhaAtual, novaSenha);
 
       addToast({
         type: 'success',
         title: t('change_password.toast.success.title'),
         description: t('change_password.toast.success.description'),
       });
-      completePasswordChange();
+      completePasswordChange(renewedToken);
     } catch (error) {
       console.error(error);
       addToast({

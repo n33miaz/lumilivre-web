@@ -146,13 +146,27 @@ export function LoginPage() {
         navigate(getDefaultRouteForRole(userToStore.role));
       }, 500);
     } catch (err) {
+      const status = (err as { response?: { status?: number } })?.response
+        ?.status;
       // NÃO logar o AxiosError (o config.data carrega usuário+senha).
-      console.error('Falha no login', (err as { response?: { status?: number } })?.response?.status ?? '');
+      console.error('Falha no login', status ?? '');
+
+      // 403 é conta desativada ou bloqueada — não é credencial errada. A API
+      // já manda o motivo traduzido; repetir "usuário ou senha inválidos"
+      // mandaria a pessoa tentar de novo até queimar o rate limit por nada.
+      const isBlockedAccount = status === 403;
 
       addToast({
         type: 'error',
-        title: t('login.toast.error.title'),
-        description: getErrorMessage(err, t('login.toast.error.description')),
+        title: isBlockedAccount
+          ? t('login.toast.blocked.title')
+          : t('login.toast.error.title'),
+        description: getErrorMessage(
+          err,
+          isBlockedAccount
+            ? t('login.toast.blocked.description')
+            : t('login.toast.error.description'),
+        ),
       });
 
       setIsLoading(false);

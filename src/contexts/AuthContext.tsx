@@ -12,6 +12,7 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
 import { queryClient } from '../services/queryClient';
+import { encerrarSessao } from '../services/authService';
 
 interface User {
   id: string;
@@ -76,7 +77,8 @@ interface AuthContextType {
   login: (userData: User) => void;
   logout: () => void;
   logoutWithAnimation: () => void;
-  completePasswordChange: () => void;
+  completePasswordChange: (renewedToken?: string | null) => void;
+  adoptRenewedToken: (renewedToken: string) => void;
   completeTour: () => void;
 }
 
@@ -90,7 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { addToast } = useToast();
   const { t } = useTranslation('common');
 
-  const logout = useCallback(() => {
+  // Só o lado local da saída. Separado do `logout` porque a expulsão por 401
+  // não deve chamar a rota de logout: o token que ela usaria já é o inválido.
+  const clearSession = useCallback(() => {
     setUser(null);
     clearPersistedUser();
     delete api.defaults.headers.common['Authorization'];
@@ -100,13 +104,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     navigate('/login');
   }, [navigate]);
 
-  const completePasswordChange = useCallback(() => {
-    if (user) {
-      const updatedUser = { ...user, isInitialPassword: false };
-      setUser(updatedUser);
-      persistUser(updatedUser);
+  const logout = useCallback(() => {
+    // Quem revoga de verdade é o servidor. A limpeza local só apaga o token
+    // desta aba — sem esta chamada, um JWT copiado antes da saída continuaria
+    // valendo até expirar.
+    const token = user?.token;
+    if (token) {
+      encerrarSessao(token).catch(() => {
+        // Falha de rede não pode prender ninguém dentro do painel: a sessão
+        // local cai de qualquer jeito e o token morre no vencimento.
+        console.warn('Falha ao revogar a sessão no servidor');
+      });
     }
-  }, [user]);
+    clearSession();
+  }, [clearSession, user]);
+
+  // Adota o token devolvido pela troca de senha. A troca revoga os tokens
+  // anteriores, então guardar o novo é o que evita o logout imediato.
+  const adoptRenewedToken = useCallback((renewedToken: string) => {
+    setUser((current) => {
+      if (!current) return current;
+      const updatedUser = { ...current, token: renewedToken };
+      persistUser(updatedUser);
+      return updatedUser;
+    });
+    api.defaults.headers.common['Authorization'] = `Bearer ${renewedToken}`;
+  }, []);
+
+  const completePasswordChange = useCallback(
+    (renewedToken?: string | null) => {
+      setUser((current) => {
+        if (!current) return current;
+        const updatedUser = {
+          ...current,
+          isInitialPassword: false,
+          ...(renewedToken ? { token: renewedToken } : {}),
+        };
+        persistUser(updatedUser);
+        return updatedUser;
+      });
+      if (renewedToken) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${renewedToken}`;
+      }
+    },
+    [],
+  );
 
   const completeTour = useCallback(() => {
     // Best-effort: registra a conclusão no backend (idempotente). Se falhar,
@@ -144,12 +186,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const isAuthEndpoint = (url?: string) => {
+      // As rotas reais são `/api/auth/**`; o prefixo curto continua aceito
+      // porque o padrão antigo nunca casava com elas e um 400 de "senha atual
+      // errada" na troca de senha derrubava a sessão inteira.
+      const matches = (path: string) =>
+        path.startsWith('/auth/') ||
+        path === '/auth' ||
+        path.startsWith('/api/auth/');
+
       if (!url) return false;
       try {
-        const path = new URL(url, api.defaults.baseURL ?? window.location.origin).pathname;
-        return path.startsWith('/auth/') || path === '/auth';
+        return matches(
+          new URL(url, api.defaults.baseURL ?? window.location.origin).pathname,
+        );
       } catch {
-        return url.startsWith('/auth/') || url.includes('/auth/');
+        return matches(url) || url.includes('/auth/');
       }
     };
 
@@ -159,8 +210,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const requestUrl: string | undefined = error.config?.url;
         const onAuthRoute = isAuthEndpoint(requestUrl);
         const status = error.response?.status;
+        // O gate de primeira senha responde 403 com este código enquanto a
+        // senha inicial não for trocada. É "abra o modal de senha", não
+        // "sessão inválida" — deslogar aqui trancaria o usuário para fora do
+        // único lugar onde ele consegue resolver.
+        const isPasswordGate =
+          error.response?.data?.code === 'PASSWORD_CHANGE_REQUIRED';
 
-        if ((status === 401 || status === 403) && user && !onAuthRoute) {
+        if (
+          (status === 401 || status === 403) &&
+          user &&
+          !onAuthRoute &&
+          !isPasswordGate
+        ) {
           console.warn('Sessão expirada ou inválida. Realizando logout...');
 
           addToast({
@@ -169,7 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             description: t('session.expired.description'),
           });
 
-          logout();
+          clearSession();
         }
         // Erro de rede / 5xx NÃO desloga mais — é indisponibilidade
         // (cold start do Render). O ApiHealthContext detecta, exibe o modal
@@ -181,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       api.interceptors.response.eject(interceptorId);
     };
-  }, [user, logout, addToast, t]);
+  }, [user, clearSession, addToast, t]);
 
   const login = (userData: User) => {
     setUser(userData);
@@ -210,6 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         logoutWithAnimation,
         completePasswordChange,
+        adoptRenewedToken,
         completeTour,
       }}
     >

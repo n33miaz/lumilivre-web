@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../../components/ui/Modal';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { changePassword } from '../../../services/authService';
 import LockIcon from '../../../assets/icons/lock.svg?react';
@@ -21,6 +22,7 @@ export function ChangePasswordModal({
 }: ChangePasswordModalProps) {
   const { t } = useTranslation('auth');
   const { addToast } = useToast();
+  const { adoptRenewedToken } = useAuth();
 
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
@@ -53,7 +55,13 @@ export function ChangePasswordModal({
     setIsLoading(true);
 
     try {
-      await changePassword('', senhaAtual, novaSenha);
+      // Sem adotar o token devolvido, a próxima requisição do painel usaria o
+      // JWT que a própria troca acabou de revogar — e o usuário seria deslogado
+      // logo depois de trocar a senha com sucesso.
+      const renewedToken = await changePassword('', senhaAtual, novaSenha);
+      if (renewedToken) {
+        adoptRenewedToken(renewedToken);
+      }
 
       addToast({
         type: 'success',
