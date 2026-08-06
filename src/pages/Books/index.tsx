@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, Layers, Library, PackageX } from 'lucide-react';
+import { BookOpen, Heart, Layers, Library, PackageX } from 'lucide-react';
 
 import {
   usePageSizeChoice,
@@ -17,16 +17,32 @@ import { ExempleModalNew } from '../../features/books/ExempleModalNew';
 import { DetalhesLivroModal } from '../../features/books/BookModalDetails';
 import { ModalExemplarDetails } from '../../features/books/ExempleModalDetails';
 import { BookFilter } from '../../features/books/BookFilter';
+import { BookInterestPanel } from '../../features/books/BookInterestPanel';
 
 import {
   type LivroAgrupado,
   type ListaLivro,
+  type ResumoInteresse,
 } from '../../services/bookService';
 import { type EmprestimoAtivoDTO } from '../../services/loanService';
 import { useLivros, useExemplares } from '../../hooks/queries/useBookQueries';
 import { useEmprestimosAtivosEAtrasados } from '../../hooks/queries/useLoanQueries';
 
 type BooksViewMode = 'list' | 'grid';
+
+/**
+ * Painéis da tela. `interest` (a fila de compra) mora aqui, e não numa página
+ * própria, porque a decisão que ela alimenta é sobre acervo — a mesma pergunta
+ * que os cartões "sem exemplar" desta tela levantam. Quem repara que um título
+ * está zerado descobre no slide ao lado quantos alunos o queriam.
+ */
+type BooksPanel = 'catalog' | 'copies' | 'interest';
+
+const PANEL_INDEX: Record<BooksPanel, number> = {
+  catalog: 0,
+  copies: 1,
+  interest: 2,
+};
 
 function PlusIcon() {
   return (
@@ -136,7 +152,8 @@ function ChevronLeftIcon() {
 
 export function LivrosPage() {
   const { t } = useTranslation('book');
-  const [isExemplarView, setIsExemplarView] = useState(false);
+  const [painel, setPainel] = useState<BooksPanel>('catalog');
+  const isExemplarView = painel === 'copies';
   const [booksViewMode, setBooksViewMode] = useState<BooksViewMode>('list');
   const [selectedBook, setSelectedBook] = useState<LivroAgrupado | null>(null);
 
@@ -303,7 +320,7 @@ export function LivrosPage() {
     setIsConfirmModalOpen(false);
     if (tempBookCreated) {
       setSelectedBook(tempBookCreated);
-      setIsExemplarView(true);
+      setPainel('copies');
       setTermoBusca('');
       setTermoBuscaAtivo('');
       setCurrentPage(1);
@@ -397,7 +414,7 @@ export function LivrosPage() {
 
   const handleVerExemplares = useCallback((livro: LivroAgrupado) => {
     setSelectedBook(livro);
-    setIsExemplarView(true);
+    setPainel('copies');
     setActiveFilters({});
     setTermoBusca('');
     setCurrentPage(1);
@@ -405,12 +422,27 @@ export function LivrosPage() {
   }, []);
 
   const handleVoltarParaLivros = () => {
-    setIsExemplarView(false);
+    setPainel('catalog');
     setSelectedBook(null);
     setTermoBusca('');
     setTermoBuscaAtivo('');
     setCurrentPage(1);
   };
+
+  // Da fila de compra para o cadastro do título: só o `id` importa, o resto do
+  // livro é buscado pelo próprio modal de detalhes.
+  const handleAbrirLivroDoInteresse = useCallback((linha: ResumoInteresse) => {
+    setLivroSelecionado({
+      id: linha.livroId,
+      isbn: '',
+      nome: linha.titulo,
+      autor: linha.autor,
+      editora: '',
+      quantidade: linha.exemplares,
+      imagem: linha.capaUrl,
+    });
+    setIsDetalhesOpen(true);
+  }, []);
 
   const handleAbrirDetalhes = useCallback((livro: LivroAgrupado) => {
     setLivroSelecionado(livro);
@@ -533,9 +565,9 @@ export function LivrosPage() {
         className="flex-1 min-h-0"
         trackClassName="items-stretch"
         itemClassName=""
-        currentIndex={isExemplarView ? 1 : 0}
+        currentIndex={PANEL_INDEX[painel]}
         viewDataAttribute="books-block"
-        viewDataValues={['list', 'exemplares']}
+        viewDataValues={['list', 'exemplares', 'interesse']}
         views={[
           <div
             key="books-list"
@@ -600,6 +632,14 @@ export function LivrosPage() {
                     <GridIcon />
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setPainel('interest')}
+                  className="h-10 px-4 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-dark-card text-sm font-bold text-lumi-primary dark:text-lumi-label inline-flex items-center gap-2 hover:border-lumi-primary"
+                  title={t('interest.subtitle')}
+                >
+                  <Heart className="h-4 w-4" /> {t('button.interest')}
+                </button>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(true)}
@@ -1082,6 +1122,23 @@ export function LivrosPage() {
                 onPageChange={setCopiesPage}
               />
             </div>
+          </div>,
+
+          <div
+            key="books-interesse"
+            className="flex min-h-0 flex-1 flex-col gap-5 px-1 pt-1"
+          >
+            <button
+              type="button"
+              onClick={() => setPainel('catalog')}
+              className="self-start text-sm text-gray-500 dark:text-gray-400 hover:text-lumi-primary inline-flex items-center gap-1.5"
+            >
+              <ChevronLeftIcon /> {t('button.back_to_books')}
+            </button>
+            <BookInterestPanel
+              isActive={painel === 'interest'}
+              onOpenBook={handleAbrirLivroDoInteresse}
+            />
           </div>,
         ]}
       />

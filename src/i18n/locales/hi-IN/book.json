@@ -130,5 +130,21 @@
   "error.delete": "किताब हटाने में त्रुटि।",
   "error.copy.create": "प्रति दर्ज करने में त्रुटि। जाँचें कि यह कोड पहले से मौजूद तो नहीं है।",
   "error.copy.update": "प्रति अद्यतन करने में त्रुटि।",
-  "error.copy.delete": "प्रति हटाने में त्रुटि।"
+  "error.copy.delete": "प्रति हटाने में त्रुटि।",
+  "button.interest": "रुचि",
+  "interest.eyebrow": "अधिग्रहण",
+  "interest.title": "पाठकों की रुचि",
+  "interest.subtitle": "हर शीर्षक को कितने पाठक चाहते हैं, और पुस्तकालय वास्तव में कितनी प्रतियाँ दे सकता है। किसने पसंद किया, यह नहीं दिखाया जाता।",
+  "interest.filter.unmet_only": "केवल जिनकी कोई प्रति उपलब्ध नहीं",
+  "interest.filter.unmet_only_hint": "खरीद कतार: जो आज कोई भी उधार नहीं ले सकता।",
+  "interest.column.book": "पुस्तक",
+  "interest.column.wanted": "चाहने वाले",
+  "interest.column.copies": "प्रतियाँ",
+  "interest.column.available": "उपलब्ध",
+  "interest.column.state": "स्थिति",
+  "interest.state.none": "संग्रह में नहीं",
+  "interest.state.all_out": "सभी उधार पर",
+  "interest.state.ok": "पूर्ति योग्य",
+  "interest.empty.unmet": "पाठक जो भी पुस्तक चाहते हैं, उसकी एक प्रति उपलब्ध है।",
+  "interest.empty.all": "अभी तक किसी पाठक ने किसी पुस्तक में रुचि नहीं दिखाई है।"
 }

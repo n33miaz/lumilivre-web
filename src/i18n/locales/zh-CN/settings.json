@@ -61,5 +61,12 @@
   "language.title": "语言",
   "language.description": "选择界面语言。",
   "language.pt_br": "Português (Brasil)",
-  "language.en_us": "English (US)"
+  "language.en_us": "English (US)",
+  "guest_access.title": "应用内访客模式",
+  "guest_access.description": "在手机应用中显示或隐藏访客入口。公开馆藏仍可通过网站访问——那是图书馆的门面。",
+  "guest_access.toggle_aria": "启用应用内访客模式",
+  "guest_access.success.title": "访客模式已更新",
+  "guest_access.success.description": "设置已保存，下次打开应用时生效。",
+  "guest_access.error.title": "保存失败",
+  "guest_access.error.description": "无法更改访客模式，请重试。"
 }

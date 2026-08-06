@@ -66,5 +66,6 @@
   "form.error.title_required": "O título é obrigatório",
   "error.create": "Erro ao publicar conteúdo.",
   "error.update": "Erro ao atualizar conteúdo.",
-  "error.delete": "Erro ao excluir conteúdo."
+  "error.delete": "Erro ao excluir conteúdo.",
+  "form.error.external_url_invalid": "Informe uma URL começando com http:// ou https://"
 }

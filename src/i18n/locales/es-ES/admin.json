@@ -4,7 +4,6 @@
   "tab.version": "Versión de la app",
   "tab.audit": "Auditoría y accesos",
   "tab.users": "Usuarios",
-
   "version.title": "Control de versión de la app",
   "version.subtitle": "Define la versión más reciente y la mínima admitida por plataforma. Cambiar la versión mínima fuerza la actualización en la aplicación.",
   "version.platform": "Plataforma",
@@ -29,7 +28,6 @@
   "version.toast.success.description": "Se ha guardado la configuración de versión.",
   "version.toast.error.title": "Error al guardar la versión",
   "version.toast.error.description": "No se pudo guardar la versión. Inténtalo de nuevo.",
-
   "audit.title": "Auditoría y accesos",
   "audit.subtitle": "Consulta el registro de accesos (inicio/cierre de sesión) y la auditoría de operaciones de negocio.",
   "audit.tab.access": "Accesos",
@@ -59,7 +57,6 @@
   "audit.column.channel": "Canal",
   "audit.column.result": "Resultado",
   "audit.column.ip": "IP",
-
   "users.title": "Usuarios",
   "users.subtitle": "Gestiona los usuarios administradores y bibliotecarios del sistema.",
   "users.search.placeholder": "Busca por correo electrónico",
@@ -93,5 +90,22 @@
   "users.toast.deleted.title": "Usuario eliminado",
   "users.toast.deleted.description": "El usuario se ha eliminado correctamente.",
   "users.toast.error.title": "Error",
-  "users.toast.error.description": "No se pudo completar la operación. Inténtalo de nuevo."
+  "users.toast.error.description": "No se pudo completar la operación. Inténtalo de nuevo.",
+  "users.column.status": "Situación",
+  "users.state.ok": "Activa",
+  "users.state.inactive": "Desactivada",
+  "users.state.locked": "Bloqueada",
+  "users.status.section": "Acceso de la cuenta",
+  "users.status.active.title": "Cuenta activa",
+  "users.status.active.description": "Desactive cuando la persona deje la escuela. Sus tokens se revocan de inmediato.",
+  "users.status.locked.title": "Bloqueo de seguridad",
+  "users.status.locked.description": "Actívelo ante sospecha de uso indebido. Es independiente de que la cuenta esté activa.",
+  "users.toast.status.title": "Situación actualizada",
+  "users.toast.status.description": "El acceso de la cuenta ha sido modificado.",
+  "users.toast.status.error.title": "Situación sin cambios",
+  "users.toast.status.error.description": "No se pudo cambiar el acceso de esta cuenta.",
+  "audit.filter.target": "Objetivo",
+  "audit.filter.target_placeholder": "Id del recurso",
+  "audit.target.none": "sin objetivo",
+  "audit.target.none_hint": "Este evento no declara objetivo — la búsqueda en el catálogo, por ejemplo."
 }

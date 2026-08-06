@@ -66,5 +66,6 @@
   "form.error.title_required": "शीर्षक आवश्यक है",
   "error.create": "सामग्री प्रकाशित करने में त्रुटि।",
   "error.update": "सामग्री अद्यतन करने में त्रुटि।",
-  "error.delete": "सामग्री हटाने में त्रुटि।"
+  "error.delete": "सामग्री हटाने में त्रुटि।",
+  "form.error.external_url_invalid": "http:// या https:// से शुरू होने वाला URL दर्ज करें"
 }

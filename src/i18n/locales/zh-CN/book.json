@@ -130,5 +130,21 @@
   "error.delete": "删除图书时出错。",
   "error.copy.create": "登记复本时出错，请检查该复本编号是否已存在。",
   "error.copy.update": "更新复本时出错。",
-  "error.copy.delete": "删除复本时出错。"
+  "error.copy.delete": "删除复本时出错。",
+  "button.interest": "需求",
+  "interest.eyebrow": "采购",
+  "interest.title": "读者需求",
+  "interest.subtitle": "每种图书有多少读者想借，与图书馆实际可借的数量对照。不显示是谁点的喜欢。",
+  "interest.filter.unmet_only": "仅显示无可借复本",
+  "interest.filter.unmet_only_hint": "采购队列：今天谁都借不到的书。",
+  "interest.column.book": "图书",
+  "interest.column.wanted": "想借人数",
+  "interest.column.copies": "复本数",
+  "interest.column.available": "可借",
+  "interest.column.state": "状态",
+  "interest.state.none": "馆藏缺失",
+  "interest.state.all_out": "全部借出",
+  "interest.state.ok": "可满足",
+  "interest.empty.unmet": "读者想借的书都有可借复本。",
+  "interest.empty.all": "还没有读者对任何图书表示兴趣。"
 }

@@ -130,5 +130,21 @@
   "error.delete": "Error deleting the book.",
   "error.copy.create": "Error registering the copy. Check whether the copy code already exists.",
   "error.copy.update": "Error updating the copy.",
-  "error.copy.delete": "Error deleting the copy."
+  "error.copy.delete": "Error deleting the copy.",
+  "button.interest": "INTEREST",
+  "interest.eyebrow": "Acquisition",
+  "interest.title": "Reader interest",
+  "interest.subtitle": "How many readers want each title, crossed with what the library can actually lend. Without identifying who liked it.",
+  "interest.filter.unmet_only": "Only with no copy available",
+  "interest.filter.unmet_only_hint": "The purchase queue: what nobody can borrow today.",
+  "interest.column.book": "Book",
+  "interest.column.wanted": "Wanted by",
+  "interest.column.copies": "Copies",
+  "interest.column.available": "Available",
+  "interest.column.state": "Status",
+  "interest.state.none": "Not in catalogue",
+  "interest.state.all_out": "All on loan",
+  "interest.state.ok": "Covered",
+  "interest.empty.unmet": "Every book readers want has a copy available.",
+  "interest.empty.all": "No reader has shown interest in a book yet."
 }

@@ -4,7 +4,6 @@
   "tab.version": "App Version",
   "tab.audit": "Audit & Access",
   "tab.users": "Users",
-
   "version.title": "App version control",
   "version.subtitle": "Set the latest and minimum supported version per platform. Changing the minimum version forces an update in the app.",
   "version.platform": "Platform",
@@ -29,7 +28,6 @@
   "version.toast.success.description": "The version settings have been saved.",
   "version.toast.error.title": "Failed to save version",
   "version.toast.error.description": "Could not save the version. Please try again.",
-
   "audit.title": "Audit & Access",
   "audit.subtitle": "Browse the access trail (login/logout) and the business operations audit.",
   "audit.tab.access": "Access",
@@ -59,7 +57,6 @@
   "audit.column.channel": "Channel",
   "audit.column.result": "Result",
   "audit.column.ip": "IP",
-
   "users.title": "Users",
   "users.subtitle": "Manage the system's administrator and librarian users.",
   "users.search.placeholder": "Search by email",
@@ -93,5 +90,22 @@
   "users.toast.deleted.title": "User deleted",
   "users.toast.deleted.description": "The user was removed successfully.",
   "users.toast.error.title": "Error",
-  "users.toast.error.description": "The operation could not be completed. Please try again."
+  "users.toast.error.description": "The operation could not be completed. Please try again.",
+  "users.column.status": "Status",
+  "users.state.ok": "Active",
+  "users.state.inactive": "Deactivated",
+  "users.state.locked": "Locked",
+  "users.status.section": "Account access",
+  "users.status.active.title": "Account active",
+  "users.status.active.description": "Turn off when the person leaves the school. Their tokens are revoked immediately.",
+  "users.status.locked.title": "Security lock",
+  "users.status.locked.description": "Turn on when you suspect misuse. It is independent of the account being active.",
+  "users.toast.status.title": "Status updated",
+  "users.toast.status.description": "Account access has been changed.",
+  "users.toast.status.error.title": "Status unchanged",
+  "users.toast.status.error.description": "Could not change access for this account.",
+  "audit.filter.target": "Target",
+  "audit.filter.target_placeholder": "Resource id",
+  "audit.target.none": "no target",
+  "audit.target.none_hint": "This event declares no target — a catalogue search, for instance."
 }

@@ -15,6 +15,13 @@ export interface RegistroAcesso {
   evento: string;
   canal: AccessChannel;
   resultado: AuditResult;
+  /**
+   * Recurso do evento. Em `ACCESS_DENIED` é o que a pessoa tentou acessar sem
+   * poder — é a linha que denuncia tentativa de IDOR. Em `BOOK_VIEWED` /
+   * `CONTENT_VIEWED` é o item aberto. Em `CATALOG_SEARCH` é vazio **por
+   * projeto**: a rota não declara alvo.
+   */
+  alvoId: string;
   ip: string;
   userAgent: string;
   correlationId: string;
@@ -41,6 +48,7 @@ export interface AccessLogFilters {
   resultado?: string;
   ator?: string;
   ip?: string;
+  alvo?: string;
   from?: string;
   to?: string;
   page?: number;
@@ -64,6 +72,7 @@ const mapAccessLog = (item: Record<string, unknown>): RegistroAcesso => ({
   evento: (item.event as string) ?? '',
   canal: (item.channel as string) ?? '',
   resultado: (item.result as string) ?? '',
+  alvoId: (item.targetId as string) ?? '',
   ip: (item.ipAddress as string) ?? '',
   userAgent: (item.userAgent as string) ?? '',
   correlationId: (item.correlationId as string) ?? '',
@@ -102,6 +111,7 @@ export const buscarAccessLogs = async (
       result: clean(filters.resultado),
       actor: clean(filters.ator),
       ip: clean(filters.ip),
+      target: clean(filters.alvo),
       from: toIsoStart(filters.from),
       to: toIsoEnd(filters.to),
       page: filters.page ?? 0,

@@ -318,7 +318,14 @@ export function ContentForm({
         {/* Link externo */}
         <div>
           <Label htmlFor="externalUrl">{t('form.field.externalUrl')}</Label>
-          <Input id="externalUrl" {...register('externalUrl')} disabled={readOnly} />
+          {/* O zod recusa URL malformada; sem repassar o erro ao `Input` o
+              clique em salvar não fazia nada e a tela não dizia por quê. */}
+          <Input
+            id="externalUrl"
+            {...register('externalUrl')}
+            error={errors.externalUrl?.message && t(errors.externalUrl.message)}
+            disabled={readOnly}
+          />
         </div>
 
         {/* Documento PDF (anexo, trabalho) */}

@@ -36,9 +36,20 @@ const ADDRESS_FIELDS: (keyof ReaderFormData)[] = [
   'complemento',
 ];
 
+/**
+ * O detalhe do leitor (`GET /api/readers/{matricula}`) devolve **só os nomes**
+ * de curso/turno/módulo — os ids não estão no contrato. Por isso o formulário
+ * também aceita os nomes: é a partir deles que os selects reencontram o id.
+ */
+type ReaderFormInitialData = Partial<ReaderFormData> & {
+  cursoNome?: string;
+  turnoNome?: string;
+  moduloNome?: string;
+};
+
 interface ReaderFormProps {
   formId: string;
-  initialData?: Partial<ReaderFormData>;
+  initialData?: ReaderFormInitialData;
   readOnly?: boolean;
   onSubmit: (data: ReaderFormData, avatarFile: File | null) => void;
   isSubmitting?: boolean;
@@ -65,24 +76,27 @@ export function ReaderForm({
   const { data: modulosList } = useModulos();
   const { data: turnosList } = useTurnos();
 
-  const cursosOptions = (cursosList || []).map((c) => ({
-    label: c.nome,
-    value: c.id,
-  }));
-  const modulosOptions = (modulosList || []).map((m) => ({
-    label: m.nome,
-    value: m.id,
-  }));
-  const turnoOptions = (turnosList || []).map((t) => ({
-    label: t.nome,
-    value: t.id,
-  }));
+  // Memorizadas porque alimentam o efeito que casa nome→id abaixo: recriar os
+  // arrays a cada render faria o efeito rodar em laço.
+  const cursosOptions = useMemo(
+    () => (cursosList || []).map((c) => ({ label: c.nome, value: c.id })),
+    [cursosList],
+  );
+  const modulosOptions = useMemo(
+    () => (modulosList || []).map((m) => ({ label: m.nome, value: m.id })),
+    [modulosList],
+  );
+  const turnoOptions = useMemo(
+    () => (turnosList || []).map((s) => ({ label: s.nome, value: s.id })),
+    [turnosList],
+  );
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    getValues,
     reset,
     formState: { errors },
   } = useForm<ReaderFormData>({
@@ -95,6 +109,45 @@ export function ReaderForm({
       reset(initialData);
     }
   }, [initialData, reset]);
+
+  // Reencontra o id de curso/turno/módulo pelo nome que veio no detalhe.
+  //
+  // Sem isto o `initialData` chega com id 0 (o mapper não tem de onde tirar),
+  // nenhuma opção casa e os três selects mostram "Selecione" no modo leitura —
+  // como se o leitor não tivesse turma. Na edição era pior: salvar sem tocar
+  // nos campos reenviaria 0.
+  useEffect(() => {
+    const semValor = (value: unknown) =>
+      value === undefined ||
+      value === null ||
+      value === '' ||
+      value === 0 ||
+      value === '0';
+
+    const casarPorNome = (
+      options: Array<{ label: string; value: number }>,
+      nome?: string,
+    ) => (nome ? options.find((option) => option.label === nome)?.value : undefined);
+
+    const pares = [
+      ['cursoId', casarPorNome(cursosOptions, initialData?.cursoNome)],
+      ['turnoId', casarPorNome(turnoOptions, initialData?.turnoNome)],
+      ['moduloId', casarPorNome(modulosOptions, initialData?.moduloNome)],
+    ] as const;
+
+    for (const [campo, id] of pares) {
+      if (id !== undefined && semValor(getValues(campo))) {
+        setValue(campo, id);
+      }
+    }
+  }, [
+    initialData,
+    cursosOptions,
+    turnoOptions,
+    modulosOptions,
+    getValues,
+    setValue,
+  ]);
 
   // Reseta a aba/preview ao (re)abrir para um leitor diferente.
   useEffect(() => {

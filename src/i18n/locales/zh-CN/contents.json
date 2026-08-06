@@ -66,5 +66,6 @@
   "form.error.title_required": "标题为必填项",
   "error.create": "发布内容出错。",
   "error.update": "更新内容出错。",
-  "error.delete": "删除内容出错。"
+  "error.delete": "删除内容出错。",
+  "form.error.external_url_invalid": "请输入以 http:// 或 https:// 开头的网址"
 }

@@ -90,5 +90,22 @@
   "users.toast.deleted.title": "用户已删除",
   "users.toast.deleted.description": "用户已成功移除。",
   "users.toast.error.title": "错误",
-  "users.toast.error.description": "操作未能完成，请重试。"
+  "users.toast.error.description": "操作未能完成，请重试。",
+  "users.column.status": "状态",
+  "users.state.ok": "启用",
+  "users.state.inactive": "已停用",
+  "users.state.locked": "已锁定",
+  "users.status.section": "账号访问",
+  "users.status.active.title": "账号启用",
+  "users.status.active.description": "当此人离开学校时关闭。其令牌会立即失效。",
+  "users.status.locked.title": "安全锁定",
+  "users.status.locked.description": "怀疑账号被滥用时开启。与账号是否启用互不影响。",
+  "users.toast.status.title": "状态已更新",
+  "users.toast.status.description": "该账号的访问权限已更改。",
+  "users.toast.status.error.title": "状态未更改",
+  "users.toast.status.error.description": "无法更改此账号的访问权限。",
+  "audit.filter.target": "目标",
+  "audit.filter.target_placeholder": "资源 ID",
+  "audit.target.none": "无目标",
+  "audit.target.none_hint": "该事件不声明目标——例如馆藏检索。"
 }

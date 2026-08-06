@@ -61,5 +61,12 @@
   "language.title": "Idioma",
   "language.description": "Escolha o idioma da interface.",
   "language.pt_br": "Português (Brasil)",
-  "language.en_us": "English (US)"
+  "language.en_us": "English (US)",
+  "guest_access.title": "Modo convidado no app",
+  "guest_access.description": "Mostra ou esconde a entrada como convidado no aplicativo. O catálogo público continua acessível pelo site — é a vitrine da biblioteca.",
+  "guest_access.toggle_aria": "Ativar modo convidado no aplicativo",
+  "guest_access.success.title": "Modo convidado atualizado",
+  "guest_access.success.description": "A preferência foi salva e vale no próximo acesso ao aplicativo.",
+  "guest_access.error.title": "Erro ao salvar",
+  "guest_access.error.description": "Não foi possível alterar o modo convidado. Tente novamente."
 }

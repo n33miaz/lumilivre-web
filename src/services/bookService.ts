@@ -72,6 +72,24 @@ export interface CddItem {
   nome: string;
 }
 
+/**
+ * Linha do indicador de interesse: quantos leitores querem o título cruzado
+ * com quantos exemplares existem e quantos estão livres.
+ *
+ * O agregado é o contrato inteiro **de propósito**: interesse é comportamento
+ * de menor de idade e a API não expõe quem curtiu. A decisão de compra se toma
+ * pela contagem, não pelos nomes.
+ */
+export interface ResumoInteresse {
+  livroId: string;
+  titulo: string;
+  autor: string;
+  capaUrl: string;
+  interessados: number;
+  exemplares: number;
+  disponiveis: number;
+}
+
 export interface LivroDetalhado extends Omit<LivroPayload, 'generos'> {
   id?: string;
   generos: string[];
@@ -332,6 +350,35 @@ export const buscarLivroPorId = async (id: number | string) => {
     ...response,
     data: toLivroDetalhado(response.data),
   };
+};
+
+const toResumoInteresse = (item: Record<string, unknown>): ResumoInteresse => ({
+  livroId: String(item.bookId ?? ''),
+  titulo: (item.title as string) ?? '',
+  autor: (item.author as string) ?? '',
+  capaUrl: (item.coverUrl as string) ?? '',
+  interessados: Number(item.interestCount ?? 0),
+  exemplares: Number(item.totalCopies ?? 0),
+  disponiveis: Number(item.availableCopies ?? 0),
+});
+
+/**
+ * Indicador de interesse do acervo (ADMIN/LIBRARIAN).
+ *
+ * `apenasSemDisponivel` traz só o que ninguém consegue pegar emprestado — é a
+ * fila de compra. Não mandamos `sort`: a consulta tem ordem própria (mais
+ * querido primeiro, desempate pelo que a biblioteca menos consegue atender) e a
+ * rota ignora o parâmetro.
+ */
+export const buscarResumoInteresse = async (
+  apenasSemDisponivel: boolean,
+  page = 0,
+  size = 10,
+): Promise<Page<ResumoInteresse>> => {
+  const response = await api.get('/api/books/interests/summary', {
+    params: { unmetOnly: apenasSemDisponivel, page, size },
+  });
+  return mapPage(response.data, toResumoInteresse);
 };
 
 export const buscarCdds = async (): Promise<CddItem[]> => {

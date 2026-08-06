@@ -61,5 +61,12 @@
   "language.title": "Idioma",
   "language.description": "Elige el idioma de la interfaz.",
   "language.pt_br": "Português (Brasil)",
-  "language.en_us": "English (US)"
+  "language.en_us": "English (US)",
+  "guest_access.title": "Modo invitado en la app",
+  "guest_access.description": "Muestra u oculta el acceso como invitado en la aplicación. El catálogo público sigue accesible desde el sitio — es el escaparate de la biblioteca.",
+  "guest_access.toggle_aria": "Activar modo invitado en la aplicación",
+  "guest_access.success.title": "Modo invitado actualizado",
+  "guest_access.success.description": "La preferencia se guardó y se aplica en el próximo acceso a la aplicación.",
+  "guest_access.error.title": "Error al guardar",
+  "guest_access.error.description": "No se pudo cambiar el modo invitado. Inténtelo de nuevo."
 }

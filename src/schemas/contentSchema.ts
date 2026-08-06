@@ -9,12 +9,14 @@ export const contentSchema = z.object({
   advisors: z.string().optional(),
   completionYear: z.string().optional(),
   completionSemester: z.string().optional(),
-  // Só URL http(s) — vai para o app e é aberta via url_launcher.
+  // Só URL http(s) — vai para o app e é aberta via url_launcher. A mensagem é
+  // **chave** de i18n como as demais: o literal `'url'` chegava cru ao `t()` e
+  // apareceria como a palavra "url" no lugar da explicação.
   externalUrl: z
     .string()
     .trim()
-    .url('url')
-    .regex(/^https?:\/\//i, 'url')
+    .url('form.error.external_url_invalid')
+    .regex(/^https?:\/\//i, 'form.error.external_url_invalid')
     .optional()
     .or(z.literal('')),
   // Visibilidade

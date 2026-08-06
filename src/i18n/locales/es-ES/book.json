@@ -130,5 +130,21 @@
   "error.delete": "Error al eliminar el libro.",
   "error.copy.create": "Error al registrar el ejemplar. Comprueba si el código ya existe.",
   "error.copy.update": "Error al actualizar el ejemplar.",
-  "error.copy.delete": "Error al eliminar el ejemplar."
+  "error.copy.delete": "Error al eliminar el ejemplar.",
+  "button.interest": "INTERÉS",
+  "interest.eyebrow": "Adquisición",
+  "interest.title": "Interés de los lectores",
+  "interest.subtitle": "Cuántos lectores quieren cada título, cruzado con lo que la biblioteca puede prestar. Sin identificar a quién le gustó.",
+  "interest.filter.unmet_only": "Solo sin ejemplar disponible",
+  "interest.filter.unmet_only_hint": "La cola de compra: lo que hoy nadie puede llevarse prestado.",
+  "interest.column.book": "Libro",
+  "interest.column.wanted": "Lo quieren",
+  "interest.column.copies": "Ejemplares",
+  "interest.column.available": "Disponibles",
+  "interest.column.state": "Situación",
+  "interest.state.none": "No lo tenemos",
+  "interest.state.all_out": "Todos prestados",
+  "interest.state.ok": "Atendido",
+  "interest.empty.unmet": "Ningún libro solicitado está sin ejemplar disponible.",
+  "interest.empty.all": "Ningún lector ha mostrado interés por un libro todavía."
 }

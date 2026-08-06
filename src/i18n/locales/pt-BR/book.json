@@ -130,5 +130,21 @@
   "error.delete": "Erro ao excluir livro.",
   "error.copy.create": "Erro ao cadastrar exemplar. Verifique se o tombo já existe.",
   "error.copy.update": "Erro ao atualizar exemplar.",
-  "error.copy.delete": "Erro ao excluir exemplar."
+  "error.copy.delete": "Erro ao excluir exemplar.",
+  "button.interest": "INTERESSE",
+  "interest.eyebrow": "Aquisição",
+  "interest.title": "Interesse dos leitores",
+  "interest.subtitle": "Quantos leitores querem cada título, cruzado com o que a biblioteca consegue emprestar. Sem identificar quem curtiu.",
+  "interest.filter.unmet_only": "Só sem exemplar disponível",
+  "interest.filter.unmet_only_hint": "A fila de compra: o que ninguém consegue pegar emprestado hoje.",
+  "interest.column.book": "Livro",
+  "interest.column.wanted": "Querem",
+  "interest.column.copies": "Exemplares",
+  "interest.column.available": "Disponíveis",
+  "interest.column.state": "Situação",
+  "interest.state.none": "Não temos",
+  "interest.state.all_out": "Todos emprestados",
+  "interest.state.ok": "Atendido",
+  "interest.empty.unmet": "Nenhum livro procurado está sem exemplar disponível.",
+  "interest.empty.all": "Nenhum leitor demonstrou interesse por livros ainda."
 }

@@ -4,6 +4,7 @@ import {
   buscarLivrosAvancado,
   buscarCdds,
   buscarEnum,
+  buscarResumoInteresse,
   type LivroFilterParams,
   buscarLivroPorId,
 } from '../../services/bookService';
@@ -60,6 +61,23 @@ export function useExemplares(livroId: number | string | null) {
     queryFn: () => buscarExemplaresPorLivroId(livroId!),
     enabled: !!livroId,
     staleTime: 1000 * 30,
+  });
+}
+
+export function useResumoInteresse(
+  apenasSemDisponivel: boolean,
+  page: number,
+  size: number,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['interesse-resumo', apenasSemDisponivel, page, size],
+    queryFn: () => buscarResumoInteresse(apenasSemDisponivel, page, size),
+    enabled,
+    placeholderData: keepPreviousData,
+    // O interesse muda no ritmo em que os alunos curtem no app; a decisão de
+    // compra é semanal. Cinco minutos evitam refetch a cada troca de aba.
+    staleTime: 1000 * 60 * 5,
   });
 }
 

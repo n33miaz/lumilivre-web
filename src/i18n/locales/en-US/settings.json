@@ -61,5 +61,12 @@
   "language.title": "Language",
   "language.description": "Choose the interface language.",
   "language.pt_br": "Português (Brasil)",
-  "language.en_us": "English (US)"
+  "language.en_us": "English (US)",
+  "guest_access.title": "Guest mode in the app",
+  "guest_access.description": "Shows or hides the guest entry in the mobile app. The public catalogue stays reachable on the website — it is the library shop window.",
+  "guest_access.toggle_aria": "Enable guest mode in the app",
+  "guest_access.success.title": "Guest mode updated",
+  "guest_access.success.description": "The preference was saved and applies on the next app launch.",
+  "guest_access.error.title": "Could not save",
+  "guest_access.error.description": "Could not change guest mode. Please try again."
 }
