@@ -7,15 +7,20 @@
   --lumi-label: #c964c5;
 }
 
+/* As Noto precisam vir nesta pilha, e nao so no tailwind.config: estas regras
+   sobrescrevem a familia do Tailwind, e sem elas o navegador so tem 'Inter',
+   que nao traz glifo CJK nem devanagari. No Windows passa despercebido porque o
+   sistema empresta YaHei/Nirmala; num host sem essas fontes, mandarim e hindi
+   viram caixas vazias. Os dois hosts do Google ja estao liberados na CSP. */
 html,
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', 'Noto Sans SC', 'Noto Sans Devanagari', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .font-display {
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', 'Noto Sans SC', 'Noto Sans Devanagari', sans-serif;
   letter-spacing: -0.01em;
 }
 
@@ -88,7 +93,7 @@ body {
 
 /* Landing-only helpers (used pela rota publica em /) */
 .landing-root {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', 'Noto Sans SC', 'Noto Sans Devanagari', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
