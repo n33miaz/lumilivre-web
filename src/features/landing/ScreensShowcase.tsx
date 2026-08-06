@@ -21,7 +21,13 @@ const PANEL_ID = 'screens-panel';
 
 /**
  * Vitrine das telas reais do painel — Visão gerencial, Acervo, Empréstimos,
- * Ranking e Relatórios — com troca por fade e reação ao tema claro/escuro.
+ * Interesse e Ranking — com troca por fade e reação ao tema claro/escuro.
+ *
+ * A ordem conta uma história e não é alfabética: o estado da biblioteca, o que
+ * ela tem, o que está circulando, o que falta comprar e o efeito nos alunos.
+ * A Central de Relatórios saiu daqui na regeração dos prints — é um menu de
+ * botões "Gerar", não uma tela em que o sistema esteja fazendo algo; ela ficou
+ * no README, onde quem lê já está disposto a rolar.
  *
  * A troca é sempre manual: um carrossel automático rouba o controle de quem está
  * lendo a legenda. As abas seguem o padrão ARIA de tablist (setas, Home/End,
@@ -36,7 +42,7 @@ export function ScreensShowcase() {
 
   const screens: Screen[] = useMemo(
     () =>
-      (['dashboard', 'books', 'loans', 'ranking', 'reports'] as const).map(
+      (['dashboard', 'books', 'loans', 'interest', 'ranking'] as const).map(
         (key) => ({
           key,
           tab: t(`screens.${key}.tab`),
