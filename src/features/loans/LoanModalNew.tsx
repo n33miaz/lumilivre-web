@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { LoanForm } from './LoanForm';
@@ -11,6 +13,7 @@ interface LoanModalNewProps {
 }
 
 export function LoanModalNew({ onClose, onSuccess }: LoanModalNewProps) {
+  const { t } = useTranslation('loan');
   const { mutateAsync: createLoan, isPending } = useCreateLoan();
 
   const handleSubmit = async (data: LoanFormData) => {
@@ -42,7 +45,7 @@ export function LoanModalNew({ onClose, onSuccess }: LoanModalNewProps) {
           isLoading={isPending}
           className="w-full"
         >
-          CONFIRMAR EMPRÉSTIMO
+          {t('button.submit')}
         </Button>
       </Modal.Footer>
     </>

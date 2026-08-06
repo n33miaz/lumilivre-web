@@ -25,5 +25,6 @@
   "chart.empty": "No readers found with the selected filters.",
   "tooltip.books": "Books",
   "tooltip.total_loans": "Total Loans",
-  "books_count": "{{count}} books"
+  "books_count": "{{count}} books",
+  "page.eyebrow": "Engagement"
 }

@@ -133,7 +133,7 @@ function ChartError({
           onClick={onRetry}
           className="mt-1 px-3 h-8 rounded-lg border border-red-300 dark:border-red-500/40 text-red-600 dark:text-red-300 text-xs font-bold hover:bg-red-50 dark:hover:bg-red-500/10"
         >
-          {retryLabel ?? 'Tentar novamente'}
+          {retryLabel}
         </button>
       )}
     </div>

@@ -23,29 +23,29 @@ interface ProcessRequestVariables {
 export const useCreateLoan = createMutationHook<unknown, EmprestimoPayload>({
   mutationFn: (payload) => cadastrarEmprestimo(payload),
   queryKey: LOAN_QUERY_KEY,
-  successMessage: 'Empréstimo realizado com sucesso!',
-  errorMessage: 'Erro ao realizar empréstimo.',
+  successMessage: 'loan:toast.created',
+  errorMessage: 'loan:error.create',
 });
 
 export const useUpdateLoan = createMutationHook<unknown, UpdateLoanVariables>({
   mutationFn: ({ id, payload }) => atualizarEmprestimo(id, payload),
   queryKey: LOAN_QUERY_KEY,
-  successMessage: 'Empréstimo atualizado com sucesso!',
-  errorMessage: 'Erro ao atualizar empréstimo.',
+  successMessage: 'loan:toast.updated',
+  errorMessage: 'loan:error.update',
 });
 
 export const useCompleteLoan = createMutationHook<unknown, string>({
   mutationFn: (id) => concluirEmprestimo(id),
   queryKey: LOAN_QUERY_KEY,
-  successMessage: 'Devolução registrada com sucesso!',
-  errorMessage: 'Erro ao registrar devolução.',
+  successMessage: 'loan:toast.returned',
+  errorMessage: 'loan:error.return',
 });
 
 export const useDeleteLoan = createMutationHook<unknown, string>({
   mutationFn: (id) => excluirEmprestimo(id),
   queryKey: LOAN_QUERY_KEY,
-  successMessage: 'Empréstimo excluído com sucesso!',
-  errorMessage: 'Erro ao excluir empréstimo.',
+  successMessage: 'loan:toast.deleted',
+  errorMessage: 'loan:error.delete',
 });
 
 export const useProcessLoanRequest = createMutationHook<
@@ -54,6 +54,6 @@ export const useProcessLoanRequest = createMutationHook<
 >({
   mutationFn: ({ id, aceitar }) => processarSolicitacao(id, aceitar),
   queryKey: DASHBOARD_SOLICITACOES_KEY,
-  successMessage: 'Solicitação processada com sucesso!',
-  errorMessage: 'Falha ao processar solicitação.',
+  successMessage: 'loan:toast.request_processed',
+  errorMessage: 'loan:error.process_request',
 });

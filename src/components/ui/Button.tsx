@@ -1,4 +1,5 @@
 import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'action' | 'ghost';
@@ -10,12 +11,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function Button({
   variant = 'primary',
   isLoading = false,
-  loadingText = 'Carregando...',
+  loadingText,
   className = '',
   disabled,
   children,
   ...props
 }: ButtonProps) {
+  const { t } = useTranslation('common');
   const baseStyles =
     'flex items-center justify-center font-bold rounded-lg shadow-md transform active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none';
 
@@ -39,7 +41,7 @@ export function Button({
       {isLoading && (
         <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2 shrink-0" />
       )}
-      {isLoading ? loadingText : children}
+      {isLoading ? (loadingText ?? t('loading')) : children}
     </button>
   );
 }

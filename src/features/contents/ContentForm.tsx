@@ -176,8 +176,8 @@ export function ContentForm({
     if (file.type !== 'application/pdf') {
       addToast({
         type: 'warning',
-        title: 'Formato inválido',
-        description: 'Selecione um arquivo PDF.',
+        title: t('toast.invalid_format.title'),
+        description: t('toast.invalid_format.description'),
       });
       return;
     }
@@ -252,7 +252,7 @@ export function ContentForm({
             <Input
               id="title"
               {...register('title')}
-              error={errors.title?.message}
+              error={errors.title?.message && t(errors.title.message)}
               disabled={readOnly}
             />
           </div>

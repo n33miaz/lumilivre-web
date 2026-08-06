@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 
 import { buscarLivrosParaAdmin } from '../../services/bookService';
 import { buscarLivroPorIsbn } from '../../services/googleBooksService';
@@ -9,7 +10,11 @@ import {
   useCdds,
   useEnum,
 } from '../../hooks/queries/useBookQueries';
-import { bookSchema, type BookFormData } from '../../schemas/bookSchema';
+import {
+  bookSchema,
+  MIN_ISBN_LENGTH,
+  type BookFormData,
+} from '../../schemas/bookSchema';
 
 import { Label } from '../../components/ui/Label';
 import { Input } from '../../components/ui/Input';
@@ -87,6 +92,7 @@ export function BookForm({
   readOnly = false,
   onSubmit,
 }: BookFormProps) {
+  const { t } = useTranslation('book');
   const [capaFile, setCapaFile] = useState<File | null>(null);
   const [isBuscandoIsbn, setIsBuscandoIsbn] = useState(false);
 
@@ -132,10 +138,10 @@ export function BookForm({
   const cddOptions = useMemo(
     () =>
       cddData?.map((c) => ({
-        label: `${c.id} - ${c.nome}`,
+        label: t('cdd.option', { code: c.id, name: c.nome }),
         value: String(c.id),
       })) || [],
-    [cddData],
+    [cddData, t],
   );
   const generosOptions = useMemo(
     () => generosData?.map((g) => ({ label: g.nome, value: g.nome })) || [],
@@ -221,6 +227,11 @@ export function BookForm({
     }
   };
 
+  // O zod devolve **chave** de i18n (ver `bookSchema`); a tradução acontece
+  // aqui, junto com os valores que saíram das frases (ex.: tamanho do ISBN).
+  const fieldError = (message?: string, values?: Record<string, unknown>) =>
+    message ? t(message, values) : undefined;
+
   const toggleActionStyles =
     'text-xs text-lumi-primary dark:text-lumi-label cursor-pointer hover:underline font-bold rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary';
 
@@ -236,22 +247,24 @@ export function BookForm({
           currentImage={initialData?.imagem}
           onImageChange={setCapaFile}
           readOnly={readOnly}
-          placeholderText={isBuscandoIsbn ? 'Buscando...' : 'Capa do Livro'}
+          placeholderText={
+            isBuscandoIsbn
+              ? t('form.cover.searching')
+              : t('form.cover.placeholder')
+          }
         />
         <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
-          {readOnly
-            ? 'Capa do livro'
-            : 'Envie a capa do livro (opcional). JPG ou PNG.'}
+          {readOnly ? t('form.cover.readonly') : t('form.cover.hint')}
         </p>
       </div>
 
       {/* Coluna principal: campos agrupados por seção. */}
       <div className="w-full md:w-[72%] space-y-6">
-        <FormSection title="Identificação">
+        <FormSection title={t('form.section.identification')}>
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12 sm:col-span-4">
               <Label htmlFor="isbn" requiredIndicator={!readOnly}>
-                ISBN
+                {t('form.field.isbn')}
               </Label>
               <div className="relative">
                 <Input
@@ -261,7 +274,9 @@ export function BookForm({
                   disabled={readOnly || !!initialData?.isbn}
                   {...register('isbn')}
                   onBlur={handleIsbnBlur}
-                  error={errors.isbn?.message}
+                  error={fieldError(errors.isbn?.message, {
+                    min: MIN_ISBN_LENGTH,
+                  })}
                 />
                 {isBuscandoIsbn && (
                   <span className="pointer-events-none absolute right-2.5 top-[11px] text-lumi-primary dark:text-lumi-label">
@@ -271,19 +286,19 @@ export function BookForm({
               </div>
               {isBuscandoIsbn && (
                 <span className="mt-1 block text-xs text-lumi-primary dark:text-lumi-label animate-fade-in">
-                  Buscando dados no Google Books…
+                  {t('form.isbn.lookup')}
                 </span>
               )}
             </div>
             <div className="col-span-12 sm:col-span-8">
               <Label htmlFor="nome" requiredIndicator={!readOnly}>
-                Título do Livro
+                {t('form.field.book_title')}
               </Label>
               <Input
                 id="nome"
                 disabled={readOnly}
                 {...register('nome')}
-                error={errors.nome?.message}
+                error={fieldError(errors.nome?.message)}
               />
             </div>
           </div>
@@ -292,7 +307,7 @@ export function BookForm({
             <div className="col-span-12 sm:col-span-6">
               <div className="flex justify-between items-center mb-1 gap-2">
                 <Label className="mb-0" requiredIndicator={!readOnly}>
-                  Autor
+                  {t('form.field.author')}
                 </Label>
                 {!readOnly && (
                   <button
@@ -301,16 +316,18 @@ export function BookForm({
                     className={toggleActionStyles}
                     aria-pressed={isNovoAutor}
                   >
-                    {isNovoAutor ? 'Selecionar existente' : '+ Novo autor'}
+                    {isNovoAutor
+                      ? t('form.author.toggle_existing')
+                      : t('form.author.toggle_new')}
                   </button>
                 )}
               </div>
               {readOnly || isNovoAutor ? (
                 <Input
                   disabled={readOnly}
-                  placeholder="Digite o nome do autor"
+                  placeholder={t('form.author.placeholder')}
                   {...register('autor')}
-                  error={errors.autor?.message}
+                  error={fieldError(errors.autor?.message)}
                 />
               ) : (
                 <Controller
@@ -322,11 +339,11 @@ export function BookForm({
                         value={field.value}
                         onChange={field.onChange}
                         options={autoresOptions}
-                        placeholder="Selecione o autor"
+                        placeholder={t('form.author.select')}
                       />
                       {errors.autor && (
                         <span className="text-xs text-red-500 mt-1 block">
-                          {errors.autor.message}
+                          {fieldError(errors.autor.message)}
                         </span>
                       )}
                     </div>
@@ -338,7 +355,7 @@ export function BookForm({
             <div className="col-span-12 sm:col-span-6">
               <div className="flex justify-between items-center mb-1 gap-2">
                 <Label className="mb-0" requiredIndicator={!readOnly}>
-                  Editora
+                  {t('form.field.publisher')}
                 </Label>
                 {!readOnly && (
                   <button
@@ -347,16 +364,18 @@ export function BookForm({
                     className={toggleActionStyles}
                     aria-pressed={isNovaEditora}
                   >
-                    {isNovaEditora ? 'Selecionar existente' : '+ Nova editora'}
+                    {isNovaEditora
+                      ? t('form.publisher.toggle_existing')
+                      : t('form.publisher.toggle_new')}
                   </button>
                 )}
               </div>
               {readOnly || isNovaEditora ? (
                 <Input
                   disabled={readOnly}
-                  placeholder="Digite a editora"
+                  placeholder={t('form.publisher.placeholder')}
                   {...register('editora')}
-                  error={errors.editora?.message}
+                  error={fieldError(errors.editora?.message)}
                 />
               ) : (
                 <Controller
@@ -368,11 +387,11 @@ export function BookForm({
                         value={field.value}
                         onChange={field.onChange}
                         options={editorasOptions}
-                        placeholder="Selecione a editora"
+                        placeholder={t('form.publisher.select')}
                       />
                       {errors.editora && (
                         <span className="text-xs text-red-500 mt-1 block">
-                          {errors.editora.message}
+                          {fieldError(errors.editora.message)}
                         </span>
                       )}
                     </div>
@@ -383,16 +402,18 @@ export function BookForm({
           </div>
         </FormSection>
 
-        <FormSection title="Classificação">
+        <FormSection title={t('form.section.classification')}>
           <div>
-            <Label requiredIndicator={!readOnly}>Gêneros</Label>
+            <Label requiredIndicator={!readOnly}>
+              {t('form.field.genres')}
+            </Label>
             {!readOnly && (
               <div className="mb-2">
                 <SearchableSelect
                   value=""
                   onChange={handleAddGenero}
                   options={generosOptions}
-                  placeholder="Selecione para adicionar..."
+                  placeholder={t('form.genres.add')}
                 />
               </div>
             )}
@@ -409,7 +430,7 @@ export function BookForm({
                     <button
                       type="button"
                       onClick={() => removeGenero(g)}
-                      aria-label={`Remover gênero ${g}`}
+                      aria-label={t('form.genres.remove_aria', { genre: g })}
                       className="ml-1 hover:bg-red-200 rounded-full p-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-primary"
                     >
                       <img
@@ -423,20 +444,20 @@ export function BookForm({
               ))}
               {(!generosSelecionados || generosSelecionados.length === 0) && (
                 <span className="text-xs text-gray-400 italic self-center">
-                  Nenhum gênero selecionado
+                  {t('form.genres.empty')}
                 </span>
               )}
             </div>
             {errors.generos && (
               <span className="text-xs text-red-500 mt-1 block">
-                {errors.generos.message}
+                {fieldError(errors.generos.message)}
               </span>
             )}
           </div>
 
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-12 sm:col-span-4">
-              <Label>CDD</Label>
+              <Label>{t('form.field.cdd')}</Label>
               {readOnly ? (
                 <Input disabled {...register('cdd')} />
               ) : (
@@ -448,14 +469,16 @@ export function BookForm({
                       value={field.value || ''}
                       onChange={field.onChange}
                       options={cddOptions}
-                      placeholder="Buscar..."
+                      placeholder={t('common:placeholder.search')}
                     />
                   )}
                 />
               )}
             </div>
             <div className="col-span-12 sm:col-span-4">
-              <Label requiredIndicator={!readOnly}>Classificação etária</Label>
+              <Label requiredIndicator={!readOnly}>
+                {t('form.field.age_classification')}
+              </Label>
               {readOnly ? (
                 <Input disabled {...register('classificacao_etaria')} />
               ) : (
@@ -468,11 +491,11 @@ export function BookForm({
                         value={field.value}
                         onChange={field.onChange}
                         options={classificacaoOptions}
-                        placeholder="Selecione"
+                        placeholder={t('common:placeholder.select')}
                       />
                       {errors.classificacao_etaria && (
                         <span className="text-xs text-red-500 mt-1 block">
-                          {errors.classificacao_etaria.message}
+                          {fieldError(errors.classificacao_etaria.message)}
                         </span>
                       )}
                     </div>
@@ -481,7 +504,7 @@ export function BookForm({
               )}
             </div>
             <div className="col-span-12 sm:col-span-4">
-              <Label>Tipo de capa</Label>
+              <Label>{t('form.field.cover_type')}</Label>
               {readOnly ? (
                 <Input disabled {...register('tipo_capa')} />
               ) : (
@@ -493,7 +516,7 @@ export function BookForm({
                       value={field.value || ''}
                       onChange={field.onChange}
                       options={tipoCapaOptions}
-                      placeholder="Selecione"
+                      placeholder={t('common:placeholder.select')}
                     />
                   )}
                 />
@@ -502,14 +525,14 @@ export function BookForm({
           </div>
         </FormSection>
 
-        <FormSection title="Publicação">
+        <FormSection title={t('form.section.publication')}>
           <div className="grid grid-cols-12 gap-4">
             <div className="col-span-6 sm:col-span-4">
-              <Label htmlFor="edicao">Edição</Label>
+              <Label htmlFor="edicao">{t('form.field.edition')}</Label>
               <Input id="edicao" disabled={readOnly} {...register('edicao')} />
             </div>
             <div className="col-span-6 sm:col-span-4">
-              <Label htmlFor="volume">Volume</Label>
+              <Label htmlFor="volume">{t('form.field.volume')}</Label>
               <Input
                 id="volume"
                 type="number"
@@ -523,7 +546,7 @@ export function BookForm({
                 control={control}
                 render={({ field }) => (
                   <CustomDatePicker
-                    label="Lançamento"
+                    label={t('form.field.release')}
                     value={field.value}
                     onChange={field.onChange}
                     disabled={readOnly}
@@ -534,9 +557,9 @@ export function BookForm({
           </div>
         </FormSection>
 
-        <FormSection title="Descrição">
+        <FormSection title={t('form.section.description')}>
           <div>
-            <Label htmlFor="sinopse">Sinopse</Label>
+            <Label htmlFor="sinopse">{t('form.field.synopsis')}</Label>
             <textarea
               id="sinopse"
               disabled={readOnly}

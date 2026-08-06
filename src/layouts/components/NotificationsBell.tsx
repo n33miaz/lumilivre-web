@@ -72,7 +72,7 @@ export function NotificationsBell() {
         onClick={() => setIsOpen((open) => !open)}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        aria-label={t('aria.notifications', { defaultValue: 'Notificações' })}
+        aria-label={t('aria.notifications')}
         className="row-hover relative h-9 w-9 rounded-lg flex items-center justify-center"
       >
         <Bell className="w-[18px] h-[18px] text-gray-600 dark:text-gray-300" />
@@ -87,16 +87,14 @@ export function NotificationsBell() {
       {shouldRender && (
         <div
           role="dialog"
-          aria-label={t('notifications.title', {
-            defaultValue: 'Notificações',
-          })}
+          aria-label={t('notifications.title')}
           className={`absolute right-0 top-full mt-2 w-80 max-h-[70vh] z-[60] rounded-2xl bg-white dark:bg-dark-card border border-gray-200/70 dark:border-white/5 shadow-card overflow-hidden ${
             isClosing ? 'animate-slide-down-out' : 'animate-slide-down'
           }`}
         >
           <div className="px-4 py-3 border-b border-gray-100 dark:border-white/5">
             <div className="font-display font-bold text-gray-900 dark:text-white">
-              {t('notifications.title', { defaultValue: 'Notificações' })}
+              {t('notifications.title')}
             </div>
           </div>
 
@@ -105,7 +103,7 @@ export function NotificationsBell() {
               <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
                 <Inbox className="w-8 h-8 text-gray-300 dark:text-gray-600" />
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  {t('notifications.empty', { defaultValue: 'Tudo em dia' })}
+                  {t('notifications.empty')}
                 </div>
               </div>
             )}
@@ -121,10 +119,7 @@ export function NotificationsBell() {
                     <AlertTriangle className="w-4 h-4" />
                   </span>
                   <div className="flex-1 text-sm text-gray-700 dark:text-gray-200">
-                    {t('notifications.overdue', {
-                      count: overdueCount,
-                      defaultValue: '{{count}} empréstimo(s) em atraso',
-                    })}
+                    {t('notifications.overdue', { count: overdueCount })}
                   </div>
                 </div>
               </button>
@@ -145,7 +140,6 @@ export function NotificationsBell() {
                     <div className="text-sm text-gray-700 dark:text-gray-200">
                       {t('notifications.new_request', {
                         name: req.leitorNome,
-                        defaultValue: 'Nova solicitação de {{name}}',
                       })}
                     </div>
                     {req.livroNome && (

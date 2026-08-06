@@ -21,5 +21,6 @@
   "notifications.new_request": "Nova solicitação de {{name}}",
   "help.label": "Ajuda",
   "user.profile": "Meu perfil",
-  "user.menu_aria": "Menu do usuário"
+  "user.menu_aria": "Menu do usuário",
+  "aria.close_sidebar": "Fechar menu lateral"
 }

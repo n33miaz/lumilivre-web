@@ -102,7 +102,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
         {isSidebarExpanded && (
           <button
             type="button"
-            aria-label="Close sidebar"
+            aria-label={t('nav:aria.close_sidebar')}
             className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
             onClick={() => setIsSidebarExpanded(false)}
           />

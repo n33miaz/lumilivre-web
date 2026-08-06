@@ -73,7 +73,7 @@
   "users.field.password_edit_hint": "Leave blank to keep the current password",
   "users.field.must_change_hint": "The user will be required to change the password on first sign-in.",
   "users.error.email": "Enter a valid email.",
-  "users.error.password": "The password must be at least 6 characters.",
+  "users.error.password": "The password must be at least {{min}} characters.",
   "users.action.new": "NEW USER",
   "users.action.create": "CREATE USER",
   "users.action.edit": "Edit",

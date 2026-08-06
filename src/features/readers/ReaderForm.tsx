@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 
 import { buscarEnderecoPorCep } from '../../services/cepService';
 import {
@@ -10,6 +11,7 @@ import {
 } from '../../hooks/queries/useReaderQueries';
 import {
   buildReaderSchema,
+  MIN_READER_NAME_LENGTH,
   type ReaderFormData,
 } from '../../schemas/readerSchema';
 import { useToast } from '../../contexts/ToastContext';
@@ -48,6 +50,7 @@ export function ReaderForm({
   readOnly = false,
   onSubmit,
 }: ReaderFormProps) {
+  const { t } = useTranslation('reader');
   const { addToast } = useToast();
   const { features } = useLibraryConfig();
   const [isCepLoading, setIsCepLoading] = useState(false);
@@ -111,7 +114,10 @@ export function ReaderForm({
         setValue('localidade', endereco.localidade || '');
         setValue('uf', endereco.uf || '');
       } catch {
-        addToast({ type: 'warning', title: 'CEP não encontrado' });
+        addToast({
+          type: 'warning',
+          title: t('toast.postal_code_not_found'),
+        });
       } finally {
         setIsCepLoading(false);
       }
@@ -126,6 +132,11 @@ export function ReaderForm({
       errored.every((f) => ADDRESS_FIELDS.includes(f));
     setActiveTab(onlyAddress ? 'endereco' : 'principal');
   };
+
+  // O zod devolve **chave** de i18n (ver `readerSchema`); a tradução acontece
+  // aqui, já com o valor que saiu da frase (tamanho mínimo do nome).
+  const fieldError = (message?: string) =>
+    message ? t(message, { min: MIN_READER_NAME_LENGTH }) : undefined;
 
   const tabButton = (tab: ReaderTab, label: string) => (
     <button
@@ -148,8 +159,8 @@ export function ReaderForm({
       className="space-y-4"
     >
       <div className="flex items-center gap-1 rounded-xl bg-gray-100 dark:bg-white/5 p-1 w-fit">
-        {tabButton('principal', 'Principal')}
-        {tabButton('endereco', 'Endereço')}
+        {tabButton('principal', t('form.tab.main'))}
+        {tabButton('endereco', t('form.tab.address'))}
       </div>
 
       {/* Aba Principal */}
@@ -160,35 +171,35 @@ export function ReaderForm({
               currentImage={initialData?.foto || null}
               onImageChange={setAvatarFile}
               readOnly={readOnly}
-              placeholderText="Foto do leitor"
+              placeholderText={t('form.photo.placeholder')}
             />
           </div>
           <div className="flex-1 w-full space-y-4">
             <div>
               <Label htmlFor="nomeCompleto" requiredIndicator={!readOnly}>
-                Nome Completo
+                {t('form.field.full_name')}
               </Label>
               <Input
                 id="nomeCompleto"
                 {...register('nomeCompleto')}
-                error={errors.nomeCompleto?.message}
+                error={fieldError(errors.nomeCompleto?.message)}
                 disabled={readOnly}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="matricula" requiredIndicator={!readOnly}>
-                  Matrícula
+                  {t('form.field.registration')}
                 </Label>
                 <Input
                   id="matricula"
                   {...register('matricula')}
-                  error={errors.matricula?.message}
+                  error={fieldError(errors.matricula?.message)}
                   disabled={readOnly || !!initialData?.matricula}
                 />
               </div>
               <div>
-                <Label htmlFor="cpf">CPF</Label>
+                <Label htmlFor="cpf">{t('form.field.cpf')}</Label>
                 <Input id="cpf" {...register('cpf')} disabled={readOnly} />
               </div>
             </div>
@@ -197,7 +208,7 @@ export function ReaderForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="celular">Celular</Label>
+            <Label htmlFor="celular">{t('form.field.phone')}</Label>
             <Input id="celular" {...register('celular')} disabled={readOnly} />
           </div>
           <Controller
@@ -205,7 +216,7 @@ export function ReaderForm({
             control={control}
             render={({ field }) => (
               <CustomDatePicker
-                label="Data de Nascimento"
+                label={t('form.field.birth_date')}
                 value={field.value}
                 onChange={field.onChange}
                 disabled={readOnly}
@@ -214,19 +225,21 @@ export function ReaderForm({
           />
         </div>
         <div>
-          <Label htmlFor="email">E-mail</Label>
+          <Label htmlFor="email">{t('form.field.email')}</Label>
           <Input
             id="email"
             type="email"
             {...register('email')}
-            error={errors.email?.message}
+            error={fieldError(errors.email?.message)}
             disabled={readOnly}
           />
         </div>
         {features.academicFields ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label requiredIndicator={!readOnly}>Curso</Label>
+              <Label requiredIndicator={!readOnly}>
+                {t('form.field.course')}
+              </Label>
               <Controller
                 name="cursoId"
                 control={control}
@@ -236,12 +249,12 @@ export function ReaderForm({
                       value={String(field.value ?? '')}
                       onChange={field.onChange}
                       options={cursosOptions}
-                      placeholder="Selecione"
+                      placeholder={t('common:placeholder.select')}
                       disabled={readOnly}
                     />
                     {errors.cursoId && (
                       <span className="text-xs text-red-500 mt-1">
-                        {errors.cursoId.message}
+                        {fieldError(errors.cursoId.message)}
                       </span>
                     )}
                   </div>
@@ -249,7 +262,9 @@ export function ReaderForm({
               />
             </div>
             <div>
-              <Label requiredIndicator={!readOnly}>Turno</Label>
+              <Label requiredIndicator={!readOnly}>
+                {t('form.field.study_shift')}
+              </Label>
               <Controller
                 name="turnoId"
                 control={control}
@@ -259,12 +274,12 @@ export function ReaderForm({
                       value={String(field.value ?? '')}
                       onChange={field.onChange}
                       options={turnoOptions}
-                      placeholder="Selecione"
+                      placeholder={t('common:placeholder.select')}
                       disabled={readOnly}
                     />
                     {errors.turnoId && (
                       <span className="text-xs text-red-500 mt-1">
-                        {errors.turnoId.message}
+                        {fieldError(errors.turnoId.message)}
                       </span>
                     )}
                   </div>
@@ -272,7 +287,9 @@ export function ReaderForm({
               />
             </div>
             <div>
-              <Label requiredIndicator={!readOnly}>Módulo</Label>
+              <Label requiredIndicator={!readOnly}>
+                {t('form.field.academic_module')}
+              </Label>
               <Controller
                 name="moduloId"
                 control={control}
@@ -282,12 +299,12 @@ export function ReaderForm({
                       value={String(field.value ?? '')}
                       onChange={field.onChange}
                       options={modulosOptions}
-                      placeholder="Selecione"
+                      placeholder={t('common:placeholder.select')}
                       disabled={readOnly}
                     />
                     {errors.moduloId && (
                       <span className="text-xs text-red-500 mt-1">
-                        {errors.moduloId.message}
+                        {fieldError(errors.moduloId.message)}
                       </span>
                     )}
                   </div>
@@ -297,11 +314,13 @@ export function ReaderForm({
           </div>
         ) : (
           <div>
-            <Label htmlFor="readerCategory">Categoria/Grupo</Label>
+            <Label htmlFor="readerCategory">
+              {t('form.field.category')}
+            </Label>
             <Input
               id="readerCategory"
               {...register('readerCategory')}
-              error={errors.readerCategory?.message}
+              error={fieldError(errors.readerCategory?.message)}
               disabled={readOnly}
             />
           </div>
@@ -312,7 +331,7 @@ export function ReaderForm({
       <div className={activeTab === 'endereco' ? 'space-y-4' : 'hidden'}>
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-4 md:col-span-3">
-            <Label htmlFor="cep">CEP</Label>
+            <Label htmlFor="cep">{t('form.field.postal_code')}</Label>
             <Input
               id="cep"
               maxLength={9}
@@ -322,7 +341,7 @@ export function ReaderForm({
             />
           </div>
           <div className="col-span-8 md:col-span-9">
-            <Label htmlFor="logradouro">Logradouro</Label>
+            <Label htmlFor="logradouro">{t('form.field.street')}</Label>
             <Input
               id="logradouro"
               {...register('logradouro')}
@@ -332,7 +351,7 @@ export function ReaderForm({
         </div>
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-5">
-            <Label htmlFor="bairro">Bairro</Label>
+            <Label htmlFor="bairro">{t('form.field.district')}</Label>
             <Input
               id="bairro"
               {...register('bairro')}
@@ -340,7 +359,7 @@ export function ReaderForm({
             />
           </div>
           <div className="col-span-5">
-            <Label htmlFor="localidade">Cidade</Label>
+            <Label htmlFor="localidade">{t('form.field.city')}</Label>
             <Input
               id="localidade"
               {...register('localidade')}
@@ -348,7 +367,7 @@ export function ReaderForm({
             />
           </div>
           <div className="col-span-2">
-            <Label htmlFor="uf">UF</Label>
+            <Label htmlFor="uf">{t('form.field.state')}</Label>
             <Input
               id="uf"
               {...register('uf')}
@@ -358,7 +377,9 @@ export function ReaderForm({
         </div>
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-4">
-            <Label htmlFor="numero_casa">Número</Label>
+            <Label htmlFor="numero_casa">
+              {t('form.field.street_number')}
+            </Label>
             <Input
               id="numero_casa"
               type="number"
@@ -367,7 +388,9 @@ export function ReaderForm({
             />
           </div>
           <div className="col-span-8">
-            <Label htmlFor="complemento">Complemento</Label>
+            <Label htmlFor="complemento">
+              {t('form.field.complement')}
+            </Label>
             <Input
               id="complemento"
               {...register('complemento')}

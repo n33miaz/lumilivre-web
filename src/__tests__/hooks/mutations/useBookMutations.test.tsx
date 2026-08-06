@@ -59,7 +59,7 @@ describe('useCreateBook', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Livro cadastrado com sucesso!',
+          description: 'Livro cadastrado com sucesso.',
         }),
       );
     });
@@ -103,7 +103,7 @@ describe('useUpdateBook', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Livro atualizado com sucesso!',
+          description: 'Livro atualizado com sucesso.',
         }),
       );
     });
@@ -127,7 +127,7 @@ describe('useDeleteBook', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Livro e seus exemplares foram excluídos!',
+          description: 'Livro e seus exemplares foram excluídos.',
         }),
       );
     });

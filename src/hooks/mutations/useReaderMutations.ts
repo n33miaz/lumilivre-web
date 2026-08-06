@@ -1,4 +1,6 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
+
 import { createMutationHook } from '../useGenericMutation';
 import { useToast } from '../../contexts/ToastContext';
 import { getErrorMessage } from '../../utils/errorHandler';
@@ -53,6 +55,7 @@ interface CreateReaderVariables {
 export function useCreateReader() {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
+  const { t } = useTranslation('reader');
 
   return useMutation({
     mutationFn: ({ payload, avatarFile }: CreateReaderVariables) =>
@@ -62,22 +65,22 @@ export function useCreateReader() {
       if (avatarError) {
         addToast({
           type: 'error',
-          title: 'Erro',
-          description: 'Leitor cadastrado, mas o envio da foto falhou.',
+          title: t('common:error.title'),
+          description: t('toast.avatar_failed.created'),
         });
       } else {
         addToast({
           type: 'success',
-          title: 'Sucesso',
-          description: 'Leitor cadastrado com sucesso!',
+          title: t('common:success'),
+          description: t('toast.created'),
         });
       }
     },
     onError: (error) => {
       addToast({
         type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao cadastrar leitor.'),
+        title: t('common:error.title'),
+        description: getErrorMessage(error, t('error.create')),
       });
     },
   });
@@ -92,6 +95,7 @@ interface UpdateReaderVariables {
 export function useUpdateReader() {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
+  const { t } = useTranslation('reader');
 
   return useMutation({
     mutationFn: ({ matricula, payload, avatarFile }: UpdateReaderVariables) =>
@@ -101,22 +105,22 @@ export function useUpdateReader() {
       if (avatarError) {
         addToast({
           type: 'error',
-          title: 'Erro',
-          description: 'Leitor atualizado, mas o envio da foto falhou.',
+          title: t('common:error.title'),
+          description: t('toast.avatar_failed.updated'),
         });
       } else {
         addToast({
           type: 'success',
-          title: 'Sucesso',
-          description: 'Leitor atualizado com sucesso!',
+          title: t('common:success'),
+          description: t('toast.updated'),
         });
       }
     },
     onError: (error) => {
       addToast({
         type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao atualizar leitor.'),
+        title: t('common:error.title'),
+        description: getErrorMessage(error, t('error.update')),
       });
     },
   });
@@ -126,28 +130,31 @@ export function useUpdateReader() {
 export const useDeleteReader = createMutationHook<unknown, string>({
   mutationFn: (matricula) => excluirLeitor(matricula),
   queryKey: READER_QUERY_KEY,
-  successMessage: 'Leitor excluído com sucesso!',
-  errorMessage: 'Erro ao excluir leitor.',
+  successMessage: 'reader:toast.deleted',
+  errorMessage: 'reader:error.delete',
 });
 
 // --- Reset de Senha ---
 export function useResetReaderPassword() {
   const { addToast } = useToast();
+  const { t } = useTranslation('reader');
 
   return useMutation({
     mutationFn: (matricula: string) => resetarSenhaLeitor(matricula),
     onSuccess: (_, matricula) => {
       addToast({
         type: 'success',
-        title: 'Senha Resetada',
-        description: `A senha foi redefinida para: ${matricula}`,
+        title: t('toast.password_reset.title'),
+        description: t('toast.password_reset.description', {
+          registration: matricula,
+        }),
       });
     },
     onError: (error) => {
       addToast({
         type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao resetar senha.'),
+        title: t('common:error.title'),
+        description: getErrorMessage(error, t('error.reset_password')),
       });
     },
   });

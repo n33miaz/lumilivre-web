@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import i18n from '../i18n';
+
 export type ErrorKind = 'validation' | 'authorization' | 'network' | 'unexpected';
 
 /**
@@ -8,7 +10,7 @@ export type ErrorKind = 'validation' | 'authorization' | 'network' | 'unexpected
  */
 export function getErrorMessage(
   error: unknown,
-  defaultMessage = 'Ocorreu um erro inesperado.',
+  defaultMessage = i18n.t('common:error.unexpected'),
 ): string {
   if (error === null || error === undefined) {
     return defaultMessage;
@@ -51,17 +53,22 @@ export function getErrorKind(error: unknown): ErrorKind {
   return 'unexpected';
 }
 
+/**
+ * Traduz pela instância global do i18next (e não por hook) porque estes helpers
+ * também rodam fora de componente — o `queryErrorHandler` do TanStack Query, por
+ * exemplo, é chamado pelo cliente, sem árvore React por perto.
+ */
 export function getErrorTitle(error: unknown): string {
   const kind = getErrorKind(error);
 
   switch (kind) {
     case 'validation':
-      return 'Verifique os dados';
+      return i18n.t('common:error.title.validation');
     case 'authorization':
-      return 'Acesso não autorizado';
+      return i18n.t('common:error.title.authorization');
     case 'network':
-      return 'Falha de conexão';
+      return i18n.t('common:error.title.network');
     default:
-      return 'Erro inesperado';
+      return i18n.t('common:error.title.unexpected');
   }
 }

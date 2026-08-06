@@ -6,6 +6,8 @@ import {
   type ReactNode,
   useCallback,
 } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ToastContext';
@@ -86,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { t } = useTranslation('common');
 
   const logout = useCallback(() => {
     setUser(null);
@@ -162,8 +165,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           addToast({
             type: 'info',
-            title: 'Sessão Expirada',
-            description: 'Por favor, faça login novamente para continuar.',
+            title: t('session.expired.title'),
+            description: t('session.expired.description'),
           });
 
           logout();
@@ -178,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       api.interceptors.response.eject(interceptorId);
     };
-  }, [user, logout, addToast]);
+  }, [user, logout, addToast, t]);
 
   const login = (userData: User) => {
     setUser(userData);

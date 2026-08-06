@@ -21,8 +21,8 @@ interface DeleteExemplarVariables {
 export const useCreateExemple = createMutationHook<unknown, ExemplarPayload>({
   mutationFn: (payload) => cadastrarExemplar(payload),
   queryKey: EXEMPLAR_QUERY_KEY,
-  successMessage: 'Exemplar cadastrado com sucesso!',
-  errorMessage: 'Erro ao cadastrar exemplar. Verifique se o tombo já existe.',
+  successMessage: 'book:toast.copy.created',
+  errorMessage: 'book:error.copy.create',
 });
 
 export const useUpdateExemplar = createMutationHook<
@@ -32,8 +32,8 @@ export const useUpdateExemplar = createMutationHook<
   mutationFn: ({ tomboAtual, payload }) =>
     atualizarExemplar(tomboAtual, payload),
   queryKey: EXEMPLAR_QUERY_KEY,
-  successMessage: 'Exemplar atualizado com sucesso!',
-  errorMessage: 'Erro ao atualizar exemplar.',
+  successMessage: 'book:toast.copy.updated',
+  errorMessage: 'book:error.copy.update',
 });
 
 export const useDeleteExemplar = createMutationHook<
@@ -42,6 +42,6 @@ export const useDeleteExemplar = createMutationHook<
 >({
   mutationFn: ({ tombo }) => excluirExemplar(tombo),
   queryKey: EXEMPLAR_QUERY_KEY,
-  successMessage: 'Exemplar excluído com sucesso!',
-  errorMessage: 'Erro ao excluir exemplar.',
+  successMessage: 'book:toast.copy.deleted',
+  errorMessage: 'book:error.copy.delete',
 });

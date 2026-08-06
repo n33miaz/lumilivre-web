@@ -53,7 +53,7 @@ describe('Hook: useCreateLoan', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Empréstimo realizado com sucesso!',
+          description: 'Empréstimo registrado com sucesso.',
         }),
       );
     });
@@ -100,7 +100,7 @@ describe('Hook: useCompleteLoan', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Devolução registrada com sucesso!',
+          description: 'Devolução registrada com sucesso.',
         }),
       );
     });
@@ -124,7 +124,7 @@ describe('Hook: useDeleteLoan', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Empréstimo excluído com sucesso!',
+          description: 'Empréstimo excluído com sucesso.',
         }),
       );
     });

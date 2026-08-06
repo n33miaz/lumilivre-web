@@ -427,20 +427,14 @@ export function DashboardPage() {
 
   const buildDashboardReport = (): DashboardReport => {
     const indicators: ReportTable = {
-      name: t('export.section.indicators', { defaultValue: 'Indicadores' }),
+      name: t('export.section.indicators'),
       columns: [t('export.csv.header.indicator'), t('export.csv.header.value')],
       rows: [],
     };
     if (statsData) {
       indicators.rows.push(
-        [
-          t('card.total_books', { defaultValue: 'Total de Livros' }),
-          statsData.livros,
-        ],
-        [
-          t('card.total_readers', { defaultValue: 'Total de Leitores' }),
-          statsData.leitores,
-        ],
+        [t('card.total_books'), statsData.livros],
+        [t('card.total_readers'), statsData.leitores],
       );
     }
     if (statsGerenciais.data) {
@@ -456,11 +450,11 @@ export function DashboardPage() {
     }
 
     const topBooks: ReportTable = {
-      name: t('chart.top_books', { defaultValue: 'Top Livros' }),
+      name: t('chart.top_books'),
       columns: [
-        t('table.column.book', { defaultValue: 'Livro' }),
-        t('export.column.author', { defaultValue: 'Autor' }),
-        t('export.column.loans', { defaultValue: 'Empréstimos' }),
+        t('table.column.book'),
+        t('export.column.author'),
+        t('export.column.loans'),
       ],
       rows: (topLivros.data ?? []).map((item) => [
         item.titulo,
@@ -470,11 +464,8 @@ export function DashboardPage() {
     };
 
     const byMonth: ReportTable = {
-      name: t('chart.loans_per_month', { defaultValue: 'Empréstimos por Mês' }),
-      columns: [
-        t('export.column.month', { defaultValue: 'Mês' }),
-        t('chart.total_label', { defaultValue: 'Total' }),
-      ],
+      name: t('chart.loans_per_month'),
+      columns: [t('export.column.month'), t('chart.total_label')],
       rows: (emprestimosPorMes.data ?? []).map((item) => [
         new Date(`${item.mes}T00:00:00`).toLocaleDateString(i18n.language, {
           month: 'short',
@@ -490,13 +481,8 @@ export function DashboardPage() {
     });
 
     return {
-      title: t('export.report.title', {
-        defaultValue: 'Relatório do Dashboard',
-      }),
-      generatedAtLabel: t('export.report.generated_at', {
-        date: generatedAt,
-        defaultValue: `Gerado em ${generatedAt}`,
-      }),
+      title: t('export.report.title'),
+      generatedAtLabel: t('export.report.generated_at', { date: generatedAt }),
       tables: [indicators, topBooks, byMonth].filter(
         (table) => table.rows.length > 0,
       ),
@@ -511,11 +497,8 @@ export function DashboardPage() {
       if (report.tables.length === 0) {
         addToast({
           type: 'info',
-          title: t('export.empty.title', { defaultValue: 'Nada para exportar' }),
-          description: t('export.empty.description', {
-            defaultValue:
-              'Ainda não há dados disponíveis para gerar o relatório.',
-          }),
+          title: t('export.empty.title'),
+          description: t('export.empty.description'),
         });
         return;
       }
@@ -531,10 +514,8 @@ export function DashboardPage() {
       console.error('Erro ao exportar dashboard:', error);
       addToast({
         type: 'error',
-        title: t('export.error.title', { defaultValue: 'Falha ao exportar' }),
-        description: t('export.error.description', {
-          defaultValue: 'Não foi possível gerar o arquivo. Tente novamente.',
-        }),
+        title: t('export.error.title'),
+        description: t('export.error.description'),
       });
     } finally {
       setIsExporting(false);
@@ -611,15 +592,13 @@ export function DashboardPage() {
       <div className="shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
-            {t('page.eyebrow', { defaultValue: 'Visão geral' })} · {todayLabel}
+            {t('page.eyebrow')} · {todayLabel}
           </div>
           <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
-            {t('page.title', { defaultValue: 'Dashboard' })}
+            {t('page.title')}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            {t('page.subtitle', {
-              defaultValue: 'Visão geral da sua biblioteca ao vivo.',
-            })}
+            {t('page.subtitle')}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 print:hidden">
@@ -722,7 +701,7 @@ export function DashboardPage() {
           <RefreshedAgo
             at={refreshedAt}
             locale={i18n.language}
-            label={t('refreshed_label', { defaultValue: 'Atualizado' })}
+            label={t('refreshed_label')}
           />
         </div>
       </div>
@@ -741,12 +720,8 @@ export function DashboardPage() {
             className="grid min-h-0 flex-1 grid-cols-1 content-start gap-4 overflow-y-auto custom-scrollbar pr-1 lg:grid-cols-2"
           >
             <ChartCard
-              eyebrow={t('chart.general_distribution_eyebrow', {
-                defaultValue: 'Distribuição geral',
-              })}
-              title={t('chart.general_distribution_title', {
-                defaultValue: 'Status dos Empréstimos',
-              })}
+              eyebrow={t('chart.general_distribution_eyebrow')}
+              title={t('chart.general_distribution_title')}
               badge={
                 statusChartTotal > 0 ? (
                   <span className="pill pill-purple">
@@ -795,7 +770,7 @@ export function DashboardPage() {
             </ChartCard>
 
             <ChartCard
-              eyebrow={t('chart.activity_eyebrow', { defaultValue: 'Atividade' })}
+              eyebrow={t('chart.activity_eyebrow')}
               title={t('chart.loans_per_month')}
               badge={
                 monthlyChartTotal > 0 ? (
@@ -825,7 +800,7 @@ export function DashboardPage() {
             </ChartCard>
 
             <ChartCard
-              eyebrow={t('chart.catalog_eyebrow', { defaultValue: 'Catálogo' })}
+              eyebrow={t('chart.catalog_eyebrow')}
               title={t('chart.top_books')}
               badge={
                 topBooksChartTotal > 0 ? (
@@ -860,10 +835,8 @@ export function DashboardPage() {
             </ChartCard>
 
             <ChartCard
-              eyebrow={t('chart.attention_eyebrow', { defaultValue: 'Atenção' })}
-              title={t('chart.overdue_and_due', {
-                defaultValue: 'Atrasos & Vencendo',
-              })}
+              eyebrow={t('chart.attention_eyebrow')}
+              title={t('chart.overdue_and_due')}
               badge={
                 dueStatusChartTotal > 0 ? (
                   <span className="pill pill-danger">
@@ -909,15 +882,14 @@ export function DashboardPage() {
             <DashboardTableCard
               containerRef={requestsCardRef}
               title={t('section.requests')}
-              subtitle={t('section.requests.subtitle', {
-                defaultValue: 'Aguardam aprovação do bibliotecário',
-              })}
+              subtitle={t('section.requests.subtitle')}
               badge={
                 solicitacoesProcessadas.length > 0 ? (
                   <span className="pill pill-warn">
                     <span className="dot" />
-                    {solicitacoesProcessadas.length}{' '}
-                    {t('open', { defaultValue: 'abertas' })}
+                    {t('badge.requests_open', {
+                      count: solicitacoesProcessadas.length,
+                    })}
                   </span>
                 ) : (
                   <span className="pill pill-success">
@@ -996,15 +968,14 @@ export function DashboardPage() {
             <DashboardTableCard
               containerRef={overdueCardRef}
               title={t('section.overdue_due')}
-              subtitle={t('section.overdue_due.subtitle', {
-                defaultValue: 'Empréstimos ativos próximos da data limite',
-              })}
+              subtitle={t('section.overdue_due.subtitle')}
               badge={
                 emprestimosProcessados.length > 0 ? (
                   <span className="pill pill-danger">
                     <span className="dot" />
-                    {emprestimosProcessados.length}{' '}
-                    {t('items', { defaultValue: 'itens' })}
+                    {t('badge.overdue_items', {
+                      count: emprestimosProcessados.length,
+                    })}
                   </span>
                 ) : (
                   <span className="pill pill-success">

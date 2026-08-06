@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
@@ -38,6 +39,7 @@ export function ModalLoanDetails({
   isOpen,
   onClose,
 }: ModalLoanDetailsProps) {
+  const { t } = useTranslation('loan');
   const [isEditMode, setIsEditMode] = useState(false);
   const [confirmAction, setConfirmAction] = useState<
     'devolucao' | 'excluir' | null
@@ -132,7 +134,7 @@ export function ModalLoanDetails({
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
       <Modal.Header
-        title={isEditMode ? 'Editar Empréstimo' : 'Detalhes do Empréstimo'}
+        title={isEditMode ? t('modal.edit.title') : t('modal.details.title')}
       />
 
       <Modal.Body>
@@ -163,16 +165,18 @@ export function ModalLoanDetails({
             onClick={() => setConfirmAction('excluir')}
             isLoading={isDeleting}
           >
-            Excluir
+            {t('common:delete')}
           </Button>
           <div className="flex gap-3">
-            <Button onClick={() => setIsEditMode(true)}>Editar</Button>
+            <Button onClick={() => setIsEditMode(true)}>
+              {t('common:edit')}
+            </Button>
             <Button
               variant="action"
               onClick={() => setConfirmAction('devolucao')}
               isLoading={isCompleting}
             >
-              Registrar Devolução
+              {t('action.register_return')}
             </Button>
           </div>
         </Modal.Footer>
@@ -182,13 +186,13 @@ export function ModalLoanDetails({
         isOpen={confirmAction !== null}
         title={
           confirmAction === 'devolucao'
-            ? 'Registro de Devolução'
-            : 'Excluir Empréstimo'
+            ? t('confirm.return_record.title')
+            : t('confirm.delete.title')
         }
         message={
           confirmAction === 'devolucao'
-            ? 'Deseja confirmar a devolução deste livro?'
-            : 'Tem certeza que deseja excluir este empréstimo?\nEssa ação não pode ser desfeita.'
+            ? t('confirm.return.message')
+            : t('confirm.delete.message')
         }
         isDestructive={confirmAction === 'excluir'}
         onConfirm={

@@ -1,4 +1,5 @@
 import api from './api';
+import i18n from '../i18n';
 
 interface LoginCredentials {
   user: string;
@@ -38,19 +39,18 @@ export const login = async (
 export const requestPasswordReset = async (
   email: string,
 ): Promise<{ mensagem: string }> => {
+  // Mesma resposta no sucesso e no erro: é o que impede descobrir quais e-mails
+  // existem. O texto vai traduzido pela instância global do i18next porque este
+  // módulo não é componente e não tem hook à disposição.
+  const mensagem = i18n.t('auth:forgot_password.toast.sent');
+
   try {
     await api.post('/api/auth/forgot-password', { email });
-    return {
-      mensagem:
-        'Se um e-mail correspondente for encontrado, um link para redefinição será enviado.',
-    };
+    return { mensagem };
   } catch {
     // Não logar o erro cru (carrega o e-mail no config.data).
     console.error('Falha ao solicitar redefinição de senha');
-    return {
-      mensagem:
-        'Se um e-mail correspondente for encontrado, um link para redefinição será enviado.',
-    };
+    return { mensagem };
   }
 };
 

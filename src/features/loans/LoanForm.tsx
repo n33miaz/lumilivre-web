@@ -1,6 +1,7 @@
 import { useMemo, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 import { useLeitoresOptions } from '../../hooks/queries/useReaderQueries';
 import {
   useLivrosOptions,
@@ -30,6 +31,7 @@ export function LoanForm({
   readOnly = false,
   onSubmit,
 }: LoanFormProps) {
+  const { t } = useTranslation('loan');
   const hoje = new Date().toISOString().split('T')[0];
   const dataDevolucaoPadrao = new Date();
   dataDevolucaoPadrao.setDate(dataDevolucaoPadrao.getDate() + 7);
@@ -76,19 +78,26 @@ export function LoanForm({
   const leitoresOptions = useMemo(
     () =>
       leitoresData?.map((a) => ({
-        label: `${a.nomeCompleto} (Mat: ${a.matricula})`,
+        label: t('form.reader.option', {
+          name: a.nomeCompleto,
+          abbr: t('request.registration_abbr'),
+          registration: a.matricula,
+        }),
         value: a.matricula,
       })) || [],
-    [leitoresData],
+    [leitoresData, t],
   );
 
   const livrosOptions = useMemo(
     () =>
       livrosData?.map((l) => ({
-        label: `${l.nome} (ISBN: ${l.isbn || 'S/N'})`,
+        label: t('form.book.option', {
+          name: l.nome,
+          isbn: l.isbn || t('form.book.no_isbn'),
+        }),
         value: String(l.id),
       })) || [],
-    [livrosData],
+    [livrosData, t],
   );
 
   const exemplaresOptions = useMemo(() => {
@@ -99,10 +108,17 @@ export function LoanForm({
           ex.status === 'DISPONIVEL' || ex.tomboExemplar === exemplarTomboAtual,
       )
       .map((ex) => ({
-        label: `${ex.tomboExemplar} - Local: ${ex.localizacao_fisica} ${ex.tomboExemplar === exemplarTomboAtual ? '(Atual)' : ''}`,
+        label: t('form.copy.option', {
+          code: ex.tomboExemplar,
+          location: ex.localizacao_fisica,
+          current:
+            ex.tomboExemplar === exemplarTomboAtual
+              ? t('form.copy.current')
+              : '',
+        }),
         value: ex.tomboExemplar,
       }));
-  }, [exemplaresData, exemplarTomboAtual]);
+  }, [exemplaresData, exemplarTomboAtual, t]);
 
   return (
     <form id={formId} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -112,11 +128,14 @@ export function LoanForm({
           control={control}
           render={({ field }) => (
             <CustomDatePicker
-              label="Data do Empréstimo"
+              label={t('form.field.borrowed_at')}
               value={field.value}
               onChange={field.onChange}
               disabled={readOnly}
-              error={errors.data_emprestimo?.message}
+              error={
+                errors.data_emprestimo?.message &&
+                t(errors.data_emprestimo.message)
+              }
             />
           )}
         />
@@ -125,11 +144,14 @@ export function LoanForm({
           control={control}
           render={({ field }) => (
             <CustomDatePicker
-              label="Data de Devolução"
+              label={t('form.field.due_at')}
               value={field.value}
               onChange={field.onChange}
               disabled={readOnly}
-              error={errors.data_devolucao?.message}
+              error={
+                errors.data_devolucao?.message &&
+                t(errors.data_devolucao.message)
+              }
             />
           )}
         />
@@ -137,7 +159,7 @@ export function LoanForm({
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <Label requiredIndicator={!readOnly}>Leitor</Label>
+          <Label requiredIndicator={!readOnly}>{t('form.field.reader')}</Label>
           {readOnly ? (
             <Input
               disabled
@@ -153,11 +175,11 @@ export function LoanForm({
                     value={field.value}
                     onChange={field.onChange}
                     options={leitoresOptions}
-                    placeholder="Selecione o leitor"
+                    placeholder={t('form.reader.placeholder')}
                   />
                   {errors.leitor_matricula && (
                     <span className="text-xs text-red-500 mt-1">
-                      {errors.leitor_matricula.message}
+                      {t(errors.leitor_matricula.message ?? '')}
                     </span>
                   )}
                 </div>
@@ -167,7 +189,7 @@ export function LoanForm({
         </div>
 
         <div>
-          <Label requiredIndicator={!readOnly}>Livro</Label>
+          <Label requiredIndicator={!readOnly}>{t('form.field.book')}</Label>
           {readOnly ? (
             <Input
               disabled
@@ -186,11 +208,11 @@ export function LoanForm({
                       setValue('exemplar_tombo', '');
                     }}
                     options={livrosOptions}
-                    placeholder="Selecione o livro"
+                    placeholder={t('form.book.placeholder')}
                   />
                   {errors.livro_id && (
                     <span className="text-xs text-red-500 mt-1">
-                      {errors.livro_id.message}
+                      {t(errors.livro_id.message ?? '')}
                     </span>
                   )}
                 </div>
@@ -200,7 +222,7 @@ export function LoanForm({
         </div>
 
         <div>
-          <Label requiredIndicator={!readOnly}>Exemplar</Label>
+          <Label requiredIndicator={!readOnly}>{t('form.field.copy')}</Label>
           {readOnly ? (
             <Input disabled value={watch('exemplar_tombo')} />
           ) : (
@@ -215,15 +237,15 @@ export function LoanForm({
                     options={exemplaresOptions}
                     placeholder={
                       !livroIdSelecionado
-                        ? 'Selecione um livro'
-                        : 'Selecione um exemplar'
+                        ? t('form.copy.placeholder_book_first')
+                        : t('form.copy.placeholder')
                     }
                     disabled={!livroIdSelecionado || isLoadingExemplares}
                     isLoading={isLoadingExemplares}
                   />
                   {errors.exemplar_tombo && (
                     <span className="text-xs text-red-500 mt-1">
-                      {errors.exemplar_tombo.message}
+                      {t(errors.exemplar_tombo.message ?? '')}
                     </span>
                   )}
                 </div>

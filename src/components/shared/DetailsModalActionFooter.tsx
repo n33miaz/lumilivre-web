@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 
@@ -14,6 +16,8 @@ interface DetailsModalActionFooterProps {
 export function DetailsModalActionFooter({
   ...props
 }: DetailsModalActionFooterProps) {
+  const { t } = useTranslation('common');
+
   return (
     <Modal.Footer className="justify-between w-full">
       <Button
@@ -22,7 +26,7 @@ export function DetailsModalActionFooter({
         disabled={props.isUpdating || props.isEditMode}
         isLoading={props.isDeleting}
       >
-        Excluir
+        {t('delete')}
       </Button>
 
       {props.isEditMode ? (
@@ -32,7 +36,7 @@ export function DetailsModalActionFooter({
             onClick={props.onCancel}
             disabled={props.isUpdating}
           >
-            Cancelar
+            {t('cancel')}
           </Button>
           <Button
             type="submit"
@@ -40,11 +44,11 @@ export function DetailsModalActionFooter({
             variant="success"
             isLoading={props.isUpdating}
           >
-            Salvar Alterações
+            {t('action.save_changes')}
           </Button>
         </div>
       ) : (
-        <Button onClick={props.onEdit}>Editar Cadastro</Button>
+        <Button onClick={props.onEdit}>{t('action.edit_record')}</Button>
       )}
     </Modal.Footer>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
@@ -36,6 +37,7 @@ export function ModalReaderDetails({
   isOpen,
   onClose,
 }: ModalReaderDetailsProps) {
+  const { t } = useTranslation('reader');
   const [isEditMode, setIsEditMode] = useState(false);
   const [confirmAction, setConfirmAction] = useState<
     'excluir' | 'resetSenha' | null
@@ -69,11 +71,11 @@ export function ModalReaderDetails({
 
   const penalidadeOptions = useMemo(
     () => [
-      { label: 'Sem Penalidade', value: '' },
+      { label: t('penalty.none_option'), value: '' },
       ...(penalidadesData?.map((p) => ({ label: p.status, value: p.nome })) ||
         []),
     ],
-    [penalidadesData],
+    [penalidadesData, t],
   );
 
   useEffect(() => {
@@ -131,7 +133,9 @@ export function ModalReaderDetails({
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)}>
-      <Modal.Header title={isEditMode ? 'Editar Leitor' : 'Detalhes do Leitor'} />
+      <Modal.Header
+        title={isEditMode ? t('modal.edit.title') : t('modal.details.title')}
+      />
       <Modal.Body>
         {isLoadingDetalhes ? (
           <LoadingIcon />
@@ -150,12 +154,12 @@ export function ModalReaderDetails({
               />
               {isEditMode && (
                 <div className="pt-2">
-                  <Label>Status de Penalidade</Label>
+                  <Label>{t('field.penalty_status')}</Label>
                   <CustomSelect
                     value={penalidade}
                     onChange={setPenalidade}
                     options={penalidadeOptions}
-                    placeholder="Selecione"
+                    placeholder={t('common:placeholder.select')}
                   />
                 </div>
               )}
@@ -182,7 +186,7 @@ export function ModalReaderDetails({
               disabled={isLoadingDetalhes}
               isLoading={isDeleting}
             >
-              Excluir
+              {t('common:delete')}
             </Button>
             <div className="flex gap-3">
               <Button
@@ -193,13 +197,15 @@ export function ModalReaderDetails({
                 className="bg-yellow-500 hover:bg-yellow-600 text-white"
               >
                 <LockIcon className="w-5 h-5 mr-2" />
-                <span className="hidden sm:inline">Resetar Senha</span>
+                <span className="hidden sm:inline">
+                  {t('action.reset_password')}
+                </span>
               </Button>
               <Button
                 onClick={() => setIsEditMode(true)}
                 disabled={isLoadingDetalhes}
               >
-                Editar Cadastro
+                {t('common:action.edit_record')}
               </Button>
             </div>
           </>
@@ -207,11 +213,19 @@ export function ModalReaderDetails({
       </Modal.Footer>
       <ConfirmModal
         isOpen={confirmAction !== null}
-        title={confirmAction === 'excluir' ? 'Excluir Leitor' : 'Resetar Senha'}
+        title={
+          confirmAction === 'excluir'
+            ? t('confirm.delete.title')
+            : t('confirm.reset_password.title')
+        }
         message={
           confirmAction === 'excluir'
-            ? `Tem certeza que deseja excluir o leitor ${leitorAtual?.nomeCompleto}?`
-            : `A senha será redefinida para a matrícula: ${leitorAtual?.matricula}. Deseja continuar?`
+            ? t('confirm.delete.message', {
+                name: leitorAtual?.nomeCompleto ?? '',
+              })
+            : t('confirm.reset_password.message', {
+                registration: leitorAtual?.matricula ?? '',
+              })
         }
         isDestructive={confirmAction === 'excluir'}
         onConfirm={

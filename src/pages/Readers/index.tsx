@@ -385,16 +385,13 @@ export function LeitoresPage() {
           </span>
           <div>
             <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
-              {t('page.eyebrow', { defaultValue: 'Comunidade' })}
+              {t('page.eyebrow')}
             </div>
             <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
-              {t('page.title', { defaultValue: 'Leitores' })}
+              {t('page.title')}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {t('page.subtitle', {
-                defaultValue:
-                  'Leitores cadastrados e seu status de penalidade.',
-              })}
+              {t('page.subtitle')}
             </p>
           </div>
         </div>
@@ -509,7 +506,7 @@ export function LeitoresPage() {
                 <th className="text-center px-5 py-3.5">
                   {features.academicFields
                     ? t('table.column.course')
-                    : t('table.column.category', { defaultValue: 'Categoria' })}
+                    : t('table.column.category')}
                 </th>
                 <th className="text-center px-5 py-3.5">
                   {t('table.column.birth_date')}

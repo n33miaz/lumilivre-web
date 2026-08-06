@@ -284,7 +284,7 @@ export function ClassificacaoPage() {
           </div>
           <div>
             <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
-              {t('page.eyebrow', { defaultValue: 'Engajamento' })}
+              {t('page.eyebrow')}
             </div>
             <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white">
               {t('page.title')}

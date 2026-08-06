@@ -88,5 +88,19 @@
   "view_toggle.analytics": "Management Analysis",
   "view_toggle.tables": "Requests and overdue",
   "view_toggle.news_indicator": "new",
-  "view_toggle.aria_label": "Toggle view"
+  "view_toggle.aria_label": "Toggle view",
+  "page.eyebrow": "Overview",
+  "page.subtitle": "A live overview of your library.",
+  "chart.general_distribution_eyebrow": "General distribution",
+  "chart.general_distribution_title": "Loan Status",
+  "chart.activity_eyebrow": "Activity",
+  "chart.catalog_eyebrow": "Catalogue",
+  "chart.attention_eyebrow": "Attention",
+  "chart.overdue_and_due": "Overdue & Due",
+  "section.requests.subtitle": "Waiting for librarian approval",
+  "section.overdue_due.subtitle": "Active loans close to the due date",
+  "badge.requests_open_one": "{{count}} open",
+  "badge.requests_open_other": "{{count}} open",
+  "badge.overdue_items_one": "{{count}} item",
+  "badge.overdue_items_other": "{{count}} items"
 }

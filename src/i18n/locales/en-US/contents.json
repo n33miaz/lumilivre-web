@@ -60,5 +60,11 @@
   "toast.created": "Content published successfully.",
   "toast.updated": "Content updated successfully.",
   "toast.deleted": "Content deleted successfully.",
-  "error.load": "Error loading contents"
+  "error.load": "Error loading contents",
+  "toast.invalid_format.title": "Invalid format",
+  "toast.invalid_format.description": "Select a PDF file.",
+  "form.error.title_required": "The title is required",
+  "error.create": "Error publishing the content.",
+  "error.update": "Error updating the content.",
+  "error.delete": "Error deleting the content."
 }

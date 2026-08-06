@@ -55,7 +55,7 @@ describe('Hook de Mutação: useCreateReader', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Leitor cadastrado com sucesso!',
+          description: 'Leitor cadastrado com sucesso.',
         }),
       );
     });

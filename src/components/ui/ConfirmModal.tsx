@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from './Modal';
 import { Button } from './Button';
 
@@ -18,10 +20,12 @@ export function ConfirmModal({
   message,
   onConfirm,
   onCancel,
-  confirmText = 'Confirmar',
-  cancelText = 'Cancelar',
+  confirmText,
+  cancelText,
   isDestructive = false,
 }: ConfirmModalProps) {
+  const { t } = useTranslation('common');
+
   return (
     <Modal isOpen={isOpen} onClose={onCancel} maxWidth="max-w-md">
       <Modal.Header title={title} />
@@ -34,7 +38,7 @@ export function ConfirmModal({
 
       <Modal.Footer>
         <Button variant="ghost" onClick={onCancel}>
-          {cancelText}
+          {cancelText ?? t('cancel')}
         </Button>
         <Button
           variant={isDestructive ? 'danger' : 'primary'}
@@ -43,7 +47,7 @@ export function ConfirmModal({
             onCancel();
           }}
         >
-          {confirmText}
+          {confirmText ?? t('confirm')}
         </Button>
       </Modal.Footer>
     </Modal>

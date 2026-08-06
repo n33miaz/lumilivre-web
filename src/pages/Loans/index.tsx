@@ -431,16 +431,13 @@ export function EmprestimosPage() {
           </span>
           <div>
             <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
-              {t('page.eyebrow', { defaultValue: 'Movimentação' })}
+              {t('page.eyebrow')}
             </div>
             <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
-              {t('page.title', { defaultValue: 'Empréstimos' })}
+              {t('page.title')}
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {t('page.subtitle', {
-                defaultValue:
-                  'Solicitações, ativos, atrasos e devoluções em um único fluxo.',
-              })}
+              {t('page.subtitle')}
             </p>
           </div>
         </div>

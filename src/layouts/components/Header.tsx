@@ -196,7 +196,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
   );
 
   const userDisplayName =
-    user?.email?.split('@')[0] ?? t('nav:settings', { defaultValue: 'Conta' });
+    user?.email?.split('@')[0] ?? t('nav:settings');
 
   return (
     <header className="sticky top-0 z-50 h-16 px-4 sm:px-6 flex items-center justify-between bg-white/85 dark:bg-dark-card/85 backdrop-blur-xl border-b border-gray-200/70 dark:border-white/5">
@@ -282,7 +282,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
               onClick={() => setIsUserMenuOpen((open) => !open)}
               aria-haspopup="menu"
               aria-expanded={isUserMenuOpen}
-              aria-label={t('nav:user.menu_aria', { defaultValue: 'Menu' })}
+              aria-label={t('nav:user.menu_aria')}
               className="row-hover h-9 pl-1 pr-3 rounded-full bg-gray-100 dark:bg-white/5 flex items-center gap-2 text-sm font-semibold"
             >
               <span className="w-7 h-7 rounded-full bg-lumi-gradient text-white text-xs font-bold flex items-center justify-center">
@@ -324,7 +324,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
                     className={userMenuItemClass}
                   >
                     <User className="w-4 h-4" />
-                    {t('nav:user.profile', { defaultValue: 'Meu perfil' })}
+                    {t('nav:user.profile')}
                   </Link> */}
                   <Link
                     to="/admin/settings"
@@ -342,7 +342,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
                     className={userMenuItemClass}
                   >
                     <LifeBuoy className="w-4 h-4" />
-                    {t('nav:help.label', { defaultValue: 'Ajuda' })}
+                    {t('nav:help.label')}
                   </button>
                   <hr className="my-2 border-gray-100 dark:border-white/5" />
                   <button
@@ -355,7 +355,7 @@ export function Header({ isSidebarExpanded, setSidebarExpanded }: HeaderProps) {
                     className="row-hover-danger w-full inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400"
                   >
                     <LogOut className="w-4 h-4" />
-                    {t('common:logout', { defaultValue: 'Sair' })}
+                    {t('common:logout')}
                   </button>
                 </div>
               </div>

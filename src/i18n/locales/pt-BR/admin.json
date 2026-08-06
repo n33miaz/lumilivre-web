@@ -73,7 +73,7 @@
   "users.field.password_edit_hint": "Deixe em branco para manter a senha atual",
   "users.field.must_change_hint": "O usuário será obrigado a trocar a senha no primeiro acesso.",
   "users.error.email": "Informe um e-mail válido.",
-  "users.error.password": "A senha deve ter no mínimo 6 caracteres.",
+  "users.error.password": "A senha deve ter no mínimo {{min}} caracteres.",
   "users.action.new": "NOVO USUÁRIO",
   "users.action.create": "CADASTRAR USUÁRIO",
   "users.action.edit": "Editar",

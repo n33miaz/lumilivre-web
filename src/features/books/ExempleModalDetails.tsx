@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { DetailsModalActionFooter } from '../../components/shared/DetailsModalActionFooter';
@@ -23,6 +25,7 @@ export function ModalExemplarDetails({
   isOpen,
   onClose,
 }: ModalExemplarDetailsProps) {
+  const { t } = useTranslation('book');
   const [isEditMode, setIsEditMode] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'excluir' | null>(null);
 
@@ -78,7 +81,11 @@ export function ModalExemplarDetails({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header
-        title={isEditMode ? 'Editar Exemplar' : 'Detalhes do Exemplar'}
+        title={
+          isEditMode
+            ? t('modal.copy.edit.title')
+            : t('modal.copy.details.title')
+        }
       />
       <Modal.Body>
         {exemplarAtual && livroIdAtual && (
@@ -108,8 +115,10 @@ export function ModalExemplarDetails({
       />
       <ConfirmModal
         isOpen={confirmAction === 'excluir'}
-        title="Excluir Exemplar"
-        message={`Tem certeza que deseja excluir o exemplar de tombo "${exemplarAtual?.tomboExemplar}"?`}
+        title={t('confirm.copy_delete.title')}
+        message={t('confirm.copy_delete.message', {
+          code: exemplarAtual?.tomboExemplar ?? '',
+        })}
         isDestructive={true}
         onConfirm={executarExclusao}
         onCancel={() => setConfirmAction(null)}

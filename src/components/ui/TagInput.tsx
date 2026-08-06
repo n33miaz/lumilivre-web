@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import closeIcon from '../../assets/icons/close.svg';
 
@@ -10,6 +11,7 @@ interface TagInputProps {
 }
 
 export function TagInput({ label, tags, setTags, placeholder }: TagInputProps) {
+  const { t } = useTranslation('common');
   const [inputValue, setInputValue] = useState('');
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -46,7 +48,11 @@ export function TagInput({ label, tags, setTags, placeholder }: TagInputProps) {
               onClick={() => removeTag(tag)}
               className="ml-2"
             >
-              <img src={closeIcon} alt="Remover" className="w-4 h-4 invert" />
+              <img
+                src={closeIcon}
+                alt={t('action.remove')}
+                className="w-4 h-4 invert"
+              />
             </button>
           </div>
         ))}

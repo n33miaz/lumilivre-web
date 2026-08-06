@@ -51,7 +51,7 @@ describe('useCreateExemple', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Exemplar cadastrado com sucesso!',
+          description: 'Exemplar cadastrado com sucesso.',
         }),
       );
     });
@@ -132,7 +132,7 @@ describe('useDeleteExemplar', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Exemplar excluído com sucesso!',
+          description: 'Exemplar excluído com sucesso.',
         }),
       );
     });

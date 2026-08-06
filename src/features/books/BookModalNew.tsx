@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '../../components/ui/Button';
 import { BookForm } from './BookForm';
 import { useCreateBook } from '../../hooks/mutations/useBookMutations';
@@ -10,6 +12,7 @@ interface BookModalNewProps {
 }
 
 export function BookModalNew({ onClose, onSuccess }: BookModalNewProps) {
+  const { t } = useTranslation('book');
   const { mutateAsync: createBook, isPending } = useCreateBook();
 
   const handleSubmit = async (data: BookFormData, file: File | null) => {
@@ -39,7 +42,7 @@ export function BookModalNew({ onClose, onSuccess }: BookModalNewProps) {
           isLoading={isPending}
           className="w-full"
         >
-          CADASTRAR LIVRO
+          {t('button.submit_book')}
         </Button>
       </div>
     </>

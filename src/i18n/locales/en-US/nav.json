@@ -21,5 +21,6 @@
   "notifications.new_request": "New request from {{name}}",
   "help.label": "Help",
   "user.profile": "My profile",
-  "user.menu_aria": "User menu"
+  "user.menu_aria": "User menu",
+  "aria.close_sidebar": "Close sidebar"
 }

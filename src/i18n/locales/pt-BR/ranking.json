@@ -25,5 +25,6 @@
   "chart.empty": "Nenhum leitor encontrado com os filtros selecionados.",
   "tooltip.books": "Livros",
   "tooltip.total_loans": "Total Empréstimos",
-  "books_count": "{{count}} livros"
+  "books_count": "{{count}} livros",
+  "page.eyebrow": "Engajamento"
 }

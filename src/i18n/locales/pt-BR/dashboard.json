@@ -88,5 +88,19 @@
   "view_toggle.analytics": "Análise Gerencial",
   "view_toggle.tables": "Solicitações e Atrasos",
   "view_toggle.news_indicator": "novidade",
-  "view_toggle.aria_label": "Alternar visualização"
+  "view_toggle.aria_label": "Alternar visualização",
+  "page.eyebrow": "Visão geral",
+  "page.subtitle": "Visão geral da sua biblioteca ao vivo.",
+  "chart.general_distribution_eyebrow": "Distribuição geral",
+  "chart.general_distribution_title": "Status dos Empréstimos",
+  "chart.activity_eyebrow": "Atividade",
+  "chart.catalog_eyebrow": "Catálogo",
+  "chart.attention_eyebrow": "Atenção",
+  "chart.overdue_and_due": "Atrasos & Vencendo",
+  "section.requests.subtitle": "Aguardam aprovação do bibliotecário",
+  "section.overdue_due.subtitle": "Empréstimos ativos próximos da data limite",
+  "badge.requests_open_one": "{{count}} aberta",
+  "badge.requests_open_other": "{{count}} abertas",
+  "badge.overdue_items_one": "{{count}} item",
+  "badge.overdue_items_other": "{{count}} itens"
 }

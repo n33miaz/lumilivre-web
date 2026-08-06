@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { useEnum } from '../../hooks/queries/useBookQueries';
 import { FilterPanel } from '../../components/ui/FilterPanel';
 import { CustomSelect } from '../../components/ui/CustomSelect';
@@ -29,11 +31,14 @@ export function LoanFilter({
   onApply,
   onClear,
 }: LoanFilterProps) {
+  const { t } = useTranslation('loan');
   const { data: statusData, isLoading } = useEnum('STATUS_EMPRESTIMO');
 
+  // Rótulo e valor vivem em campos separados: o `value` viaja para a API como
+  // filtro, então traduzi-lo quebraria a busca em todo idioma novo.
   const statusOptions: Option[] = [
-    { label: 'Todos', value: '' },
-    { label: 'Vence Hoje', value: 'VENCE_HOJE' },
+    { label: t('filter.status.all'), value: '' },
+    { label: t('filter.status.due_today'), value: 'VENCE_HOJE' },
     ...(statusData?.map((s) => ({ label: s.status, value: s.nome })) || []),
   ];
 
@@ -49,12 +54,12 @@ export function LoanFilter({
     >
       {isLoading ? (
         <div className="p-8 text-center text-gray-500">
-          Carregando filtros...
+          {t('common:filter.loading')}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className={labelStyles}>Status do Empréstimo</label>
+            <label className={labelStyles}>{t('filter.field.status')}</label>
             <CustomSelect
               value={filters.statusEmprestimo}
               onChange={(val) => onFilterChange('statusEmprestimo', val)}
@@ -64,13 +69,13 @@ export function LoanFilter({
           </div>
 
           <CustomDatePicker
-            label="Data do Empréstimo (A partir)"
+            label={t('filter.field.borrowed_from')}
             value={filters.dataEmprestimo}
             onChange={(e) => onFilterChange('dataEmprestimo', e.target.value)}
           />
 
           <CustomDatePicker
-            label="Data de Devolução (Até)"
+            label={t('filter.field.due_until')}
             value={filters.dataDevolucao}
             onChange={(e) => onFilterChange('dataDevolucao', e.target.value)}
           />

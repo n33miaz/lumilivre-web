@@ -58,7 +58,7 @@ describe('useCreateContent', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Conteúdo publicado com sucesso!',
+          description: 'Conteúdo publicado com sucesso.',
         }),
       );
     });
@@ -102,7 +102,7 @@ describe('useUpdateContent', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Conteúdo atualizado com sucesso!',
+          description: 'Conteúdo atualizado com sucesso.',
         }),
       );
     });
@@ -126,7 +126,7 @@ describe('useDeleteContent', () => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'success',
-          description: 'Conteúdo excluído com sucesso!',
+          description: 'Conteúdo excluído com sucesso.',
         }),
       );
     });

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '../../components/ui/Button';
 import { ExempleForm, type ExempleFormData } from './ExempleForm';
 import { useCreateExemple } from '../../hooks/mutations/useExempleMutations';
@@ -15,6 +17,7 @@ export function ExempleModalNew({
   livroIsbn,
   livroNome,
 }: ExempleModalNewProps) {
+  const { t } = useTranslation('book');
   const { mutateAsync: createExemplar, isPending } = useCreateExemple();
 
   const handleSubmit = async (data: ExempleFormData) => {
@@ -47,7 +50,7 @@ export function ExempleModalNew({
           isLoading={isPending}
           className="w-full"
         >
-          CADASTRAR EXEMPLAR
+          {t('button.submit_copy')}
         </Button>
       </div>
     </>

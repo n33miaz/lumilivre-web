@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from '../../components/ui/Modal';
 import { Button } from '../../components/ui/Button';
 import { ReaderForm } from './ReaderForm';
@@ -12,6 +14,7 @@ interface ReaderModalNewProps {
 }
 
 export function ReaderModalNew({ onClose, onSuccess }: ReaderModalNewProps) {
+  const { t } = useTranslation('reader');
   const { mutateAsync: createReader, isPending } = useCreateReader();
   const { features } = useLibraryConfig();
 
@@ -52,7 +55,7 @@ export function ReaderModalNew({ onClose, onSuccess }: ReaderModalNewProps) {
           isLoading={isPending}
           className="w-full"
         >
-          CADASTRAR LEITOR
+          {t('button.submit')}
         </Button>
       </Modal.Footer>
     </>

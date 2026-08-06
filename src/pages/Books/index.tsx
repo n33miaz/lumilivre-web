@@ -548,16 +548,13 @@ export function LivrosPage() {
                 </span>
                 <div>
                   <div className="text-xs font-semibold tracking-wider text-lumi-primary dark:text-lumi-label uppercase">
-                    {t('page.eyebrow', { defaultValue: 'Acervo' })}
+                    {t('page.eyebrow')}
                   </div>
                   <h1 className="font-display font-extrabold text-3xl text-gray-900 dark:text-white mt-1">
-                    {t('page.title', { defaultValue: 'Livros' })}
+                    {t('page.title')}
                   </h1>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    {t('page.subtitle', {
-                      defaultValue:
-                        'Catálogo completo, com busca por ISBN e exemplares físicos.',
-                    })}
+                    {t('page.subtitle')}
                   </p>
                 </div>
               </div>
@@ -937,9 +934,7 @@ export function LivrosPage() {
                 className="text-sm text-gray-500 dark:text-gray-400 hover:text-lumi-primary inline-flex items-center gap-1.5"
               >
                 <ChevronLeftIcon />{' '}
-                {t('back_to_books', {
-                  defaultValue: 'Voltar para Livros',
-                })}
+                {t('button.back_to_books')}
               </button>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
@@ -959,7 +954,7 @@ export function LivrosPage() {
                     </h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       {selectedBook?.autor
-                        ? `${t('by', { defaultValue: 'por' })} ${selectedBook.autor}`
+                        ? `${t('by')} ${selectedBook.autor}`
                         : ''}
                       {selectedBook?.isbn ? ` · ISBN ${selectedBook.isbn}` : ''}
                     </p>

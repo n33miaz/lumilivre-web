@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { FilterPanel } from '../../components/ui/FilterPanel';
 import { CustomSelect } from '../../components/ui/CustomSelect';
@@ -37,6 +38,7 @@ export function BookFilter({
   onApply,
   onClear,
 }: BookFilterProps) {
+  const { t } = useTranslation('book');
   const { data: generosData, isLoading: isLoadingGeneros } = useGeneros();
   const { data: cddData, isLoading: isLoadingCdds } = useCdds();
   const { data: classificacaoData, isLoading: isLoadingClass } = useEnum(
@@ -54,40 +56,40 @@ export function BookFilter({
   const generosOpts = useMemo(() => {
     if (!generosData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.genre.all'), value: '' },
       ...generosData.map((g) => ({ label: g.nome, value: g.nome })),
     ];
-  }, [generosData]);
+  }, [generosData, t]);
 
   const cddOpts = useMemo(() => {
     if (!cddData) return [];
     return [
-      { label: 'Todos', value: '' },
+      { label: t('filter.cdd.all'), value: '' },
       ...cddData.map((c) => ({
-        label: `${c.id} - ${c.nome}`,
+        label: t('cdd.option', { code: c.id, name: c.nome }),
         value: c.id,
       })),
     ];
-  }, [cddData]);
+  }, [cddData, t]);
 
   const classificacaoOpts = useMemo(() => {
     if (!classificacaoData) return [];
     return [
-      { label: 'Todas', value: '' },
+      { label: t('filter.age_rating.all'), value: '' },
       ...classificacaoData.map((c) => ({
         label: c.status,
         value: c.nome,
       })),
     ];
-  }, [classificacaoData]);
+  }, [classificacaoData, t]);
 
   const tipoCapaOpts = useMemo(() => {
     if (!tipoCapaData) return [];
     return [
-      { label: 'Todas', value: '' },
+      { label: t('filter.cover_type.all'), value: '' },
       ...tipoCapaData.map((c) => ({ label: c.status, value: c.nome })),
     ];
-  }, [tipoCapaData]);
+  }, [tipoCapaData, t]);
 
   const { autoresOpts, editorasOpts } = useMemo(() => {
     if (!livrosData?.content) return { autoresOpts: [], editorasOpts: [] };
@@ -102,15 +104,15 @@ export function BookFilter({
 
     return {
       autoresOpts: [
-        { label: 'Todos', value: '' },
+        { label: t('filter.author.all'), value: '' },
         ...autoresUnicos.map((a) => ({ label: a, value: a })),
       ],
       editorasOpts: [
-        { label: 'Todas', value: '' },
+        { label: t('filter.publisher.all'), value: '' },
         ...editorasUnicas.map((e) => ({ label: e, value: e })),
       ],
     };
-  }, [livrosData]);
+  }, [livrosData, t]);
 
   const isLoading =
     isLoadingGeneros ||
@@ -131,40 +133,42 @@ export function BookFilter({
     >
       {isLoading ? (
         <div className="p-8 text-center text-gray-500">
-          Carregando filtros...
+          {t('common:filter.loading')}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SearchableSelect
-            label="Autor"
+            label={t('form.field.author')}
             value={filters.autor}
             onChange={(val) => onFilterChange('autor', val)}
             options={autoresOpts}
           />
 
           <SearchableSelect
-            label="Editora"
+            label={t('form.field.publisher')}
             value={filters.editora}
             onChange={(val) => onFilterChange('editora', val)}
             options={editorasOpts}
           />
 
           <SearchableSelect
-            label="Gênero"
+            label={t('form.field.genre')}
             value={filters.genero}
             onChange={(val) => onFilterChange('genero', val)}
             options={generosOpts}
           />
 
           <SearchableSelect
-            label="CDD"
+            label={t('form.field.cdd')}
             value={filters.cdd}
             onChange={(val) => onFilterChange('cdd', val)}
             options={cddOpts}
           />
 
           <div>
-            <label className={labelStyles}>Classificação</label>
+            <label className={labelStyles}>
+              {t('filter.field.classification')}
+            </label>
             <CustomSelect
               value={filters.classificacaoEtaria}
               onChange={(val) => onFilterChange('classificacaoEtaria', val)}
@@ -174,11 +178,11 @@ export function BookFilter({
           </div>
 
           <div>
-            <label className={labelStyles}>Capa</label>
+            <label className={labelStyles}>{t('filter.field.cover')}</label>
             <CustomSelect
               value={filters.tipoCapa}
               onChange={(val) => onFilterChange('tipoCapa', val)}
-              placeholder="Selecione o Tipo de Capa"
+              placeholder={t('filter.cover_type.placeholder')}
               options={tipoCapaOpts}
               invertArrow={true}
             />

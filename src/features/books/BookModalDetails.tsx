@@ -95,7 +95,9 @@ export function DetalhesLivroModal({
   return (
     <Modal isOpen={isOpen} onClose={() => onClose()}>
       <Modal.Header
-        title={isEditMode ? 'Editando Livro' : 'Detalhes do Livro'}
+        title={
+          isEditMode ? t('modal.edit.title') : t('modal.details.title')
+        }
       />
       <Modal.Body>
         {isLoading ? (

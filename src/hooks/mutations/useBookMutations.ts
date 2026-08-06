@@ -21,20 +21,20 @@ interface UpdateBookVariables {
 export const useCreateBook = createMutationHook<unknown, CreateBookVariables>({
   mutationFn: ({ payload, file }) => cadastrarLivro(payload, file),
   queryKey: BOOK_QUERY_KEY,
-  successMessage: 'Livro cadastrado com sucesso!',
-  errorMessage: 'Erro ao cadastrar livro.',
+  successMessage: 'book:toast.created',
+  errorMessage: 'book:error.create',
 });
 
 export const useUpdateBook = createMutationHook<unknown, UpdateBookVariables>({
   mutationFn: ({ id, payload, file }) => atualizarLivro(id, payload, file),
   queryKey: BOOK_QUERY_KEY,
-  successMessage: 'Livro atualizado com sucesso!',
-  errorMessage: 'Erro ao atualizar livro.',
+  successMessage: 'book:toast.updated',
+  errorMessage: 'book:error.update',
 });
 
 export const useDeleteBook = createMutationHook<unknown, number | string>({
   mutationFn: (id) => excluirLivroComExemplares(id),
   queryKey: BOOK_QUERY_KEY,
-  successMessage: 'Livro e seus exemplares foram excluídos!',
-  errorMessage: 'Erro ao excluir livro.',
+  successMessage: 'book:toast.deleted_with_copies',
+  errorMessage: 'book:error.delete',
 });

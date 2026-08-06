@@ -25,21 +25,21 @@ export const useCreateContent = createMutationHook<unknown, CreateContentVariabl
   mutationFn: ({ payload, coverFile, docFile }) =>
     cadastrarConteudo(payload, coverFile, docFile),
   queryKey: CONTENT_QUERY_KEY,
-  successMessage: 'Conteúdo publicado com sucesso!',
-  errorMessage: 'Erro ao publicar conteúdo.',
+  successMessage: 'contents:toast.created',
+  errorMessage: 'contents:error.create',
 });
 
 export const useUpdateContent = createMutationHook<unknown, UpdateContentVariables>({
   mutationFn: ({ id, payload, coverFile, docFile }) =>
     atualizarConteudo(id, payload, coverFile, docFile),
   queryKey: CONTENT_QUERY_KEY,
-  successMessage: 'Conteúdo atualizado com sucesso!',
-  errorMessage: 'Erro ao atualizar conteúdo.',
+  successMessage: 'contents:toast.updated',
+  errorMessage: 'contents:error.update',
 });
 
 export const useDeleteContent = createMutationHook<unknown, string>({
   mutationFn: (id) => excluirConteudo(id),
   queryKey: CONTENT_QUERY_KEY,
-  successMessage: 'Conteúdo excluído com sucesso!',
-  errorMessage: 'Erro ao excluir conteúdo.',
+  successMessage: 'contents:toast.deleted',
+  errorMessage: 'contents:error.delete',
 });
