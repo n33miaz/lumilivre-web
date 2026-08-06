@@ -32,14 +32,50 @@ import enUSDashboard from './locales/en-US/dashboard.json';
 import enUSLanding from './locales/en-US/landing.json';
 import enUSDownload from './locales/en-US/download.json';
 
-// Espanhol, Mandarim e Hindi. Início pelos namespaces de chrome
-// (common + nav); os demais caem em en-US via `fallbackLng` até serem traduzidos.
 import esESCommon from './locales/es-ES/common.json';
+import esESAuth from './locales/es-ES/auth.json';
+import esESReader from './locales/es-ES/reader.json';
+import esESBook from './locales/es-ES/book.json';
+import esESLoan from './locales/es-ES/loan.json';
+import esESSettings from './locales/es-ES/settings.json';
+import esESAdmin from './locales/es-ES/admin.json';
 import esESNav from './locales/es-ES/nav.json';
+import esESRanking from './locales/es-ES/ranking.json';
+import esESReport from './locales/es-ES/report.json';
+import esESContents from './locales/es-ES/contents.json';
+import esESDashboard from './locales/es-ES/dashboard.json';
+import esESLanding from './locales/es-ES/landing.json';
+import esESDownload from './locales/es-ES/download.json';
+
 import zhCNCommon from './locales/zh-CN/common.json';
+import zhCNAuth from './locales/zh-CN/auth.json';
+import zhCNReader from './locales/zh-CN/reader.json';
+import zhCNBook from './locales/zh-CN/book.json';
+import zhCNLoan from './locales/zh-CN/loan.json';
+import zhCNSettings from './locales/zh-CN/settings.json';
+import zhCNAdmin from './locales/zh-CN/admin.json';
 import zhCNNav from './locales/zh-CN/nav.json';
+import zhCNRanking from './locales/zh-CN/ranking.json';
+import zhCNReport from './locales/zh-CN/report.json';
+import zhCNContents from './locales/zh-CN/contents.json';
+import zhCNDashboard from './locales/zh-CN/dashboard.json';
+import zhCNLanding from './locales/zh-CN/landing.json';
+import zhCNDownload from './locales/zh-CN/download.json';
+
 import hiINCommon from './locales/hi-IN/common.json';
+import hiINAuth from './locales/hi-IN/auth.json';
+import hiINReader from './locales/hi-IN/reader.json';
+import hiINBook from './locales/hi-IN/book.json';
+import hiINLoan from './locales/hi-IN/loan.json';
+import hiINSettings from './locales/hi-IN/settings.json';
+import hiINAdmin from './locales/hi-IN/admin.json';
 import hiINNav from './locales/hi-IN/nav.json';
+import hiINRanking from './locales/hi-IN/ranking.json';
+import hiINReport from './locales/hi-IN/report.json';
+import hiINContents from './locales/hi-IN/contents.json';
+import hiINDashboard from './locales/hi-IN/dashboard.json';
+import hiINLanding from './locales/hi-IN/landing.json';
+import hiINDownload from './locales/hi-IN/download.json';
 
 export const LOCALES = [
   { code: 'pt-BR', label: 'Português', short: 'PT' },
@@ -95,11 +131,54 @@ i18n
         landing: enUSLanding,
         download: enUSDownload,
       },
-      // Idiomas novos: chrome traduzido (common+nav); o resto usa o
-      // fallback en-US -> pt-BR até a tradução completa dos demais namespaces.
-      'es-ES': { common: esESCommon, nav: esESNav },
-      'zh-CN': { common: zhCNCommon, nav: zhCNNav },
-      'hi-IN': { common: hiINCommon, nav: hiINNav },
+      'es-ES': {
+        common: esESCommon,
+        auth: esESAuth,
+        reader: esESReader,
+        book: esESBook,
+        loan: esESLoan,
+        settings: esESSettings,
+        admin: esESAdmin,
+        nav: esESNav,
+        ranking: esESRanking,
+        report: esESReport,
+        contents: esESContents,
+        dashboard: esESDashboard,
+        landing: esESLanding,
+        download: esESDownload,
+      },
+      'zh-CN': {
+        common: zhCNCommon,
+        auth: zhCNAuth,
+        reader: zhCNReader,
+        book: zhCNBook,
+        loan: zhCNLoan,
+        settings: zhCNSettings,
+        admin: zhCNAdmin,
+        nav: zhCNNav,
+        ranking: zhCNRanking,
+        report: zhCNReport,
+        contents: zhCNContents,
+        dashboard: zhCNDashboard,
+        landing: zhCNLanding,
+        download: zhCNDownload,
+      },
+      'hi-IN': {
+        common: hiINCommon,
+        auth: hiINAuth,
+        reader: hiINReader,
+        book: hiINBook,
+        loan: hiINLoan,
+        settings: hiINSettings,
+        admin: hiINAdmin,
+        nav: hiINNav,
+        ranking: hiINRanking,
+        report: hiINReport,
+        contents: hiINContents,
+        dashboard: hiINDashboard,
+        landing: hiINLanding,
+        download: hiINDownload,
+      },
     },
     fallbackLng: {
       'es-ES': ['en-US', 'pt-BR'],

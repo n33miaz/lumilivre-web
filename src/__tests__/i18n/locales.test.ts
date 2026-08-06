@@ -20,8 +20,16 @@ const LOCALES_DIR = path.resolve(process.cwd(), 'src/i18n/locales');
 /** Locale de referência: é o que o produto fala por padrão. */
 const REFERENCE_LOCALE = DEFAULT_LOCALE;
 
-/** Locale que precisa acompanhar a referência chave a chave. */
-const COMPLETE_LOCALE = 'en-US';
+/**
+ * Todo idioma suportado acompanha a referência chave a chave. Enquanto es/zh/hi
+ * eram parciais, bastava proibir chave órfã e o resto caía no `fallbackLng`.
+ * Com os cinco completos a regra fica simétrica de propósito: chave nova nasce
+ * nos cinco ou a suíte quebra — senão a próxima nasce em dois idiomas de novo,
+ * e a falta some no fallback sem ninguém ver.
+ */
+const TRANSLATED_LOCALES = SUPPORTED_LOCALES.filter(
+  (locale) => locale !== REFERENCE_LOCALE,
+);
 
 const readBundle = (locale: string, namespace: string): Record<string, string> =>
   JSON.parse(
@@ -40,6 +48,10 @@ const placeholdersOf = (value: string): string[] =>
     .map((match) => match[1])
     .sort();
 
+/** Tags de `<Trans>` embutidas na mensagem (`<author>…</author>` → `author`). */
+const tagsOf = (value: string): string[] =>
+  [...value.matchAll(/<\/?([a-zA-Z][\w-]*)\s*\/?>/g)].map((match) => match[1]).sort();
+
 const referenceNamespaces = namespacesOf(REFERENCE_LOCALE);
 
 describe('bundles de i18n', () => {
@@ -47,30 +59,40 @@ describe('bundles de i18n', () => {
     expect(referenceNamespaces.length).toBeGreaterThan(0);
   });
 
-  it(`${COMPLETE_LOCALE} cobre exatamente os namespaces de ${REFERENCE_LOCALE}`, () => {
-    expect(namespacesOf(COMPLETE_LOCALE)).toEqual(referenceNamespaces);
-  });
+  it.each(TRANSLATED_LOCALES)(
+    `locale "%s" cobre exatamente os namespaces de ${REFERENCE_LOCALE}`,
+    (locale) => {
+      expect(namespacesOf(locale)).toEqual(referenceNamespaces);
+    },
+  );
 
   it.each(referenceNamespaces)(
-    'namespace "%s": pt-BR e en-US carregam o mesmo conjunto de chaves',
+    'namespace "%s": os cinco idiomas carregam o mesmo conjunto de chaves',
     (namespace) => {
       const reference = new Set(Object.keys(readBundle(REFERENCE_LOCALE, namespace)));
-      const complete = new Set(Object.keys(readBundle(COMPLETE_LOCALE, namespace)));
 
-      const missingInComplete = [...reference].filter((k) => !complete.has(k));
-      const missingInReference = [...complete].filter((k) => !reference.has(k));
-
-      expect({ missingInComplete, missingInReference }).toEqual({
-        missingInComplete: [],
-        missingInReference: [],
+      const drift = TRANSLATED_LOCALES.flatMap((locale) => {
+        const translated = new Set(Object.keys(readBundle(locale, namespace)));
+        return [
+          ...[...reference]
+            .filter((key) => !translated.has(key))
+            .map((key) => `${locale} não traduz: ${key}`),
+          // Chave que só existe no idioma traduzido é órfã: ninguém a lê, e ela
+          // envelhece sem que a referência saiba que existe.
+          ...[...translated]
+            .filter((key) => !reference.has(key))
+            .map((key) => `${locale} inventa: ${key}`),
+        ];
       });
+
+      expect(drift).toEqual([]);
     },
   );
 
   it.each(referenceNamespaces)(
     'namespace "%s": nenhuma tradução em branco',
     (namespace) => {
-      for (const locale of [REFERENCE_LOCALE, COMPLETE_LOCALE]) {
+      for (const locale of [REFERENCE_LOCALE, ...TRANSLATED_LOCALES]) {
         const empty = Object.entries(readBundle(locale, namespace))
           .filter(([, value]) => typeof value !== 'string' || value.trim() === '')
           .map(([key]) => `${locale}/${namespace}: ${key}`);
@@ -83,49 +105,31 @@ describe('bundles de i18n', () => {
     'namespace "%s": as interpolações sobrevivem à tradução',
     (namespace) => {
       const reference = readBundle(REFERENCE_LOCALE, namespace);
-      const complete = readBundle(COMPLETE_LOCALE, namespace);
 
       // Uma frase que perde o `{{name}}` na tradução deixa de mostrar o dado —
-      // e o bug só aparece no idioma traduzido, nunca no de origem.
-      const drift = Object.entries(reference)
-        .filter(([key, value]) => {
-          const other = complete[key];
-          if (typeof other !== 'string') return false;
-          return (
-            placeholdersOf(value).join('|') !== placeholdersOf(other).join('|')
-          );
-        })
-        .map(([key]) => `${namespace}: ${key}`);
+      // e o bug só aparece no idioma traduzido, nunca no de origem. A ordem das
+      // palavras muda entre idiomas; o conjunto de argumentos, não.
+      const drift = TRANSLATED_LOCALES.flatMap((locale) => {
+        const translated = readBundle(locale, namespace);
+        return Object.entries(reference)
+          .filter(([key, value]) => {
+            const other = translated[key];
+            if (typeof other !== 'string') return false;
+            return (
+              placeholdersOf(value).join('|') !== placeholdersOf(other).join('|') ||
+              tagsOf(value).join('|') !== tagsOf(other).join('|')
+            );
+          })
+          .map(([key]) => `${locale}/${namespace}: ${key}`);
+      });
 
       expect(drift).toEqual([]);
     },
   );
 
-  // Idiomas ainda parciais (es/zh/hi) caem no fallback en-US → pt-BR. Não exigimos
-  // cobertura total deles, mas uma chave que só existe ali é chave órfã: ninguém
-  // a lê, e ela some do radar quando a tradução for completada.
-  const partialLocales = SUPPORTED_LOCALES.filter(
-    (locale) => locale !== REFERENCE_LOCALE && locale !== COMPLETE_LOCALE,
-  );
-
-  it.each(partialLocales)(
-    'locale parcial "%s" não inventa chave fora do pt-BR',
-    (locale) => {
-      const orphans: string[] = [];
-      for (const namespace of namespacesOf(locale)) {
-        expect(referenceNamespaces).toContain(namespace);
-        const reference = new Set(Object.keys(readBundle(REFERENCE_LOCALE, namespace)));
-        for (const key of Object.keys(readBundle(locale, namespace))) {
-          if (!reference.has(key)) orphans.push(`${namespace}: ${key}`);
-        }
-      }
-      expect(orphans).toEqual([]);
-    },
-  );
-
   it('todo namespace do disco está registrado no i18n', () => {
     const resources = i18n.options.resources ?? {};
-    for (const locale of [REFERENCE_LOCALE, COMPLETE_LOCALE]) {
+    for (const locale of [REFERENCE_LOCALE, ...TRANSLATED_LOCALES]) {
       expect(Object.keys(resources[locale] ?? {}).sort()).toEqual(
         referenceNamespaces,
       );

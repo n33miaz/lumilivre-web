@@ -1,0 +1,10 @@
+{
+  "eyebrow": "Android 应用",
+  "title": "正在下载 LumiLivre",
+  "message": "应用将在片刻后开始下载。",
+  "button.retry": "未自动开始？点此下载",
+  "button.releases": "查看已发布版本",
+  "unconfigured.title": "无法下载",
+  "unconfigured.message": "此版本未配置应用的下载地址。请直接从应用仓库的 releases 页面下载最新版本。",
+  "link.return_to_admin": "前往管理面板"
+}

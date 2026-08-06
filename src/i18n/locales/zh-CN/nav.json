@@ -21,5 +21,6 @@
   "notifications.new_request": "来自 {{name}} 的新申请",
   "help.label": "帮助",
   "user.profile": "我的资料",
-  "user.menu_aria": "用户菜单"
+  "user.menu_aria": "用户菜单",
+  "aria.close_sidebar": "关闭侧边栏"
 }

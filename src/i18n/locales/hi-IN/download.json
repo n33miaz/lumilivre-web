@@ -1,0 +1,10 @@
+{
+  "eyebrow": "Android ऐप",
+  "title": "LumiLivre डाउनलोड हो रहा है",
+  "message": "ऐप कुछ ही पलों में डाउनलोड होना शुरू हो जाएगा।",
+  "button.retry": "शुरू न हुआ हो तो क्लिक करें",
+  "button.releases": "प्रकाशित संस्करण देखें",
+  "unconfigured.title": "डाउनलोड अनुपलब्ध",
+  "unconfigured.message": "इस बिल्ड को ऐप का पता नहीं मिला। नवीनतम संस्करण सीधे ऐप के रिपॉज़िटरी की releases से डाउनलोड करें।",
+  "link.return_to_admin": "प्रशासनिक साइट पर जाएँ"
+}

@@ -1,0 +1,10 @@
+{
+  "eyebrow": "Aplicación Android",
+  "title": "Descargando LumiLivre",
+  "message": "La descarga de la aplicación empezará en unos instantes.",
+  "button.retry": "Haz clic si no ha empezado",
+  "button.releases": "Ver versiones publicadas",
+  "unconfigured.title": "Descarga no disponible",
+  "unconfigured.message": "Esta build no recibió la dirección de la aplicación. Descarga la versión más reciente directamente desde las releases del repositorio de la app.",
+  "link.return_to_admin": "Ir al panel administrativo"
+}
