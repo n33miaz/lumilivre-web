@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Modal } from '../../../components/ui/Modal';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
 import { useToast } from '../../../contexts/ToastContext';
@@ -6,6 +8,7 @@ import { changePassword } from '../../../services/authService';
 import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
 import { Button } from '../../../components/ui/Button';
+import { MIN_PASSWORD_LENGTH } from '../../../utils/passwordPolicy';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -16,6 +19,7 @@ export function ChangePasswordModal({
   isOpen,
   onClose,
 }: ChangePasswordModalProps) {
+  const { t } = useTranslation('auth');
   const { addToast } = useToast();
 
   const [senhaAtual, setSenhaAtual] = useState('');
@@ -26,11 +30,13 @@ export function ChangePasswordModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (novaSenha.length < 6) {
+    if (novaSenha.length < MIN_PASSWORD_LENGTH) {
       addToast({
         type: 'warning',
-        title: 'Senha curta',
-        description: 'A nova senha deve ter no mínimo 6 caracteres.',
+        title: t('change_password.toast.too_short.title'),
+        description: t('change_password.toast.too_short.description', {
+          min: MIN_PASSWORD_LENGTH,
+        }),
       });
       return;
     }
@@ -38,8 +44,8 @@ export function ChangePasswordModal({
     if (novaSenha !== confirmarSenha) {
       addToast({
         type: 'warning',
-        title: 'Erro',
-        description: 'As novas senhas não conferem.',
+        title: t('change_password.toast.mismatch.title'),
+        description: t('change_password.toast.mismatch.description'),
       });
       return;
     }
@@ -51,8 +57,8 @@ export function ChangePasswordModal({
 
       addToast({
         type: 'success',
-        title: 'Sucesso',
-        description: 'Senha alterada com sucesso!',
+        title: t('change_password.toast.success.title'),
+        description: t('change_password.toast.success.description'),
       });
 
       setSenhaAtual('');
@@ -63,10 +69,10 @@ export function ChangePasswordModal({
       console.error(error);
       addToast({
         type: 'error',
-        title: 'Erro',
+        title: t('change_password.toast.error.title'),
         description: getErrorMessage(
           error,
-          'Erro ao alterar senha. Verifique sua senha atual.',
+          t('change_password.toast.error.description'),
         ),
       });
     } finally {
@@ -76,7 +82,7 @@ export function ChangePasswordModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="max-w-lg">
-      <Modal.Header title="Alterar Senha" />
+      <Modal.Header title={t('change_password.modal.title')} />
 
       <Modal.Body>
         <form
@@ -86,7 +92,7 @@ export function ChangePasswordModal({
         >
           <InputFloatingLabel
             id="senhaAtual"
-            label="Senha Atual"
+            label={t('change_password.field.current')}
             type="password"
             value={senhaAtual}
             onChange={(e) => setSenhaAtual(e.target.value)}
@@ -95,7 +101,7 @@ export function ChangePasswordModal({
           />
           <InputFloatingLabel
             id="novaSenha"
-            label="Nova Senha"
+            label={t('change_password.field.new')}
             type="password"
             value={novaSenha}
             onChange={(e) => setNovaSenha(e.target.value)}
@@ -104,7 +110,7 @@ export function ChangePasswordModal({
           />
           <InputFloatingLabel
             id="confirmarSenha"
-            label="Confirmar Nova Senha"
+            label={t('change_password.field.confirm')}
             type="password"
             value={confirmarSenha}
             onChange={(e) => setConfirmarSenha(e.target.value)}
@@ -116,15 +122,15 @@ export function ChangePasswordModal({
 
       <Modal.Footer>
         <Button variant="ghost" onClick={onClose} disabled={isLoading}>
-          Cancelar
+          {t('common:cancel')}
         </Button>
         <Button
           type="submit"
           form="change-password-form"
           isLoading={isLoading}
-          loadingText="Salvando..."
+          loadingText={t('change_password.button.loading')}
         >
-          Salvar
+          {t('common:save')}
         </Button>
       </Modal.Footer>
     </Modal>

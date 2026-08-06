@@ -1,4 +1,5 @@
 import { z } from './zod';
+import { MIN_PASSWORD_LENGTH } from '../utils/passwordPolicy';
 
 export const MANAGEABLE_ROLES = ['ADMIN', 'LIBRARIAN'] as const;
 
@@ -11,13 +12,14 @@ const baseUserSchema = z.object({
 export type UserFormData = z.infer<typeof baseUserSchema>;
 
 /**
- * Na criação a senha é obrigatória (mín. 6). Na edição, é opcional — quando em
- * branco, mantém a senha atual; quando informada, precisa ter mín. 6.
+ * Na criação a senha é obrigatória (mín. `MIN_PASSWORD_LENGTH`). Na edição, é
+ * opcional — quando em branco, mantém a senha atual; quando informada, precisa
+ * respeitar o mesmo mínimo.
  */
 export function buildUserSchema(isEdit: boolean) {
   return baseUserSchema.superRefine((data, ctx) => {
     const pwd = data.password ?? '';
-    if (!isEdit && pwd.length < 6) {
+    if (!isEdit && pwd.length < MIN_PASSWORD_LENGTH) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['password'],
@@ -25,7 +27,7 @@ export function buildUserSchema(isEdit: boolean) {
       });
       return;
     }
-    if (isEdit && pwd.length > 0 && pwd.length < 6) {
+    if (isEdit && pwd.length > 0 && pwd.length < MIN_PASSWORD_LENGTH) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['password'],

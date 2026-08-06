@@ -1,12 +1,25 @@
 import { z } from './zod';
 
+/**
+ * Tamanho mínimo do nome. Sai da frase e entra por interpolação (`{{min}}`)
+ * para que a regra e a mensagem não possam divergir na tradução.
+ */
+export const MIN_READER_NAME_LENGTH = 3;
+
+// Mensagens são **chaves** de i18n (namespace `reader`); o formulário traduz.
 export const readerSchema = z.object({
-  nomeCompleto: z.string().min(3, 'O nome deve ter no mínimo 3 caracteres'),
-  matricula: z.string().min(1, 'A matrícula é obrigatória'),
+  nomeCompleto: z
+    .string()
+    .min(MIN_READER_NAME_LENGTH, 'form.error.name_min'),
+  matricula: z.string().min(1, 'form.error.registration_required'),
   cpf: z.string().optional(),
   celular: z.string().optional(),
   dataNascimento: z.string().optional(),
-  email: z.string().email('E-mail inválido').or(z.literal('')).optional(),
+  email: z
+    .string()
+    .email('form.error.email_invalid')
+    .or(z.literal(''))
+    .optional(),
   cursoId: z.union([z.string(), z.number()]).optional(),
   turnoId: z.union([z.string(), z.number()]).optional(),
   moduloId: z.union([z.string(), z.number()]).optional(),
@@ -27,9 +40,9 @@ export const readerSchema = z.object({
 export type ReaderFormData = z.infer<typeof readerSchema>;
 
 const requiredAcademicFields = [
-  ['cursoId', 'O curso é obrigatório'],
-  ['turnoId', 'O turno é obrigatório'],
-  ['moduloId', 'O módulo é obrigatório'],
+  ['cursoId', 'form.error.course_required'],
+  ['turnoId', 'form.error.shift_required'],
+  ['moduloId', 'form.error.module_required'],
 ] as const;
 
 /** Em bibliotecas escolares, curso/turno/módulo são obrigatórios. */

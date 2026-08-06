@@ -13,6 +13,7 @@ import { AuthSubmitButton } from '../../../components/ui/AuthSubmitButton';
 
 import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
+import { MIN_PASSWORD_LENGTH } from '../../../utils/passwordPolicy';
 
 export function MudarSenhaPage() {
   const { t } = useTranslation('auth');
@@ -58,11 +59,13 @@ export function MudarSenhaPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (novaSenha.length < 6) {
+    if (novaSenha.length < MIN_PASSWORD_LENGTH) {
       addToast({
         type: 'warning',
         title: t('reset_password.toast.too_short.title'),
-        description: t('reset_password.toast.too_short.description'),
+        description: t('reset_password.toast.too_short.description', {
+          min: MIN_PASSWORD_LENGTH,
+        }),
       });
       return;
     }

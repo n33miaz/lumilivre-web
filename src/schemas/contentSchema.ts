@@ -2,7 +2,8 @@ import { z } from './zod';
 
 export const contentSchema = z.object({
   contentType: z.enum(['ANNOUNCEMENT', 'ATTACHMENT', 'WORK']),
-  title: z.string().min(1, 'O título é obrigatório'),
+  // Chave de i18n (namespace `contents`), como no resto dos schemas.
+  title: z.string().min(1, 'form.error.title_required'),
   body: z.string().optional(),
   authors: z.string().optional(),
   advisors: z.string().optional(),

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../../components/ui/Modal';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
@@ -8,8 +9,10 @@ import { changePassword } from '../../../services/authService';
 
 import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
+import { MIN_PASSWORD_LENGTH } from '../../../utils/passwordPolicy';
 
 export function MandatoryPasswordChangeModal() {
+  const { t } = useTranslation('auth');
   const { user, completePasswordChange } = useAuth();
   const { addToast } = useToast();
 
@@ -23,11 +26,13 @@ export function MandatoryPasswordChangeModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (novaSenha.length < 6) {
+    if (novaSenha.length < MIN_PASSWORD_LENGTH) {
       addToast({
         type: 'warning',
-        title: 'Senha curta',
-        description: 'A nova senha deve ter no mínimo 6 caracteres.',
+        title: t('change_password.toast.too_short.title'),
+        description: t('change_password.toast.too_short.description', {
+          min: MIN_PASSWORD_LENGTH,
+        }),
       });
       return;
     }
@@ -35,8 +40,8 @@ export function MandatoryPasswordChangeModal() {
     if (novaSenha !== confirmarSenha) {
       addToast({
         type: 'warning',
-        title: 'Erro',
-        description: 'As novas senhas não conferem.',
+        title: t('change_password.toast.mismatch.title'),
+        description: t('change_password.toast.mismatch.description'),
       });
       return;
     }
@@ -48,16 +53,19 @@ export function MandatoryPasswordChangeModal() {
 
       addToast({
         type: 'success',
-        title: 'Sucesso',
-        description: 'Senha alterada com sucesso!',
+        title: t('change_password.toast.success.title'),
+        description: t('change_password.toast.success.description'),
       });
       completePasswordChange();
     } catch (error) {
       console.error(error);
       addToast({
         type: 'error',
-        title: 'Erro',
-        description: getErrorMessage(error, 'Erro ao alterar senha.'),
+        title: t('change_password.toast.error.title'),
+        description: getErrorMessage(
+          error,
+          t('mandatory_change.toast.error.description'),
+        ),
       });
     } finally {
       setIsLoading(false);
@@ -66,20 +74,19 @@ export function MandatoryPasswordChangeModal() {
 
   return (
     <Modal isOpen={true} onClose={() => {}} preventClose={true}>
-      <Modal.Header title="Alteração de Primeira Senha" />
+      <Modal.Header title={t('mandatory_change.modal.title')} />
       <Modal.Body>
         <div className="space-y-4">
           <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              Por motivos de segurança, você deve alterar sua senha inicial
-              antes de continuar utilizando o sistema.
+              {t('mandatory_change.notice')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <InputFloatingLabel
               id="senhaAtual"
-              label="Senha Atual"
+              label={t('change_password.field.current')}
               type="password"
               value={senhaAtual}
               onChange={(e) => setSenhaAtual(e.target.value)}
@@ -89,7 +96,7 @@ export function MandatoryPasswordChangeModal() {
 
             <InputFloatingLabel
               id="novaSenha"
-              label="Nova Senha"
+              label={t('change_password.field.new')}
               type="password"
               value={novaSenha}
               onChange={(e) => setNovaSenha(e.target.value)}
@@ -99,7 +106,7 @@ export function MandatoryPasswordChangeModal() {
 
             <InputFloatingLabel
               id="confirmarSenha"
-              label="Confirmar Nova Senha"
+              label={t('change_password.field.confirm')}
               type="password"
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
@@ -116,7 +123,9 @@ export function MandatoryPasswordChangeModal() {
                 {isLoading && (
                   <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 )}
-                {isLoading ? 'SALVANDO...' : 'SALVAR'}
+                {isLoading
+                  ? t('mandatory_change.button.submitting')
+                  : t('mandatory_change.button.submit')}
               </button>
             </div>
           </form>

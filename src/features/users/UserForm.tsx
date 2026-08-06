@@ -11,6 +11,7 @@ import {
   MANAGEABLE_ROLES,
   type UserFormData,
 } from '../../schemas/userSchema';
+import { MIN_PASSWORD_LENGTH } from '../../utils/passwordPolicy';
 
 interface UserFormProps {
   formId: string;
@@ -86,7 +87,11 @@ export function UserForm({
           autoComplete="new-password"
           placeholder={isEdit ? t('users.field.password_edit_hint') : undefined}
           {...register('password')}
-          error={errors.password ? t('users.error.password') : undefined}
+          error={
+            errors.password
+              ? t('users.error.password', { min: MIN_PASSWORD_LENGTH })
+              : undefined
+          }
         />
         <p className="text-xs text-gray-400 mt-1">
           {t('users.field.must_change_hint')}
