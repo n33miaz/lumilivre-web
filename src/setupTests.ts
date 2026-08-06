@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { beforeAll, vi } from 'vitest';
+
+import i18n, { DEFAULT_LOCALE } from './i18n';
 
 // Node >= 22 define localStorage/sessionStorage como getters globais
 // experimentais (undefined sem --localstorage-file), sombreando os do jsdom
@@ -43,6 +45,13 @@ if (typeof globalThis.localStorage?.clear !== 'function') {
     });
   }
 }
+
+// Idioma fixo em pt-BR para toda a suíte. Sem isto o detector cai no
+// `navigator.language` do jsdom (en-US) e as asserções de texto passariam a
+// depender do ambiente em vez do bundle.
+beforeAll(async () => {
+  await i18n.changeLanguage(DEFAULT_LOCALE);
+});
 
 // Mock do window.matchMedia para o jsdom
 Object.defineProperty(window, 'matchMedia', {
