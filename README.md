@@ -43,20 +43,25 @@ idiomas parciais.
   <h1>Screenshots</h1>
 </div>
 
+Capturas do stack local rodando com o seed de demonstração — nenhuma tela é
+mock. As da vitrine da landing ficam em `src/assets/images/prints/` (o build as
+consome); as demais, em `docs/screenshots/`.
+
 <div align="center">
-  <img src="src/assets/images/prints/landing.png" width="92%" alt="Landing pública" style="border-radius: 10px; margin: 5px;">
+  <img src="docs/screenshots/landing.png" width="45%" alt="Landing pública no tema claro" style="border-radius: 10px; margin: 5px;">
+  <img src="docs/screenshots/landing_dark.png" width="45%" alt="A mesma landing no tema escuro" style="border-radius: 10px; margin: 5px;">
 </div>
 <div align="center">
-  <img src="src/assets/images/prints/login.png" width="45%" alt="Login" style="border-radius: 10px; margin: 5px;">
-  <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Dashboard" style="border-radius: 10px; margin: 5px;">
+  <img src="docs/screenshots/login.png" width="45%" alt="Tela de login com o painel de dicas" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/dashboard.png" width="45%" alt="Dashboard na visão de análise gerencial" style="border-radius: 10px; margin: 5px;">
 </div>
 <div align="center">
-  <img src="src/assets/images/prints/books_dark-new.png" width="45%" alt="Livros (tema escuro)" style="border-radius: 10px; margin: 5px;">
-  <img src="src/assets/images/prints/exemples_dark.png" width="45%" alt="Exemplares (tema escuro)" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/books_dark.png" width="45%" alt="Acervo no tema escuro" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/loans.png" width="45%" alt="Empréstimos com a situação de cada retirada" style="border-radius: 10px; margin: 5px;">
 </div>
 <div align="center">
-  <img src="src/assets/images/prints/students.png" width="45%" alt="Leitores" style="border-radius: 10px; margin: 5px;">
-  <img src="src/assets/images/prints/students-details.png" width="45%" alt="Detalhes do leitor" style="border-radius: 10px; margin: 5px;">
+  <img src="src/assets/images/prints/interest.png" width="45%" alt="Interesse dos leitores: quem quer o quê e quantos exemplares existem" style="border-radius: 10px; margin: 5px;">
+  <img src="docs/screenshots/reports.png" width="45%" alt="Central de relatórios" style="border-radius: 10px; margin: 5px;">
 </div>
 
 ## Stack

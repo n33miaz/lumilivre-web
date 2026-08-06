@@ -30,6 +30,9 @@ playwright.config.ts
 .vscode/
 README.md
 LICENSE
+# Capturas que só os READMEs consomem — o Vite nunca as importa, então mandá-las
+# no contexto de build é 640 KB para o Docker jogar fora.
+docs/
 
 # Docker (evita invalidar cache ao editar o próprio Dockerfile)
 Dockerfile
