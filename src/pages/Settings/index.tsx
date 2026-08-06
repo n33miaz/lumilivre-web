@@ -14,8 +14,10 @@ import AutoIcon from '../../assets/icons/auto.svg?react';
 import LogoutIcon from '../../assets/icons/logout.svg?react';
 import ToolsIcon from '../../assets/icons/tools.svg?react';
 import AlertIcon from '../../assets/icons/alert.svg?react';
+import UserIcon from '../../assets/icons/users.svg?react';
 import { LocaleSwitcher } from '../../components/ui/LocaleSwitcher';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
+import { ToggleSwitch } from '../../components/ui/ToggleSwitch';
 import { useToast } from '../../contexts/ToastContext';
 import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 import {
@@ -98,27 +100,6 @@ function ThemePicker({ theme, onChange, labels }: ThemePickerProps) {
   );
 }
 
-interface NotifSwitchProps {
-  checked: boolean;
-  onChange: () => void;
-  ariaLabel: string;
-  disabled?: boolean;
-}
-
-function NotifSwitch({ checked, onChange, ariaLabel, disabled }: NotifSwitchProps) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={ariaLabel}
-      disabled={disabled}
-      onClick={onChange}
-      className={`switch ${checked ? 'on' : ''} ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-    />
-  );
-}
-
 export function ConfiguracoesPage() {
   const { t } = useTranslation(['settings', 'admin']);
   const { theme, setTheme } = useContext(ThemeContext);
@@ -128,6 +109,7 @@ export function ConfiguracoesPage() {
   const {
     libraryType,
     readerCanEditAvatar,
+    guestAccessEnabled,
     isLoading: isConfigLoading,
   } = useLibraryConfig();
   const isAdmin = user?.role === 'ADMIN';
@@ -168,7 +150,8 @@ export function ConfiguracoesPage() {
   });
 
   const updateAvatarMutation = useMutation({
-    mutationFn: (next: boolean) => updateSettings(libraryType, next),
+    mutationFn: (next: boolean) =>
+      updateSettings(libraryType, { readerCanEditAvatar: next }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['library-settings'] });
       addToast({
@@ -182,6 +165,26 @@ export function ConfiguracoesPage() {
         type: 'error',
         title: t('reader_avatar.error.title'),
         description: t('reader_avatar.error.description'),
+      });
+    },
+  });
+
+  const updateGuestAccessMutation = useMutation({
+    mutationFn: (next: boolean) =>
+      updateSettings(libraryType, { guestAccessEnabled: next }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['library-settings'] });
+      addToast({
+        type: 'success',
+        title: t('guest_access.success.title'),
+        description: t('guest_access.success.description'),
+      });
+    },
+    onError: () => {
+      addToast({
+        type: 'error',
+        title: t('guest_access.error.title'),
+        description: t('guest_access.error.description'),
       });
     },
   });
@@ -255,7 +258,7 @@ export function ConfiguracoesPage() {
               title={t('reader_avatar.title')}
               description={t('reader_avatar.description')}
               action={
-                <NotifSwitch
+                <ToggleSwitch
                   checked={readerCanEditAvatar}
                   // Sem o config carregado, o PUT usaria o libraryType default
                   // (SCHOOL) e poderia flipar o tipo de uma biblioteca STANDARD.
@@ -264,6 +267,23 @@ export function ConfiguracoesPage() {
                     updateAvatarMutation.mutate(!readerCanEditAvatar)
                   }
                   ariaLabel={t('reader_avatar.toggle_aria')}
+                />
+              }
+            />
+            <SettingsRow
+              icon={<UserIcon className="w-6 h-6" />}
+              title={t('guest_access.title')}
+              description={t('guest_access.description')}
+              action={
+                <ToggleSwitch
+                  checked={guestAccessEnabled}
+                  disabled={
+                    updateGuestAccessMutation.isPending || isConfigLoading
+                  }
+                  onChange={() =>
+                    updateGuestAccessMutation.mutate(!guestAccessEnabled)
+                  }
+                  ariaLabel={t('guest_access.toggle_aria')}
                 />
               }
             />
@@ -344,7 +364,7 @@ export function ConfiguracoesPage() {
             title={t('notification.title')}
             description={t('notification.description')}
             action={
-              <NotifSwitch
+              <ToggleSwitch
                 checked={notificationsEnabled}
                 onChange={handleNotificationsChange}
                 ariaLabel={t('notification.toggle_aria')}

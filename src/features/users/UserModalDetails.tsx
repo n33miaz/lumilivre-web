@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/ui/Modal';
 import { ConfirmModal } from '../../components/ui/ConfirmModal';
 import { Button } from '../../components/ui/Button';
+import { ToggleSwitch } from '../../components/ui/ToggleSwitch';
 import { UserForm } from './UserForm';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   useUpdateUser,
   useDeleteUser,
+  useSetUserStatus,
 } from '../../hooks/mutations/useUserMutations';
 import type { UserFormData } from '../../schemas/userSchema';
 import type {
@@ -35,6 +37,8 @@ export function UserModalDetails({
 
   const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
   const { mutateAsync: deleteUser, isPending: isDeleting } = useDeleteUser();
+  const { mutate: setUserStatus, isPending: isChangingStatus } =
+    useSetUserStatus();
 
   useEffect(() => {
     if (isOpen) setIsEditMode(false);
@@ -78,6 +82,30 @@ export function UserModalDetails({
     }
   };
 
+  // Cada linha manda **só** o seu campo: o omitido fica intocado no servidor,
+  // então ligar o bloqueio nunca reativa uma conta desligada por engano.
+  const statusRows = [
+    {
+      id: 'active',
+      title: t('users.status.active.title'),
+      description: t('users.status.active.description'),
+      checked: usuario.ativo,
+      onChange: () =>
+        setUserStatus({ id: usuario.id, payload: { ativo: !usuario.ativo } }),
+    },
+    {
+      id: 'locked',
+      title: t('users.status.locked.title'),
+      description: t('users.status.locked.description'),
+      checked: usuario.bloqueado,
+      onChange: () =>
+        setUserStatus({
+          id: usuario.id,
+          payload: { bloqueado: !usuario.bloqueado },
+        }),
+    },
+  ];
+
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)} maxWidth="max-w-xl">
       <Modal.Header
@@ -108,6 +136,35 @@ export function UserModalDetails({
               <span>
                 <span className="pill pill-purple">{usuario.perfilLabel}</span>
               </span>
+            </div>
+
+            {/* Dois interruptores, não um seletor de três posições: desligamento
+                e bloqueio são estados independentes e podem coexistir. */}
+            <div className="space-y-2 pt-2">
+              <span className="block text-xs font-semibold uppercase tracking-wider text-gray-400">
+                {t('users.status.section')}
+              </span>
+              {statusRows.map((row) => (
+                <div
+                  key={row.id}
+                  className="flex items-center gap-4 rounded-xl border border-gray-200/70 dark:border-white/5 bg-gray-50 dark:bg-white/5 p-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm text-gray-800 dark:text-white">
+                      {row.title}
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {row.description}
+                    </p>
+                  </div>
+                  <ToggleSwitch
+                    checked={row.checked}
+                    onChange={row.onChange}
+                    ariaLabel={row.title}
+                    disabled={isChangingStatus}
+                  />
+                </div>
+              ))}
             </div>
           </div>
         )}

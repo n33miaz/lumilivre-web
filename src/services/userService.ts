@@ -15,6 +15,20 @@ export interface UsuarioResumo {
   perfilCode: string;
   /** Rótulo localizado do perfil, vindo do backend. */
   perfilLabel: string;
+  /**
+   * Estados **independentes**: `ativo=false` é desligamento administrativo (a
+   * pessoa saiu da escola) e `bloqueado=true` é bloqueio de segurança. Uma
+   * conta pode estar desativada e bloqueada ao mesmo tempo, então não dá para
+   * reduzir os dois a um seletor de três posições.
+   */
+  ativo: boolean;
+  bloqueado: boolean;
+}
+
+/** Corpo do `PATCH /status`: campo omitido fica inalterado no servidor. */
+export interface UsuarioStatusPayload {
+  ativo?: boolean;
+  bloqueado?: boolean;
 }
 
 export interface UsuarioPayload {
@@ -31,6 +45,10 @@ const mapUserSummary = (item: Record<string, unknown>): UsuarioResumo => {
     email: (item.email as string) ?? '',
     perfilCode: role?.code ?? '',
     perfilLabel: role?.label ?? role?.code ?? '',
+    // `?? true` / `?? false` cobrem o backend antigo, que não mandava os
+    // campos: sem eles toda conta apareceria bloqueada na tela.
+    ativo: (item.active as boolean | undefined) ?? true,
+    bloqueado: (item.locked as boolean | undefined) ?? false,
   };
 };
 
@@ -70,4 +88,23 @@ export const atualizarUsuario = async (
 export const excluirUsuario = async (id: string) => {
   const response = await api.delete(`/api/users/${id}`);
   return response.data;
+};
+
+/**
+ * Liga/desliga acesso da conta. Manda **só** o interruptor que mudou: o campo
+ * omitido é preservado pelo servidor, então enviar os dois sempre sobrescreveria
+ * um estado que outra pessoa acabou de mudar.
+ *
+ * Recusas (auto-desativação, último admin, nada a mudar) voltam como 400 com
+ * `message` já traduzida — quem chama deve mostrar o texto da API.
+ */
+export const alterarStatusUsuario = async (
+  id: string,
+  payload: UsuarioStatusPayload,
+): Promise<UsuarioResumo> => {
+  const response = await api.patch(`/api/users/${id}/status`, {
+    active: payload.ativo,
+    locked: payload.bloqueado,
+  });
+  return mapUserSummary(response.data);
 };

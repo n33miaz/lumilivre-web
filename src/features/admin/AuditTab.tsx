@@ -18,6 +18,7 @@ interface AccessFilterState {
   resultado: string;
   ator: string;
   ip: string;
+  alvo: string;
   from: string;
   to: string;
 }
@@ -36,6 +37,7 @@ const EMPTY_ACCESS: AccessFilterState = {
   resultado: '',
   ator: '',
   ip: '',
+  alvo: '',
   from: '',
   to: '',
 };
@@ -269,6 +271,20 @@ export function AuditTab() {
               />
             </div>
             <div>
+              <label className={labelClass} htmlFor="acc-alvo">
+                {t('audit.filter.target')}
+              </label>
+              <input
+                id="acc-alvo"
+                className={inputClass}
+                placeholder={t('audit.filter.target_placeholder')}
+                value={accessDraft.alvo}
+                onChange={(e) =>
+                  setAccessDraft((p) => ({ ...p, alvo: e.target.value }))
+                }
+              />
+            </div>
+            <div>
               <label className={labelClass} htmlFor="acc-from">
                 {t('audit.filter.from')}
               </label>
@@ -332,6 +348,9 @@ export function AuditTab() {
                     <th className="text-left px-4 py-3">
                       {t('audit.column.event')}
                     </th>
+                    <th className="text-left px-4 py-3">
+                      {t('audit.column.target')}
+                    </th>
                     <th className="text-center px-4 py-3">
                       {t('audit.column.channel')}
                     </th>
@@ -346,13 +365,13 @@ export function AuditTab() {
                 <tbody>
                   {accessLoading ? (
                     <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                      <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                         {t('common:loading')}
                       </td>
                     </tr>
                   ) : (accessData?.content.length ?? 0) === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                      <td colSpan={7} className="px-4 py-12 text-center text-gray-400">
                         {t('common:empty')}
                       </td>
                     </tr>
@@ -381,6 +400,26 @@ export function AuditTab() {
                             <div className="text-xs text-red-500 truncate max-w-[220px]">
                               {row.mensagemErro}
                             </div>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {row.alvoId ? (
+                            <span
+                              className="block max-w-[180px] truncate font-mono text-xs text-gray-500 dark:text-gray-400"
+                              title={row.alvoId}
+                            >
+                              {row.alvoId}
+                            </span>
+                          ) : (
+                            /* `CATALOG_SEARCH` não declara alvo por projeto —
+                               o traço precisa parecer ausência esperada, não
+                               dado que faltou carregar. */
+                            <span
+                              className="text-xs text-gray-300 dark:text-gray-600"
+                              title={t('audit.target.none_hint')}
+                            >
+                              {t('audit.target.none')}
+                            </span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-center">

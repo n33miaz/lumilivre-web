@@ -35,6 +35,13 @@ export function UsersTab() {
 
   const { data, isLoading, isError } = useUsuarios(textoAtivo, page, size);
 
+  // O modal lê da lista recarregada, não da cópia congelada no clique: sem
+  // isso os interruptores de situação continuariam na posição antiga depois de
+  // o PATCH voltar e a query ser invalidada.
+  const selecionado = selected
+    ? (data?.content.find((item) => item.id === selected.id) ?? selected)
+    : null;
+
   // Paginação do servidor: novo tamanho reinicia a página.
   const handlePageSizeChange = (value: PageSizeChoice) => {
     setPageSize(value);
@@ -59,6 +66,34 @@ export function UsersTab() {
   const rolePill = (code: string) =>
     code === 'ADMIN' ? 'pill pill-danger' : 'pill pill-purple';
 
+  // Desligamento e bloqueio são independentes: uma conta pode estar nos dois.
+  // Por isso a coluna mostra selos somáveis em vez de um único rótulo.
+  const statusPills = (usuario: UsuarioResumo) => {
+    const pills: Array<{ id: string; className: string; label: string }> = [];
+    if (!usuario.ativo) {
+      pills.push({
+        id: 'inactive',
+        className: 'pill pill-warn',
+        label: t('users.state.inactive'),
+      });
+    }
+    if (usuario.bloqueado) {
+      pills.push({
+        id: 'locked',
+        className: 'pill pill-danger',
+        label: t('users.state.locked'),
+      });
+    }
+    if (pills.length === 0) {
+      pills.push({
+        id: 'ok',
+        className: 'pill pill-success',
+        label: t('users.state.ok'),
+      });
+    }
+    return pills;
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <Modal isOpen={isNewOpen} onClose={() => setIsNewOpen(false)} maxWidth="max-w-xl">
@@ -70,7 +105,7 @@ export function UsersTab() {
       </Modal>
 
       <UserModalDetails
-        usuario={selected}
+        usuario={selecionado}
         isOpen={isDetailsOpen}
         onClose={closeDetails}
       />
@@ -116,25 +151,28 @@ export function UsersTab() {
               <tr>
                 <th className="text-left px-5 py-3.5">{t('users.column.email')}</th>
                 <th className="text-center px-5 py-3.5">{t('users.column.role')}</th>
+                <th className="text-center px-5 py-3.5">
+                  {t('users.column.status')}
+                </th>
                 <th className="text-center px-5 py-3.5">{t('common:actions')}</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={3} className="px-5 py-12 text-center text-gray-400">
+                  <td colSpan={4} className="px-5 py-12 text-center text-gray-400">
                     {t('common:loading')}
                   </td>
                 </tr>
               ) : isError ? (
                 <tr>
-                  <td colSpan={3} className="px-5 py-12 text-center text-red-500">
+                  <td colSpan={4} className="px-5 py-12 text-center text-red-500">
                     {t('common:error.load')}
                   </td>
                 </tr>
               ) : (data?.content.length ?? 0) === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-5 py-12 text-center text-gray-400">
+                  <td colSpan={4} className="px-5 py-12 text-center text-gray-400">
                     {t('common:empty')}
                   </td>
                 </tr>
@@ -151,6 +189,16 @@ export function UsersTab() {
                       <span className={rolePill(usuario.perfilCode)}>
                         {usuario.perfilLabel}
                       </span>
+                    </td>
+                    <td className="px-5 py-3 text-center">
+                      <div className="flex flex-wrap justify-center gap-1.5">
+                        {statusPills(usuario).map((pill) => (
+                          <span key={pill.id} className={pill.className}>
+                            <span className="dot" />
+                            {pill.label}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td className="px-5 py-3 text-center">
                       <button
