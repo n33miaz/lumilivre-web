@@ -23,6 +23,14 @@ vi.mock('react-router-dom', async (importOriginal) => {
 vi.mock('../../../services/authService');
 const mockedLogin = vi.mocked(authService.login);
 
+// Rótulos vindos do bundle, não cravados no teste: aqui se verifica o
+// comportamento do login, não a redação do campo — que já mudou uma vez
+// (de "Email" para "E-mail ou matrícula") e quebrou este arquivo.
+// `exact: false` porque o rótulo pode carregar marcação de obrigatório.
+const labelUsuario = () => i18n.t('auth:login.field.user');
+const labelSenha = () => i18n.t('auth:login.field.password');
+const matcher = { exact: false } as const;
+
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter>
     <ToastProvider>
@@ -50,10 +58,10 @@ describe('Página: Login', () => {
     render(<LoginPage />, { wrapper });
 
     // Act: Preenche os campos e clica no botão
-    fireEvent.change(screen.getByLabelText(/Email/i), {
+    fireEvent.change(screen.getByLabelText(labelUsuario(), matcher), {
       target: { value: 'admin@lumilivre.com' },
     });
-    fireEvent.change(screen.getByLabelText(/Senha/i), {
+    fireEvent.change(screen.getByLabelText(labelSenha(), matcher), {
       target: { value: 'senha123' },
     });
 
@@ -82,10 +90,10 @@ describe('Página: Login', () => {
 
     render(<LoginPage />, { wrapper });
 
-    fireEvent.change(screen.getByLabelText(/Email/i), {
+    fireEvent.change(screen.getByLabelText(labelUsuario(), matcher), {
       target: { value: 'errado@lumilivre.com' },
     });
-    fireEvent.change(screen.getByLabelText(/Senha/i), {
+    fireEvent.change(screen.getByLabelText(labelSenha(), matcher), {
       target: { value: 'senhaerrada' },
     });
 
