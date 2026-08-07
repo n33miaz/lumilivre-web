@@ -6,6 +6,7 @@ import { BrowserFrame } from './BrowserFrame';
 import { PrintPicture } from './PrintPicture';
 import { PRINTS, type ScreenPrint } from './prints';
 import { SectionHeader } from './SectionHeader';
+import { SHELF_MARKS } from './shelfMarks';
 
 interface Screen {
   key: keyof typeof PRINTS;
@@ -89,16 +90,22 @@ export function ScreensShowcase() {
   return (
     <section
       id="screens"
-      className="relative overflow-hidden bg-gray-50 py-24 dark:bg-ink-900/40 sm:py-28"
+      className="paper-surface relative overflow-hidden bg-paper-200 py-24 dark:bg-ink-900/50 sm:py-28"
     >
-      <div aria-hidden="true" className="absolute inset-0 grid-pattern opacity-40" />
       <div className="relative mx-auto max-w-6xl px-6">
         <SectionHeader
+          mark={SHELF_MARKS.screens}
           eyebrow={t('screens.eyebrow')}
           title={t('screens.title')}
           lead={t('screens.subtitle')}
         />
 
+        {/* Divisórias de gaveta: as abas eram pastilhas com degradê e sombra
+            colorida, iguais às de qualquer painel de preços. Agora são etiquetas
+            retangulares alinhadas à esquerda — a escolhida vira um bloco cheio
+            de tinta da marca, as outras ficam em papel com filete. A base de 3px
+            existe nas cinco (só muda de cor), então trocar de aba não altera
+            altura nenhuma e a fileira nunca reflui. */}
         <div
           ref={tablistRef}
           role="tablist"
@@ -106,7 +113,7 @@ export function ScreensShowcase() {
           onKeyDown={handleTablistKeyDown}
           data-reveal
           data-reveal-delay="3"
-          className="mb-10 flex flex-wrap justify-center gap-2"
+          className="mb-10 flex flex-wrap gap-1.5"
         >
           {screens.map((screen, index) => {
             const selected = active === index;
@@ -122,10 +129,10 @@ export function ScreensShowcase() {
                 // por seta, como manda o padrão de tablist.
                 tabIndex={selected ? 0 : -1}
                 onClick={() => setActive(index)}
-                className={`rounded-full px-4 py-2 text-sm font-bold transition-[background-color,color,box-shadow,transform] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-ink-900 ${
+                className={`rounded-[2px] border border-b-[3px] px-3.5 py-2 text-[13px] font-bold transition-[background-color,color,border-color] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:focus-visible:ring-offset-ink-900 ${
                   selected
-                    ? 'bg-lumi-gradient text-white shadow-glowSoft'
-                    : 'bg-white text-gray-600 hover:-translate-y-px hover:text-lumi-600 dark:bg-white/5 dark:text-gray-300 dark:hover:text-lumi-200'
+                    ? 'border-lumi-500 border-b-lumi-500 bg-lumi-500 text-white dark:border-lumi-label dark:border-b-lumi-label dark:bg-lumi-500'
+                    : 'border-paper-300 border-b-paper-300 bg-paper-50 text-paper-600 hover:border-lumi-400 hover:text-lumi-600 dark:border-white/10 dark:border-b-white/10 dark:bg-white/5 dark:text-ink-400 dark:hover:text-lumi-200'
                 }`}
               >
                 {screen.tab}
@@ -138,17 +145,25 @@ export function ScreensShowcase() {
           id={PANEL_ID}
           role="tabpanel"
           aria-labelledby={`${TAB_ID_PREFIX}${current.key}`}
-          className="grid items-center gap-10 lg:grid-cols-5"
+          // 4/8 de doze: mais uma proporção diferente das vizinhas (o herói é
+          // 7/5, a figura do topo 3/9). Nenhuma seção repete a divisão da
+          // anterior — é assim que a página ganha ritmo sem mudar de estilo.
+          //
+          // `items-start` e não `items-center`: centralizado, o filete do
+          // título flutuava no meio de um vazio de 150px ao lado de uma imagem
+          // muito mais alta. Alinhados pelo topo, o filete e a borda superior da
+          // moldura ficam na mesma linha — que é o que amarra as duas colunas.
+          className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-12"
         >
           <div
             data-reveal
             data-reveal-delay="4"
-            className="order-2 lg:order-1 lg:col-span-2"
+            className="order-2 lg:order-1 lg:col-span-4"
           >
-            <h3 className="mb-3 font-display text-2xl font-black tracking-tight text-gray-900 dark:text-white">
+            <h3 className="mb-3 border-t-2 border-paper-900 pt-4 font-display text-[1.6rem] font-extrabold leading-tight tracking-[-0.02em] text-paper-900 dark:border-ink-100/80 dark:text-ink-100">
               {current.title}
             </h3>
-            <p className="leading-relaxed text-gray-600 dark:text-gray-400">
+            <p className="text-[15px] leading-relaxed text-paper-600 dark:text-ink-200">
               {current.description}
             </p>
           </div>
@@ -156,7 +171,7 @@ export function ScreensShowcase() {
           <div
             data-reveal
             data-reveal-delay="5"
-            className="order-1 lg:order-2 lg:col-span-3"
+            className="order-1 lg:order-2 lg:col-span-8"
           >
             <BrowserFrame path={current.print.path}>
               {screens.map((screen, index) => (

@@ -15,12 +15,13 @@ import { PRINTS } from './prints';
 const MAX_TILT = 4;
 
 /**
- * O print de verdade do painel, logo abaixo da proposta de valor.
+ * O print de verdade do painel, logo abaixo da proposta de valor. Reaproveita a
+ * MESMA captura da vitrine (ver `prints.ts`), então não custa nenhum byte a mais.
  *
- * Substitui o mock desenhado à mão que vivia aqui: números e nomes de leitores
- * inventados, a poucos pixels da vitrine que mostra as telas reais — o contraste
- * fazia o conjunto parecer template. Reaproveita a MESMA captura da vitrine
- * (ver `prints.ts`), então o hero não custa nenhum byte a mais.
+ * A composição inverte o eixo do bloco de cima: lá o texto está à esquerda e a
+ * ficha à direita; aqui a legenda fica numa coluna estreita à esquerda e o print
+ * ocupa as nove colunas restantes. Alternar de que lado o peso cai é o que dá
+ * **ritmo** — duas seções seguidas com o mesmo eixo viram parede.
  *
  * A inclinação segue o ponteiro por variáveis CSS escritas via CSSOM, como no
  * `buttonLight` dos botões do login: `transform` puro, sem animar layout, e
@@ -56,33 +57,46 @@ export function HeroShot() {
   }, []);
 
   return (
-    <div
-      data-reveal
-      data-reveal-delay="4"
-      className="relative mx-auto mt-14 max-w-5xl sm:mt-16"
-    >
-      {/* Brilho de apoio: fica atrás do print e some no claro para não lavar a
-          borda da moldura. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -inset-x-8 -top-6 bottom-8 rounded-[36px] bg-lumi-400/10 blur-3xl dark:bg-lumi-500/20"
-      />
-      <div
-        ref={stageRef}
-        className="tilt-stage relative"
-        onPointerMove={hasFinePointer ? handlePointerMove : undefined}
-        onPointerLeave={hasFinePointer ? handlePointerLeave : undefined}
+    // `figure` de verdade: a legenda ao lado é um `figcaption`, e ele só é HTML
+    // válido dentro de uma figura.
+    <figure className="mt-16 grid gap-x-10 gap-y-6 sm:mt-20 lg:grid-cols-12">
+      {/* Legenda de figura, como numa página impressa: fica ao lado da imagem,
+          não embaixo de um título centralizado. */}
+      <figcaption
+        data-reveal
+        data-reveal-delay="1"
+        className="border-t-2 border-paper-900 pt-3 dark:border-ink-100/80 lg:col-span-3"
       >
-        <BrowserFrame path={PRINTS.dashboard.path}>
-          <PrintPicture
-            print={PRINTS.dashboard}
-            isDark={isDark}
-            alt={t('hero.shot.alt')}
-            loading="eager"
-            className="absolute inset-0 h-full w-full object-cover object-top"
-          />
-        </BrowserFrame>
+        <span className="cota block text-[11px] uppercase text-lumi-600 dark:text-lumi-200">
+          {t('hero.shot.caption.label')}
+        </span>
+        <p className="mt-2 text-[13px] leading-snug text-paper-600 dark:text-ink-400">
+          {t('hero.shot.caption.text')}
+        </p>
+      </figcaption>
+
+      <div
+        data-reveal
+        data-reveal-delay="2"
+        className="relative lg:col-span-9"
+      >
+        <div
+          ref={stageRef}
+          className="tilt-stage relative"
+          onPointerMove={hasFinePointer ? handlePointerMove : undefined}
+          onPointerLeave={hasFinePointer ? handlePointerLeave : undefined}
+        >
+          <BrowserFrame path={PRINTS.dashboard.path}>
+            <PrintPicture
+              print={PRINTS.dashboard}
+              isDark={isDark}
+              alt={t('hero.shot.alt')}
+              loading="eager"
+              className="absolute inset-0 h-full w-full object-cover object-top"
+            />
+          </BrowserFrame>
+        </div>
       </div>
-    </div>
+    </figure>
   );
 }

@@ -7,8 +7,14 @@ import { Icon } from './Icon';
 const REPOS = ['lumilivre-api', 'lumilivre-web', 'lumilivre-app'];
 
 const LINK_CLASS =
-  'rounded text-gray-700 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-gray-300 dark:hover:text-lumi-200';
+  'rounded-[2px] text-paper-600 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-200';
 
+/**
+ * Rodapé em colofão: a mesma família de filete e mono do resto da página, com a
+ * assimetria 5/3/4 em vez das quatro colunas iguais que havia antes. Colunas
+ * iguais no rodapé é o penúltimo lugar onde a página deixava escapar que a
+ * estrutura vinha de um molde.
+ */
 export function Footer() {
   const { t } = useTranslation('landing');
   const year = new Date().getFullYear();
@@ -27,21 +33,23 @@ export function Footer() {
   );
 
   return (
-    <footer className="border-t border-gray-200 px-6 py-16 dark:border-gray-800">
+    <footer className="paper-surface border-t-2 border-paper-900 bg-paper-100 px-6 py-16 dark:border-ink-100/80 dark:bg-ink-950">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12 grid gap-10 md:grid-cols-4">
-          <div className="md:col-span-2">
+        <div className="mb-12 grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-5">
             <div className="mb-4 flex items-center gap-2.5">
-              <LogoIcon className="h-7 w-7 text-lumi-500" />
-              <span className="text-lg font-extrabold">LumiLivre</span>
+              <LogoIcon className="h-7 w-7 text-lumi-500 dark:text-lumi-label" />
+              <span className="font-display text-lg font-extrabold text-paper-900 dark:text-ink-100">
+                LumiLivre
+              </span>
             </div>
-            <p className="max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+            <p className="max-w-[46ch] text-sm leading-relaxed text-paper-600 dark:text-ink-400">
               {t('footer.description')}
             </p>
           </div>
 
-          <div>
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
+          <div className="lg:col-span-3">
+            <h2 className="mb-4 border-t border-paper-300 pt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-paper-500 dark:border-white/10 dark:text-ink-400">
               {t('footer.heading.repos')}
             </h2>
             <ul className="space-y-2.5 text-sm">
@@ -51,7 +59,7 @@ export function Footer() {
                     href={`https://github.com/n33miaz/${repo}`}
                     target="_blank"
                     rel="noreferrer"
-                    className={`inline-flex items-center gap-1.5 font-mono ${LINK_CLASS}`}
+                    className={`inline-flex items-center gap-1.5 font-mono text-[13px] ${LINK_CLASS}`}
                   >
                     <Icon name="github" size={14} />
                     {repo}
@@ -61,8 +69,8 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-gray-500 dark:text-gray-400">
+          <div className="lg:col-span-4">
+            <h2 className="mb-4 border-t border-paper-300 pt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-paper-500 dark:border-white/10 dark:text-ink-400">
               {t('footer.heading.project')}
             </h2>
             <ul className="space-y-2.5 text-sm">
@@ -85,9 +93,9 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-200 pt-8 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-3 border-t border-paper-300 pt-8 font-mono text-[11px] text-paper-500 dark:border-white/10 dark:text-ink-400 md:flex-row md:items-center">
           <div>{t('footer.copyright', { year })}</div>
-          <div className="font-mono">{t('footer.location')}</div>
+          <div>{t('footer.location')}</div>
         </div>
       </div>
     </footer>

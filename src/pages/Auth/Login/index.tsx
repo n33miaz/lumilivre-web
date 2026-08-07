@@ -40,6 +40,7 @@ import {
 import { ThemeToggle } from '../../../layouts/components/ThemeToggle';
 import { LocaleSwitcher } from '../../../components/ui/LocaleSwitcher';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
+import { AuthCardHeader } from '../../../components/ui/AuthCardHeader';
 import { AuthSubmitButton } from '../../../components/ui/AuthSubmitButton';
 import {
   setButtonLight,
@@ -226,58 +227,61 @@ export function LoginPage() {
 
       <section
         ref={brandPanelRef}
-        className="login-brand-panel relative z-10 hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
+        className="login-brand-panel rule-lines relative z-10 hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
       >
-        <div aria-hidden="true" className="absolute inset-0 grid-pattern opacity-20" />
-
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-            <LogoIcon className="h-7 w-7 text-white" />
-          </div>
-          <div>
-            <h1 className="font-display text-3xl font-extrabold tracking-tight">
-              {t('login.title')}
-            </h1>
-            <div className="-mt-0.5 text-sm text-white/70">
-              {t('login.hero.tagline')}
-            </div>
-          </div>
+        {/* Marca em linha, sobre um filete — o mesmo cabeçalho de ficha da
+            landing, lido em negativo. O quadrado de vidro de 48px que embrulhava
+            o logo saiu: glassmorphism era o segundo tique da lista, e aqui ele
+            não estava resolvendo nada. */}
+        <div className="relative z-10 flex items-center gap-3 border-b-2 border-white/35 pb-4">
+          <LogoIcon className="h-9 w-9 shrink-0 text-white" />
+          <h1 className="font-display text-2xl font-extrabold tracking-tight">
+            {t('login.title')}
+          </h1>
+          <span className="cota ml-auto text-[10px] uppercase text-lumi-100">
+            {t('login.hero.tagline')}
+          </span>
         </div>
 
-        <div className="relative z-10 max-w-lg space-y-6">
-          {/* `text-5x1` era erro de digitação: a classe não existia e o h2 caía no
-              tamanho herdado. Corrigido para a escala de verdade. */}
+        <div className="relative z-10 max-w-lg">
+          {/* Escala de abertura igual à do herói da landing: um salto grande
+              entre o título e o texto de apoio, sem degradê no texto. */}
           <h2
             data-reveal
-            className="font-display text-4xl font-extrabold leading-[1.06] xl:text-5xl"
+            className="font-display text-[2.6rem] font-extrabold leading-[1.1] tracking-[-0.03em] xl:text-[3.1rem]"
           >
             {t('login.headline.start')}{' '}
-            <span className="text-lumi-100">{t('login.headline.highlight')}</span>.
+            <span className="text-lumi-200">{t('login.headline.highlight')}</span>.
           </h2>
 
           <p
             data-reveal
             data-reveal-delay="1"
-            className="text-[17px] leading-relaxed text-white/80"
+            className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-lumi-100"
           >
             {t('login.subtitle')}
           </p>
 
-          <div className="space-y-3">
+          <div className="mt-10">
+            {/* Os textos pequenos deste painel subiram de 45–70% para 75–80% de
+                branco: sobre o ponto mais claro da malha (#8B2B87) as opacidades
+                antigas caíam para 3,7:1, abaixo do mínimo AA para 10–11px. */}
             <div
               data-reveal
               data-reveal-delay="2"
-              className="flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-white/50"
+              className="cota border-t border-white/30 pt-3 text-[10px] uppercase text-white/80"
             >
               {t('login.tips.eyebrow')}
-              <span aria-hidden="true" className="h-px flex-1 bg-white/15" />
             </div>
 
             {/* Conjunto diferente a cada acesso, nunca repetindo o anterior (ver
                 `features/auth/loginTips.ts`). Empilhado em vez de duas colunas: a
                 dica tem uma frase inteira de explicação, que em coluna estreita
-                virava três linhas quebradas. */}
-            <ul className="space-y-2.5">
+                virava três linhas quebradas.
+                Eram cartões de vidro com borda e sombra — agora são linhas
+                pautadas numeradas, o mesmo desenho das quatro ações do rodapé da
+                landing. Um material só nas seis superfícies públicas. */}
+            <ul>
               {tips.map((tip, index) => {
                 const TipIcon = TIP_ICONS[tip.icon];
                 return (
@@ -285,16 +289,22 @@ export function LoginPage() {
                     key={tip.id}
                     data-reveal
                     data-reveal-delay={String(index + 3)}
-                    className="group flex items-start gap-3.5 rounded-xl border border-white/10 bg-white/10 p-3.5 backdrop-blur transition-[background-color,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.16]"
+                    className="flex items-start gap-4 border-b border-white/20 py-4"
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/15 transition-colors duration-300 group-hover:bg-white/25">
-                      <TipIcon className="h-[18px] w-[18px] text-lumi-100" />
+                    <span
+                      aria-hidden="true"
+                      className="cota shrink-0 pt-1 text-[10px] text-white/75"
+                    >
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[2px] border border-white/30">
+                      <TipIcon className="h-4 w-4 text-lumi-100" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block font-display text-sm font-bold leading-tight">
+                      <span className="block font-display text-[15px] font-bold leading-tight">
                         {t(`login.tip.${tip.id}.title`)}
                       </span>
-                      <span className="mt-1 block text-xs leading-snug text-white/75">
+                      <span className="mt-1 block text-[13px] leading-snug text-lumi-100">
                         {t(`login.tip.${tip.id}.desc`)}
                       </span>
                     </span>
@@ -305,7 +315,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="relative z-10 text-sm text-white/60">
+        <div className="relative z-10 font-mono text-[11px] leading-relaxed text-white/80">
           <Trans
             t={t}
             i18nKey="login.hero.footer"
@@ -316,7 +326,7 @@ export function LoginPage() {
               site: (
                 <Link
                   to="/"
-                  className="font-semibold underline decoration-white/30 underline-offset-2 transition-colors hover:text-lumi-label"
+                  className="font-semibold underline decoration-white/40 underline-offset-2 transition-colors hover:text-lumi-label"
                 />
               ),
             }}
@@ -327,30 +337,37 @@ export function LoginPage() {
       <section className="login-form-panel relative z-10 flex min-h-screen items-center justify-center px-5 py-20 lg:px-10">
         {/* Frosted chip lifts both controls off the mesh so the locale label
             stays legible in light mode (purple text was washing out). */}
-        <div className="absolute right-5 top-5 z-20 flex items-center gap-1 rounded-full border border-black/5 bg-white/70 px-1.5 py-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-white/10">
+        <div className="absolute right-5 top-5 z-20 flex items-center gap-1 rounded-md border border-paper-300 bg-paper-50/80 px-1.5 py-1 backdrop-blur-md dark:border-white/10 dark:bg-white/10">
           <LocaleSwitcher />
           <ThemeToggle />
         </div>
 
         <div className="w-full max-w-md">
-          <div className="mb-8 text-center lg:hidden">
-            <LogoIcon className="mx-auto h-24 w-auto text-lumi-primary" />
-            <h1 className="font-display text-4xl font-extrabold text-gray-900 dark:text-gray-100">
+          {/* Cabeçalho de celular/tablet: o painel de marca da esquerda não
+              existe abaixo de `lg`, então o `h1` da tela mora aqui. Antes o logo
+              tinha 96px de altura e empurrava o formulário para baixo da dobra
+              num aparelho de 667px — agora a marca é uma linha só, com o mesmo
+              filete das outras superfícies. */}
+          <div className="mb-8 flex items-center gap-3 border-b-2 border-paper-900 pb-4 dark:border-ink-100/80 lg:hidden">
+            <LogoIcon className="h-9 w-9 shrink-0 text-lumi-primary dark:text-lumi-label" />
+            <h1 className="font-display text-2xl font-extrabold tracking-tight text-paper-900 dark:text-ink-100">
               {t('login.title')}
             </h1>
+            {/* Some abaixo de 380px: nesta faixa a linha "LumiLivre + Library
+                Management System" quebra em três e o cabeçalho fica mais alto
+                que o formulário. É rótulo decorativo, não informação. */}
+            <span className="cota ml-auto hidden text-[10px] uppercase text-paper-500 dark:text-ink-400 min-[380px]:inline">
+              {t('login.hero.tagline')}
+            </span>
           </div>
 
-          <div className="login-card rounded-3xl p-5 sm:p-8">
-            <div className="mb-7 text-center">
-              {/* Um degrau menor até `sm`: em 320px "Bem-Vindo(a)" quebrava em
-                  duas linhas no tamanho cheio. */}
-              <h2 className="font-display text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
-                {t('login.form.welcome')}
-              </h2>
-              <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
-                {t('login.form.welcome_subtitle')}
-              </p>
-            </div>
+          <div className="ficha ficha-elevada ficha-furo paper-surface bg-paper-50 px-5 pb-14 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
+            <AuthCardHeader
+              kicker={t('login.kicker')}
+              title={t('login.form.welcome')}
+              subtitle={t('login.form.welcome_subtitle')}
+              level={2}
+            />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <InputFloatingLabel
@@ -385,16 +402,16 @@ export function LoginPage() {
               </div>
             </form>
 
-            <div className="mt-4 text-center">
+            <div className="mt-5 text-center">
               <Link
                 to="/forgot-password"
-                className="text-base font-semibold text-gray-500 hover:text-lumi-primary dark:text-gray-400 dark:hover:text-lumi-label"
+                className="rounded-[2px] text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
               >
                 {t('login.link.forgot_password')}
               </Link>
             </div>
 
-            <div className="mt-6 border-t border-gray-200 pt-5 dark:border-white/10">
+            <div className="mt-6 border-t border-paper-300 pt-5 dark:border-white/10">
               <a
                 {...apkLinkProps()}
                 onPointerMove={handleButtonPointerMove}
@@ -404,11 +421,11 @@ export function LoginPage() {
                 onBlur={handleButtonBlur}
                 // Padding e corpo menores até `sm` para o rótulo caber inteiro em
                 // 320px — o `truncate` cortava "…ANDROID" rente à borda.
-                className="btn-download btn-shader group relative flex w-full items-center justify-center overflow-hidden rounded-xl px-3 py-4 text-[13px] font-extrabold text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:px-4 sm:text-base"
+                className="btn-download btn-shader group relative flex w-full items-center justify-center overflow-hidden rounded-md px-3 py-4 text-[13px] font-extrabold text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:px-4 sm:text-base"
               >
                 {/* Same hover-driven shader light as the submit button. */}
                 <ShaderBackground
-                  className="absolute inset-0 z-[1] rounded-xl"
+                  className="absolute inset-0 z-[1] rounded-md"
                   variant={3}
                   colors={DOWNLOAD_SHADER}
                   highlight={DOWNLOAD_HIGHLIGHT}

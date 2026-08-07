@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Modal } from '../../../components/ui/Modal';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
+import { AuthSubmitButton } from '../../../components/ui/AuthSubmitButton';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useToast } from '../../../contexts/ToastContext';
 import { changePassword } from '../../../services/authService';
@@ -11,6 +12,25 @@ import LockIcon from '../../../assets/icons/lock.svg?react';
 import { getErrorMessage } from '../../../utils/errorHandler';
 import { MIN_PASSWORD_LENGTH } from '../../../utils/passwordPolicy';
 
+/**
+ * Portão da primeira senha.
+ *
+ * É a **primeira tela que todo aluno e toda bibliotecária veem por dentro do
+ * sistema** — e era a mais descuidada das cinco: título genérico, uma tarja
+ * amarela de aviso, três campos e um botão chapado. A tarja amarela é a
+ * linguagem de erro; usá-la para receber alguém diz, no primeiro segundo, que
+ * algo deu errado. Não deu: a conta está pronta.
+ *
+ * Agora é uma ficha como as outras quatro superfícies de acesso — mesma cota
+ * `025.5`, mesmo filete, mesmo botão com a luz que segue o ponteiro — com uma
+ * saudação, o motivo em uma linha e a exigência de tamanho dita ANTES de a
+ * pessoa digitar, em vez de só depois, num toast de erro.
+ *
+ * Nada de comportamento mudou: mesmos três campos, mesma validação, mesmo
+ * `preventClose`, mesma chamada de serviço. O `Modal.Header` saiu porque com
+ * `preventClose` ele já não renderizava botão nenhum — só um título solto acima
+ * do corpo, que agora vive dentro da ficha.
+ */
 export function MandatoryPasswordChangeModal() {
   const { t } = useTranslation('auth');
   const { user, completePasswordChange } = useAuth();
@@ -76,63 +96,76 @@ export function MandatoryPasswordChangeModal() {
   };
 
   return (
-    <Modal isOpen={true} onClose={() => {}} preventClose={true}>
-      <Modal.Header title={t('mandatory_change.modal.title')} />
-      <Modal.Body>
-        <div className="space-y-4">
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 mb-4">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              {t('mandatory_change.notice')}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <InputFloatingLabel
-              id="senhaAtual"
-              label={t('change_password.field.current')}
-              type="password"
-              value={senhaAtual}
-              onChange={(e) => setSenhaAtual(e.target.value)}
-              icon={LockIcon}
-              required
-            />
-
-            <InputFloatingLabel
-              id="novaSenha"
-              label={t('change_password.field.new')}
-              type="password"
-              value={novaSenha}
-              onChange={(e) => setNovaSenha(e.target.value)}
-              icon={LockIcon}
-              required
-            />
-
-            <InputFloatingLabel
-              id="confirmarSenha"
-              label={t('change_password.field.confirm')}
-              type="password"
-              value={confirmarSenha}
-              onChange={(e) => setConfirmarSenha(e.target.value)}
-              icon={LockIcon}
-              required
-            />
-
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-lumi-primary hover:bg-lumi-primary-hover text-white font-bold py-3 px-4 rounded-lg shadow-md disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isLoading && (
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                )}
-                {isLoading
-                  ? t('mandatory_change.button.submitting')
-                  : t('mandatory_change.button.submit')}
-              </button>
-            </div>
-          </form>
+    <Modal isOpen={true} onClose={() => {}} preventClose={true} maxWidth="max-w-xl">
+      {/* `rounded-lg` acompanha o raio da caixa do `Modal`: o corpo é o único
+          filho e cobre a caixa inteira, então sem isso o branco do contêiner
+          apareceria nos quatro cantos. */}
+      <Modal.Body className="ficha-plana rounded-lg px-6 pb-8 pt-7 sm:px-9">
+        <div className="flex items-baseline justify-between gap-4 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
+          <span
+            aria-hidden="true"
+            className="cota text-sm text-lumi-600 dark:text-lumi-200"
+          >
+            025.5
+          </span>
+          <span className="cota truncate text-[10px] uppercase text-paper-500 dark:text-ink-400">
+            {t('mandatory_change.kicker')}
+          </span>
         </div>
+
+        <h2 className="mt-6 font-display text-[1.75rem] font-extrabold leading-[1.15] tracking-[-0.025em] text-paper-900 dark:text-ink-100 sm:text-[2rem]">
+          {t('mandatory_change.headline')}
+        </h2>
+        <p className="mt-2.5 max-w-[52ch] text-[15px] leading-relaxed text-paper-600 dark:text-ink-400">
+          {t('mandatory_change.notice')}
+        </p>
+
+        <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+          <InputFloatingLabel
+            id="senhaAtual"
+            label={t('change_password.field.current')}
+            type="password"
+            value={senhaAtual}
+            onChange={(e) => setSenhaAtual(e.target.value)}
+            icon={LockIcon}
+            required
+          />
+
+          <InputFloatingLabel
+            id="novaSenha"
+            label={t('change_password.field.new')}
+            type="password"
+            value={novaSenha}
+            onChange={(e) => setNovaSenha(e.target.value)}
+            icon={LockIcon}
+            required
+          />
+
+          {/* A exigência de tamanho dita antes, e não num toast depois da
+              tentativa. É texto: a validação continua sendo a mesma do envio. */}
+          <p className="border-l-2 border-lumi-500 py-1 pl-3 font-mono text-[11px] leading-relaxed text-paper-600 dark:border-lumi-label dark:text-ink-400">
+            {t('mandatory_change.hint', { min: MIN_PASSWORD_LENGTH })}
+          </p>
+
+          <InputFloatingLabel
+            id="confirmarSenha"
+            label={t('change_password.field.confirm')}
+            type="password"
+            value={confirmarSenha}
+            onChange={(e) => setConfirmarSenha(e.target.value)}
+            icon={LockIcon}
+            required
+          />
+
+          <div className="pt-3">
+            <AuthSubmitButton
+              loading={isLoading}
+              loadingLabel={t('mandatory_change.button.submitting')}
+            >
+              {t('mandatory_change.button.submit')}
+            </AuthSubmitButton>
+          </div>
+        </form>
       </Modal.Body>
     </Modal>
   );

@@ -57,7 +57,10 @@ export function LandingPage() {
   return (
     <div
       ref={rootRef}
-      className={`landing-root min-h-screen bg-white font-inter text-gray-900 transition-[opacity,transform] duration-[260ms] ease-out dark:bg-ink-950 dark:text-gray-100 ${
+      // Papel (#F8F5EE) no lugar do branco puro, tinta quente (#1A1814) no lugar
+      // do cinza-900 azulado. A marca roxa não mudou uma vírgula — o que mudou é
+      // o neutro em volta dela, e é ele que fazia o conjunto parecer template.
+      className={`landing-root paper-surface min-h-screen bg-paper-100 font-inter text-paper-900 transition-[opacity,transform] duration-[260ms] ease-out dark:bg-ink-950 dark:text-ink-100 ${
         isLeaving ? 'pointer-events-none scale-[0.985] opacity-0' : 'opacity-100'
       }`}
     >
@@ -65,7 +68,7 @@ export function LandingPage() {
           aparece quando recebe foco. */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-lumi-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-lumi-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >
         {t('a11y.skipToContent')}
       </a>

@@ -38,9 +38,9 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
     <header
       className={`sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-300 ${
         scrolled
-          ? 'border-b border-gray-200/70 bg-white/80 shadow-soft backdrop-blur-md dark:border-white/10 dark:bg-ink-950/80'
+          ? 'border-b border-paper-300 bg-paper-100/85 backdrop-blur-md dark:border-white/10 dark:bg-ink-950/85'
           : // Nem fundo nem blur no topo: qualquer um dos dois desenha uma faixa
-            // visível sobre o degradê do hero.
+            // visível sobre a malha do hero.
             'border-b border-transparent bg-transparent'
       }`}
     >
@@ -59,22 +59,25 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
           </span>
         </a>
 
+        {/* Rótulos em versalete espaçado, como as guias de uma gaveta: mais
+            estreitos que o corpo do texto, e o único elemento tipográfico da
+            barra que não é a marca. */}
         <nav
           aria-label="LumiLivre"
-          className="hidden items-center gap-7 text-sm font-medium text-gray-700 lg:flex dark:text-gray-300"
+          className="hidden items-center gap-8 text-[12px] font-bold uppercase tracking-[0.1em] text-paper-600 lg:flex dark:text-ink-400"
         >
           {LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="group relative rounded py-1 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:hover:text-lumi-200"
+              className="group relative py-1 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:hover:text-lumi-200"
             >
               {t(link.key)}
               {/* Sublinhado que cresce do centro — transform puro, sem mexer no
                   espaço que o link ocupa. */}
               <span
                 aria-hidden="true"
-                className="absolute -bottom-0.5 left-0 h-0.5 w-full origin-center scale-x-0 rounded-full bg-lumi-gradient transition-transform duration-300 group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                className="absolute -bottom-0.5 left-0 h-0.5 w-full origin-center scale-x-0 bg-lumi-500 transition-transform duration-300 group-hover:scale-x-100 group-focus-visible:scale-x-100 dark:bg-lumi-label"
               />
             </a>
           ))}
@@ -85,7 +88,7 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
             type="button"
             onClick={() => setDark(!dark)}
             aria-label={t('aria.toggleTheme')}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-lumi-200"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-paper-600 transition-colors hover:bg-paper-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:bg-white/10 dark:hover:text-lumi-200"
           >
             <Icon name={dark ? 'sun' : 'moon'} size={18} />
           </button>

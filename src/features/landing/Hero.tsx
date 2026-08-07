@@ -1,131 +1,114 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useIsDark } from '../../hooks/useIsDark';
 import { LoginMeshBackground } from '../../components/ui/ShaderBackground/LoginMeshBackground';
 import { Btn } from './Btn';
+import { CatalogRecord } from './CatalogRecord';
 import { HeroShot } from './HeroShot';
 import { Icon } from './Icon';
+import { ShelfMark } from './ShelfMark';
+import { SHELF_MARKS } from './shelfMarks';
 
 const CONTACT_HREF = 'mailto:ncormino@gmail.com';
 
+/**
+ * Abertura da página.
+ *
+ * O herói anterior tinha, um a um, os tiques de página gerada: bloco
+ * centralizado, pastilha com bolinha pulsando, título com degradê no texto,
+ * dois botões gêmeos e uma faixa de quatro estatísticas em colunas idênticas.
+ * Nada disso era ruim isoladamente — o problema é que é o conjunto que a
+ * ferramenta entrega por padrão, e o dono pediu justamente para não parecer
+ * isso.
+ *
+ * O que ficou no lugar:
+ *
+ * - **Assimetria 7/5.** Coluna de texto larga à esquerda, ficha estreita à
+ *   direita. Duas colunas de larguras diferentes, e nunca o mesmo eixo da
+ *   seção seguinte (o print vem com a legenda à ESQUERDA, invertendo o peso).
+ * - **Escala com salto.** Título até 4,5rem contra corpo de 1,125rem. O
+ *   destaque é uma cor sólida da marca, não um degradê — degradê em texto é
+ *   ilegível no escuro e é o efeito mais copiado da última década.
+ * - **Uma ação forte e uma discreta.** A secundária virou link com filete.
+ * - **A prova virou registro.** Ver `CatalogRecord`.
+ *
+ * A malha WebGL fica: é a mesma do login, dá material próprio ao topo e degrada
+ * com graça sem WebGL. Só a opacidade caiu, para o papel aparecer por baixo.
+ */
 export function Hero() {
   const { t } = useTranslation('landing');
   const isDark = useIsDark();
 
-  // Quatro números, todos rastreáveis no código (RLS nas 20 tabelas, endpoints
-  // anotados, três clientes, dois idiomas completos). Prova antes de adjetivo:
-  // "100% responsivo", que ocupava esta faixa, não provava nada.
-  const proof = useMemo(
-    () => [
-      { key: 'apps', value: t('proof.apps.value'), label: t('proof.apps.label') },
-      {
-        key: 'endpoints',
-        value: t('proof.endpoints.value'),
-        label: t('proof.endpoints.label'),
-      },
-      {
-        key: 'tables',
-        value: t('proof.tables.value'),
-        label: t('proof.tables.label'),
-      },
-      {
-        key: 'langs',
-        value: t('proof.langs.value'),
-        label: t('proof.langs.label'),
-      },
-    ],
-    [t],
-  );
-
   return (
-    <section id="top" className="relative overflow-hidden">
-      {/* Fundo interativo (a mesma malha reativa do login). Degrada com graça em
-          clientes sem WebGL e congela com prefers-reduced-motion. */}
+    <section
+      id="top"
+      className="paper-surface relative overflow-hidden bg-paper-100 dark:bg-ink-950"
+    >
+      {/* A malha continua — é o mesmo shader do login, e o topo precisa de um
+          material vivo por baixo do papel. O que mudou é a dose: com o véu
+          pesado por cima ela dá um movimento perceptível de canto, longe de
+          virar a mancha roxa flutuante que a página existe para evitar. */}
       <LoginMeshBackground
         isDark={isDark}
         split={false}
         quality={0.4}
-        className="absolute inset-x-0 top-0 z-0 h-full opacity-40 dark:opacity-30"
+        className="absolute inset-x-0 top-0 z-0 h-full opacity-40 dark:opacity-[0.35]"
       />
       {/* Véu que devolve contraste ao texto sobre a malha e dissolve a seção no
           fundo da próxima — sem ele o limite entre as duas fica visível. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 z-[1] bg-gradient-to-b from-white/70 via-white/40 to-white dark:from-ink-950/70 dark:via-ink-950/50 dark:to-ink-950"
+        className="absolute inset-0 z-[1] bg-gradient-to-b from-paper-100/75 via-paper-100/60 to-paper-100 dark:from-ink-950/75 dark:via-ink-950/65 dark:to-ink-950"
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pb-24 pt-16 sm:pt-24">
-        <div className="mx-auto max-w-3xl text-center">
-          <span
-            data-reveal
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-lumi-200/70 bg-white/70 px-3.5 py-1.5 text-xs font-bold text-lumi-700 backdrop-blur dark:border-lumi-500/30 dark:bg-white/5 dark:text-lumi-200"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-lumi-500 animate-pulse-soft" />
-            {t('hero.badge')}
-          </span>
+      <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-10 sm:pt-14">
+        <div className="grid items-start gap-x-10 gap-y-12 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <ShelfMark mark={SHELF_MARKS.hero} label={t('hero.mark')} />
 
-          <h1
-            data-reveal
-            data-reveal-delay="1"
-            className="text-[2.5rem] font-black leading-[1.04] tracking-tighter sm:text-6xl lg:text-7xl"
-          >
-            {t('hero.title.part1')}{' '}
-            <span className="gradient-text">{t('hero.title.part2')}</span>
-          </h1>
-
-          <p
-            data-reveal
-            data-reveal-delay="2"
-            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-gray-600 dark:text-gray-300 sm:text-xl"
-          >
-            {t('hero.lead')}
-          </p>
-
-          <div
-            data-reveal
-            data-reveal-delay="3"
-            className="mt-9 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center"
-          >
-            <Btn
-              href="#screens"
-              variant="primary"
-              trailingIcon={<Icon name="arrow-right" size={16} />}
+            <h1
+              data-reveal
+              data-reveal-delay="1"
+              className="mt-7 font-display text-[2.6rem] font-extrabold leading-[1.08] tracking-[-0.035em] text-paper-900 dark:text-ink-100 sm:text-[3.4rem] lg:text-[4.25rem]"
             >
-              {t('hero.cta.primary')}
-            </Btn>
-            <Btn
-              href={CONTACT_HREF}
-              variant="secondary"
-              icon={<Icon name="mail" size={16} />}
+              {t('hero.title.part1')}{' '}
+              <span className="text-lumi-500 dark:text-lumi-label">
+                {t('hero.title.part2')}
+              </span>
+            </h1>
+
+            <p
+              data-reveal
+              data-reveal-delay="2"
+              className="mt-7 max-w-[48ch] text-[17px] leading-relaxed text-paper-600 dark:text-ink-200 sm:text-lg"
             >
-              {t('hero.cta.secondary')}
-            </Btn>
+              {t('hero.lead')}
+            </p>
+
+            <div
+              data-reveal
+              data-reveal-delay="3"
+              className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-5"
+            >
+              <Btn
+                href="#screens"
+                variant="primary"
+                trailingIcon={<Icon name="arrow-right" size={16} />}
+              >
+                {t('hero.cta.primary')}
+              </Btn>
+              <Btn href={CONTACT_HREF} variant="quiet">
+                {t('hero.cta.secondary')}
+              </Btn>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <CatalogRecord />
           </div>
         </div>
 
         <HeroShot />
-
-        <dl className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-x-6 gap-y-8 border-t border-gray-200 pt-10 dark:border-white/10 md:grid-cols-4">
-          {proof.map((item, index) => (
-            <div
-              key={item.key}
-              data-reveal
-              data-reveal-delay={String(index + 1)}
-              className="text-center md:text-left"
-            >
-              <dt className="sr-only">{item.label}</dt>
-              <dd>
-                <span className="block font-display text-3xl font-black tabular-nums text-gray-900 dark:text-white sm:text-4xl">
-                  {item.value}
-                </span>
-                <span className="mt-1.5 block text-[13px] leading-snug text-gray-500 dark:text-gray-400">
-                  {item.label}
-                </span>
-              </dd>
-            </div>
-          ))}
-        </dl>
       </div>
     </section>
   );

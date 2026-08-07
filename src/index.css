@@ -97,45 +97,149 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-.landing-root .grid-pattern {
-  background-image:
-    linear-gradient(rgba(118, 32, 117, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(118, 32, 117, 0.06) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.dark .landing-root .grid-pattern {
-  background-image:
-    linear-gradient(rgba(201, 100, 197, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201, 100, 197, 0.08) 1px, transparent 1px);
-}
-
-.landing-root .gradient-text {
-  background: linear-gradient(135deg, #762075 0%, #c964c5 50%, #762075 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* No escuro, as pontas #762075 do degradê ficam em 2,1:1 contra o fundo — abaixo
-   do mínimo até para texto grande. A escala sobe um degrau e as pontas passam a
-   5,7:1, mantendo o mesmo desenho de cor. */
-.dark .landing-root .gradient-text {
-  background: linear-gradient(135deg, #c964c5 0%, #e9a7e6 50%, #c964c5 100%);
-}
-
 /* Cada seção é destino de âncora e a barra de navegação é fixa: sem esta margem,
    clicar em "Engenharia" encosta o título embaixo do cabeçalho. */
 .landing-root section[id] {
   scroll-margin-top: 5rem;
 }
 
-.landing-root .blob {
+/* ============================================================
+   MOTIVO: ficha de catálogo
+   ------------------------------------------------------------
+   Duas peças, e só duas — misturar cinco vira colagem:
+
+     .ficha     o cartão do fichário. Retângulo pautado, canto
+                praticamente reto (papel é CORTADO, não
+                arredondado) e furo do bastão na base.
+     .cota      a etiqueta de lombada: bloco mono, pequeno,
+                com o número de classificação.
+
+   Escolhidas porque são as duas peças da cultura de biblioteca
+   que já são tipográficas e retangulares: viram componente de
+   interface sem virar cenografia retrô. Vale para a landing e
+   para as cinco telas de autenticação — é o que faz as seis
+   superfícies públicas serem a mesma família.
+   ============================================================ */
+
+/* Textura de fibra. Ruído dessaturado a 6%: cinza médio escurece
+   de leve sobre o papel e clareia de leve sobre a tinta, então o
+   MESMO tile serve aos dois temas. Vem em background-image (e não
+   num ::before) para não criar contexto de empilhamento novo em
+   cima do canvas WebGL do hero. `data:` já é liberado em img-src. */
+.paper-surface {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)' opacity='0.06'/%3E%3C/svg%3E");
+  background-size: 140px 140px;
+}
+
+/* Sem `background-color` aqui de propósito: quem usa a ficha escolhe o degrau de
+   papel (50 para a face do cartão, 100 para um cartão dentro de outro). Como
+   este bloco vem DEPOIS das utilities do Tailwind e tem a mesma especificidade,
+   uma cor definida aqui venceria o `bg-paper-*` do JSX sem aviso. */
+.ficha {
+  position: relative;
+  border: 1px solid #e4dccb;
+  /* 2px, e não `rounded-2xl`: a hierarquia de raio da página inteira sai daqui.
+     Ficha 2px · botão e campo 6px · moldura de navegador 12px (tela é
+     arredondada, papel não). Raio igual em tudo é marca de template. */
+  border-radius: 2px;
+  box-shadow:
+    0 1px 0 rgba(26, 24, 20, 0.03),
+    0 14px 30px -20px rgba(26, 24, 20, 0.3);
+}
+
+.dark .ficha {
+  border-color: rgba(228, 220, 203, 0.13);
+  box-shadow: 0 14px 32px -20px rgba(0, 0, 0, 0.75);
+}
+
+/* Ficha das telas de autenticação: sombra mais alta porque ali ela flutua sobre
+   a malha WebGL viva — a sombra curta da landing sumia contra o roxo em
+   movimento. Precisa vir DEPOIS de `.ficha` (mesma especificidade) para
+   sobrescrever a sombra base. */
+.ficha-elevada {
+  box-shadow: 0 30px 80px -20px rgba(94, 25, 93, 0.26);
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.dark .ficha-elevada {
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.65);
+}
+
+/* O rótulo flutuante do `InputFloatingLabel` fura a borda do campo pintando um
+   retângulo da cor do cartão (`bg-white` / `dark:bg-dark-card`). Com a ficha em
+   papel, esse retângulo abria um talho branco frio sobre o creme. Seletor de
+   elemento dentro da classe: vence as utilities do Tailwind sem `!important` e
+   sem tocar no primitivo, que o painel inteiro compartilha. */
+.ficha label,
+.ficha-plana label {
+  background-color: #fffdf9;
+}
+
+.dark .ficha label,
+.dark .ficha-plana label {
+  background-color: #13101b;
+}
+
+/* Ficha sem moldura: só o papel. Serve ao portão da primeira senha, que já vive
+   dentro da caixa do `Modal` (borda e raio são dela) mas é o último passo da
+   autenticação, não um diálogo do painel — e por isso usa o papel das outras
+   quatro superfícies de acesso, e não o branco do painel. */
+.ficha-plana {
+  background-color: #fffdf9;
+}
+
+.dark .ficha-plana {
+  background-color: #13101b;
+}
+
+/* Furo do bastão que prende as fichas na gaveta. Quem já abriu um fichário
+   reconhece; quem não abriu lê como detalhe de material. Puramente decorativo,
+   por isso não ocupa espaço no fluxo — o respiro vem do padding do container. */
+.ficha-furo::after {
+  content: '';
   position: absolute;
+  left: 50%;
+  bottom: 13px;
+  width: 13px;
+  height: 13px;
+  margin-left: -6.5px;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.35;
+  border: 1px solid #e4dccb;
+  background-color: #f0ebe0;
+  box-shadow: inset 0 1px 2px rgba(26, 24, 20, 0.16);
   pointer-events: none;
+}
+
+.dark .ficha-furo::after {
+  border-color: rgba(228, 220, 203, 0.14);
+  background-color: #0b0810;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Cota (número de classificação). `tabular-nums` porque a coluna de cotas das
+   seções tem que alinhar dígito com dígito, como numa lombada de estante. */
+.cota {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+}
+
+/* Pauta horizontal — a face de um cartão, não papel milimetrado. A grade
+   quadriculada que estava aqui é genérica de "tech"; linha só horizontal é
+   papel de escrever. Usada no painel escuro da Engenharia e atrás do painel de
+   marca do login. */
+.rule-lines {
+  background-image: linear-gradient(
+    to bottom,
+    rgba(228, 220, 203, 0.07) 1px,
+    transparent 1px
+  );
+  background-size: 100% 30px;
 }
 
 input[type='date']::-webkit-calendar-picker-indicator {
@@ -185,23 +289,26 @@ input[type='date']::-webkit-calendar-picker-indicator {
      interactive mesh canvas. CSS can't tween gradients, but it can tween the
      background-color, keeping the theme switch in lockstep with the card. */
   .login-shell {
-    background-color: #fbf6fd;
+    /* Papel (#F8F5EE), não o lilás-branco frio de antes: as seis superfícies
+       públicas passam a dividir o mesmo neutro, e o roxo da malha ganha
+       saturação percebida sobre um fundo quente. */
+    background-color: #f8f5ee;
     transition: background-color 200ms ease;
   }
 
   .dark .login-shell {
-    background-color: #181b23;
+    background-color: #13101b;
   }
 
   /* Single-column auth pages (forgot/reset): flat themed color at every
      breakpoint (no split), with the non-split mesh layered on at lg+. */
   .auth-shell {
-    background-color: #fbf6fd;
+    background-color: #f8f5ee;
     transition: background-color 200ms ease;
   }
 
   .dark .auth-shell {
-    background-color: #181b23;
+    background-color: #13101b;
   }
 
   /* ============================================================
@@ -252,12 +359,11 @@ input[type='date']::-webkit-calendar-picker-indicator {
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .login-shell::before,
-    .auth-shell::before {
-      animation: none;
-    }
-  }
+  /* O desligamento por `prefers-reduced-motion` deste fundo NÃO mora aqui: o
+     override de `@media (min-width: 1024px)`, mais abaixo, redeclara `animation`
+     e venceria por vir depois na folha — em tela grande o degradê continuava
+     correndo para quem pediu menos movimento. A regra vive no bloco de
+     reduced-motion no fim do arquivo, que vence os dois. */
 
   .login-stage {
     opacity: 1;
@@ -345,24 +451,9 @@ input[type='date']::-webkit-calendar-picker-indicator {
     border-color: rgba(201, 100, 197, 0.1);
   }
 
-  /* Login card: solid white in light mode, solid dark-card (#181B23) in dark.
-     200ms color transition keeps it in sync with the shader's palette lerp. */
-  .login-card {
-    background: #ffffff;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 1px solid rgba(118, 32, 117, 0.1);
-    box-shadow: 0 30px 80px -20px rgba(94, 25, 93, 0.22);
-    transition:
-      background-color 200ms ease,
-      border-color 200ms ease,
-      box-shadow 200ms ease;
-  }
-  .dark .login-card {
-    background: #181b23;
-    border-color: rgba(201, 100, 197, 0.12);
-    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6);
-  }
+  /* A ficha das telas de autenticação (material, sombra alta e o remendo do
+     rótulo flutuante) mora junto do resto do motivo, fora de @layer — precisa
+     vir depois de `.ficha` na folha para sobrescrever a sombra base. */
 
   /* Shared base for the lit gradient buttons (submit + download). Colors come
      from CSS variables so each button only overrides its palette. The pointer
@@ -419,7 +510,10 @@ input[type='date']::-webkit-calendar-picker-indicator {
     position: absolute;
     inset: 1px;
     z-index: 2;
-    border-radius: 11px;
+    /* 1px a menos que o raio do botão (agora 6px, o degrau de "controle" da
+       hierarquia): o brilho interno precisa acompanhar o canto, senão sobra um
+       filete reto na quina. */
+    border-radius: 5px;
     background:
       linear-gradient(
         to bottom,
@@ -1174,6 +1268,16 @@ input[type='date']::-webkit-calendar-picker-indicator {
   .tilt-stage {
     transform: none;
     transition: none;
+  }
+
+  /* Degradê que flui atrás das telas de autenticação. Precisa ser declarado
+     aqui, no fim da folha e fora de @layer: a versão de `@media (min-width:
+     1024px)` do `.login-shell::before` redeclara `animation` e venceria uma
+     regra escrita junto da definição, deixando o fundo em movimento em telas
+     grandes para quem pediu o contrário. */
+  .login-shell::before,
+  .auth-shell::before {
+    animation: none;
   }
 
   .animate-fade-in,

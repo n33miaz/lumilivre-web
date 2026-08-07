@@ -1,52 +1,49 @@
+import { ShelfMark } from './ShelfMark';
+
 interface SectionHeaderProps {
-  eyebrow?: string;
+  /** Cota da seção — ver `shelfMarks.ts`. */
+  mark: string;
+  eyebrow: string;
   title: string;
   lead?: string;
-  /**
-   * `center` para seções em grade; `left` para as de leitura corrida, onde um
-   * título centralizado sobre texto alinhado à esquerda quebra o eixo.
-   */
-  align?: 'center' | 'left';
-  /** Seção sobre fundo escuro fixo (Engenharia) — inverte a escala de cinzas. */
+  /** Seção sobre fundo escuro fixo (Engenharia) — inverte a escala de tinta. */
   tone?: 'default' | 'invert';
 }
 
-// Uma escala tipográfica só para todas as seções: antes cada componente
-// escolhia o seu peso/tracking e os h2 não batiam entre si.
+/**
+ * Cabeçalho de seção: etiqueta de lombada, título e linha de apoio.
+ *
+ * Três decisões, todas contra a mesma armadilha:
+ *
+ * 1. **Sempre à esquerda.** A versão anterior centralizava por padrão, e título
+ *    centralizado sobre conteúdo alinhado à esquerda quebra o eixo da página —
+ *    além de ser o desenho de herói que todo gerador entrega. Um eixo só, à
+ *    esquerda, da primeira seção à última.
+ * 2. **Escala com salto grande.** Título em `clamp` até 3,25rem contra um apoio
+ *    de 1,0625rem: é o contraste de tamanho, não o peso da fonte, que faz uma
+ *    página parecer editorial. `leading` em 1,14 — apertado para o latino sem
+ *    esmagar as matras do devanágari, que colidem abaixo de ~1,1.
+ * 3. **Medida de leitura curta.** O apoio para em 54ch. Linha longa é o que faz
+ *    texto de marketing parecer preenchimento.
+ */
 export function SectionHeader({
+  mark,
   eyebrow,
   title,
   lead,
-  align = 'center',
   tone = 'default',
 }: SectionHeaderProps) {
-  const centered = align === 'center';
   const invert = tone === 'invert';
 
   return (
-    <div
-      className={
-        centered ? 'max-w-2xl mx-auto text-center mb-14' : 'max-w-2xl mb-12'
-      }
-    >
-      {eyebrow && (
-        <span
-          data-reveal
-          className={`inline-block px-3 py-1 mb-4 rounded-full text-[11px] font-bold uppercase tracking-[0.14em] ${
-            invert
-              ? 'bg-white/10 text-lumi-200'
-              : 'bg-lumi-100 text-lumi-700 dark:bg-lumi-500/20 dark:text-lumi-200'
-          }`}
-        >
-          {eyebrow}
-        </span>
-      )}
+    <div className="mb-12 max-w-3xl lg:mb-16">
+      <ShelfMark mark={mark} label={eyebrow} tone={tone} />
       <h2
         data-reveal
         data-reveal-delay="1"
-        className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight ${
-          lead ? 'mb-4' : ''
-        } ${invert ? 'text-white' : 'text-gray-900 dark:text-white'}`}
+        className={`mt-6 font-display text-[1.9rem] font-extrabold leading-[1.14] tracking-[-0.025em] sm:text-[2.4rem] lg:text-[3rem] ${
+          lead ? 'mb-5' : ''
+        } ${invert ? 'text-ink-100' : 'text-paper-900 dark:text-ink-100'}`}
       >
         {title}
       </h2>
@@ -54,8 +51,8 @@ export function SectionHeader({
         <p
           data-reveal
           data-reveal-delay="2"
-          className={`text-lg leading-relaxed ${
-            invert ? 'text-gray-300' : 'text-gray-600 dark:text-gray-400'
+          className={`max-w-[54ch] text-[17px] leading-relaxed ${
+            invert ? 'text-ink-200' : 'text-paper-600 dark:text-ink-200'
           }`}
         >
           {lead}

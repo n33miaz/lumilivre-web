@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Icon, type IconName } from './Icon';
+import { ShelfMark } from './ShelfMark';
+import { SHELF_MARKS } from './shelfMarks';
 
 interface ContactCard {
   key: string;
@@ -22,6 +24,12 @@ const MAIL = 'ncormino@gmail.com';
  * falsa, e invisível para teclado. Agora cada um é uma âncora: e-mail com
  * assunto pronto, repositórios, licença e a entrada no painel para quem já é
  * cliente. O último serve a bibliotecária, que chega aqui procurando "entrar".
+ *
+ * O bloco era um retângulo de 24px de raio com moldura em degradê, quadriculado
+ * por baixo e um "blob" rosa desfocado no canto — três efeitos ao mesmo tempo,
+ * todos da mesma lista de tiques. Agora é um bloco chapado de tinta roxa, sem
+ * raio de canto, e as quatro ações são LINHAS PAUTADAS: a mesma pauta da ficha,
+ * lida em negativo. Um material só, do começo ao fim da página.
  */
 export function ContactCTA() {
   const { t } = useTranslation('landing');
@@ -62,76 +70,68 @@ export function ContactCTA() {
   );
 
   return (
-    <section id="contact" className="px-6 py-24 sm:py-28">
-      <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl bg-gradient-to-br from-lumi-700 via-lumi-500 to-lumi-label p-1">
-        <div className="relative overflow-hidden rounded-[22px] bg-lumi-700 px-8 py-14 sm:px-12 md:px-16 md:py-20">
-          <div aria-hidden="true" className="absolute inset-0 grid-pattern opacity-30" />
-          <div
-            aria-hidden="true"
-            className="blob bg-lumi-label h-72 w-72 -right-10 -top-10"
+    <section id="contact" className="rule-lines bg-lumi-700 px-6 py-24 sm:py-28">
+      <div className="mx-auto grid max-w-6xl items-start gap-x-12 gap-y-12 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <ShelfMark
+            mark={SHELF_MARKS.contact}
+            label={t('contact.badge')}
+            tone="invert"
           />
-
-          <div className="relative grid items-center gap-10 md:grid-cols-2">
-            <div>
-              <span
-                data-reveal
-                className="mb-5 inline-block rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur"
-              >
-                {t('contact.badge')}
-              </span>
-              <h2
-                data-reveal
-                data-reveal-delay="1"
-                className="mb-5 text-4xl font-black leading-tight tracking-tight text-white md:text-5xl"
-              >
-                {t('contact.title.line1')}
-                <br />
-                {t('contact.title.line2')}
-              </h2>
-              <p
-                data-reveal
-                data-reveal-delay="2"
-                className="text-lg leading-relaxed text-white/85"
-              >
-                {t('contact.description')}
-              </p>
-            </div>
-
-            <ul className="space-y-3">
-              {cards.map((card, index) => (
-                <li
-                  key={card.key}
-                  data-reveal
-                  data-reveal-delay={String(index + 1)}
-                >
-                  <a
-                    href={card.href}
-                    target={card.external ? '_blank' : undefined}
-                    rel={card.external ? 'noreferrer' : undefined}
-                    className="group flex items-start gap-4 rounded-xl bg-white/10 p-4 backdrop-blur transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-lumi-700"
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-                      <Icon name={card.icon} size={18} />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block font-bold text-white">
-                        {card.title}
-                      </span>
-                      <span className="mt-0.5 block text-sm text-white/80">
-                        {card.desc}
-                      </span>
-                    </span>
-                    <Icon
-                      name="arrow-right"
-                      size={16}
-                      className="ml-auto mt-1 shrink-0 text-white/50 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-white"
-                    />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h2
+            data-reveal
+            data-reveal-delay="1"
+            className="mb-5 mt-6 font-display text-[2.1rem] font-extrabold leading-[1.12] tracking-[-0.03em] text-white sm:text-[2.6rem] lg:text-[3rem]"
+          >
+            {t('contact.title.line1')}
+            <br />
+            {t('contact.title.line2')}
+          </h2>
+          <p
+            data-reveal
+            data-reveal-delay="2"
+            className="max-w-[46ch] text-[17px] leading-relaxed text-lumi-100"
+          >
+            {t('contact.description')}
+          </p>
         </div>
+
+        {/* Quatro linhas pautadas, não quatro cards de vidro: a seta e o filete
+            já dizem que cada linha vai a algum lugar. */}
+        <ul className="border-t border-white/25 lg:col-span-7">
+          {cards.map((card, index) => (
+            <li
+              key={card.key}
+              data-reveal
+              data-reveal-delay={String(index + 1)}
+              className="border-b border-white/25"
+            >
+              <a
+                href={card.href}
+                target={card.external ? '_blank' : undefined}
+                rel={card.external ? 'noreferrer' : undefined}
+                className="group flex items-start gap-4 py-5 transition-colors duration-200 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-lumi-700 sm:px-3"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[2px] border border-white/30 text-white transition-colors duration-200 group-hover:border-white/60">
+                  <Icon name={card.icon} size={16} />
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-display font-bold text-white">
+                    {card.title}
+                  </span>
+                  <span className="mt-0.5 block text-sm text-lumi-100">
+                    {card.desc}
+                  </span>
+                </span>
+                <Icon
+                  name="arrow-right"
+                  size={16}
+                  className="ml-auto mt-1 shrink-0 text-white/55 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-white"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

@@ -112,7 +112,7 @@ export function MudarSenhaPage() {
       return (
         <div className="py-6 text-center">
           <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-lumi-primary border-t-transparent" />
-          <p className="text-gray-600 dark:text-gray-300">
+          <p className="text-paper-600 dark:text-ink-400">
             {t('reset_password.loading')}
           </p>
         </div>
@@ -121,13 +121,15 @@ export function MudarSenhaPage() {
 
     if (!isTokenValid) {
       return (
-        <div className="text-center">
-          <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/30 dark:text-red-400">
+        <div>
+          {/* Aviso pautado, não caixa vermelha arredondada: o filete lateral
+              basta para marcar erro e o bloco continua sendo papel. */}
+          <div className="mb-6 border-l-2 border-red-600 bg-red-50/70 py-3 pl-4 pr-3 text-sm leading-relaxed text-red-800 dark:border-red-400 dark:bg-red-500/10 dark:text-red-200">
             {errorToken}
           </div>
           <Link
             to="/forgot-password"
-            className="font-bold text-lumi-primary hover:underline dark:text-lumi-label"
+            className="rounded-[2px] font-semibold text-lumi-primary underline decoration-lumi-500/40 decoration-1 underline-offset-4 transition-colors hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-lumi-label dark:decoration-lumi-label/40"
           >
             {t('reset_password.link.request_new')}
           </Link>
@@ -171,6 +173,7 @@ export function MudarSenhaPage() {
 
   return (
     <AuthShell
+      kicker={t('reset_password.kicker')}
       title={t('reset_password.title')}
       subtitle={
         !isLoadingToken && isTokenValid
@@ -181,7 +184,7 @@ export function MudarSenhaPage() {
         !isLoadingToken && isTokenValid ? (
           <Link
             to="/login"
-            className="text-base font-semibold text-gray-500 hover:text-lumi-primary dark:text-gray-400 dark:hover:text-lumi-label"
+            className="rounded-[2px] text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
           >
             {t('reset_password.link.cancel')}
           </Link>

@@ -53,12 +53,13 @@ export function EsqueciSenhaPage() {
 
   return (
     <AuthShell
+      kicker={t('forgot_password.kicker')}
       title={t('forgot_password.title')}
       subtitle={t('forgot_password.description')}
       footer={
         <Link
           to="/login"
-          className="text-base font-semibold text-gray-500 hover:text-lumi-primary dark:text-gray-400 dark:hover:text-lumi-label"
+          className="rounded-[2px] text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
         >
           {t('forgot_password.button.back')}
         </Link>

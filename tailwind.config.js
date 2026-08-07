@@ -35,7 +35,39 @@ export default {
           800: '#3A0F39',
           900: '#260825',
         },
+        // Neutros de papel e tinta, usados SÓ pelas superfícies públicas
+        // (landing + autenticação). O painel interno continua nos `gray-*` do
+        // Tailwind: trocar lá seria repintar tela por tela, fora deste escopo.
+        //
+        // Motivo da escala: cinza frio de template (`#F9FAFB`, `#6B7280`) é o
+        // que faz uma página parecer gerada. Papel levemente amarelado e tinta
+        // quente conversam com o assunto — e, por serem menos azuis, deixam o
+        // roxo da marca ler como cor, não como mais um tom do mesmo cinza.
+        //
+        // Todos os pares de texto foram medidos contra o fundo em que são
+        // usados: 500 é o degrau mais claro que ainda passa AA em corpo pequeno
+        // sobre `paper-200` (4,56:1); de 400 para baixo é filete e borda, nunca
+        // texto.
+        paper: {
+          50: '#FFFDF9',
+          100: '#F8F5EE',
+          200: '#F0EBE0',
+          300: '#E4DCCB',
+          400: '#C4B9A3',
+          500: '#726957',
+          600: '#5A5245',
+          700: '#3E382E',
+          800: '#2A2721',
+          900: '#1A1814',
+        },
         ink: {
+          // Tinta no escuro: a mesma família roxo-preta que já existia, com dois
+          // degraus a mais para separar fundo, faixa recuada e ficha.
+          100: '#F5F1E8',
+          200: '#D8D2C6',
+          400: '#A79F92',
+          700: '#211C2B',
+          800: '#191424',
           900: '#13101B',
           950: '#0B0810',
         },

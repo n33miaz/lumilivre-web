@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SectionHeader } from './SectionHeader';
+import { SHELF_MARKS } from './shelfMarks';
 
 const ITEM_KEYS = [
   'rls',
@@ -26,6 +27,11 @@ const ITEM_KEYS = [
  *
  * Substitui também a marquise de logos que rolava sozinha: movimento infinito
  * sem informação nova, e o repertório listava tecnologia que o app não usa.
+ *
+ * Saiu daqui o "blob" — o círculo roxo desfocado de 384px que flutuava no canto.
+ * É o primeiro item da lista de tiques de página gerada, e não sobreviveria a
+ * nenhuma das referências editoriais: fundo é material (pauta, papel), não
+ * mancha de degradê. No lugar ficou a pauta horizontal de um cartão.
  */
 export function Engineering() {
   const { t } = useTranslation('landing');
@@ -102,38 +108,45 @@ export function Engineering() {
     // encostam, e sem o filete a quebra de ritmo desapareceria.
     <section
       id="engineering"
-      className="relative overflow-hidden border-y border-white/10 bg-ink-900 px-6 py-24 text-gray-300 sm:py-28"
+      // `ink-900` e não `ink-950`: no tema escuro o fundo da página JÁ é
+      // ink-950, e um painel da mesma cor apagaria justamente a quebra de ritmo
+      // que esta seção existe para fazer.
+      className="rule-lines relative overflow-hidden border-y border-white/10 bg-ink-900 px-6 py-24 text-ink-200 sm:py-28"
     >
-      <div aria-hidden="true" className="absolute inset-0 grid-pattern opacity-60" />
-      <div
-        aria-hidden="true"
-        className="blob bg-lumi-500 h-96 w-96 -right-24 top-10"
-      />
-
       <div className="relative mx-auto max-w-6xl">
         <SectionHeader
+          mark={SHELF_MARKS.engineering}
           eyebrow={t('eng.eyebrow')}
           title={t('eng.title')}
           lead={t('eng.lead')}
-          align="left"
           tone="invert"
         />
 
+        {/* Nove decisões numeradas em mono: a numeração é o que faz a lista ler
+            como um índice de catálogo e não como mais uma grade de cards. */}
         <ul className="grid gap-x-10 gap-y-9 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item, index) => (
             <li
               key={item.key}
               data-reveal
               data-reveal-delay={String((index % 3) + 1)}
-              className="border-t border-white/10 pt-5"
+              className="border-t border-white/15 pt-5"
             >
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-lumi-200">
-                {item.label}
-              </span>
-              <h3 className="mb-2 mt-2 font-display text-lg font-extrabold leading-snug text-white">
+              <div className="flex items-baseline gap-3">
+                <span
+                  aria-hidden="true"
+                  className="cota text-[10px] text-white/30"
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-lumi-200">
+                  {item.label}
+                </span>
+              </div>
+              <h3 className="mb-2 mt-2 font-display text-lg font-extrabold leading-snug text-ink-100">
                 {item.title}
               </h3>
-              <p className="text-sm leading-relaxed text-gray-400">
+              <p className="max-w-[52ch] text-sm leading-relaxed text-ink-400">
                 {item.desc}
               </p>
             </li>
@@ -143,7 +156,7 @@ export function Engineering() {
         <div
           data-reveal
           data-reveal-delay="2"
-          className="mt-16 rounded-2xl border border-white/10 bg-white/[0.03] p-6 sm:p-8"
+          className="mt-16 rounded-[2px] border border-white/12 bg-white/[0.03] p-6 sm:p-8"
         >
           <h3 className="mb-6 font-mono text-[10px] uppercase tracking-[0.18em] text-lumi-200">
             {t('eng.stack.title')}
@@ -152,16 +165,16 @@ export function Engineering() {
             {stack.map((group) => (
               <div
                 key={group.key}
-                className="flex flex-col gap-2 sm:flex-row sm:gap-6"
+                className="flex flex-col gap-2 border-t border-white/[0.07] pt-4 first:border-t-0 first:pt-0 sm:flex-row sm:gap-6"
               >
-                <dt className="shrink-0 pt-1 text-xs font-bold uppercase tracking-[0.12em] text-gray-400 sm:w-32">
+                <dt className="cota shrink-0 pt-1 text-[10px] uppercase text-ink-400 sm:w-36">
                   {group.label}
                 </dt>
                 <dd className="flex flex-wrap gap-1.5">
                   {group.items.map((tech) => (
                     <span
                       key={tech}
-                      className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[11px] text-gray-300"
+                      className="rounded-[2px] border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[11px] text-ink-200"
                     >
                       {tech}
                     </span>
