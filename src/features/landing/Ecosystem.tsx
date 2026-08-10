@@ -107,7 +107,7 @@ export function Ecosystem() {
   return (
     <section
       id="ecosystem"
-      className="paper-surface relative bg-paper-200 px-6 py-24 dark:bg-ink-900/50 sm:py-28"
+      className="emenda emenda-dobra paper-surface relative bg-paper-200 px-6 py-24 dark:bg-ink-900/50 sm:py-28"
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeader

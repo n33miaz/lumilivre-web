@@ -175,7 +175,7 @@ export function ScreensShowcase() {
   return (
     <section
       id="screens"
-      className="paper-surface relative overflow-hidden bg-paper-200 py-24 dark:bg-ink-900/50 sm:py-28"
+      className="emenda emenda-dobra paper-surface relative overflow-hidden bg-paper-200 py-24 dark:bg-ink-900/50 sm:py-28"
     >
       <div className="relative mx-auto max-w-6xl px-6">
         <SectionHeader

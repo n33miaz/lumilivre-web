@@ -33,7 +33,9 @@ export function Footer() {
   );
 
   return (
-    <footer className="paper-surface border-t-2 border-paper-900 bg-paper-100 px-6 py-16 dark:border-ink-100/80 dark:bg-ink-950">
+    // `emenda` sem `emenda-dobra`: a régua de 2px do colofão já é o filete desta
+    // emenda. O véu é o que amacia o salto do bloco roxo para o papel.
+    <footer className="emenda paper-surface border-t-2 border-paper-900 bg-paper-100 px-6 py-16 dark:border-ink-100/80 dark:bg-ink-950">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-5">

@@ -61,7 +61,12 @@ export function Engineering() {
       // `ink-900` e não `ink-950`: no tema escuro o fundo da página JÁ é
       // ink-950, e um painel da mesma cor apagaria justamente a quebra de ritmo
       // que esta seção existe para fazer.
-      className="rule-lines relative overflow-hidden border-y border-white/10 bg-ink-900 px-6 py-24 text-ink-200 sm:py-28"
+      //
+      // `emenda emenda-luz`, sem `emenda-dobra`: o filete de cima desta seção já
+      // é o `border-y` branco, que é o que se enxerga sobre tinta escura. E o
+      // véu inverte — sombra sobre quase preto não aparece, então quem amacia a
+      // queda do papel para o painel é a claridade na borda dele.
+      className="emenda emenda-luz rule-lines relative overflow-hidden border-y border-white/10 bg-ink-900 px-6 py-24 text-ink-200 sm:py-28"
     >
       <div className="relative mx-auto max-w-6xl">
         <SectionHeader

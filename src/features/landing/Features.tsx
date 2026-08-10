@@ -205,7 +205,10 @@ export function Features() {
   );
 
   return (
-    <section id="features" className="px-6 py-24 sm:py-28">
+    <section
+      id="features"
+      className="emenda emenda-dobra px-6 py-24 sm:py-28"
+    >
       <div className="mx-auto max-w-6xl">
         <SectionHeader
           mark={SHELF_MARKS.features}

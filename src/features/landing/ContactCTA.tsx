@@ -70,7 +70,10 @@ export function ContactCTA() {
   );
 
   return (
-    <section id="contact" className="rule-lines bg-lumi-700 px-6 py-24 sm:py-28">
+    <section
+      id="contact"
+      className="emenda emenda-dobra rule-lines bg-lumi-700 px-6 py-24 sm:py-28"
+    >
       <div className="mx-auto grid max-w-6xl items-start gap-x-12 gap-y-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <ShelfMark
