@@ -27,7 +27,7 @@ export function TableSearch({
 
   return (
     <div
-      className={`relative flex items-stretch rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 transition focus-within:border-lumi-primary focus-within:ring-2 focus-within:ring-lumi-primary ${className}`}
+      className={`relative flex items-stretch rounded-xl bg-white dark:bg-dark-card border border-gray-200 dark:border-white/10 transition-[border-color,box-shadow,background-color] duration-200 ease-out motion-reduce:transition-none focus-within:border-lumi-primary focus-within:ring-2 focus-within:ring-lumi-primary ${className}`}
     >
       <input
         type="text"

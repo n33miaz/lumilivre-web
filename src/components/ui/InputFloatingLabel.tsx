@@ -40,7 +40,7 @@ export function InputFloatingLabel({
       <input
         id={id}
         type={currentType}
-        className={`w-full pl-10 ${isPasswordType ? 'pr-10' : 'pr-4'} py-3.5 bg-transparent border-2 rounded-lg outline-none text-gray-800 dark:text-gray-100 transition-[border-color,box-shadow,color] duration-200 ease-out
+        className={`w-full pl-10 ${isPasswordType ? 'pr-10' : 'pr-4'} py-3.5 bg-transparent border-2 rounded-lg outline-none text-gray-800 dark:text-gray-100 transition-[border-color,box-shadow,color,background-color] duration-200 ease-out motion-reduce:transition-none
           ${
             error
               ? 'border-red-500'
@@ -62,10 +62,17 @@ export function InputFloatingLabel({
 
       {/* Float driven purely by `transform` (top/left stay constant) so the
           200ms transition interpolates a single matrix — switching `top`
-          between % and rem made Chromium snap instead of animate. */}
+          between % and rem made Chromium snap instead of animate.
+          Lista explícita no lugar de `transition-all`: `all` também alcança
+          propriedades que não deveriam animar (o `padding`, a `border` que o
+          navegador injeta no preenchimento automático) e, quando uma delas
+          entra no meio, a curva do rótulo engasga. Aqui estão as quatro que de
+          fato mudam — posição, corpo, peso e cor — mais a cor de fundo, que é o
+          retalho que fura a borda do campo e precisa acompanhar a troca de
+          tema. */}
       <label
         htmlFor={id}
-        className={`absolute left-3 top-1/2 origin-left cursor-text px-1 pointer-events-none bg-white dark:bg-dark-card text-base transition-all duration-200 ease-out motion-reduce:transition-none
+        className={`absolute left-3 top-1/2 origin-left cursor-text px-1 pointer-events-none bg-white dark:bg-dark-card text-base transition-[transform,font-size,font-weight,color,background-color] duration-200 ease-out motion-reduce:transition-none
           ${
             shouldFloatLabel
               ? 'translate-x-0 translate-y-[calc(-50%_-_1.75rem)] scale-75 font-bold'
@@ -83,7 +90,7 @@ export function InputFloatingLabel({
 
       {Icon && (
         <Icon
-          className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-200 ease-out
+          className={`absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors duration-200 ease-out motion-reduce:transition-none
             ${
               error
                 ? 'text-red-500'
@@ -99,7 +106,7 @@ export function InputFloatingLabel({
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none hover:opacity-80"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 focus:outline-none hover:opacity-80 transition-opacity duration-200 ease-out motion-reduce:transition-none"
           tabIndex={-1}
         >
           {showPassword ? (

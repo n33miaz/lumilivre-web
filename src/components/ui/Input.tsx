@@ -4,6 +4,10 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
 }
 
+// 200ms em todos os campos do sistema, e não só nos de login: a mesma duração do
+// rótulo flutuante. Com `transition-colors` sem duração o Tailwind entregava
+// 150ms, e dois campos vizinhos de telas diferentes reagiam em ritmos diferentes.
+
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className = '', error, disabled, ...props }, ref) => {
     return (
@@ -12,7 +16,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           disabled={disabled}
           className={`
-            w-full h-[38px] px-3 border rounded-md outline-none text-sm transition-colors
+            w-full h-[38px] px-3 border rounded-md outline-none text-sm
+            transition-[color,background-color,border-color,box-shadow] duration-200 ease-out motion-reduce:transition-none
             ${
               disabled
                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'

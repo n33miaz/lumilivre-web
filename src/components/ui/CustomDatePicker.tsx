@@ -404,7 +404,8 @@ export const CustomDatePicker = forwardRef<
           ref={inputRef}
           type="text"
           className={`
-            w-full pl-3 pr-10 py-2 text-sm border rounded-md outline-none transition-colors placeholder-gray-400 dark:placeholder-gray-500
+            w-full pl-3 pr-10 py-2 text-sm border rounded-md outline-none placeholder-gray-400 dark:placeholder-gray-500
+            transition-[color,background-color,border-color,box-shadow] duration-200 ease-out motion-reduce:transition-none
             ${
               props.disabled
                 ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-600'

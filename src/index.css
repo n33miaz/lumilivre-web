@@ -183,6 +183,40 @@ body {
   background-color: #13101b;
 }
 
+/* ============================================================
+   Rótulo flutuante × preenchimento automático
+   ------------------------------------------------------------
+   O gerenciador de senhas do navegador preenche usuário e senha
+   SEM disparar foco e, em parte dos casos, sem evento de input:
+   o React não vê `value` mudar, `shouldFloatLabel` continua
+   falso, e o rótulo fica deitado em cima do texto preenchido —
+   até o primeiro clique, quando salta. Esse salto é exatamente
+   o teletransporte que a transição de 200ms existe para evitar.
+   O rótulo é irmão POSTERIOR do campo, então `~` alcança sem
+   mudar a marcação. Sobrescrevemos as VARIÁVEIS do transform do
+   Tailwind, e não o `transform` inteiro, para o rótulo subir
+   pela mesma transição do estado com foco, e não por um atalho.
+   Duas regras separadas de propósito: um seletor com
+   pseudo-classe desconhecida invalidaria a lista inteira, e
+   `:autofill` (padrão) e `:-webkit-autofill` (legado) não estão
+   nos mesmos navegadores.
+   ============================================================ */
+input:-webkit-autofill ~ label {
+  --tw-translate-x: 0px;
+  --tw-translate-y: calc(-50% - 1.75rem);
+  --tw-scale-x: 0.75;
+  --tw-scale-y: 0.75;
+  font-weight: 700;
+}
+
+input:autofill ~ label {
+  --tw-translate-x: 0px;
+  --tw-translate-y: calc(-50% - 1.75rem);
+  --tw-scale-x: 0.75;
+  --tw-scale-y: 0.75;
+  font-weight: 700;
+}
+
 /* Ficha sem moldura: só o papel. Serve ao portão da primeira senha, que já vive
    dentro da caixa do `Modal` (borda e raio são dela) mas é o último passo da
    autenticação, não um diálogo do painel — e por isso usa o papel das outras
@@ -217,6 +251,30 @@ body {
   border-color: rgba(228, 220, 203, 0.14);
   background-color: #0b0810;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+/* Pastilha do trocador de idioma e tema das telas de acesso: mesma cor, mesma
+   borda, mesmo canto de 2px e mesma sombra da ficha do formulário.
+   NÃO é `.ficha` reaproveitada, e não por preguiça: `.ficha` declara
+   `position: relative` e mora depois de `@tailwind utilities` na folha — com a
+   mesma especificidade, venceria o `absolute` que ancora a pastilha no canto da
+   tela. Aqui entra só o material. */
+.ficha-pastilha {
+  border: 1px solid #e4dccb;
+  border-radius: 2px;
+  background-color: #fffdf9;
+  box-shadow:
+    0 1px 0 rgba(26, 24, 20, 0.03),
+    0 14px 30px -20px rgba(26, 24, 20, 0.3);
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease;
+}
+
+.dark .ficha-pastilha {
+  border-color: rgba(228, 220, 203, 0.13);
+  background-color: #13101b;
+  box-shadow: 0 14px 32px -20px rgba(0, 0, 0, 0.75);
 }
 
 /* Cota (número de classificação). `tabular-nums` porque a coluna de cotas das

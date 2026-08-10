@@ -65,7 +65,7 @@ export function EsqueciSenhaPage() {
         </Link>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <InputFloatingLabel
           id="email"
           type="email"

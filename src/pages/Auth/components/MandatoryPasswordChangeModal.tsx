@@ -120,7 +120,7 @@ export function MandatoryPasswordChangeModal() {
           {t('mandatory_change.notice')}
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <InputFloatingLabel
             id="senhaAtual"
             label={t('change_password.field.current')}

@@ -31,12 +31,14 @@ export function TagInput({ label, tags, setTags, placeholder }: TagInputProps) {
   const labelStyles =
     'block text-sm font-medium text-gray-700 dark:text-white mb-1';
   const inputStyles =
-    'flex-grow bg-transparent outline-none text-gray-800 dark:text-gray-100 min-w-[150px]';
+    'flex-grow bg-transparent outline-none text-gray-800 dark:text-gray-100 min-w-[150px] transition-colors duration-200 ease-out motion-reduce:transition-none';
 
   return (
     <div>
       <label className={labelStyles}>{label}*</label>
-      <div className="flex items-center gap-2 p-2 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-lumi-primary focus-within:border-lumi-primary overflow-x-auto whitespace-nowrap">
+      {/* Mesma janela de 200ms do rótulo flutuante: a moldura acende no foco no
+          ritmo dos outros campos, em vez dos 150ms padrão do Tailwind. */}
+      <div className="flex items-center gap-2 p-2 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 focus-within:ring-2 focus-within:ring-lumi-primary focus-within:border-lumi-primary overflow-x-auto whitespace-nowrap transition-[border-color,box-shadow,background-color] duration-200 ease-out motion-reduce:transition-none">
         {tags.map((tag) => (
           <div
             key={tag}

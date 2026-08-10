@@ -96,7 +96,7 @@ export function ChangePasswordModal({
         {/* Mesma cota das outras quatro superfícies de acesso. O `Modal.Header`
             fica porque é ele que carrega o botão de fechar — a faixa de cota
             entra como primeira linha do corpo e costura o modal à família. */}
-        <div className="mb-6 flex items-baseline justify-between gap-4 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
+        <div className="mb-8 flex items-baseline justify-between gap-4 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
           <span
             aria-hidden="true"
             className="cota text-sm text-lumi-600 dark:text-lumi-200"
@@ -111,7 +111,7 @@ export function ChangePasswordModal({
         <form
           id="change-password-form"
           onSubmit={handleSubmit}
-          className="space-y-4"
+          className="space-y-5"
         >
           <InputFloatingLabel
             id="senhaAtual"

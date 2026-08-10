@@ -51,7 +51,10 @@ export function AuthShell({
         />
       )}
 
-      <div className="absolute right-5 top-5 z-10 flex items-center gap-1 rounded-md border border-paper-300 bg-paper-50/80 px-1.5 py-1 backdrop-blur-md dark:border-white/10 dark:bg-white/10">
+      {/* Mesma pastilha do login: papel opaco, borda de 1px e canto de 2px, o
+          material da ficha logo abaixo. As quatro telas de acesso têm de mostrar
+          o mesmo canto superior direito. */}
+      <div className="ficha-pastilha paper-surface absolute right-5 top-5 z-10 flex items-center gap-1 px-1.5 py-1">
         <LocaleSwitcher />
         <ThemeToggle />
       </div>
@@ -63,7 +66,7 @@ export function AuthShell({
           {children}
 
           {footer && (
-            <div className="mt-6 border-t border-paper-300 pt-5 text-center dark:border-white/10">
+            <div className="mt-7 border-t border-paper-300 pt-6 text-center dark:border-white/10">
               {footer}
             </div>
           )}

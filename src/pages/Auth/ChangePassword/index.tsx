@@ -138,7 +138,7 @@ export function MudarSenhaPage() {
     }
 
     return (
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <InputFloatingLabel
           id="novaSenha"
           type="password"
