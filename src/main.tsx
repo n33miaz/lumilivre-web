@@ -17,6 +17,7 @@ import { LocaleProvider } from './contexts/LocaleContext';
 import { LibraryConfigProvider } from './contexts/LibraryConfigContext';
 import { ApiHealthProvider } from './contexts/ApiHealthContext';
 import { ApiWakingModal } from './components/ApiWakingModal';
+import { ApiWakingNotice } from './components/ApiWakingNotice';
 import { queryClient } from './services/queryClient';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -28,6 +29,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <QueryErrorBridge />
             <ApiHealthProvider>
               <ApiWakingModal />
+              <ApiWakingNotice />
               <BrowserRouter>
                 <AuthProvider>
                   <LibraryConfigProvider>
