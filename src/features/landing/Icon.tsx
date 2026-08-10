@@ -12,6 +12,9 @@ type IconName =
   | 'sparkles'
   | 'arrow-left-right'
   | 'arrow-right'
+  | 'arrow-up-right'
+  | 'chevron-left'
+  | 'chevron-right'
   | 'bookmark'
   | 'megaphone'
   | 'mail'
@@ -102,6 +105,16 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="m12 5 7 7-7 7" />
     </>
   ),
+  // Seta diagonal: a convenção de "abre fora daqui" (outra aba). É o que dá ao
+  // card do ecossistema a pista de que ele é link, e não um bloco de texto.
+  'arrow-up-right': (
+    <>
+      <path d="M7 17 17 7" />
+      <path d="M7 7h10v10" />
+    </>
+  ),
+  'chevron-left': <path d="m15 18-6-6 6-6" />,
+  'chevron-right': <path d="m9 18 6-6-6-6" />,
   bookmark: <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />,
   megaphone: (
     <>

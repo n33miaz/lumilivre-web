@@ -72,7 +72,14 @@ export function Hero() {
               className="mt-7 font-display text-[2.6rem] font-extrabold leading-[1.08] tracking-[-0.035em] text-paper-900 dark:text-ink-100 sm:text-[3.4rem] lg:text-[4.25rem]"
             >
               {t('hero.title.part1')}{' '}
-              <span className="text-lumi-500 dark:text-lumi-label">
+              {/* `lumi-300` no escuro, não `lumi-label`: aquele token é magenta
+                  (#C964C5) e, num título de 4rem, a metade destacada da frase
+                  lia como ROSA, não como o roxo da marca. `lumi-300` (#CE93D8)
+                  é degrau da própria rampa roxa e dá 8,3:1 sobre `ink-950` —
+                  passa AA com folga. A troca é de classe, não de token: o
+                  `lumi-label` é usado no painel inteiro e mexer nele repintaria
+                  telas que nada têm a ver com esta frase. */}
+              <span className="text-lumi-500 dark:text-lumi-300">
                 {t('hero.title.part2')}
               </span>
             </h1>

@@ -95,7 +95,10 @@ export function Footer() {
 
         <div className="flex flex-col items-start justify-between gap-3 border-t border-paper-300 pt-8 font-mono text-[11px] text-paper-500 dark:border-white/10 dark:text-ink-400 md:flex-row md:items-center">
           <div>{t('footer.copyright', { year })}</div>
-          <div>{t('footer.location')}</div>
+          {/* Assinatura, não endereço: a cidade saiu porque um portfólio lido
+              por recrutador do mundo inteiro não ganha nada em publicar onde o
+              autor mora. O que sustenta a linha é a autoria, e ela fica. */}
+          <div>{t('footer.authorship')}</div>
         </div>
       </div>
     </footer>
