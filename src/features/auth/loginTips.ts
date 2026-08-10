@@ -12,7 +12,40 @@
 export interface LoginTip {
   id: string;
   icon: LoginTipIcon;
+  /** Assuntos de que a dica fala. Ver `LoginTopic`. */
+  topics: readonly LoginTopic[];
 }
+
+/**
+ * Vocabulário de assuntos do produto — a moeda comum entre as dicas e as
+ * chamadas do painel (`loginHeadlines.ts`).
+ *
+ * Mora aqui, e não no módulo de chamadas, porque a dependência entre os dois só
+ * pode apontar num sentido: as chamadas conhecem o acervo de dicas para poder
+ * filtrá-lo, o contrário nunca acontece.
+ *
+ * Curto de propósito. Um assunto por eixo do sistema; se cada dica ganhasse um
+ * assunto só seu, nada colidiria com nada e o filtro não filtraria nada.
+ */
+export type LoginTopic =
+  /** Catálogo, ISBN, exemplares. */
+  | 'acervo'
+  /** Empréstimo, reserva, devolução, atraso. */
+  | 'emprestimo'
+  /** Cadastro e dados de quem lê. */
+  | 'leitor'
+  /** Relatórios, exportação, números do dashboard. */
+  | 'relatorio'
+  /** Mural, comunicados, anexos. */
+  | 'conteudo'
+  /** Ranking, pódio, incentivo à leitura. */
+  | 'engajamento'
+  /** Aplicativo Android do leitor. */
+  | 'app'
+  /** Navegação do painel: busca, filtros, atalhos, tour. */
+  | 'painel'
+  /** Configuração, tema, idioma. */
+  | 'ajuste';
 
 export type LoginTipIcon =
   | 'scan'
@@ -31,24 +64,32 @@ export type LoginTipIcon =
   | 'palette';
 
 export const LOGIN_TIPS: readonly LoginTip[] = [
-  { id: 'isbn', icon: 'scan' },
-  { id: 'queue', icon: 'queue' },
-  { id: 'overdue', icon: 'clock' },
-  { id: 'libraryType', icon: 'toggle' },
-  { id: 'reports', icon: 'report' },
-  { id: 'export', icon: 'export' },
-  { id: 'board', icon: 'board' },
-  { id: 'ranking', icon: 'trophy' },
-  { id: 'app', icon: 'phone' },
-  { id: 'search', icon: 'keyboard' },
-  { id: 'filters', icon: 'filter' },
-  { id: 'cep', icon: 'pin' },
-  { id: 'tour', icon: 'compass' },
-  { id: 'theme', icon: 'palette' },
+  { id: 'isbn', icon: 'scan', topics: ['acervo'] },
+  { id: 'queue', icon: 'queue', topics: ['emprestimo'] },
+  { id: 'overdue', icon: 'clock', topics: ['emprestimo'] },
+  // Liga e desliga ranking, mural e campos de turma: fala de três assuntos de
+  // uma vez, e por isso sai de cena junto com qualquer um deles.
+  { id: 'libraryType', icon: 'toggle', topics: ['ajuste', 'engajamento', 'conteudo'] },
+  { id: 'reports', icon: 'report', topics: ['relatorio'] },
+  { id: 'export', icon: 'export', topics: ['relatorio'] },
+  { id: 'board', icon: 'board', topics: ['conteudo'] },
+  { id: 'ranking', icon: 'trophy', topics: ['engajamento'] },
+  { id: 'app', icon: 'phone', topics: ['app'] },
+  { id: 'search', icon: 'keyboard', topics: ['painel'] },
+  { id: 'filters', icon: 'filter', topics: ['painel'] },
+  { id: 'cep', icon: 'pin', topics: ['leitor'] },
+  { id: 'tour', icon: 'compass', topics: ['painel'] },
+  { id: 'theme', icon: 'palette', topics: ['ajuste'] },
 ];
 
-/** Quantas dicas o painel mostra por acesso. */
-export const TIPS_PER_VISIT = 3;
+/**
+ * Quantas dicas o painel mostra por acesso.
+ *
+ * Duas, e não três: com a chamada do painel também variando por visita, três
+ * dicas somavam quatro blocos de texto disputando a mesma coluna. Duas deixam
+ * respiro entre as seções e cada uma tem chance de ser lida.
+ */
+export const TIPS_PER_VISIT = 2;
 
 /**
  * Chave própria no `localStorage`. Não pode viajar dentro de `user`/`authToken`,
@@ -110,10 +151,14 @@ function shuffled<T>(items: readonly T[], random: () => number): T[] {
 /**
  * Escolhe as dicas do acesso atual, **sem nenhuma das que estão em `exclude`**.
  *
- * Sorteio puramente aleatório repete demais — com 14 dicas e 3 por vez, mais de
- * um em cada cinco acessos traria uma repetida, e o usuário lê isso como bug, não
+ * Sorteio puramente aleatório repete demais — mesmo com 14 dicas e 2 por vez, um
+ * em cada quatro acessos traria uma repetida, e o usuário lê isso como bug, não
  * como acaso. Excluir o conjunto anterior garante interseção vazia entre acessos
  * consecutivos; o filtro só é relaxado se o acervo restante não der conta.
+ *
+ * `pool` existe para que quem chama possa estreitar o acervo antes do sorteio —
+ * é por ela que `loginHeadlines.ts` remove as dicas que falariam do mesmo
+ * assunto da chamada da visita.
  *
  * Função pura de propósito (nada de storage aqui): sob StrictMode o React chama
  * o inicializador de estado duas vezes, e um efeito colateral aqui consumiria

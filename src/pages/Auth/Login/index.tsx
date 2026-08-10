@@ -33,10 +33,13 @@ import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { useScrollReveal } from '../../../hooks/useScrollReveal';
 import {
   readLastShownTips,
-  rememberLoginTips,
-  selectLoginTips,
   type LoginTipIcon,
 } from '../../../features/auth/loginTips';
+import {
+  readLastShownHeadline,
+  rememberLoginVisit,
+  selectLoginVisit,
+} from '../../../features/auth/loginHeadlines';
 import { ThemeToggle } from '../../../layouts/components/ThemeToggle';
 import { LocaleSwitcher } from '../../../components/ui/LocaleSwitcher';
 import { InputFloatingLabel } from '../../../components/ui/InputFloatingLabel';
@@ -99,18 +102,25 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
-  // Conjunto de dicas desta visita: sorteado uma vez na montagem, excluindo o
-  // conjunto da visita anterior. A gravação vem depois, num efeito, para que o
-  // duplo render do StrictMode não consuma duas rotações.
-  const [tips] = useState(() =>
-    selectLoginTips({ exclude: readLastShownTips() }),
+  // Chamada + dicas desta visita: sorteadas juntas, uma vez na montagem,
+  // excluindo o que a visita anterior mostrou. Juntas porque a chamada é escolhida
+  // primeiro e as dicas só podem sair do que sobra dela — ver
+  // `features/auth/loginHeadlines.ts`, que é onde essa ordem é garantida.
+  // A gravação vem depois, num efeito, para que o duplo render do StrictMode não
+  // consuma duas rotações.
+  const [visit] = useState(() =>
+    selectLoginVisit({
+      excludeHeadline: readLastShownHeadline(),
+      excludeTips: readLastShownTips(),
+    }),
   );
+  const { headline, tips } = visit;
   const brandPanelRef = useRef<HTMLElement>(null);
   useScrollReveal(brandPanelRef);
 
   useEffect(() => {
-    rememberLoginTips(tips);
-  }, [tips]);
+    rememberLoginVisit(visit);
+  }, [visit]);
 
   const navigate = useNavigate();
   const { login: setAuthUser } = useAuth();
@@ -227,49 +237,55 @@ export function LoginPage() {
 
       <section
         ref={brandPanelRef}
-        className="login-brand-panel rule-lines relative z-10 hidden flex-col justify-between overflow-hidden p-12 text-white lg:flex"
+        className="login-brand-panel rule-lines relative z-10 hidden flex-col justify-between gap-12 overflow-hidden px-12 py-14 text-white lg:flex"
       >
         {/* Marca em linha, sobre um filete — o mesmo cabeçalho de ficha da
             landing, lido em negativo. O quadrado de vidro de 48px que embrulhava
             o logo saiu: glassmorphism era o segundo tique da lista, e aqui ele
-            não estava resolvendo nada. */}
-        <div className="relative z-10 flex items-center gap-3 border-b-2 border-white/35 pb-4">
+            não estava resolvendo nada.
+            "Library Management System" saiu da direita: era etiqueta decorativa,
+            dizia em inglês o que o subtítulo do formulário já diz, e empurrava a
+            marca para o canto. Sem ela, logo e nome ficam centrados juntos — que
+            é o que o filete precisa apoiar. */}
+        <div className="relative z-10 flex items-center justify-center gap-3 border-b-2 border-white/35 pb-5">
           <LogoIcon className="h-9 w-9 shrink-0 text-white" />
           <h1 className="font-display text-2xl font-extrabold tracking-tight">
             {t('login.title')}
           </h1>
-          <span className="cota ml-auto text-[10px] uppercase text-lumi-100">
-            {t('login.hero.tagline')}
-          </span>
         </div>
 
         <div className="relative z-10 max-w-lg">
           {/* Escala de abertura igual à do herói da landing: um salto grande
-              entre o título e o texto de apoio, sem degradê no texto. */}
+              entre o título e o texto de apoio, sem degradê no texto.
+              O par chamada/apoio muda a cada acesso, e nunca fala do assunto das
+              dicas ao lado — a exclusão é feita no sorteio, não conferida depois. */}
           <h2
             data-reveal
             className="font-display text-[2.6rem] font-extrabold leading-[1.1] tracking-[-0.03em] xl:text-[3.1rem]"
           >
-            {t('login.headline.start')}{' '}
-            <span className="text-lumi-200">{t('login.headline.highlight')}</span>.
+            {t(`login.headline.${headline.id}.start`)}{' '}
+            <span className="text-lumi-200">
+              {t(`login.headline.${headline.id}.highlight`)}
+            </span>
+            .
           </h2>
 
           <p
             data-reveal
             data-reveal-delay="1"
-            className="mt-6 max-w-[46ch] text-[17px] leading-relaxed text-lumi-100"
+            className="mt-7 max-w-[46ch] text-[17px] leading-relaxed text-lumi-100"
           >
-            {t('login.subtitle')}
+            {t(`login.headline.${headline.id}.subtitle`)}
           </p>
 
-          <div className="mt-10">
+          <div className="mt-14">
             {/* Os textos pequenos deste painel subiram de 45–70% para 75–80% de
                 branco: sobre o ponto mais claro da malha (#8B2B87) as opacidades
                 antigas caíam para 3,7:1, abaixo do mínimo AA para 10–11px. */}
             <div
               data-reveal
               data-reveal-delay="2"
-              className="cota border-t border-white/30 pt-3 text-[10px] uppercase text-white/80"
+              className="cota mb-2 border-t border-white/30 pt-4 text-[10px] uppercase text-white/80"
             >
               {t('login.tips.eyebrow')}
             </div>
@@ -289,7 +305,7 @@ export function LoginPage() {
                     key={tip.id}
                     data-reveal
                     data-reveal-delay={String(index + 3)}
-                    className="flex items-start gap-4 border-b border-white/20 py-4"
+                    className="flex items-start gap-4 border-b border-white/20 py-5"
                   >
                     <span
                       aria-hidden="true"
@@ -335,9 +351,12 @@ export function LoginPage() {
       </section>
 
       <section className="login-form-panel relative z-10 flex min-h-screen items-center justify-center px-5 py-20 lg:px-10">
-        {/* Frosted chip lifts both controls off the mesh so the locale label
-            stays legible in light mode (purple text was washing out). */}
-        <div className="absolute right-5 top-5 z-20 flex items-center gap-1 rounded-md border border-paper-300 bg-paper-50/80 px-1.5 py-1 backdrop-blur-md dark:border-white/10 dark:bg-white/10">
+        {/* Mesmo material da ficha do formulário: papel opaco, borda de 1px e o
+            canto de 2px. Era vidro fosco a 80% — e vidro sobre uma malha que
+            muda de cor o tempo todo é justamente o que o contraste não
+            perdoa. Opaco, o roxo do idioma passa de 3,7:1 para 9,4:1 no claro,
+            e no escuro a pastilha vira a mesma tinta do cartão. */}
+        <div className="ficha-pastilha paper-surface absolute right-5 top-5 z-20 flex items-center gap-1 px-1.5 py-1">
           <LocaleSwitcher />
           <ThemeToggle />
         </div>
@@ -348,17 +367,15 @@ export function LoginPage() {
               tinha 96px de altura e empurrava o formulário para baixo da dobra
               num aparelho de 667px — agora a marca é uma linha só, com o mesmo
               filete das outras superfícies. */}
-          <div className="mb-8 flex items-center gap-3 border-b-2 border-paper-900 pb-4 dark:border-ink-100/80 lg:hidden">
+          {/* Sem a etiqueta "Library Management System" que ficava à direita: em
+              telas estreitas ela quebrava a linha em três e deixava o cabeçalho
+              mais alto que o formulário. Agora marca e nome ficam centrados —
+              a mesma composição do painel de marca do `lg+`. */}
+          <div className="mb-8 flex items-center justify-center gap-3 border-b-2 border-paper-900 pb-4 dark:border-ink-100/80 lg:hidden">
             <LogoIcon className="h-9 w-9 shrink-0 text-lumi-primary dark:text-lumi-label" />
             <h1 className="font-display text-2xl font-extrabold tracking-tight text-paper-900 dark:text-ink-100">
               {t('login.title')}
             </h1>
-            {/* Some abaixo de 380px: nesta faixa a linha "LumiLivre + Library
-                Management System" quebra em três e o cabeçalho fica mais alto
-                que o formulário. É rótulo decorativo, não informação. */}
-            <span className="cota ml-auto hidden text-[10px] uppercase text-paper-500 dark:text-ink-400 min-[380px]:inline">
-              {t('login.hero.tagline')}
-            </span>
           </div>
 
           <div className="ficha ficha-elevada ficha-furo paper-surface bg-paper-50 px-5 pb-14 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
@@ -369,7 +386,7 @@ export function LoginPage() {
               level={2}
             />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <InputFloatingLabel
                 id="usuario"
                 type="text"

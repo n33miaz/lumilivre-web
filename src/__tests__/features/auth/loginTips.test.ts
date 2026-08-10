@@ -40,6 +40,13 @@ describe('Dicas do login', () => {
     expect(LOGIN_TIPS.length).toBeGreaterThanOrEqual(TIPS_PER_VISIT * 2);
   });
 
+  it('toda dica declara pelo menos um assunto', () => {
+    // Dica sem assunto passa livre por qualquer filtro de colisão — e é assim
+    // que a repetição volta sem ninguém notar.
+    const semAssunto = LOGIN_TIPS.filter((tip) => tip.topics.length === 0);
+    expect(semAssunto.map((tip) => tip.id)).toEqual([]);
+  });
+
   it('entrega a quantidade pedida, sem repetir dentro do mesmo conjunto', () => {
     const tips = selectLoginTips();
     expect(tips).toHaveLength(TIPS_PER_VISIT);
