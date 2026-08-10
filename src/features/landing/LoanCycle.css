@@ -1,0 +1,737 @@
+/* ============================================================
+   O CICLO DO EMPRÉSTIMO — folha da animação do herói.
+
+   Precisa ser folha própria pelos mesmos dois motivos do
+   `ScreensShowcase.css`: a CSP desta imagem não aceita `style`
+   inline nem `<style>` injetado, e nada disto (keyframes com
+   dezenas de paradas, `@media (prefers-reduced-motion)`) tem
+   variante no Tailwind 3. Folha empacotada pelo Vite, sim.
+
+   Por que CSS e não framer-motion: é uma sequência em LAÇO, sem
+   estado, sem gesto e sem interrupção. Uma vez declarada, ela
+   corre no compositor sem passar pelo JS a cada quadro — e não
+   soma nada ao bundle da rota, que é onde o custo dói.
+
+   Só `opacity` e `transform` são animados. Nenhuma propriedade
+   de layout entra em keyframe: a página tem um shader WebGL
+   rodando no mesmo herói e não sobra orçamento para reflow.
+   ============================================================ */
+
+.lc {
+  /* Uma batida por etapa da história; o ciclo é a soma das seis.
+     2,2s é o tempo de ler uma legenda de ~40 caracteres (~1,2s)
+     com folga para os 0,4s de entrada e os 0,4s de saída. Abaixo
+     disso a legenda vira piscada; acima, a pessoa rola antes do
+     fim. Os dois valores são escritos à mão em vez de calculados
+     porque TODA porcentagem de keyframe aqui deriva deles. */
+  --lc-beat: 2.2s;
+  --lc-cycle: 13.2s;
+
+  /* Paleta em variáveis para o tema trocar as CORES sem duplicar
+     nenhuma das regras de animação abaixo. */
+  --lc-paper: #fffdf9;
+  --lc-paper-2: #f0ebe0;
+  --lc-line: #e4dccb;
+  --lc-ink: #1a1814;
+  --lc-muted: #c4b9a3;
+  --lc-brand: #762075;
+  --lc-on-brand: #fffdf9;
+}
+
+/* No escuro a marca sobe para `lumi-300`. É a mesma decisão já
+   tomada no título do herói: `lumi-500` (#762075) sobre tinta
+   quase não separa do fundo, e o que devia ser a cor da marca lê
+   como um borrão escuro. */
+.dark .lc {
+  /* `ink-800`, e não `ink-900`: a ficha que segura o desenho JÁ é
+     `ink-900`, e com o mesmo valor cada objeto de papel sumia no
+     fundo — sobrava só o contorno de 1,5px, e o exemplar em cima
+     do balcão virava um vulto. Um degrau de diferença basta para
+     as peças levantarem do cartão. */
+  --lc-paper: #191424;
+  --lc-paper-2: #211c2b;
+  --lc-line: rgba(228, 220, 203, 0.16);
+  /* 80% de `ink-100`, exatamente o `dark:border-ink-100/80` que a
+     página usa em todos os filetes de 2px. Cheio, o filete acende
+     demais sobre a tinta. */
+  --lc-ink: rgba(245, 241, 232, 0.8);
+  --lc-muted: rgba(228, 220, 203, 0.32);
+  --lc-brand: #ce93d8;
+  --lc-on-brand: #0b0810;
+}
+
+.lc-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ------------------------------------------------------------
+   Material: as classes que pintam o desenho.
+   Cor e traço moram aqui (e não em atributo de apresentação)
+   porque `var()` em atributo de apresentação é terreno instável
+   entre navegadores. Geometria (x, y, width, rx, d) continua em
+   atributo, que é onde ela pertence.
+   ------------------------------------------------------------ */
+
+/* Face de papel: qualquer coisa cortada de um cartão. */
+.lc-paper {
+  fill: var(--lc-paper);
+  stroke: var(--lc-line);
+  stroke-width: 1.5;
+}
+
+/* O filete de 2px da página — a divisória de gaveta de fichário.
+   É o que separa a prateleira do balcão e a coluna da tabela. */
+.lc-rule {
+  fill: var(--lc-ink);
+}
+
+.lc-hair {
+  fill: none;
+  stroke: var(--lc-line);
+  stroke-width: 1.5;
+}
+
+/* Barra de conteúdo abstrata. NUNCA texto falso: o desenho é um
+   esquema e precisa admitir que é, senão vira captura inventada. */
+.lc-bar {
+  fill: var(--lc-muted);
+}
+
+.lc-fill-2 {
+  fill: var(--lc-paper-2);
+}
+
+.lc-brand-fill {
+  fill: var(--lc-brand);
+}
+
+/* Tinta da marca a 14%: o realce de linha escolhida, no
+   aplicativo e na tabela do painel. `fill-opacity` (e não
+   `opacity`) porque `opacity` no filho MULTIPLICA a do grupo que
+   está sendo animado, e o realce sumiria junto com o foco. */
+.lc-tint {
+  fill: var(--lc-brand);
+  fill-opacity: 0.14;
+}
+
+/* O que fica POR CIMA da marca: rótulo do botão, ponto da
+   pastilha de situação, cota da lombada. Inverte com o tema
+   junto com `--lc-brand`. */
+.lc-on-brand {
+  fill: var(--lc-on-brand);
+}
+
+/* Filete de 1px: separador de linha de tabela e base da barra de
+   endereço. Retângulo preenchido, não traço. */
+.lc-hairline {
+  fill: var(--lc-line);
+}
+
+/* O anel do toque na tela do celular. */
+.lc-ring {
+  fill: none;
+  stroke: var(--lc-brand);
+  stroke-width: 3;
+}
+
+.lc-brand-stroke {
+  fill: none;
+  stroke: var(--lc-brand);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lc-brand-thin {
+  fill: none;
+  stroke: var(--lc-brand);
+  stroke-width: 1.5;
+}
+
+/* Etiqueta de lombada: mono, como a `.cota` do resto da página. */
+.lc-cota {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  fill: var(--lc-muted);
+}
+
+/* Vão deixado na estante pelo exemplar emprestado. Tracejado
+   porque o lugar continua reservado — o livro volta. */
+.lc-slot {
+  fill: none;
+  stroke: var(--lc-brand);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 5;
+  opacity: 0.5;
+}
+
+.lc-bridge {
+  fill: none;
+  stroke: var(--lc-brand);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 6;
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------
+   Estados de repouso.
+   São eles que aparecem quando a animação não roda (movimento
+   reduzido). Por isso o quadro parado já é uma composição que se
+   sustenta: estante com o vão aberto, exemplar fora, aplicativo
+   com o pedido feito, painel com o empréstimo aprovado.
+   ------------------------------------------------------------ */
+.lc-shelf,
+.lc-phone,
+.lc-browser,
+.lc-hit,
+.lc-cta,
+.lc-newrow,
+.lc-stamp,
+.lc-reader {
+  opacity: 1;
+}
+
+/* Os dois efêmeros: só existem no instante do toque e do retorno.
+   Parados, não têm o que dizer — e um círculo grande de "toque"
+   congelado no meio da tela seria ruído. */
+.lc-tap,
+.lc-req,
+.lc-back {
+  opacity: 0;
+}
+
+/* Escala e rotação sempre em torno do próprio centro do
+   elemento; sem isto o SVG mede a origem contra a viewBox
+   inteira e o carimbo desce vindo do canto do desenho. */
+.lc-book,
+.lc-stamp,
+.lc-tap,
+.lc-req,
+.lc-hit {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* ------------------------------------------------------------
+   Coreografia.
+   As porcentagens são as seis batidas: 16,67% cada.
+     b1 0    b2 16,67   b3 33,33
+     b4 50   b5 66,67   b6 83,33
+   O que a batida 6 conquista NÃO é desfeito em 100%: some
+   durante os primeiros 8% do ciclo seguinte, que é a batida da
+   estante. Assim a emenda do laço vira "a mesa sendo limpa" em
+   vez de um piscar geral, e a batida final fica visível o dobro
+   do tempo.
+   ------------------------------------------------------------ */
+
+/* b1 — a estante acende. */
+@keyframes lcShelf {
+  0%,
+  2% {
+    opacity: 0.38;
+  }
+  8%,
+  33.33% {
+    opacity: 1;
+  }
+  40%,
+  100% {
+    opacity: 0.38;
+  }
+}
+
+/* O vão fecha na emenda do laço (o exemplar foi devolvido) e
+   reabre quando ele sai, na batida 2. */
+@keyframes lcSlot {
+  0%,
+  3% {
+    opacity: 0.5;
+  }
+  6%,
+  20% {
+    opacity: 0;
+  }
+  26%,
+  100% {
+    opacity: 0.5;
+  }
+}
+
+/* b2 — o exemplar sai da estante; b6 — desce para o balcão.
+   Entre uma e outra ele fica estacionado e recuado, para o
+   aplicativo e o painel ficarem com o foco. */
+@keyframes lcBook {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  4% {
+    opacity: 1;
+  }
+  16.67% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  26% {
+    transform: translate(187px, -31px) scale(1.15) rotate(-5deg);
+  }
+  33.33% {
+    opacity: 1;
+  }
+  40%,
+  83.33% {
+    opacity: 0.45;
+  }
+  83.34% {
+    transform: translate(187px, -31px) scale(1.15) rotate(-5deg);
+    animation-timing-function: cubic-bezier(0.34, 1.12, 0.44, 1);
+  }
+  88% {
+    opacity: 1;
+  }
+  90% {
+    transform: translate(179px, 99px) scale(0.8) rotate(-6deg);
+  }
+  96% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(179px, 99px) scale(0.8) rotate(-6deg);
+  }
+}
+
+/* b3/b4 — o aplicativo assume o foco; na b6 volta a acender de
+   leve, porque é ali que a aprovação chega de volta. */
+@keyframes lcPhone {
+  0%,
+  4% {
+    opacity: 0.9;
+  }
+  10%,
+  27% {
+    opacity: 0.38;
+  }
+  36%,
+  66.67% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0.55;
+  }
+  84%,
+  100% {
+    opacity: 0.9;
+  }
+}
+
+/* b3 — o aluno se interessa: a linha do título fica marcada e
+   assim permanece até o fim do ciclo. */
+@keyframes lcHit {
+  0%,
+  4% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  8% {
+    opacity: 0;
+  }
+  36% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  42%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* b4 — o botão de pedir emprestado sobe. */
+@keyframes lcCta {
+  0%,
+  4% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  8% {
+    opacity: 0;
+  }
+  49% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  54%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* O toque: um anel só, que abre e some. Repetir viraria pulso
+   decorativo — e pulso infinito é o tique visual que esta página
+   inteira existe para evitar. */
+@keyframes lcTap {
+  0%,
+  55% {
+    opacity: 0;
+    transform: scale(0.18);
+  }
+  56% {
+    opacity: 0.5;
+    transform: scale(0.18);
+  }
+  63%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* b4→b5 — a ficha do pedido atravessa do celular para o site.
+   É a única peça que cruza a ponte: é literalmente o que o
+   aplicativo manda para o painel. */
+@keyframes lcReq {
+  0%,
+  62% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.55) rotate(0deg);
+  }
+  65.5% {
+    opacity: 1;
+    transform: translate(6px, -4px) scale(1) rotate(-4deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  71% {
+    opacity: 1;
+    transform: translate(144px, 4px) scale(0.72) rotate(3deg);
+  }
+  74%,
+  100% {
+    opacity: 0;
+    transform: translate(148px, 6px) scale(0.62) rotate(3deg);
+  }
+}
+
+@keyframes lcBridge {
+  0%,
+  4% {
+    opacity: 0.6;
+  }
+  8%,
+  46% {
+    opacity: 0;
+  }
+  54%,
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* b5 — o painel assume o foco. */
+@keyframes lcBrowser {
+  0%,
+  4% {
+    opacity: 0.95;
+  }
+  10%,
+  60% {
+    opacity: 0.38;
+  }
+  70%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+/* A solicitação entra na fila do painel, vinda da esquerda —
+   do lado do celular, não de lugar nenhum. */
+@keyframes lcNewRow {
+  0%,
+  4% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  8% {
+    opacity: 0;
+  }
+  70% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  74.5%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* O carimbo: desce de 2,4× em 0,46s, passa um pouco do ponto e
+   assenta. É o pico emocional da sequência e o único movimento
+   com peso — todo o resto desliza. */
+@keyframes lcStamp {
+  0%,
+  5% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  9% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  71%,
+  75% {
+    opacity: 0;
+    transform: scale(2.4);
+    animation-timing-function: cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+  78.5% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    transform: scale(1.04);
+  }
+  81.5%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* b6 — a aprovação volta pela mesma ponte, no sentido inverso. */
+@keyframes lcBack {
+  0%,
+  84% {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  85.5% {
+    opacity: 1;
+    transform: translateX(22px);
+  }
+  89% {
+    opacity: 1;
+    transform: translateX(-22px);
+  }
+  90.5%,
+  100% {
+    opacity: 0;
+    transform: translateX(-26px);
+  }
+}
+
+/* b3 — a carteirinha do leitor entra (é assim que o aluno existe
+   nesta linguagem: um objeto de biblioteca, não um bonequinho);
+   b6 — acende junto com a retirada. */
+@keyframes lcReader {
+  0%,
+  4% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  8% {
+    opacity: 0;
+  }
+  36% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  44%,
+  83.33% {
+    opacity: 0.55;
+    transform: translateY(0);
+  }
+  89%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* A legenda de cada batida. Uma só animação para as seis: o
+   atraso por `:nth-child` é o que as põe em fila. */
+@keyframes lcStep {
+  0%,
+  1.5% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  5%,
+  14.5% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  16.67%,
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+/* ------------------------------------------------------------
+   Ligação dos keyframes.
+   ------------------------------------------------------------ */
+.lc-shelf {
+  animation: lcShelf var(--lc-cycle) linear infinite;
+}
+.lc-slot {
+  animation: lcSlot var(--lc-cycle) linear infinite;
+}
+.lc-book {
+  animation: lcBook var(--lc-cycle) linear infinite;
+}
+.lc-phone {
+  animation: lcPhone var(--lc-cycle) linear infinite;
+}
+.lc-hit {
+  animation: lcHit var(--lc-cycle) ease-out infinite;
+}
+.lc-cta {
+  animation: lcCta var(--lc-cycle) ease-out infinite;
+}
+.lc-tap {
+  animation: lcTap var(--lc-cycle) ease-out infinite;
+}
+.lc-req {
+  animation: lcReq var(--lc-cycle) linear infinite;
+}
+.lc-bridge {
+  animation: lcBridge var(--lc-cycle) linear infinite;
+}
+.lc-browser {
+  animation: lcBrowser var(--lc-cycle) linear infinite;
+}
+.lc-newrow {
+  animation: lcNewRow var(--lc-cycle) ease-out infinite;
+}
+.lc-stamp {
+  animation: lcStamp var(--lc-cycle) linear infinite;
+}
+.lc-back {
+  animation: lcBack var(--lc-cycle) linear infinite;
+}
+.lc-reader {
+  animation: lcReader var(--lc-cycle) ease-out infinite;
+}
+
+/* `backwards` é obrigatório, não enfeite: com o atraso do
+   `:nth-child` e o preenchimento padrão (`none`), cada legenda
+   fica SEM efeito nenhum até a vez dela chegar — e o que aparece
+   é o estilo base, ou seja, as seis frases visíveis de uma vez,
+   empilhadas na mesma célula. Com `backwards` a legenda já nasce
+   no quadro de 0%, que é invisível. */
+.lc-steps li {
+  animation: lcStep var(--lc-cycle) linear infinite backwards;
+}
+.lc-steps li:nth-child(2) {
+  animation-delay: calc(var(--lc-beat) * 1);
+}
+.lc-steps li:nth-child(3) {
+  animation-delay: calc(var(--lc-beat) * 2);
+}
+.lc-steps li:nth-child(4) {
+  animation-delay: calc(var(--lc-beat) * 3);
+}
+.lc-steps li:nth-child(5) {
+  animation-delay: calc(var(--lc-beat) * 4);
+}
+.lc-steps li:nth-child(6) {
+  animation-delay: calc(var(--lc-beat) * 5);
+}
+
+/* ------------------------------------------------------------
+   Chave geral. O padrão é PARADO: quem não está na tela nem numa
+   aba visível não gasta um quadro sequer.
+
+   Duas armadilhas moram nestas três regras.
+
+   1. O atalho `animation` redefine `animation-play-state` para
+      `running`. Por isso a chave vem DEPOIS de todas as
+      declarações acima — com especificidade igual, quem vem por
+      último vence.
+   2. `.lc .lc-run` (0,2,0), e não `.lc-run` (0,1,0): a ligação
+      das legendas é `.lc-steps li`, que é (0,1,1) e venceria a
+      classe sozinha. O sintoma era silencioso e caro — as seis
+      legendas continuavam se revezando com o bloco fora da tela,
+      exatamente o desperdício que este mecanismo existe para
+      evitar. `.lc[data-loan-cycle='running']` é (0,3,0) e
+      continua ganhando das duas.
+   ------------------------------------------------------------ */
+.lc .lc-run {
+  animation-play-state: paused;
+}
+
+.lc[data-loan-cycle='running'] .lc-run {
+  animation-play-state: running;
+}
+
+/* ------------------------------------------------------------
+   As seis legendas.
+   Empilhadas na MESMA célula da grade (e não em `position:
+   absolute`): a célula cresce até a legenda mais alta e a altura
+   deixa de mudar quando a frase troca — em hindi e em mandarim a
+   quebra de linha não é a mesma do português.
+   ------------------------------------------------------------ */
+.lc-steps {
+  display: grid;
+}
+
+.lc-steps li {
+  grid-area: 1 / 1;
+}
+
+/* ------------------------------------------------------------
+   Movimento reduzido: nada se move, e mesmo assim a história
+   inteira continua na tela — as seis legendas viram uma tira
+   numerada, e o desenho fica no estado de repouso, que já é o
+   ciclo em andamento (vão aberto na estante, exemplar fora,
+   pedido feito no aplicativo, empréstimo carimbado no painel).
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .lc-run {
+    animation: none;
+  }
+
+  /* Único estado de repouso que não sai da marcação: parado no
+     slot, o exemplar tamparia o vão e a estante pareceria
+     completa — o contrário do que a tira diz. */
+  .lc-book {
+    transform: translate(187px, -31px) scale(1.15) rotate(-5deg);
+  }
+
+  .lc-steps {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 0.5rem 1.5rem;
+  }
+
+  /* `animation: none` precisa ser repetido aqui. O desligamento
+     geral mora em `.lc-run` (0,1,0) e este seletor é (0,1,1):
+     sem esta linha a declaração mais específica venceria e as
+     seis legendas continuariam se revezando — e uma animação
+     ativa ainda sobrepõe o `opacity` estático logo abaixo, então
+     a tira nem chegaria a aparecer. */
+  .lc-steps li {
+    animation: none;
+    grid-area: auto;
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (min-width: 640px) {
+    .lc-steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .lc-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}

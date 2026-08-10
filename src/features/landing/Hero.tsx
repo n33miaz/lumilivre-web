@@ -4,8 +4,8 @@ import { useIsDark } from '../../hooks/useIsDark';
 import { LoginMeshBackground } from '../../components/ui/ShaderBackground/LoginMeshBackground';
 import { Btn } from './Btn';
 import { CatalogRecord } from './CatalogRecord';
-import { HeroShot } from './HeroShot';
 import { Icon } from './Icon';
+import { LoanCycle } from './LoanCycle';
 import { ShelfMark } from './ShelfMark';
 import { SHELF_MARKS } from './shelfMarks';
 
@@ -24,8 +24,9 @@ const CONTACT_HREF = 'mailto:ncormino@gmail.com';
  * O que ficou no lugar:
  *
  * - **Assimetria 7/5.** Coluna de texto larga à esquerda, ficha estreita à
- *   direita. Duas colunas de larguras diferentes, e nunca o mesmo eixo da
- *   seção seguinte (o print vem com a legenda à ESQUERDA, invertendo o peso).
+ *   direita. Duas colunas de larguras diferentes, e nunca o mesmo eixo do
+ *   bloco seguinte (o `LoanCycle` vem com a legenda à ESQUERDA, invertendo o
+ *   peso).
  * - **Escala com salto.** Título até 4,5rem contra corpo de 1,125rem. O
  *   destaque é uma cor sólida da marca, não um degradê — degradê em texto é
  *   ilegível no escuro e é o efeito mais copiado da última década.
@@ -115,7 +116,7 @@ export function Hero() {
           </div>
         </div>
 
-        <HeroShot />
+        <LoanCycle />
       </div>
     </section>
   );
