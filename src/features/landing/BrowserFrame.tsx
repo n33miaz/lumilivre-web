@@ -5,6 +5,16 @@ interface BrowserFrameProps {
   path: string;
   children: ReactNode;
   className?: string;
+  /**
+   * Ocupa a altura toda do pai em vez de derivá-la da própria proporção.
+   *
+   * Existe por causa do carrossel: lá o palco tem altura fixa (senão a página
+   * saltaria a cada troca automática, ainda mais quando entrarem os prints de
+   * app, que são retrato). Com `fill`, a barra de endereço fica com a altura
+   * natural dela e a área do print consome o resto — que, num palco medido pela
+   * própria moldura, dá exatamente os mesmos 16/10 do modo normal.
+   */
+  fill?: boolean;
 }
 
 /**
@@ -12,23 +22,26 @@ interface BrowserFrameProps {
  * de verdade (`/admin/...`, ver `App.tsx`) em vez de um domínio fictício: é a
  * mesma informação decorativa, só que verificável.
  *
- * A área do print tem proporção fixa, então a imagem nunca empurra o conteúdo
- * de baixo enquanto carrega.
+ * Fora do modo `fill`, a área do print tem proporção fixa, então a imagem nunca
+ * empurra o conteúdo de baixo enquanto carrega.
  */
 export function BrowserFrame({
   path,
   children,
   className = '',
+  fill = false,
 }: BrowserFrameProps) {
   return (
     // Raio de 12px: no sistema da página, tela é a única coisa arredondada —
     // papel (2px) e controle (6px) ficam abaixo. Uma moldura de navegador com o
     // mesmo raio do resto apagaria essa distinção.
     <div
-      className={`overflow-hidden rounded-xl border border-paper-300 bg-paper-50 shadow-[0_28px_60px_-32px_rgba(26,24,20,0.55)] dark:border-white/10 dark:bg-ink-900 dark:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.9)] ${className}`}
+      className={`overflow-hidden rounded-xl border border-paper-300 bg-paper-50 shadow-[0_28px_60px_-32px_rgba(26,24,20,0.55)] dark:border-white/10 dark:bg-ink-900 dark:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.9)] ${
+        fill ? 'flex h-full flex-col' : ''
+      } ${className}`}
     >
       <div
-        className="flex items-center gap-1.5 border-b border-paper-200 px-4 py-3 dark:border-white/5"
+        className="flex shrink-0 items-center gap-1.5 border-b border-paper-200 px-4 py-3 dark:border-white/5"
         aria-hidden="true"
       >
         <span className="h-3 w-3 rounded-full bg-paper-300 dark:bg-white/15" />
@@ -42,7 +55,11 @@ export function BrowserFrame({
           {path}
         </span>
       </div>
-      <div className="relative aspect-[16/10] bg-paper-100 dark:bg-ink-950">
+      <div
+        className={`relative bg-paper-100 dark:bg-ink-950 ${
+          fill ? 'flex-1' : 'aspect-[16/10]'
+        }`}
+      >
         {children}
       </div>
     </div>

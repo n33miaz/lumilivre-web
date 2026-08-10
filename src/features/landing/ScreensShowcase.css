@@ -1,0 +1,42 @@
+/* ============================================================
+   Setas do carrossel da vitrine de telas.
+
+   Precisa ser folha própria: `@media (hover: hover)` não tem
+   variante no Tailwind 3, e a CSP desta imagem não aceita
+   `style` inline nem `<style>` injetado — folha empacotada
+   pelo Vite, sim.
+
+   O corte é por CAPACIDADE DE PONTEIRO, nunca por largura de
+   tela. Tablet grande é toque e laptop estreito não é; decidir
+   por breakpoint acerta o caso comum e erra os dois extremos.
+   ============================================================ */
+
+/* Base = toque e qualquer coisa sem hover confiável: seta sempre à vista,
+   porque ali não existe hover para revelá-la. */
+[data-carousel-arrow] {
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-carousel-arrow] {
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+
+  /* `:focus-within` cobre a navegação por teclado: ao tabular para a seta ela
+     aparece, senão o foco ficaria num controle invisível. */
+  [data-carousel]:hover [data-carousel-arrow],
+  [data-carousel]:focus-within [data-carousel-arrow] {
+    opacity: 1;
+  }
+}
+
+/* Com movimento reduzido não há avanço automático, então as setas passam a ser
+   o único caminho pelo carrossel — escondê-las até o hover deixaria a seção sem
+   saída aparente para quem justamente pediu menos surpresa. */
+@media (prefers-reduced-motion: reduce) {
+  [data-carousel-arrow] {
+    opacity: 1;
+    transition: none;
+  }
+}
