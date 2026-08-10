@@ -57,7 +57,9 @@ body {
    Hover feedback: instant on enter, slow fade on leave.
    Applied to the sidebar nav pills and to every table row.
    Unlayered on purpose so the longer transition overrides
-   Tailwind's `.transition` utility and the global 200ms rule.
+   Tailwind's `.transition` utility. (A regra global de 200ms
+   que também precisava ser vencida aqui deixou de existir: ver
+   `.tema-em-troca`, no fim deste arquivo.)
    The :hover state zeroes the duration → highlight snaps in;
    leaving reverts to the base rule → it eases out over ~0.5s.
    Gradients can't be transitioned, so rows use a solid tint.
@@ -101,6 +103,98 @@ body {
    clicar em "Engenharia" encosta o título embaixo do cabeçalho. */
 .landing-root section[id] {
   scroll-margin-top: 5rem;
+}
+
+/* ============================================================
+   MOTIVO: emenda entre seções
+   ------------------------------------------------------------
+   A página é uma pilha de folhas, e o que faltava nas emendas
+   era justamente dizer isso. Duas folhas encostadas sem nada
+   declarando o limite leem como falha de renderização; a mesma
+   troca de tom com a emenda DECLARADA lê como construção — é o
+   que este bloco faz, com o mesmo vocabulário de filete que a
+   página já usa dentro das seções.
+
+   Uma peça e dois modificadores dela — não seis remendos:
+
+     .emenda        o véu: 3,5rem da sombra que a folha de cima
+                    projeta sobre a de baixo. Curto de propósito
+                    — "mais suave" não é "mais borrado", e um
+                    degradê de meia tela em cada emenda seria
+                    exatamente a página de degradês empilhados
+                    que este projeto evita.
+     .emenda-dobra  a dobra: o corte de 1px e o fio de luz logo
+                    abaixo dele.
+     .emenda-luz    o mesmo véu, invertido. Sombra sobre tinta
+                    quase preta não se enxerga, então quando a
+                    seção que CHEGA é muito mais escura que a de
+                    cima o véu vira luz: a borda do painel é que
+                    pega claridade, em vez de receber sombra.
+                    Vale para a Engenharia, e só — é a única
+                    emenda da página que cai de papel em tinta.
+
+   Por que os DOIS filetes, e não um: as cores são alfa sobre o
+   que estiver embaixo, então cada um serve a metade do problema
+   sem precisar saber quem é o vizinho. O corte (tinta a 10%) lê
+   sobre papel e some sobre a tinta escura; o fio de luz (papel a
+   12%) faz o contrário. Uma emenda só, que funciona entre papel
+   e papel, papel e tinta, tinta e marca — e nos dois temas, com
+   o par de tokens invertido.
+
+   Quem NÃO usa:
+
+   - o herói e a seção logo abaixo dele. Ali a emenda já existe e
+     é outra: o véu em degradê do `Hero` dissolve a malha WebGL
+     no papel da próxima seção. Pôr um filete no meio disso
+     reintroduziria exatamente o limite que aquele véu apaga.
+   - `.emenda-dobra` na Engenharia e no rodapé: as duas já têm
+     filete próprio (o `border-y` branco do painel escuro e a
+     régua de 2px do colofão). Duas linhas na mesma emenda é
+     ruído, então ali entra só o véu.
+   ============================================================ */
+.landing-root {
+  --emenda-corte: rgba(26, 24, 20, 0.1);
+  --emenda-luz: rgba(255, 253, 249, 0.12);
+  --emenda-veu: rgba(26, 24, 20, 0.055);
+  --emenda-veu-claro: rgba(255, 253, 249, 0.07);
+}
+
+.dark .landing-root {
+  --emenda-corte: rgba(0, 0, 0, 0.5);
+  --emenda-luz: rgba(228, 220, 203, 0.07);
+  --emenda-veu: rgba(0, 0, 0, 0.28);
+  --emenda-veu-claro: rgba(228, 220, 203, 0.05);
+}
+
+.landing-root .emenda {
+  position: relative;
+}
+
+/* O véu tem 3,5rem e o menor respiro de topo da página tem 4rem (o rodapé; as
+   seções têm 6rem), então ele nunca alcança conteúdo — é por isso que não
+   precisa de `z-index` nem de camada nova para ficar por baixo do texto. */
+.landing-root .emenda::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3.5rem;
+  pointer-events: none;
+  /* `currentColor`, e não a variável dentro do degradê: degradê não transiciona,
+     mas `color` sim — e o degradê é repintado enquanto ela anda. É o que faz a
+     emenda acompanhar a esmaecida de 200ms da troca de tema em vez de saltar. */
+  color: var(--emenda-veu);
+  background-image: linear-gradient(to bottom, currentColor, transparent);
+}
+
+.landing-root .emenda-luz::before {
+  color: var(--emenda-veu-claro);
+}
+
+.landing-root .emenda-dobra {
+  border-top: 1px solid var(--emenda-corte);
+  box-shadow: inset 0 1px 0 var(--emenda-luz);
 }
 
 /* ============================================================
@@ -329,14 +423,36 @@ input[type='date']::-webkit-calendar-picker-indicator {
     -webkit-appearance: none;
   }
 
-  @layer base {
-    /* Transição global apenas para a TROCA DE TEMA: limitamos às propriedades
-       de cor (color/background/border/fill/stroke). Não usar `transition-all`,
-       pois transicionaria transform/opacity/layout em todos os elementos e
-       atrapalharia animações como a navegação entre páginas (framer-motion). */
-    *:not([class*='transition']) {
-      @apply transition-colors duration-200 ease-in-out;
-    }
+  /* ------------------------------------------------------------
+     O que sobrou da antiga regra universal de 200ms — e só isto.
+
+     Aquela regra (`*:not([class*='transition'])`) fazia DOIS
+     trabalhos ao mesmo tempo. O de esmaecer a troca de tema saiu
+     daqui e virou `.tema-em-troca`, ligada só na janela da troca.
+     O outro era o realce de CONTROLE: metade dos botões e links
+     do painel tira daqui a suavidade do hover, e apagar a regra
+     inteira faria cinquenta controles passarem a saltar.
+
+     Por que uma lista de elementos e não `*`: célula de tabela,
+     `div` de layout e `span` de texto não têm estado de hover, e
+     eram elas — às centenas, numa tela de empréstimos — que
+     faziam a regra universal custar caro. Seletor de elemento é
+     (0,0,1), o degrau mais baixo que existe: qualquer
+     `transition-*` do Tailwind e qualquer transição calibrada
+     (`.row-hover`, `.nav-pill`, `.float-field input`) continuam
+     vencendo sem precisar de `!important`.
+     ------------------------------------------------------------ */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary {
+    transition-property:
+      color, background-color, border-color, text-decoration-color, fill,
+      stroke;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
   }
 }
 
@@ -1246,6 +1362,49 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 /* ============================================================
+   TROCA DE TEMA — a esmaecida de 200ms
+   ------------------------------------------------------------
+   A classe é posta no `<html>` pelo `ThemeContext` no instante
+   da troca e retirada logo depois; fora dessa janela NADA no
+   sistema carrega transição extra. É o contrário do que havia
+   aqui (`*:not([class*='transition'])` ligado o tempo todo), que
+   fazia todo hover, foco e realce arrastar 200ms e declarava uma
+   transição por célula nas tabelas grandes.
+   Duas consequências de desenho, ambas de propósito:
+
+   1. Sem `!important`. `.tema-em-troca *` é (0,1,0) e mora
+      DEPOIS de `@tailwind utilities`, então vence as utilities;
+      mas perde para qualquer transição já calibrada com
+      especificidade maior — a revelação no scroll logo abaixo
+      (0,2,0) mantém os 620ms dela, e o `style` inline do
+      SlideStage continua intocado.
+   2. O bloco vem ANTES das regras de revelação e de inclinação
+      por um motivo de ordem: com especificidade empatada, quem
+      vem depois vence, e `transition-delay: 0s` daqui apagaria o
+      escalonamento de `[data-reveal-delay]`.
+
+   `opacity` entra na lista porque é ela que faz a esmaecida das
+   CAPTURAS (ver `PrintPicture`): as duas versões da mesma tela
+   ficam empilhadas e a de cima muda de opacidade. Como o
+   `ThemeContext` não põe a classe quando há movimento reduzido,
+   esse mesmo mecanismo já nasce desligado ali — não é preciso
+   repetir nada no bloco de `prefers-reduced-motion`.
+   Nenhuma propriedade de layout entra: `transform`, largura e
+   altura ficam de fora, então nada aqui provoca reflow.
+   ============================================================ */
+.tema-em-troca,
+.tema-em-troca *,
+.tema-em-troca *::before,
+.tema-em-troca *::after {
+  transition-property:
+    color, background-color, border-color, outline-color,
+    text-decoration-color, fill, stroke, box-shadow, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+  transition-delay: 0s;
+}
+
+/* ============================================================
    Revelação no scroll (landing) — `hooks/useScrollReveal.ts`.
    O estado escondido depende de `data-reveal-ready`, escrito
    pelo hook: sem JS nada fica invisível. Fora de @layer para
@@ -1314,6 +1473,17 @@ input[type='date']::-webkit-calendar-picker-indicator {
     scroll-behavior: auto;
   }
 
+  /* Rede de segurança, igual à da revelação logo abaixo: o `ThemeContext` já
+     não põe a classe neste modo, mas se puser, nada esmaece. Precisa estar
+     aqui, no fim da folha, para empatar em especificidade com a regra da troca
+     e vencer por ordem. */
+  .tema-em-troca,
+  .tema-em-troca *,
+  .tema-em-troca *::before,
+  .tema-em-troca *::after {
+    transition: none;
+  }
+
   /* Rede de segurança: o hook já não marca `data-reveal-ready` neste modo, mas
      se marcasse, o conteúdo continuaria visível e parado. */
   [data-reveal-ready] [data-reveal],
@@ -1360,6 +1530,15 @@ input[type='date']::-webkit-calendar-picker-indicator {
     transition: none !important;
   }
 
+  /* Os controles ganham no `@layer base` uma esmaecida de 200ms no realce de
+     hover e foco; aqui ela cai junto com o resto. Mesmo degrau de
+     especificidade da regra de lá e mais tarde na folha — vence por ordem. */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
   .row-hover,
   .row-hover-danger,
   .nav-pill {

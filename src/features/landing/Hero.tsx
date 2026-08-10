@@ -56,10 +56,23 @@ export function Hero() {
         className="absolute inset-x-0 top-0 z-0 h-full opacity-40 dark:opacity-[0.35]"
       />
       {/* Véu que devolve contraste ao texto sobre a malha e dissolve a seção no
-          fundo da próxima — sem ele o limite entre as duas fica visível. */}
+          fundo da próxima — sem ele o limite entre as duas fica visível.
+
+          São DOIS véus empilhados, um por tema, e não um só com `dark:`.
+          Degradê é a única coisa que o CSS não sabe interpolar: com um véu só,
+          a troca de tema repintava de creme para tinta num quadro, e como este
+          véu cobre o herói inteiro era ele — não o fundo — que fazia a abertura
+          da página saltar. Empilhados, o que muda é a OPACIDADE de cada um, que
+          entra na esmaecida de 200ms junto com o resto (ver `.tema-em-troca`).
+          O custo é uma camada a mais, sem pintura nova: os dois degradês já
+          existiam, um deles era só a variante `dark:` do outro. */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 z-[1] bg-gradient-to-b from-paper-100/75 via-paper-100/60 to-paper-100 dark:from-ink-950/75 dark:via-ink-950/65 dark:to-ink-950"
+        className="absolute inset-0 z-[1] bg-gradient-to-b from-paper-100/75 via-paper-100/60 to-paper-100 opacity-100 dark:opacity-0"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 z-[1] bg-gradient-to-b from-ink-950/75 via-ink-950/65 to-ink-950 opacity-0 dark:opacity-100"
       />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-10 sm:pt-14">
