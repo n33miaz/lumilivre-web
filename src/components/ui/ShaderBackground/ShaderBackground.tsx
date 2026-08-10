@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Renderer, Triangle, Program, Mesh } from 'ogl';
 
+import { attachGlRecovery, type GlRecoveryHandle } from './glRecovery';
 import { VERTEX, buildFragment, type ShaderVariant } from './shaderSources';
 
 interface ShaderBackgroundProps {
@@ -72,6 +73,11 @@ export function ShaderBackground({
   className = '',
 }: ShaderBackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Geração do contexto WebGL: incrementá-la remonta o shader do zero. É o que
+  // repara a perda de contexto — ver `glRecovery.ts`.
+  const [glGeneration, setGlGeneration] = useState(0);
+  const glBudget = useRef(0);
 
   // Stable buffers consumed by OGL uniforms — references never change, only
   // their contents do. This avoids OGL's redundant-uniform cache holding onto a
@@ -225,11 +231,14 @@ export function ShaderBackground({
     let running = true;
     let revealed = false;
     const start = performance.now();
+    // Preenchido logo abaixo; `reveal` precisa alcançá-lo e roda antes.
+    let recovery: GlRecoveryHandle | null = null;
 
     const reveal = () => {
       if (revealed) return;
       revealed = true;
       canvas.style.opacity = '1';
+      recovery?.markPainted();
     };
 
     const frame = () => {
@@ -263,6 +272,19 @@ export function ShaderBackground({
       raf = requestAnimationFrame(frame);
     };
 
+    // Antes do primeiro frame: em `prefers-reduced-motion` o `reveal()` é
+    // síncrono e já precisa encontrar a recuperação de pé.
+    recovery = attachGlRecovery({
+      canvas,
+      budget: glBudget,
+      onLost: () => {
+        running = false;
+        cancelAnimationFrame(raf);
+        canvas.style.opacity = '0';
+      },
+      requestRebuild: () => setGlGeneration((generation) => generation + 1),
+    });
+
     if (reduceMotion) {
       // Single static frame — no animation loop.
       program.uniforms.uTime.value = 12.0;
@@ -284,15 +306,6 @@ export function ShaderBackground({
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // On context loss, hide the canvas so the caller's CSS gradient shows.
-    const onContextLost = (event: Event) => {
-      event.preventDefault();
-      running = false;
-      cancelAnimationFrame(raf);
-      canvas.style.opacity = '0';
-    };
-    canvas.addEventListener('webglcontextlost', onContextLost as EventListener);
-
     return () => {
       running = false;
       cancelAnimationFrame(raf);
@@ -304,17 +317,15 @@ export function ShaderBackground({
       host?.removeEventListener('pointerleave', onHostLeave);
       host?.removeEventListener('focusin', onHostEnter);
       host?.removeEventListener('focusout', onHostLeave);
-      canvas.removeEventListener(
-        'webglcontextlost',
-        onContextLost as EventListener,
-      );
+      recovery?.dispose();
       const ext = gl.getExtension('WEBGL_lose_context');
       ext?.loseContext();
       if (canvas.parentNode === container) container.removeChild(canvas);
     };
-    // GL is fully torn down only when these structural props change. Colors,
-    // intensity, reactivity and speed flow through buffersRef each frame.
-  }, [variant, interactive, hoverOnly, enableRipple, quality]);
+    // GL is fully torn down only when these structural props change (ou quando a
+    // geração muda, por perda de contexto). Colors, intensity, reactivity and
+    // speed flow through buffersRef each frame.
+  }, [variant, interactive, hoverOnly, enableRipple, quality, glGeneration]);
 
   return (
     <div

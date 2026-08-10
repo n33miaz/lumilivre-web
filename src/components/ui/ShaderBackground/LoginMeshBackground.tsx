@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Renderer, Triangle, Program, Mesh } from 'ogl';
 
+import { attachGlRecovery, type GlRecoveryHandle } from './glRecovery';
 import { VERTEX } from './shaderSources';
 
 interface LoginMeshBackgroundProps {
@@ -236,6 +237,12 @@ export function LoginMeshBackground({
   // the WebGL context. The cursor color animates the same way.
   const targetIsDark = useRef(isDark);
 
+  // Geração do contexto WebGL: entra nas dependências do efeito, então
+  // incrementá-la remonta a malha do zero — canvas, contexto e programa novos.
+  // É como a perda de contexto é reparada; ver `glRecovery.ts` para o porquê.
+  const [glGeneration, setGlGeneration] = useState(0);
+  const glBudget = useRef(0);
+
   useEffect(() => {
     targetIsDark.current = isDark;
   }, [isDark]);
@@ -451,11 +458,15 @@ export function LoginMeshBackground({
       renderer.render({ scene: mesh });
     };
 
+    // Preenchido logo abaixo; `reveal` precisa alcançá-lo e roda antes.
+    let recovery: GlRecoveryHandle | null = null;
+
     let revealed = false;
     const reveal = () => {
       if (revealed) return;
       revealed = true;
       canvas.style.opacity = '1';
+      recovery?.markPainted();
     };
 
     const frame = () => {
@@ -498,6 +509,21 @@ export function LoginMeshBackground({
       raf = requestAnimationFrame(frame);
     };
 
+    // Antes de pintar o primeiro frame: em `prefers-reduced-motion` o `reveal()`
+    // é síncrono e já precisa encontrar a recuperação de pé.
+    recovery = attachGlRecovery({
+      canvas,
+      budget: glBudget,
+      onLost: () => {
+        running = false;
+        cancelAnimationFrame(raf);
+        // Apaga o canvas para o degradê CSS animado aparecer no lugar enquanto a
+        // reconstrução não termina — em vez de um frame congelado ou um vazio.
+        canvas.style.opacity = '0';
+      },
+      requestRebuild: () => setGlGeneration((generation) => generation + 1),
+    });
+
     if (reduceMotion) {
       renderFrame(12);
       reveal();
@@ -517,27 +543,13 @@ export function LoginMeshBackground({
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // If the GPU drops the context (HW accel toggled, driver reset, too many
-    // contexts), stop and fade the canvas out so the animated CSS gradient
-    // fallback shows through instead of a frozen/blank frame.
-    const onContextLost = (event: Event) => {
-      event.preventDefault();
-      running = false;
-      cancelAnimationFrame(raf);
-      canvas.style.opacity = '0';
-    };
-    canvas.addEventListener('webglcontextlost', onContextLost as EventListener);
-
     return () => {
       running = false;
       cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pointermove', onPointerMove);
-      canvas.removeEventListener(
-        'webglcontextlost',
-        onContextLost as EventListener,
-      );
+      recovery?.dispose();
       const ext = gl.getExtension('WEBGL_lose_context');
       ext?.loseContext();
       if (canvas.parentNode === container) container.removeChild(canvas);
@@ -545,7 +557,7 @@ export function LoginMeshBackground({
     // Deliberately excluding `isDark` — palette lerp is driven by targetIsDark
     // ref, so theme switches don't tear down the GL context.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality, split]);
+  }, [quality, split, glGeneration]);
 
   return (
     <div
