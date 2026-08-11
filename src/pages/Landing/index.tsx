@@ -68,7 +68,7 @@ export function LandingPage() {
           aparece quando recebe foco. */}
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-lumi-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-control focus:bg-lumi-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
       >
         {t('a11y.skipToContent')}
       </a>

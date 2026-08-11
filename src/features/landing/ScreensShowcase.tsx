@@ -228,7 +228,7 @@ export function ScreensShowcase() {
                   // por seta, como manda o padrão de tablist.
                   tabIndex={selected ? 0 : -1}
                   onClick={() => setActive(index)}
-                  className={`rounded-[2px] border border-b-[3px] px-3.5 py-2 text-[13px] font-bold transition-[background-color,color,border-color] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:focus-visible:ring-offset-ink-900 ${
+                  className={`rounded-control border border-b-[3px] px-3.5 py-2 text-[13px] font-bold transition-[background-color,color,border-color] duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:focus-visible:ring-offset-ink-900 ${
                     selected
                       ? 'border-lumi-500 border-b-lumi-500 bg-lumi-500 text-white dark:border-lumi-300 dark:border-b-lumi-300 dark:bg-lumi-500'
                       : 'border-paper-300 border-b-paper-300 bg-paper-50 text-paper-600 hover:border-lumi-400 hover:text-lumi-600 dark:border-white/10 dark:border-b-white/10 dark:bg-white/5 dark:text-ink-400 dark:hover:text-lumi-200'
@@ -267,7 +267,7 @@ export function ScreensShowcase() {
                   mesma informação já está no `aria-selected` das abas. */}
               <div
                 aria-hidden="true"
-                className="mb-3 border-t-2 border-paper-900 pt-4 dark:border-ink-100/80"
+                className="mb-3 border-t border-paper-300 pt-4 dark:border-white/10"
               >
                 <span className="cota text-[11px] text-paper-500 dark:text-ink-400">
                   {String(active + 1).padStart(2, '0')} /{' '}

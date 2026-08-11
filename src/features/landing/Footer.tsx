@@ -7,7 +7,7 @@ import { Icon } from './Icon';
 const REPOS = ['lumilivre-api', 'lumilivre-web', 'lumilivre-app'];
 
 const LINK_CLASS =
-  'rounded-[2px] text-paper-600 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-200';
+  'rounded-control text-paper-600 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-200';
 
 /**
  * Rodapé em colofão: a mesma família de filete e mono do resto da página, com a
@@ -51,7 +51,7 @@ export function Footer() {
           </div>
 
           <div className="lg:col-span-3">
-            <h2 className="mb-4 border-t border-paper-300 pt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-paper-500 dark:border-white/10 dark:text-ink-400">
+            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-paper-500 dark:text-ink-400">
               {t('footer.heading.repos')}
             </h2>
             <ul className="space-y-2.5 text-sm">
@@ -72,7 +72,7 @@ export function Footer() {
           </div>
 
           <div className="lg:col-span-4">
-            <h2 className="mb-4 border-t border-paper-300 pt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-paper-500 dark:border-white/10 dark:text-ink-400">
+            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-paper-500 dark:text-ink-400">
               {t('footer.heading.project')}
             </h2>
             <ul className="space-y-2.5 text-sm">

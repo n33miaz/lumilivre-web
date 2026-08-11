@@ -47,7 +47,7 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <a
           href="#top"
-          className="flex shrink-0 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400"
+          className="flex shrink-0 items-center gap-2.5 rounded-control focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400"
         >
           <LogoIcon className="h-8 w-8 text-lumi-500" aria-hidden="true" />
           {/* O nome sai da tela abaixo de 400px para o botão "Entrar" não ser
@@ -88,7 +88,7 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
             type="button"
             onClick={() => setDark(!dark)}
             aria-label={t('aria.toggleTheme')}
-            className="flex h-10 w-10 items-center justify-center rounded-md text-paper-600 transition-colors hover:bg-paper-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:bg-white/10 dark:hover:text-lumi-200"
+            className="flex h-10 w-10 items-center justify-center rounded-control text-paper-600 transition-colors hover:bg-paper-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:bg-white/10 dark:hover:text-lumi-200"
           >
             <Icon name={dark ? 'sun' : 'moon'} size={18} />
           </button>

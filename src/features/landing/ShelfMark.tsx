@@ -9,13 +9,18 @@ interface ShelfMarkProps {
 }
 
 /**
- * Etiqueta de lombada: filete grosso, cota à esquerda, assunto à direita.
+ * Etiqueta de lombada: filete fino, cota à esquerda, assunto à direita.
  *
  * É o marcador de seção da página inteira e substitui a pastilha arredondada de
  * "eyebrow" que havia antes — pastilha colorida com texto em caixa alta é
- * justamente o que toda página gerada usa. O filete de 2px que corre por toda a
- * largura da coluna faz o trabalho que a pastilha fazia (separar), com o peso
- * de uma divisória de gaveta de fichário.
+ * justamente o que toda página gerada usa. O filete separa o bloco como uma
+ * divisória de gaveta de fichário faria.
+ *
+ * O peso caiu de 2px em tinta cheia para 1px de baixo contraste: aparecendo na
+ * abertura de TODA seção, o filete grosso somava réguas demais e a página lia
+ * como grade — o dono pediu menos linha horizontal. Fino, ele continua marcando
+ * a seção sem pesar; é o único separador de cada abertura, e o resto do ritmo
+ * agora vem do respiro.
  *
  * A cota e o assunto ficam na MESMA linha de base: alinhar pela base é o que dá
  * o ar de composição impressa. `items-baseline` continua valendo em devanágari
@@ -31,8 +36,8 @@ export function ShelfMark({
   return (
     <div
       data-reveal
-      className={`flex items-baseline gap-x-4 border-t-2 pt-3 ${
-        invert ? 'border-ink-100/80' : 'border-paper-900 dark:border-ink-100/80'
+      className={`flex items-baseline gap-x-4 border-t pt-3 ${
+        invert ? 'border-white/20' : 'border-paper-300 dark:border-white/10'
       } ${className}`}
     >
       {/* A cota é sinal visual: fora da tela ela viraria "zero dois sete ponto

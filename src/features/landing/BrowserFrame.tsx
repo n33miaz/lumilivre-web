@@ -32,11 +32,11 @@ export function BrowserFrame({
   fill = false,
 }: BrowserFrameProps) {
   return (
-    // Raio de 12px: no sistema da página, tela é a única coisa arredondada —
-    // papel (2px) e controle (6px) ficam abaixo. Uma moldura de navegador com o
-    // mesmo raio do resto apagaria essa distinção.
+    // Degrau "frame" da escala: no sistema da página, a tela é a coisa mais
+    // arredondada — cartão e controle ficam abaixo. Uma moldura de navegador com
+    // o mesmo raio do resto apagaria essa distinção.
     <div
-      className={`overflow-hidden rounded-xl border border-paper-300 bg-paper-50 shadow-[0_28px_60px_-32px_rgba(26,24,20,0.55)] dark:border-white/10 dark:bg-ink-900 dark:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.9)] ${
+      className={`overflow-hidden rounded-frame border border-paper-300 bg-paper-50 shadow-[0_28px_60px_-32px_rgba(26,24,20,0.55)] dark:border-white/10 dark:bg-ink-900 dark:shadow-[0_28px_60px_-30px_rgba(0,0,0,0.9)] ${
         fill ? 'flex h-full flex-col' : ''
       } ${className}`}
     >

@@ -147,7 +147,7 @@ export function ApiWakingDialog({
         {/* `items-center` (e não a linha de base do `AuthCardHeader`): aqui o
             filete carrega um botão, e alinhar botão por baseline o deixa
             pendurado meio pixel acima da cota. */}
-        <div className="flex items-center justify-between gap-3 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
+        <div className="flex items-center justify-between gap-3 border-b border-paper-300 pb-3 dark:border-white/10">
           <span
             aria-hidden="true"
             className="cota text-sm text-lumi-600 dark:text-lumi-200"
@@ -163,7 +163,7 @@ export function ApiWakingDialog({
               onClick={onClose}
               aria-label={t('close')}
               title={t('close')}
-              className="-mr-1.5 shrink-0 rounded-[2px] p-1.5 text-paper-500 transition-colors hover:text-lumi-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-label"
+              className="-mr-1.5 shrink-0 rounded-control p-1.5 text-paper-500 transition-colors hover:text-lumi-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-label"
             >
               <CloseIcon className="h-4 w-4 fill-current" />
             </button>
@@ -203,14 +203,14 @@ export function ApiWakingDialog({
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-md bg-lumi-primary px-4 py-3 text-sm font-extrabold text-white transition-colors hover:bg-lumi-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 sm:flex-1"
+            className="rounded-control bg-lumi-primary px-4 py-3 text-sm font-extrabold text-white transition-colors hover:bg-lumi-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 sm:flex-1"
           >
             {t('apiHealth.retry_now')}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-paper-300 px-4 py-3 text-sm font-bold text-paper-600 transition-colors hover:border-paper-400 hover:text-paper-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:border-white/15 dark:text-ink-400 dark:hover:border-white/30 dark:hover:text-ink-100 sm:flex-1"
+            className="rounded-control border border-paper-300 px-4 py-3 text-sm font-bold text-paper-600 transition-colors hover:border-paper-400 hover:text-paper-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:border-white/15 dark:text-ink-400 dark:hover:border-white/30 dark:hover:text-ink-100 sm:flex-1"
           >
             {t('apiHealth.dismiss')}
           </button>

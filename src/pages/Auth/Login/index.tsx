@@ -237,7 +237,7 @@ export function LoginPage() {
 
       <section
         ref={brandPanelRef}
-        className="login-brand-panel rule-lines relative z-10 hidden flex-col justify-between gap-12 overflow-hidden px-12 py-14 text-white lg:flex"
+        className="login-brand-panel relative z-10 hidden flex-col justify-between gap-12 overflow-hidden px-12 py-14 text-white lg:flex"
       >
         {/* Marca em linha, sobre um filete — o mesmo cabeçalho de ficha da
             landing, lido em negativo. O quadrado de vidro de 48px que embrulhava
@@ -282,10 +282,13 @@ export function LoginPage() {
             {/* Os textos pequenos deste painel subiram de 45–70% para 75–80% de
                 branco: sobre o ponto mais claro da malha (#8B2B87) as opacidades
                 antigas caíam para 3,7:1, abaixo do mínimo AA para 10–11px. */}
+            {/* Sem filete acima da etiqueta: o respiro do bloco (`mt-14`) já
+                separa das linhas anteriores, e mais uma régua horizontal aqui era
+                exatamente o que o dono pediu para tirar. */}
             <div
               data-reveal
               data-reveal-delay="2"
-              className="cota mb-2 border-t border-white/30 pt-4 text-[10px] uppercase text-white/80"
+              className="cota mb-3 text-[10px] uppercase text-white/80"
             >
               {t('login.tips.eyebrow')}
             </div>
@@ -294,10 +297,11 @@ export function LoginPage() {
                 `features/auth/loginTips.ts`). Empilhado em vez de duas colunas: a
                 dica tem uma frase inteira de explicação, que em coluna estreita
                 virava três linhas quebradas.
-                Eram cartões de vidro com borda e sombra — agora são linhas
-                pautadas numeradas, o mesmo desenho das quatro ações do rodapé da
-                landing. Um material só nas seis superfícies públicas. */}
-            <ul>
+                Eram cartões de vidro com borda e sombra; viraram linhas pautadas
+                e agora só o respiro as separa — o filete entre cada dica somava
+                régua horizontal demais no painel. O número em mono e o ícone já
+                dão o ritmo de lista. */}
+            <ul className="space-y-1">
               {tips.map((tip, index) => {
                 const TipIcon = TIP_ICONS[tip.icon];
                 return (
@@ -305,7 +309,7 @@ export function LoginPage() {
                     key={tip.id}
                     data-reveal
                     data-reveal-delay={String(index + 3)}
-                    className="flex items-start gap-4 border-b border-white/20 py-5"
+                    className="flex items-start gap-4 py-3.5"
                   >
                     <span
                       aria-hidden="true"
@@ -313,7 +317,7 @@ export function LoginPage() {
                     >
                       {String(index + 1).padStart(2, '0')}
                     </span>
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[2px] border border-white/30">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control border border-white/30">
                       <TipIcon className="h-4 w-4 text-lumi-100" />
                     </span>
                     <span className="min-w-0">
@@ -422,7 +426,7 @@ export function LoginPage() {
             <div className="mt-5 text-center">
               <Link
                 to="/forgot-password"
-                className="rounded-[2px] text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
+                className="rounded-control text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
               >
                 {t('login.link.forgot_password')}
               </Link>
@@ -438,11 +442,11 @@ export function LoginPage() {
                 onBlur={handleButtonBlur}
                 // Padding e corpo menores até `sm` para o rótulo caber inteiro em
                 // 320px — o `truncate` cortava "…ANDROID" rente à borda.
-                className="btn-download btn-shader group relative flex w-full items-center justify-center overflow-hidden rounded-md px-3 py-4 text-[13px] font-extrabold text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:px-4 sm:text-base"
+                className="btn-download btn-shader group relative flex w-full items-center justify-center overflow-hidden rounded-control px-3 py-4 text-[13px] font-extrabold text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:px-4 sm:text-base"
               >
                 {/* Same hover-driven shader light as the submit button. */}
                 <ShaderBackground
-                  className="absolute inset-0 z-[1] rounded-md"
+                  className="absolute inset-0 z-[1] rounded-control"
                   variant={3}
                   colors={DOWNLOAD_SHADER}
                   highlight={DOWNLOAD_HIGHLIGHT}

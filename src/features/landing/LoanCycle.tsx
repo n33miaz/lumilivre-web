@@ -163,7 +163,7 @@ export function LoanCycle() {
       <figcaption
         data-reveal
         data-reveal-delay="1"
-        className="border-t-2 border-paper-900 pt-3 dark:border-ink-100/80 lg:col-span-3"
+        className="border-t border-paper-300 pt-3 dark:border-white/10 lg:col-span-3"
       >
         <span className="cota block text-[11px] uppercase text-lumi-600 dark:text-lumi-200">
           {t('hero.cycle.caption.label')}
@@ -497,14 +497,15 @@ export function LoanCycle() {
 
                 {/* ---------- O PAINEL ---------- */}
                 <g className="lc-browser lc-run">
-                  {/* Raio de 12px: tela. É a única coisa arredondada assim no
-                      desenho, pela mesma hierarquia da `BrowserFrame`. */}
+                  {/* Raio de moldura de tela: acompanha o degrau "frame" da escala
+                      (o mesmo raio da `BrowserFrame`), a coisa mais arredondada do
+                      desenho. */}
                   <rect
                     x="590"
                     y="58"
                     width="378"
                     height="252"
-                    rx="12"
+                    rx="18"
                     className="lc-paper"
                   />
                   <rect

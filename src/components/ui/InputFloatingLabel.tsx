@@ -40,7 +40,7 @@ export function InputFloatingLabel({
       <input
         id={id}
         type={currentType}
-        className={`w-full pl-10 ${isPasswordType ? 'pr-10' : 'pr-4'} py-3.5 bg-transparent border-2 rounded-lg outline-none text-gray-800 dark:text-gray-100 transition-[border-color,box-shadow,color,background-color] duration-200 ease-out motion-reduce:transition-none
+        className={`w-full pl-10 ${isPasswordType ? 'pr-10' : 'pr-4'} py-3.5 bg-transparent border-2 rounded-control outline-none text-gray-800 dark:text-gray-100 transition-[border-color,box-shadow,color,background-color] duration-200 ease-out motion-reduce:transition-none
           ${
             error
               ? 'border-red-500'

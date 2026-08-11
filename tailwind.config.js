@@ -72,6 +72,17 @@ export default {
           950: '#0B0810',
         },
       },
+      borderRadius: {
+        // Escala de raio das superfícies públicas, por PAPEL do elemento (não
+        // por componente): controle < cartão < moldura de tela. Os valores moram
+        // em variáveis CSS (ver `:root` em index.css) para haver um lugar só de
+        // calibragem — o que a classe `.ficha` também lê. Antes a hierarquia era
+        // 2·6·12px e o conjunto lia como duro; agora é generosa, mas mantém a
+        // tela como a coisa mais arredondada.
+        control: 'var(--radius-control)',
+        card: 'var(--radius-card)',
+        frame: 'var(--radius-frame)',
+      },
       boxShadow: {
         soft: '0 4px 14px rgba(15, 17, 22, 0.06)',
         card: '0 8px 24px -8px rgba(118, 32, 117, 0.18), 0 2px 6px rgba(15, 17, 22, 0.04)',

@@ -5,6 +5,17 @@
 :root {
   --lumi-primary: #762075;
   --lumi-label: #c964c5;
+
+  /* Escala de raio das superfícies públicas (landing + acesso). Um valor por
+     PAPEL do elemento — controle < cartão < moldura de tela —, nunca um raio por
+     componente, que é o que faz uma interface parecer amadora. O canto de 2px que
+     imitava papel cortado lia como duro; a escala agora é generosa e contínua,
+     mas preserva a hierarquia: a tela continua sendo a coisa mais arredondada.
+     Fonte única: os utilitários `rounded-control/card/frame` do Tailwind e a
+     classe `.ficha` leem estas três variáveis. */
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-frame: 18px;
 }
 
 /* As Noto precisam vir nesta pilha, e nao so no tailwind.config: estas regras
@@ -232,10 +243,12 @@ body {
 .ficha {
   position: relative;
   border: 1px solid #e4dccb;
-  /* 2px, e não `rounded-2xl`: a hierarquia de raio da página inteira sai daqui.
-     Ficha 2px · botão e campo 6px · moldura de navegador 12px (tela é
-     arredondada, papel não). Raio igual em tudo é marca de template. */
-  border-radius: 2px;
+  /* Degrau "cartão" da escala (ver as variáveis em :root). A hierarquia continua
+     — controle < cartão < moldura de tela, a tela ainda é a mais arredondada —,
+     o que mudou foi a dose: o canto quase reto que imitava papel cortado subiu
+     para um raio generoso, igual em todas as fichas. Raio diferente por
+     componente é o que faz parecer template. */
+  border-radius: var(--radius-card);
   box-shadow:
     0 1px 0 rgba(26, 24, 20, 0.03),
     0 14px 30px -20px rgba(26, 24, 20, 0.3);
@@ -347,15 +360,57 @@ input:autofill ~ label {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
 }
 
+/* ============================================================
+   Reação ao ponteiro nos cartões (Ecossistema, Recursos).
+   ------------------------------------------------------------
+   Um brilho suave da cor da marca que segue o cursor — o mesmo
+   mecanismo do `buttonLight` dos botões: as coordenadas chegam
+   por CSSOM (`--glow-x/--glow-y/--glow-on`), nunca por atributo
+   `style`, que a CSP bloquearia. Só compõe uma camada de gradiente
+   sobre o papel: zero custo de layout.
+
+   O `::before` fica ENTRE o papel e o conteúdo — o conteúdo do
+   cartão recebe `relative z-[1]` no JSX —, então o brilho nunca
+   lava o texto. A elevação no hover (sombra mais alta, borda que
+   acende) mora nas utilities do próprio cartão: `hover:` é (0,2,0)
+   e vence a sombra base de `.ficha` (0,1,0). Não uso `translate`
+   aqui de propósito — a propriedade `transform` já é da revelação
+   no scroll destes mesmos cartões, e brigar com ela custaria uma
+   guerra de especificidade sem ganho visível.
+   ============================================================ */
+.ficha-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--glow-on, 0);
+  background: radial-gradient(
+    20rem 20rem at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(201, 100, 197, 0.16),
+    transparent 60%
+  );
+  transition: opacity 320ms ease;
+}
+
+.dark .ficha-glow::before {
+  background: radial-gradient(
+    20rem 20rem at var(--glow-x, 50%) var(--glow-y, 50%),
+    rgba(201, 100, 197, 0.22),
+    transparent 60%
+  );
+}
+
 /* Pastilha do trocador de idioma e tema das telas de acesso: mesma cor, mesma
-   borda, mesmo canto de 2px e mesma sombra da ficha do formulário.
+   borda, mesmo canto e mesma sombra da ficha do formulário.
    NÃO é `.ficha` reaproveitada, e não por preguiça: `.ficha` declara
    `position: relative` e mora depois de `@tailwind utilities` na folha — com a
    mesma especificidade, venceria o `absolute` que ancora a pastilha no canto da
    tela. Aqui entra só o material. */
 .ficha-pastilha {
   border: 1px solid #e4dccb;
-  border-radius: 2px;
+  border-radius: var(--radius-card);
   background-color: #fffdf9;
   box-shadow:
     0 1px 0 rgba(26, 24, 20, 0.03),
@@ -379,19 +434,6 @@ input:autofill ~ label {
   font-weight: 700;
   letter-spacing: 0.1em;
   line-height: 1.2;
-}
-
-/* Pauta horizontal — a face de um cartão, não papel milimetrado. A grade
-   quadriculada que estava aqui é genérica de "tech"; linha só horizontal é
-   papel de escrever. Usada no painel escuro da Engenharia e atrás do painel de
-   marca do login. */
-.rule-lines {
-  background-image: linear-gradient(
-    to bottom,
-    rgba(228, 220, 203, 0.07) 1px,
-    transparent 1px
-  );
-  background-size: 100% 30px;
 }
 
 input[type='date']::-webkit-calendar-picker-indicator {
@@ -684,10 +726,9 @@ input[type='date']::-webkit-calendar-picker-indicator {
     position: absolute;
     inset: 1px;
     z-index: 2;
-    /* 1px a menos que o raio do botão (agora 6px, o degrau de "controle" da
-       hierarquia): o brilho interno precisa acompanhar o canto, senão sobra um
-       filete reto na quina. */
-    border-radius: 5px;
+    /* 1px a menos que o raio do botão (o degrau "controle" da escala): o brilho
+       interno precisa acompanhar o canto, senão sobra um filete reto na quina. */
+    border-radius: calc(var(--radius-control) - 1px);
     background:
       linear-gradient(
         to bottom,
@@ -860,7 +901,7 @@ input[type='date']::-webkit-calendar-picker-indicator {
     padding: 18px 14px 8px 38px;
     background: transparent;
     border: 1.5px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: var(--radius-control);
     font-size: 14px;
     outline: none;
     transition: all 0.2s;
@@ -1414,12 +1455,17 @@ input[type='date']::-webkit-calendar-picker-indicator {
    ============================================================ */
 [data-reveal-ready] [data-reveal] {
   opacity: 0;
-  /* translate3d (e não translateY) para a revelação nascer numa camada de
-     composição própria — a rolagem não repinta o resto da seção. */
-  transform: translate3d(0, 16px, 0);
+  /* Desliza, esmaece E encolhe de leve: três eixos combinados dão uma entrada
+     mais orgânica que o fade puro, e mesmo assim só `transform`/`opacity` mudam
+     — nada que provoque reflow. translate3d (e não translateY) para a revelação
+     nascer numa camada de composição própria: a rolagem não repinta o resto da
+     seção. */
+  transform: translate3d(0, 26px, 0) scale(0.98);
   transition-property: opacity, transform;
-  transition-duration: 620ms;
-  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Mais longo e com curva mais macia (quint-out): a entrada desacelera até
+     assentar, em vez de chegar e travar. */
+  transition-duration: 760ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 [data-reveal-ready] [data-reveal][data-revealed] {
@@ -1428,21 +1474,25 @@ input[type='date']::-webkit-calendar-picker-indicator {
 }
 
 /* Escalonamento por atributo, não por style inline: a CSP desta imagem não
-   libera 'unsafe-inline' em style-src. */
+   libera 'unsafe-inline' em style-src. Passos um pouco mais largos e uma parada
+   a mais que antes — a cascata dos blocos fica mais perceptível sem arrastar. */
 [data-reveal-delay='1'] {
-  transition-delay: 70ms;
+  transition-delay: 90ms;
 }
 [data-reveal-delay='2'] {
-  transition-delay: 140ms;
+  transition-delay: 180ms;
 }
 [data-reveal-delay='3'] {
-  transition-delay: 210ms;
+  transition-delay: 270ms;
 }
 [data-reveal-delay='4'] {
-  transition-delay: 280ms;
+  transition-delay: 360ms;
 }
 [data-reveal-delay='5'] {
-  transition-delay: 350ms;
+  transition-delay: 450ms;
+}
+[data-reveal-delay='6'] {
+  transition-delay: 540ms;
 }
 
 /* Inclinação do print do hero conforme o ponteiro. As variáveis chegam por
@@ -1496,6 +1546,14 @@ input[type='date']::-webkit-calendar-picker-indicator {
   .tilt-stage {
     transform: none;
     transition: none;
+  }
+
+  /* Rede de segurança: os manipuladores de ponteiro do brilho dos cartões já
+     não são ligados neste modo (ver `usePointerGlow`), então `--glow-on` fica em
+     0 e o brilho nunca aparece. Se aparecesse, ao menos não teria trajeto. */
+  .ficha-glow::before {
+    transition: none;
+    opacity: 0;
   }
 
   /* Degradê que flui atrás das telas de autenticação. Precisa ser declarado

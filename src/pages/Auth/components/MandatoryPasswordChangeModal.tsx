@@ -101,7 +101,7 @@ export function MandatoryPasswordChangeModal() {
           filho e cobre a caixa inteira, então sem isso o branco do contêiner
           apareceria nos quatro cantos. */}
       <Modal.Body className="ficha-plana rounded-lg px-6 pb-8 pt-7 sm:px-9">
-        <div className="flex items-baseline justify-between gap-4 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
+        <div className="flex items-baseline justify-between gap-4 border-b border-paper-300 pb-3 dark:border-white/10">
           <span
             aria-hidden="true"
             className="cota text-sm text-lumi-600 dark:text-lumi-200"

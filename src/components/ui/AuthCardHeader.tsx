@@ -44,7 +44,10 @@ export function AuthCardHeader({
     // mb-8: o mesmo respiro extra que o painel de marca do login ganhou entre as
     // suas seções — as cinco fichas de acesso respiram no mesmo compasso.
     <header className="mb-8">
-      <div className="flex items-baseline justify-between gap-4 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
+      {/* Filete fino (não mais o de 2px): o cabeçalho da ficha aparece nas cinco
+          telas de acesso, e a régua grossa repetida somava linha demais. A cota
+          e a etiqueta seguram a identidade; a linha só separa, de leve. */}
+      <div className="flex items-baseline justify-between gap-4 border-b border-paper-300 pb-3 dark:border-white/10">
         {/* Sinal visual: lido em voz alta viraria "zero dois cinco ponto
             cinco" na abertura de toda tela de acesso. A etiqueta ao lado
             continua sendo anunciada. */}

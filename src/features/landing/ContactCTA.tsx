@@ -72,7 +72,7 @@ export function ContactCTA() {
   return (
     <section
       id="contact"
-      className="emenda emenda-dobra rule-lines bg-lumi-700 px-6 py-24 sm:py-28"
+      className="emenda emenda-dobra bg-lumi-700 px-6 py-24 sm:py-28"
     >
       <div className="mx-auto grid max-w-6xl items-start gap-x-12 gap-y-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
@@ -99,15 +99,17 @@ export function ContactCTA() {
           </p>
         </div>
 
-        {/* Quatro linhas pautadas, não quatro cards de vidro: a seta e o filete
-            já dizem que cada linha vai a algum lugar. */}
-        <ul className="border-t border-white/25 lg:col-span-7">
+        {/* Quatro ações separadas só por um filete fino entre elas: a seta e o
+            realce no hover já dizem que cada linha vai a algum lugar, então some
+            a régua do topo e as divisórias ficam de baixo contraste — menos linha
+            horizontal no bloco mais chapado da página. */}
+        <ul className="lg:col-span-7">
           {cards.map((card, index) => (
             <li
               key={card.key}
               data-reveal
               data-reveal-delay={String(index + 1)}
-              className="border-b border-white/25"
+              className="border-b border-white/15 last:border-b-0"
             >
               <a
                 href={card.href}
@@ -115,7 +117,7 @@ export function ContactCTA() {
                 rel={card.external ? 'noreferrer' : undefined}
                 className="group flex items-start gap-4 py-5 transition-colors duration-200 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-lumi-700 sm:px-3"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[2px] border border-white/30 text-white transition-colors duration-200 group-hover:border-white/60">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control border border-white/30 text-white transition-colors duration-200 group-hover:border-white/60">
                   <Icon name={card.icon} size={16} />
                 </span>
                 <span className="min-w-0">

@@ -45,10 +45,10 @@ export function Btn({
   ...rest
 }: BtnProps) {
   const quiet = variant === 'quiet';
-  // Raio de 6px (e não `rounded-xl`): a hierarquia é ficha 2px · controle 6px ·
-  // moldura de navegador 12px. O link não tem raio nenhum — não é uma caixa.
+  // Degrau "controle" da escala de raio (ver :root). O link não tem raio nenhum
+  // — não é uma caixa.
   const base = `group inline-flex items-center justify-center gap-2 font-semibold transition-[background-color,border-color,color,box-shadow,transform,text-decoration-color] duration-150 ${
-    quiet ? '' : 'rounded-md'
+    quiet ? '' : 'rounded-control'
   }`;
   return (
     <a

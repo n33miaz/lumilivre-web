@@ -48,10 +48,10 @@ export function AuthSubmitButton({
       onPointerLeave={onLeave}
       onFocus={onFocus}
       onBlur={onBlur}
-      className="btn-shader group relative w-full overflow-hidden rounded-md px-4 py-4 text-base font-extrabold tracking-wide text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-lumi-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:brightness-100"
+      className="btn-shader group relative w-full overflow-hidden rounded-control px-4 py-4 text-base font-extrabold tracking-wide text-white shadow-md transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:shadow-2xl hover:brightness-110 active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-lumi-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:brightness-100"
     >
       <ShaderBackground
-        className="absolute inset-0 z-[1] rounded-md"
+        className="absolute inset-0 z-[1] rounded-control"
         variant={3}
         colors={SUBMIT_SHADER}
         highlight={SUBMIT_HIGHLIGHT}

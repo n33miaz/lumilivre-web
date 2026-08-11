@@ -36,8 +36,12 @@ const ITEM_KEYS = [
  *
  * Saiu daqui o "blob" — o círculo roxo desfocado de 384px que flutuava no canto.
  * É o primeiro item da lista de tiques de página gerada, e não sobreviveria a
- * nenhuma das referências editoriais: fundo é material (pauta, papel), não
- * mancha de degradê. No lugar ficou a pauta horizontal de um cartão.
+ * nenhuma das referências editoriais: fundo é material, não mancha de degradê.
+ *
+ * Saíram também as linhas horizontais que enchiam a seção — a pauta de fundo e o
+ * filete no topo de cada uma das nove decisões. Eram muitas réguas para uma
+ * grade só; o painel agora respira em tinta chapada, e quem ordena a leitura é a
+ * numeração em mono, não uma linha por célula.
  */
 export function Engineering() {
   const { t } = useTranslation('landing');
@@ -66,7 +70,7 @@ export function Engineering() {
       // é o `border-y` branco, que é o que se enxerga sobre tinta escura. E o
       // véu inverte — sombra sobre quase preto não aparece, então quem amacia a
       // queda do papel para o painel é a claridade na borda dele.
-      className="emenda emenda-luz rule-lines relative overflow-hidden border-y border-white/10 bg-ink-900 px-6 py-24 text-ink-200 sm:py-28"
+      className="emenda emenda-luz relative overflow-hidden border-y border-white/10 bg-ink-900 px-6 py-24 text-ink-200 sm:py-28"
     >
       <div className="relative mx-auto max-w-6xl">
         <SectionHeader
@@ -79,15 +83,15 @@ export function Engineering() {
 
         {/* Nove decisões numeradas em mono: a numeração é o que faz a lista ler
             como um índice de catálogo e não como mais uma grade de cards.
-            Nove em três colunas fecham 3x3 exatos — é por isso que a seção não
-            desequilibrou quando o quadro de tecnologias saiu do rodapé dela. */}
-        <ul className="grid gap-x-10 gap-y-9 md:grid-cols-2 lg:grid-cols-3">
+            Nove em três colunas fecham 3x3 exatos. Sem filete no topo de cada
+            uma: o respiro largo entre as fileiras (`gap-y`) separa melhor do que
+            nove réguas empilhadas, que era o que dava o ar de grade. */}
+        <ul className="grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
           {items.map((item, index) => (
             <li
               key={item.key}
               data-reveal
               data-reveal-delay={String((index % 3) + 1)}
-              className="border-t border-white/15 pt-5"
             >
               <div className="flex items-baseline gap-3">
                 <span
@@ -109,16 +113,6 @@ export function Engineering() {
             </li>
           ))}
         </ul>
-
-        {/* Filete de fechamento. Cada decisão abre com uma linha em cima e nada
-            embaixo; sem esta régua final a última fileira ficava com a borda de
-            um lado só e a seção parecia interrompida no meio — que é justamente
-            o risco de tirar o bloco que fechava a página aqui. Régua, e não um
-            card novo: é pontuação, não conteúdo. */}
-        <div
-          aria-hidden="true"
-          className="mt-14 border-t border-white/15"
-        />
       </div>
     </section>
   );

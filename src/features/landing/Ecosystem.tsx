@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Icon, type IconName } from './Icon';
 import { SectionHeader } from './SectionHeader';
 import { SHELF_MARKS } from './shelfMarks';
+import { usePointerGlow } from './usePointerGlow';
 
 interface Pillar {
   key: string;
@@ -26,7 +27,7 @@ function Stack({ items }: { items: string[] }) {
       {items.map((item) => (
         <li
           key={item}
-          className="rounded-[2px] border border-paper-300 px-2 py-1 font-mono text-[11px] text-paper-600 dark:border-white/10 dark:text-ink-400"
+          className="rounded-control border border-paper-300 px-2 py-1 font-mono text-[11px] text-paper-600 dark:border-white/10 dark:text-ink-400"
         >
           {item}
         </li>
@@ -45,8 +46,9 @@ function Stack({ items }: { items: string[] }) {
  * que o app (5) porque é o produto que a página está vendendo. A hierarquia da
  * arquitetura vira hierarquia de layout — que é informação, não enfeite.
  *
- * Cada peça é uma ficha: retângulo de 2px de raio, cabeçalho com o nome real do
- * repositório em mono e filete grosso separando cabeçalho de conteúdo.
+ * Cada peça é uma ficha: cartão de papel com o nome real do repositório em mono
+ * sobre um filete fino, e um brilho da marca que segue o cursor somado à borda
+ * que acende no hover.
  *
  * Duas mudanças desta rodada, ambas a pedido do dono:
  *
@@ -62,6 +64,7 @@ function Stack({ items }: { items: string[] }) {
  */
 export function Ecosystem() {
   const { t } = useTranslation('landing');
+  const glow = usePointerGlow();
 
   const pillars: Pillar[] = useMemo(
     () => [
@@ -133,10 +136,15 @@ export function Ecosystem() {
               })}
               data-reveal
               data-reveal-delay={String(index + 1)}
-              className={`${pillar.span} ficha paper-surface group block bg-paper-50 p-6 text-center transition-[border-color,box-shadow,transform] duration-300 hover:border-lumi-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:bg-ink-900 dark:hover:border-lumi-300 dark:focus-visible:ring-offset-ink-900 sm:p-7`}
+              {...glow}
+              // `ficha-glow`: brilho da marca que segue o cursor (ver
+              // `usePointerGlow`). A elevação no hover é sombra + borda, não
+              // deslocamento: `transform` já pertence à revelação no scroll deste
+              // mesmo cartão. `hover:` é (0,2,0) e vence a sombra base de `.ficha`.
+              className={`${pillar.span} ficha ficha-glow paper-surface group relative block bg-paper-50 p-6 text-center transition-[border-color,box-shadow,transform] duration-300 hover:border-lumi-400 hover:shadow-[0_24px_44px_-26px_rgba(94,25,93,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:bg-ink-900 dark:hover:border-lumi-300 dark:hover:shadow-[0_24px_48px_-26px_rgba(0,0,0,0.85)] dark:focus-visible:ring-offset-ink-900 sm:p-7`}
             >
-              <div className="flex items-center justify-center gap-3 border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[2px] border border-lumi-500/35 bg-lumi-50 text-lumi-600 dark:border-lumi-300/30 dark:bg-lumi-500/15 dark:text-lumi-200">
+              <div className="relative z-[1] flex items-center justify-center gap-3 border-b border-paper-300 pb-3 dark:border-white/10">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control border border-lumi-500/35 bg-lumi-50 text-lumi-600 dark:border-lumi-300/30 dark:bg-lumi-500/15 dark:text-lumi-200">
                   <Icon name={pillar.icon} size={16} />
                 </span>
                 <span className="cota text-[11px] uppercase text-paper-500 dark:text-ink-400">
@@ -152,7 +160,7 @@ export function Ecosystem() {
                 </span>
               </div>
 
-              <div className="mt-5">
+              <div className="relative z-[1] mt-5">
                 <h3 className="font-display text-xl font-extrabold text-paper-900 underline decoration-transparent decoration-2 underline-offset-4 transition-[text-decoration-color] duration-200 group-hover:decoration-lumi-400 group-focus-visible:decoration-lumi-400 dark:text-ink-100">
                   {pillar.title}
                 </h3>

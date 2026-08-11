@@ -59,8 +59,10 @@ export function CatalogRecord() {
       className="ficha ficha-furo paper-surface bg-paper-50 px-5 pb-12 pt-4 dark:bg-ink-900 sm:px-6"
     >
       {/* Cabeçalho da ficha: cota à esquerda, sigla do acervo à direita — o
-          canto superior de um cartão de fichário, sem nenhuma outra decoração. */}
-      <div className="flex items-baseline justify-between border-b-2 border-paper-900 pb-3 dark:border-ink-100/80">
+          canto superior de um cartão de fichário. Filete fino (não mais o de 2px)
+          para o cartão respirar; o acento grosso da página fica na etiqueta de
+          lombada da abertura de cada seção. */}
+      <div className="flex items-baseline justify-between border-b border-paper-300 pb-3 dark:border-white/10">
         <span
           aria-hidden="true"
           className="cota text-sm text-lumi-600 dark:text-lumi-200"
