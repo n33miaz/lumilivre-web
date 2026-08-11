@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SectionHeader } from './SectionHeader';
-import { SHELF_MARKS } from './shelfMarks';
 
 /**
  * O único bloco da página escrito para a bibliotecária, não para quem avalia o
@@ -44,7 +43,6 @@ export function Problem() {
     <section id="problem" className="px-6 py-24 sm:py-28">
       <div className="mx-auto max-w-6xl">
         <SectionHeader
-          mark={SHELF_MARKS.problem}
           eyebrow={t('problem.eyebrow')}
           title={t('problem.title')}
           lead={t('problem.lead')}

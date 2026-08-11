@@ -21,10 +21,10 @@ import { MIN_PASSWORD_LENGTH } from '../../../utils/passwordPolicy';
  * linguagem de erro; usá-la para receber alguém diz, no primeiro segundo, que
  * algo deu errado. Não deu: a conta está pronta.
  *
- * Agora é uma ficha como as outras quatro superfícies de acesso — mesma cota
- * `025.5`, mesmo filete, mesmo botão com a luz que segue o ponteiro — com uma
- * saudação, o motivo em uma linha e a exigência de tamanho dita ANTES de a
- * pessoa digitar, em vez de só depois, num toast de erro.
+ * Agora é uma ficha como as outras superfícies de acesso — mesma etiqueta,
+ * mesmo filete, mesmo botão com a luz que segue o ponteiro — com uma saudação,
+ * o motivo em uma linha e a exigência de tamanho dita ANTES de a pessoa digitar,
+ * em vez de só depois, num toast de erro.
  *
  * Nada de comportamento mudou: mesmos três campos, mesma validação, mesmo
  * `preventClose`, mesma chamada de serviço. O `Modal.Header` saiu porque com
@@ -101,13 +101,7 @@ export function MandatoryPasswordChangeModal() {
           filho e cobre a caixa inteira, então sem isso o branco do contêiner
           apareceria nos quatro cantos. */}
       <Modal.Body className="ficha-plana rounded-lg px-6 pb-8 pt-7 sm:px-9">
-        <div className="flex items-baseline justify-between gap-4 border-b border-paper-300 pb-3 dark:border-white/10">
-          <span
-            aria-hidden="true"
-            className="cota text-sm text-lumi-600 dark:text-lumi-200"
-          >
-            025.5
-          </span>
+        <div className="flex items-baseline border-b border-paper-300 pb-3 dark:border-white/10">
           <span className="cota truncate text-[10px] uppercase text-paper-500 dark:text-ink-400">
             {t('mandatory_change.kicker')}
           </span>

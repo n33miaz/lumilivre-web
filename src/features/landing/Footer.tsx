@@ -7,7 +7,7 @@ import { Icon } from './Icon';
 const REPOS = ['lumilivre-api', 'lumilivre-web', 'lumilivre-app'];
 
 const LINK_CLASS =
-  'rounded-control text-paper-600 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-200';
+  'rounded-control text-paper-600 transition-colors duration-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:text-lumi-200';
 
 /**
  * Rodapé em colofão: a mesma família de filete e mono do resto da página, com a

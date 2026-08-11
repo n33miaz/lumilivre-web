@@ -391,10 +391,22 @@ export function LoginMeshBackground({
     };
     applyBackPalette();
 
+    // Só há "tamanho válido" quando o container tem dimensão real. É a trava
+    // contra a corrida de tamanho no primeiro frame: sem ela, um container ainda
+    // com 0px (layout não resolvido, display trocando) renderizava a malha num
+    // buffer de 1px e a esticava para 100% — o quadro chapado e FEIO que o dono
+    // via "quando a animação falha". Enquanto o tamanho não for válido, nada é
+    // pintado nem revelado, e o degradê CSS bonito por baixo é o que aparece.
+    let hasValidSize = false;
     const resize = () => {
-      renderer.setSize(container.clientWidth || 1, container.clientHeight || 1);
-      uniforms.uResolution.value[0] = canvas.width;
-      uniforms.uResolution.value[1] = canvas.height;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w > 0 && h > 0) {
+        renderer.setSize(w, h);
+        uniforms.uResolution.value[0] = canvas.width;
+        uniforms.uResolution.value[1] = canvas.height;
+        hasValidSize = true;
+      }
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
@@ -504,8 +516,13 @@ export function LoginMeshBackground({
         applyBackPalette();
       }
 
-      renderFrame(t);
-      reveal();
+      // Só pinta e revela com tamanho válido: um frame de 1px esticado seria o
+      // fundo feio. Sem tamanho, o laço segue barato (sem chamadas de GL) até o
+      // ResizeObserver entregar a dimensão — e o degradê CSS cobre a espera.
+      if (hasValidSize) {
+        renderFrame(t);
+        reveal();
+      }
       raf = requestAnimationFrame(frame);
     };
 
@@ -525,8 +542,20 @@ export function LoginMeshBackground({
     });
 
     if (reduceMotion) {
-      renderFrame(12);
-      reveal();
+      // Movimento reduzido: um único frame estático. Mas ele também precisa
+      // esperar o tamanho válido — senão pinta o mesmo quadro de 1px esticado.
+      // Tenta por alguns segundos; se a dimensão nunca chegar, desiste e deixa o
+      // degradê CSS no lugar.
+      let tries = 0;
+      const renderOnce = () => {
+        if (hasValidSize) {
+          renderFrame(12);
+          reveal();
+          return;
+        }
+        if (tries++ < 300) raf = requestAnimationFrame(renderOnce);
+      };
+      raf = requestAnimationFrame(renderOnce);
     } else {
       raf = requestAnimationFrame(frame);
     }

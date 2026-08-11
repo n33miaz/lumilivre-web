@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Icon, type IconName } from './Icon';
 import { ShelfMark } from './ShelfMark';
-import { SHELF_MARKS } from './shelfMarks';
 
 interface ContactCard {
   key: string;
@@ -76,11 +75,7 @@ export function ContactCTA() {
     >
       <div className="mx-auto grid max-w-6xl items-start gap-x-12 gap-y-12 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <ShelfMark
-            mark={SHELF_MARKS.contact}
-            label={t('contact.badge')}
-            tone="invert"
-          />
+          <ShelfMark label={t('contact.badge')} tone="invert" />
           <h2
             data-reveal
             data-reveal-delay="1"

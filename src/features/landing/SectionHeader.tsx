@@ -1,8 +1,6 @@
 import { ShelfMark } from './ShelfMark';
 
 interface SectionHeaderProps {
-  /** Cota da seção — ver `shelfMarks.ts`. */
-  mark: string;
   eyebrow: string;
   title: string;
   lead?: string;
@@ -27,7 +25,6 @@ interface SectionHeaderProps {
  *    texto de marketing parecer preenchimento.
  */
 export function SectionHeader({
-  mark,
   eyebrow,
   title,
   lead,
@@ -37,7 +34,7 @@ export function SectionHeader({
 
   return (
     <div className="mb-12 max-w-3xl lg:mb-16">
-      <ShelfMark mark={mark} label={eyebrow} tone={tone} />
+      <ShelfMark label={eyebrow} tone={tone} />
       <h2
         data-reveal
         data-reveal-delay="1"

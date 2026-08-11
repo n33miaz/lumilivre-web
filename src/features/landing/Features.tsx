@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Icon, type IconName } from './Icon';
 import { SectionHeader } from './SectionHeader';
-import { SHELF_MARKS } from './shelfMarks';
 import { usePointerGlow } from './usePointerGlow';
 
 /**
@@ -30,7 +29,7 @@ function CatalogVisual() {
   ];
 
   return (
-    <div className="ficha ficha-furo mt-6 bg-paper-100 px-4 pb-10 pt-3 dark:bg-ink-950/70">
+    <div className="ficha mt-6 bg-paper-100 px-4 pb-10 pt-3 dark:bg-ink-950/70">
       <div className="flex items-baseline gap-2 border-b border-paper-300 pb-2.5 dark:border-white/10">
         <span className="cota text-[10px] uppercase text-paper-500 dark:text-ink-400">
           {t('features.visual.catalog.input')}
@@ -213,7 +212,6 @@ export function Features() {
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeader
-          mark={SHELF_MARKS.features}
           eyebrow={t('features.eyebrow')}
           title={t('features.title')}
           lead={t('features.lead')}
@@ -233,13 +231,13 @@ export function Features() {
               // `ficha-glow` + elevação por sombra no hover, o mesmo desenho dos
               // cartões do Ecossistema. Sem lift por `transform`: a propriedade é
               // da revelação no scroll deste cartão.
-              className={`${item.span} ficha ficha-glow paper-surface group relative overflow-hidden bg-paper-50 p-6 transition-[border-color,box-shadow,transform] duration-300 hover:border-lumi-400 hover:shadow-[0_24px_44px_-26px_rgba(94,25,93,0.5)] dark:bg-ink-900 dark:hover:shadow-[0_24px_48px_-26px_rgba(0,0,0,0.85)]`}
+              className={`${item.span} ficha ficha-glow paper-surface group relative overflow-hidden bg-paper-50 p-6 transition-[border-color,box-shadow,transform] duration-200 hover:border-lumi-400 hover:shadow-[0_24px_44px_-26px_rgba(94,25,93,0.5)] dark:bg-ink-900 dark:hover:shadow-[0_24px_48px_-26px_rgba(0,0,0,0.85)]`}
             >
               {/* Filete que cresce do canto ao passar o ponteiro: só scale-x, sem
                   tocar em layout. */}
               <span
                 aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-lumi-500 transition-transform duration-500 group-hover:scale-x-100 dark:bg-lumi-label"
+                className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-lumi-500 transition-transform duration-200 group-hover:scale-x-100 dark:bg-lumi-label"
               />
               <div
                 // A célula de largura inteira centra o conteúdo na vertical: a

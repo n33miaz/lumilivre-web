@@ -129,7 +129,7 @@ export function MudarSenhaPage() {
           </div>
           <Link
             to="/forgot-password"
-            className="rounded-control font-semibold text-lumi-primary underline decoration-lumi-500/40 decoration-1 underline-offset-4 transition-colors hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-lumi-label dark:decoration-lumi-label/40"
+            className="rounded-control font-semibold text-lumi-primary underline decoration-lumi-500/40 decoration-1 underline-offset-4 transition-colors duration-200 hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-lumi-label dark:decoration-lumi-label/40"
           >
             {t('reset_password.link.request_new')}
           </Link>
@@ -184,7 +184,7 @@ export function MudarSenhaPage() {
         !isLoadingToken && isTokenValid ? (
           <Link
             to="/login"
-            className="rounded-control text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
+            className="rounded-control text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors duration-200 hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
           >
             {t('reset_password.link.cancel')}
           </Link>

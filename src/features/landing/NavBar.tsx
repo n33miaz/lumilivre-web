@@ -36,7 +36,7 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-300 ${
+      className={`sticky top-0 z-40 transition-[background-color,border-color,box-shadow] duration-200 ${
         scrolled
           ? 'border-b border-paper-300 bg-paper-100/85 backdrop-blur-md dark:border-white/10 dark:bg-ink-950/85'
           : // Nem fundo nem blur no topo: qualquer um dos dois desenha uma faixa
@@ -70,14 +70,14 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
             <a
               key={link.href}
               href={link.href}
-              className="group relative py-1 transition-colors hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:hover:text-lumi-200"
+              className="group relative py-1 transition-colors duration-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:hover:text-lumi-200"
             >
               {t(link.key)}
               {/* Sublinhado que cresce do centro — transform puro, sem mexer no
                   espaço que o link ocupa. */}
               <span
                 aria-hidden="true"
-                className="absolute -bottom-0.5 left-0 h-0.5 w-full origin-center scale-x-0 bg-lumi-500 transition-transform duration-300 group-hover:scale-x-100 group-focus-visible:scale-x-100 dark:bg-lumi-label"
+                className="absolute -bottom-0.5 left-0 h-0.5 w-full origin-center scale-x-0 bg-lumi-500 transition-transform duration-200 group-hover:scale-x-100 group-focus-visible:scale-x-100 dark:bg-lumi-label"
               />
             </a>
           ))}
@@ -88,7 +88,7 @@ export function NavBar({ dark, setDark, onAdminClick }: NavBarProps) {
             type="button"
             onClick={() => setDark(!dark)}
             aria-label={t('aria.toggleTheme')}
-            className="flex h-10 w-10 items-center justify-center rounded-control text-paper-600 transition-colors hover:bg-paper-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:bg-white/10 dark:hover:text-lumi-200"
+            className="flex h-10 w-10 items-center justify-center rounded-control text-paper-600 transition-colors duration-200 hover:bg-paper-200 hover:text-lumi-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:hover:bg-white/10 dark:hover:text-lumi-200"
           >
             <Icon name={dark ? 'sun' : 'moon'} size={18} />
           </button>

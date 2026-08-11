@@ -259,9 +259,13 @@ export function LoginPage() {
               entre o título e o texto de apoio, sem degradê no texto.
               O par chamada/apoio muda a cada acesso, e nunca fala do assunto das
               dicas ao lado — a exclusão é feita no sorteio, não conferida depois. */}
+          {/* Corpo relativo à tela (`clamp` sobre `vw`): em vez de saltar de
+              2,6rem para 3,1rem num breakpoint, o título cresce contínuo com a
+              largura e nunca estoura nas telas `lg` mais estreitas (1024–1280),
+              onde o valor fixo ficava grande demais para a metade do painel. */}
           <h2
             data-reveal
-            className="font-display text-[2.6rem] font-extrabold leading-[1.1] tracking-[-0.03em] xl:text-[3.1rem]"
+            className="font-display text-[clamp(1.9rem,3.1vw,3.1rem)] font-extrabold leading-[1.1] tracking-[-0.03em]"
           >
             {t(`login.headline.${headline.id}.start`)}{' '}
             <span className="text-lumi-200">
@@ -273,7 +277,7 @@ export function LoginPage() {
           <p
             data-reveal
             data-reveal-delay="1"
-            className="mt-7 max-w-[46ch] text-[17px] leading-relaxed text-lumi-100"
+            className="mt-7 max-w-[46ch] text-[clamp(0.9375rem,1.2vw,1.0625rem)] leading-relaxed text-lumi-100"
           >
             {t(`login.headline.${headline.id}.subtitle`)}
           </p>
@@ -304,16 +308,20 @@ export function LoginPage() {
             <ul className="space-y-1">
               {tips.map((tip, index) => {
                 const TipIcon = TIP_ICONS[tip.icon];
+                // `items-center`: número, ícone e o bloco de texto centrados no
+                // MESMO eixo vertical, tenha a descrição uma ou duas linhas — antes
+                // (`items-start`) o número e o ícone grudavam no topo e pareciam
+                // desalinhados com o texto.
                 return (
                   <li
                     key={tip.id}
                     data-reveal
                     data-reveal-delay={String(index + 3)}
-                    className="flex items-start gap-4 py-3.5"
+                    className="flex items-center gap-4 py-3.5"
                   >
                     <span
                       aria-hidden="true"
-                      className="cota shrink-0 pt-1 text-[10px] text-white/75"
+                      className="cota shrink-0 text-[10px] text-white/75"
                     >
                       {String(index + 1).padStart(2, '0')}
                     </span>
@@ -321,10 +329,10 @@ export function LoginPage() {
                       <TipIcon className="h-4 w-4 text-lumi-100" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block font-display text-[15px] font-bold leading-tight">
+                      <span className="block font-display text-[clamp(0.875rem,1.05vw,0.9375rem)] font-bold leading-tight">
                         {t(`login.tip.${tip.id}.title`)}
                       </span>
-                      <span className="mt-1 block text-[13px] leading-snug text-lumi-100">
+                      <span className="mt-1 block text-[clamp(0.75rem,0.92vw,0.8125rem)] leading-snug text-lumi-100">
                         {t(`login.tip.${tip.id}.desc`)}
                       </span>
                     </span>
@@ -346,7 +354,7 @@ export function LoginPage() {
               site: (
                 <Link
                   to="/"
-                  className="font-semibold underline decoration-white/40 underline-offset-2 transition-colors hover:text-lumi-label"
+                  className="font-semibold underline decoration-white/40 underline-offset-2 transition-colors duration-200 hover:text-lumi-label"
                 />
               ),
             }}
@@ -382,12 +390,15 @@ export function LoginPage() {
             </h1>
           </div>
 
-          <div className="ficha ficha-elevada ficha-furo paper-surface bg-paper-50 px-5 pb-14 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
+          <div className="ficha ficha-elevada paper-surface bg-paper-50 px-5 pb-12 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
+            {/* Sem a linha nova do topo (a cota + "ACESSO AO PAINEL"): o cartão
+                de login volta a abrir direto no título centralizado, como o dono
+                pediu. As outras telas de acesso mantêm a etiqueta à esquerda. */}
             <AuthCardHeader
-              kicker={t('login.kicker')}
               title={t('login.form.welcome')}
               subtitle={t('login.form.welcome_subtitle')}
               level={2}
+              align="center"
             />
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -426,7 +437,7 @@ export function LoginPage() {
             <div className="mt-5 text-center">
               <Link
                 to="/forgot-password"
-                className="rounded-control text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
+                className="rounded-control text-[15px] font-semibold text-paper-600 underline decoration-paper-400 decoration-1 underline-offset-4 transition-colors duration-200 hover:text-lumi-primary hover:decoration-lumi-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 dark:text-ink-400 dark:decoration-white/25 dark:hover:text-lumi-label"
               >
                 {t('login.link.forgot_password')}
               </Link>

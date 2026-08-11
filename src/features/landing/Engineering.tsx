@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SectionHeader } from './SectionHeader';
-import { SHELF_MARKS } from './shelfMarks';
 
 const ITEM_KEYS = [
   'rls',
@@ -74,7 +73,6 @@ export function Engineering() {
     >
       <div className="relative mx-auto max-w-6xl">
         <SectionHeader
-          mark={SHELF_MARKS.engineering}
           eyebrow={t('eng.eyebrow')}
           title={t('eng.title')}
           lead={t('eng.lead')}

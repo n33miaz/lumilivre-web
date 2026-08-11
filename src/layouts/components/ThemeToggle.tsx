@@ -41,16 +41,16 @@ export function ThemeToggle() {
     >
       {/* Both icons share one grid cell and cross-fade + rotate on theme change,
           so the swap glides instead of hard-cutting. Wrapper tilts on hover. */}
-      <span className="relative grid h-5 w-5 place-items-center transition-transform duration-300 ease-out group-hover:rotate-12">
+      <span className="relative grid h-5 w-5 place-items-center transition-transform duration-200 ease-out group-hover:rotate-12">
         <MoonIcon
-          className={`col-start-1 row-start-1 h-5 w-5 text-lumi-primary transition-[opacity,transform] duration-300 ease-out ${
+          className={`col-start-1 row-start-1 h-5 w-5 text-lumi-primary transition-[opacity,transform] duration-200 ease-out ${
             isLight
               ? 'rotate-0 scale-100 opacity-100'
               : '-rotate-90 scale-0 opacity-0'
           }`}
         />
         <SunIcon
-          className={`col-start-1 row-start-1 h-5 w-5 text-amber-400 transition-[opacity,transform] duration-300 ease-out ${
+          className={`col-start-1 row-start-1 h-5 w-5 text-amber-400 transition-[opacity,transform] duration-200 ease-out ${
             isLight
               ? 'rotate-90 scale-0 opacity-0'
               : 'rotate-0 scale-100 opacity-100'

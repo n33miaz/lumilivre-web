@@ -8,17 +8,6 @@ import { formatElapsed } from './apiHealthFormat';
 
 import CloseIcon from '../assets/icons/close-sm.svg?react';
 
-/**
- * Cota do aviso de infraestrutura.
- *
- * `004.6` é, na Classificação Decimal de Dewey, "interfaceamento e
- * comunicações" — a prateleira onde mora o assunto "a máquina está subindo".
- * As telas de acesso abrem com `025.5` (serviços ao usuário); este diálogo não
- * é serviço ao usuário, é o encanamento aparecendo, e a cota diferente é o que
- * diz isso antes do título.
- */
-const INFRA_MARK = '004.6';
-
 /** Tudo que recebe foco dentro do diálogo, na ordem em que aparece no DOM. */
 const FOCUSABLE =
   'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -140,24 +129,18 @@ export function ApiWakingDialog({
         // Sem `aria-live`: o corpo carrega um contador que muda a cada segundo,
         // e uma região viva leria a caixa inteira sessenta vezes por minuto. O
         // `role="alertdialog"` com foco dentro já anuncia tudo uma vez.
-        className={`ficha ficha-elevada ficha-furo paper-surface relative w-full max-w-md bg-paper-50 px-6 pb-14 pt-5 outline-none dark:bg-ink-900 sm:px-8 ${
+        className={`ficha ficha-elevada paper-surface relative w-full max-w-md bg-paper-50 px-6 pb-14 pt-5 outline-none dark:bg-ink-900 sm:px-8 ${
           isClosing ? 'animate-shrink-out' : 'animate-grow-in'
         }`}
       >
-        {/* `items-center` (e não a linha de base do `AuthCardHeader`): aqui o
-            filete carrega um botão, e alinhar botão por baseline o deixa
-            pendurado meio pixel acima da cota. */}
+        {/* `items-center`: o filete carrega um botão de fechar, e alinhar botão
+            por baseline o deixaria pendurado meio pixel acima da etiqueta. A cota
+            de Dewey que abria a linha saiu com os demais números misteriosos. */}
         <div className="flex items-center justify-between gap-3 border-b border-paper-300 pb-3 dark:border-white/10">
-          <span
-            aria-hidden="true"
-            className="cota text-sm text-lumi-600 dark:text-lumi-200"
-          >
-            {INFRA_MARK}
+          <span className="cota truncate text-[10px] uppercase text-paper-500 dark:text-ink-400">
+            {t('apiHealth.kicker')}
           </span>
           <div className="flex min-w-0 items-center gap-2">
-            <span className="cota truncate text-[10px] uppercase text-paper-500 dark:text-ink-400">
-              {t('apiHealth.kicker')}
-            </span>
             <button
               type="button"
               onClick={onClose}

@@ -60,7 +60,7 @@ export function AuthShell({
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="ficha ficha-elevada ficha-furo paper-surface bg-paper-50 px-6 pb-14 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
+        <div className="ficha ficha-elevada paper-surface bg-paper-50 px-6 pb-12 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
           <AuthCardHeader kicker={kicker} title={title} subtitle={subtitle} />
 
           {children}

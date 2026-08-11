@@ -159,12 +159,19 @@ export function ShaderBackground({
     });
     const mesh = new Mesh(gl, { geometry: new Triangle(gl), program });
 
+    // "Tamanho válido" = container com dimensão real. Enquanto não houver, nada é
+    // pintado nem revelado: um buffer de 1px esticado a 100% é justamente o
+    // quadro feio a evitar. O degradê/CSS do próprio controle cobre a espera.
+    let hasValidSize = false;
     const resize = () => {
-      const w = container.clientWidth || 1;
-      const h = container.clientHeight || 1;
-      renderer.setSize(w, h);
-      buf.resolution[0] = canvas.width;
-      buf.resolution[1] = canvas.height;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w > 0 && h > 0) {
+        renderer.setSize(w, h);
+        buf.resolution[0] = canvas.width;
+        buf.resolution[1] = canvas.height;
+        hasValidSize = true;
+      }
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
@@ -267,8 +274,11 @@ export function ShaderBackground({
       buf.ripple[2] = age;
       buf.ripple[3] = active;
 
-      renderer.render({ scene: mesh });
-      reveal();
+      // Só pinta e revela com tamanho válido (ver `resize`).
+      if (hasValidSize) {
+        renderer.render({ scene: mesh });
+        reveal();
+      }
       raf = requestAnimationFrame(frame);
     };
 
@@ -286,11 +296,20 @@ export function ShaderBackground({
     });
 
     if (reduceMotion) {
-      // Single static frame — no animation loop.
-      program.uniforms.uTime.value = 12.0;
-      program.uniforms.uHover.value = hover.current;
-      renderer.render({ scene: mesh });
-      reveal();
+      // Single static frame — no animation loop. Espera o tamanho válido antes
+      // de pintar; se nunca chegar, desiste e deixa o fundo do controle.
+      let tries = 0;
+      const renderOnce = () => {
+        if (hasValidSize) {
+          program.uniforms.uTime.value = 12.0;
+          program.uniforms.uHover.value = hover.current;
+          renderer.render({ scene: mesh });
+          reveal();
+          return;
+        }
+        if (tries++ < 300) raf = requestAnimationFrame(renderOnce);
+      };
+      raf = requestAnimationFrame(renderOnce);
     } else {
       raf = requestAnimationFrame(frame);
     }

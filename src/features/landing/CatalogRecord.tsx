@@ -2,7 +2,6 @@ import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SUPPORTED_LOCALES } from '../../i18n';
-import { SHELF_MARKS } from './shelfMarks';
 
 /**
  * A ficha de catálogo do próprio LumiLivre — o objeto que define o visual da
@@ -56,19 +55,12 @@ export function CatalogRecord() {
       data-reveal
       data-reveal-delay="3"
       aria-label={t('record.aria')}
-      className="ficha ficha-furo paper-surface bg-paper-50 px-5 pb-12 pt-4 dark:bg-ink-900 sm:px-6"
+      className="ficha paper-surface bg-paper-50 px-5 pb-12 pt-4 dark:bg-ink-900 sm:px-6"
     >
-      {/* Cabeçalho da ficha: cota à esquerda, sigla do acervo à direita — o
-          canto superior de um cartão de fichário. Filete fino (não mais o de 2px)
-          para o cartão respirar; o acento grosso da página fica na etiqueta de
-          lombada da abertura de cada seção. */}
-      <div className="flex items-baseline justify-between border-b border-paper-300 pb-3 dark:border-white/10">
-        <span
-          aria-hidden="true"
-          className="cota text-sm text-lumi-600 dark:text-lumi-200"
-        >
-          {SHELF_MARKS.hero}
-        </span>
+      {/* Cabeçalho da ficha: só a sigla do acervo sobre um filete fino — o canto
+          superior de um cartão de fichário. A cota de Dewey que abria a linha
+          saiu com os demais números misteriosos, a pedido do dono. */}
+      <div className="flex items-baseline border-b border-paper-300 pb-3 dark:border-white/10">
         <span className="cota text-[10px] uppercase text-paper-500 dark:text-ink-400">
           {t('record.stamp')}
         </span>

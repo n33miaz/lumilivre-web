@@ -7,7 +7,6 @@ import { CatalogRecord } from './CatalogRecord';
 import { Icon } from './Icon';
 import { LoanCycle } from './LoanCycle';
 import { ShelfMark } from './ShelfMark';
-import { SHELF_MARKS } from './shelfMarks';
 
 const CONTACT_HREF = 'mailto:ncormino@gmail.com';
 
@@ -78,7 +77,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-20 pt-10 sm:pt-14">
         <div className="grid items-start gap-x-10 gap-y-12 lg:grid-cols-12">
           <div className="lg:col-span-7">
-            <ShelfMark mark={SHELF_MARKS.hero} label={t('hero.mark')} />
+            <ShelfMark label={t('hero.mark')} />
 
             <h1
               data-reveal

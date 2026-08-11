@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Icon, type IconName } from './Icon';
 import { SectionHeader } from './SectionHeader';
-import { SHELF_MARKS } from './shelfMarks';
 import { usePointerGlow } from './usePointerGlow';
 
 interface Pillar {
@@ -114,7 +113,6 @@ export function Ecosystem() {
     >
       <div className="mx-auto max-w-6xl">
         <SectionHeader
-          mark={SHELF_MARKS.ecosystem}
           eyebrow={t('ecosystem.eyebrow')}
           title={t('ecosystem.title')}
           lead={t('ecosystem.lead')}
@@ -141,7 +139,7 @@ export function Ecosystem() {
               // `usePointerGlow`). A elevação no hover é sombra + borda, não
               // deslocamento: `transform` já pertence à revelação no scroll deste
               // mesmo cartão. `hover:` é (0,2,0) e vence a sombra base de `.ficha`.
-              className={`${pillar.span} ficha ficha-glow paper-surface group relative block bg-paper-50 p-6 text-center transition-[border-color,box-shadow,transform] duration-300 hover:border-lumi-400 hover:shadow-[0_24px_44px_-26px_rgba(94,25,93,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:bg-ink-900 dark:hover:border-lumi-300 dark:hover:shadow-[0_24px_48px_-26px_rgba(0,0,0,0.85)] dark:focus-visible:ring-offset-ink-900 sm:p-7`}
+              className={`${pillar.span} ficha ficha-glow paper-surface group relative block bg-paper-50 p-6 text-center transition-[border-color,box-shadow,transform] duration-200 hover:border-lumi-400 hover:shadow-[0_24px_44px_-26px_rgba(94,25,93,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-lumi-400 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-200 dark:bg-ink-900 dark:hover:border-lumi-300 dark:hover:shadow-[0_24px_48px_-26px_rgba(0,0,0,0.85)] dark:focus-visible:ring-offset-ink-900 sm:p-7`}
             >
               <div className="relative z-[1] flex items-center justify-center gap-3 border-b border-paper-300 pb-3 dark:border-white/10">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control border border-lumi-500/35 bg-lumi-50 text-lumi-600 dark:border-lumi-300/30 dark:bg-lumi-500/15 dark:text-lumi-200">

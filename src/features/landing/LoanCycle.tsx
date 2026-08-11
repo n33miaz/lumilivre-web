@@ -9,7 +9,6 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { SHELF_MARKS } from './shelfMarks';
 import './LoanCycle.css';
 
 /** Amplitude da inclinação, em graus. Herdada do print que estava aqui. */
@@ -243,29 +242,6 @@ export function LoanCycle() {
                       />
                     </g>
                   ))}
-                  {/* Cotas de Dewey de verdade, as mesmas da página: 025.3 é
-                      catalogação e 027.8 é biblioteca escolar. Quem é da área
-                      reconhece; quem não é lê como sistema de ordenação. */}
-                  <text
-                    x="103"
-                    y="165"
-                    className="lc-cota"
-                    fontSize="9"
-                    textAnchor="middle"
-                    transform="rotate(-90 103 165)"
-                  >
-                    {SHELF_MARKS.features}
-                  </text>
-                  <text
-                    x="210"
-                    y="168"
-                    className="lc-cota"
-                    fontSize="9"
-                    textAnchor="middle"
-                    transform="rotate(-90 210 168)"
-                  >
-                    {SHELF_MARKS.hero}
-                  </text>
                 </g>
 
                 {/* O vão que o exemplar emprestado deixa. Tracejado porque o
@@ -302,9 +278,9 @@ export function LoanCycle() {
                     rx="1"
                     className="lc-fill-2"
                   />
-                  {/* Etiqueta de lombada. 025.6 é serviços de circulação —
-                      empréstimo e devolução, que é exatamente o que este
-                      exemplar está prestes a fazer. */}
+                  {/* Etiqueta de lombada em branco: a sticker que toda estante
+                      cataloga, sem o número de classificação — a cota de Dewey
+                      saiu com os demais números misteriosos. */}
                   <rect
                     x="127"
                     y="216"
@@ -313,16 +289,6 @@ export function LoanCycle() {
                     rx="1"
                     className="lc-brand-fill"
                   />
-                  <text
-                    x="139"
-                    y="236"
-                    className="lc-cota lc-on-brand"
-                    fontSize="10"
-                    textAnchor="middle"
-                    transform="rotate(-90 139 236)"
-                  >
-                    {SHELF_MARKS.screens}
-                  </text>
                 </g>
 
                 {/* ---------- O APLICATIVO ---------- */}
@@ -744,9 +710,6 @@ export function LoanCycle() {
                     rx="2"
                     className="lc-bar"
                   />
-                  {/* Furo do bastão do fichário, o mesmo detalhe da ficha de
-                      catálogo do bloco de cima. */}
-                  <circle cx="445" cy="336" r="4.5" className="lc-paper" />
                 </g>
               </svg>
             </div>
