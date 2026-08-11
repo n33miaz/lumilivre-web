@@ -11,7 +11,8 @@
 // Cada tela tem par claro/escuro **com o mesmo enquadramento**: a vitrine faz
 // cross-fade entre os dois e qualquer diferença de altura ou de linha visível
 // vira um salto na transição. Para o painel isso quer dizer 1440x900 (16/10, a
-// mesma proporção da área útil da moldura de navegador).
+// mesma proporção da área útil da moldura de navegador); para o app, retrato de
+// celular real (1080x2400).
 import dashboardLight from '../../assets/images/prints/dashboard.png?picture';
 import dashboardDark from '../../assets/images/prints/dashboard_dark.png?picture';
 import booksLight from '../../assets/images/prints/books.png?picture';
@@ -22,6 +23,10 @@ import interestLight from '../../assets/images/prints/interest.png?picture';
 import interestDark from '../../assets/images/prints/interest_dark.png?picture';
 import rankingLight from '../../assets/images/prints/ranking.png?picture';
 import rankingDark from '../../assets/images/prints/ranking_dark.png?picture';
+import appCatalogLight from '../../assets/images/prints/app-catalog.png?picture';
+import appCatalogDark from '../../assets/images/prints/app-catalog_dark.png?picture';
+import appCategoriesLight from '../../assets/images/prints/app-categories.png?picture';
+import appCategoriesDark from '../../assets/images/prints/app-categories_dark.png?picture';
 
 /** Par de arquivos de uma mesma tela — um por tema. */
 interface PrintSources {
@@ -43,12 +48,9 @@ export interface WebPrint extends PrintSources {
  * Não tem `path` de propósito — celular não tem barra de endereço, e inventar
  * uma seria a única informação falsa da página.
  *
- * Ainda não existe nenhum arquivo deste tipo; o tipo entra antes das imagens
- * para que a vitrine já saiba desenhar as duas proporções lado a lado. Quando os
- * prints do app existirem, basta importá-los aqui e acrescentar uma entrada com
- * `kind: 'app'` — o carrossel não muda de altura, porque o palco é uma caixa
- * fixa e o retrato é encaixado pela ALTURA, centralizado (ver
- * `ScreensShowcase.tsx`). O par claro/escuro continua obrigatório.
+ * O palco da vitrine tem altura FIXA e o retrato é encaixado pela ALTURA,
+ * centralizado (ver `ScreensShowcase.tsx`), então misturar app e painel no mesmo
+ * palco não faz a página saltar. O par claro/escuro continua obrigatório.
  */
 export interface AppPrint extends PrintSources {
   kind: 'app';
@@ -60,10 +62,6 @@ export type ScreenPrint = WebPrint | AppPrint;
  * `satisfies` (e não uma anotação de tipo) para cada entrada conservar o tipo
  * literal: é o que faz `PRINTS.dashboard.path` continuar sendo `string` para o
  * hero, em vez de `string | undefined` vindo da união.
- *
- * A ORDEM das chaves é a ordem do carrossel, e ela conta uma história: o estado
- * da biblioteca, o que ela tem, o que está circulando, o que falta comprar e o
- * efeito nos alunos. Prints do app entram no fim, depois do painel.
  */
 export const PRINTS = {
   dashboard: {
@@ -98,19 +96,36 @@ export const PRINTS = {
     dark: rankingDark,
     path: '/admin/ranking',
   },
+  appCatalog: {
+    kind: 'app',
+    light: appCatalogLight,
+    dark: appCatalogDark,
+  },
+  appCategories: {
+    kind: 'app',
+    light: appCategoriesLight,
+    dark: appCategoriesDark,
+  },
 } satisfies Record<string, ScreenPrint>;
 
 export type PrintKey = keyof typeof PRINTS;
 
+/** Os dois sistemas que a vitrine mostra — o seletor alterna entre eles. */
+export type SystemKey = 'web' | 'app';
+
 /**
- * Ordem de exibição da vitrine. Vive aqui, e não no componente, porque quem
+ * Ordem de exibição de cada sistema. Vive aqui, e não no componente, porque quem
  * acrescenta um print já está neste arquivo — deixar a ordem do outro lado é o
  * jeito garantido de esquecer dela.
+ *
+ * A ordem do painel conta uma história: o estado da biblioteca, o que ela tem, o
+ * que está circulando, o que falta comprar e o efeito nos alunos. A do app segue
+ * o caminho do leitor: primeiro o acervo, depois como ele é organizado.
  */
-export const PRINT_ORDER = [
-  'dashboard',
-  'books',
-  'loans',
-  'interest',
-  'ranking',
-] as const satisfies readonly PrintKey[];
+export const SYSTEM_ORDER = {
+  web: ['dashboard', 'books', 'loans', 'interest', 'ranking'],
+  app: ['appCatalog', 'appCategories'],
+} as const satisfies Record<SystemKey, readonly PrintKey[]>;
+
+/** Ordem em que o seletor e o autoplay percorrem os sistemas. */
+export const SYSTEMS = ['web', 'app'] as const satisfies readonly SystemKey[];
