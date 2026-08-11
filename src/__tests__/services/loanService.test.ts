@@ -9,6 +9,7 @@ import {
   buscarEmprestimosAvancado,
   getContagemAtrasados,
   getContagemEmprestimosTotais,
+  getEmprestimoStatusSummary,
   buscarEmprestimosAtivosEAtrasados,
   buscarRanking,
   buscarHistoricoLeitor,
@@ -129,6 +130,35 @@ describe('loanService', () => {
       2,
       '/api/loans/active-and-overdue/count',
     );
+  });
+
+  it('getEmprestimoStatusSummary reads the global status-summary endpoint', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: { all: 164, active: 40, overdue: 8, dueToday: 7, completed: 109 },
+    });
+
+    const result = await getEmprestimoStatusSummary();
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/loans/status-summary');
+    expect(result).toEqual({
+      all: 164,
+      active: 40,
+      overdue: 8,
+      dueToday: 7,
+      completed: 109,
+    });
+  });
+
+  it('getEmprestimoStatusSummary defaults missing counters to zero', async () => {
+    mockedApi.get.mockResolvedValue({ data: {} });
+
+    await expect(getEmprestimoStatusSummary()).resolves.toEqual({
+      all: 0,
+      active: 0,
+      overdue: 0,
+      dueToday: 0,
+      completed: 0,
+    });
   });
 
   it('buscarEmprestimosAtivosEAtrasados maps v2 active loans', async () => {

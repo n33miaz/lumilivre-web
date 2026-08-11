@@ -17,7 +17,10 @@ import { TableFooter } from '../../components/ui/TableFooter';
 import { LoanModalNew } from '../../features/loans/LoanModalNew';
 import { ModalLoanDetails } from '../../features/loans/LoanModalDetails';
 
-import { useEmprestimos } from '../../hooks/queries/useLoanQueries';
+import {
+  useEmprestimos,
+  useEmprestimoStatusSummary,
+} from '../../hooks/queries/useLoanQueries';
 import { type EmprestimoListagemDTO } from '../../services/loanService';
 import { formatarNome } from '../../utils/formatters';
 import { useTablePageSize } from '../../hooks/useTablePageSize';
@@ -70,13 +73,48 @@ const cleanFilters = (filters: Record<string, unknown>) => {
   return cleaned;
 };
 
-const filtroAtrasadosObj = {
-  statusEmprestimo: 'ATRASADO',
+const filtroVazioObj = {
+  statusEmprestimo: '',
   dataEmprestimo: '',
   dataDevolucao: '',
   tombo: '',
   livroNome: '',
   leitorNome: '',
+};
+
+const filtroAtrasadosObj = {
+  ...filtroVazioObj,
+  statusEmprestimo: 'ATRASADO',
+};
+
+// Cada aba corresponde a um filtro de status resolvido no servidor. O valor viaja
+// como statusEmprestimo; VENCE_HOJE é convertido em intervalo de datas pelo
+// `filtersForHook`. Assim clicar numa aba filtra e pagina a base inteira.
+const statusPorAba: Record<
+  Exclude<LoanTab, 'all' | 'solicitacoes'>,
+  string
+> = {
+  ativo: 'ATIVO',
+  atrasado: 'ATRASADO',
+  'vence-hoje': 'VENCE_HOJE',
+  concluido: 'CONCLUIDO',
+};
+
+// Caminho inverso: um filtro de status aplicado (aba, painel ou deep-link) define
+// qual aba fica destacada.
+const abaPorStatus = (status: string): LoanTab => {
+  switch (status) {
+    case 'ATIVO':
+      return 'ativo';
+    case 'ATRASADO':
+      return 'atrasado';
+    case 'VENCE_HOJE':
+      return 'vence-hoje';
+    case 'CONCLUIDO':
+      return 'concluido';
+    default:
+      return 'all';
+  }
 };
 
 function PlusIcon() {
@@ -155,14 +193,7 @@ export function EmprestimosPage() {
     if (searchParams.get('filtro') === 'atrasados') {
       return filtroAtrasadosObj;
     }
-    return {
-      statusEmprestimo: '',
-      dataEmprestimo: '',
-      dataDevolucao: '',
-      tombo: '',
-      livroNome: '',
-      leitorNome: '',
-    };
+    return filtroVazioObj;
   });
 
   const [activeFilters, setActiveFilters] = useState(() => {
@@ -230,6 +261,9 @@ export function EmprestimosPage() {
     filtroAtivo,
     filtersForHook,
   );
+
+  // Contadores das abas vêm da base inteira (server-side), não da página.
+  const { data: statusSummary } = useEmprestimoStatusSummary();
 
   const emprestimos = useMemo<EmprestimoDisplay[]>(() => {
     if (!pageData?.content) return [];
@@ -306,13 +340,11 @@ export function EmprestimosPage() {
   };
 
   const statusBadges = useMemo(() => {
-    const countBy = (status: StatusEmprestimoDisplay) =>
-      emprestimos.filter((item) => item.status === status).length;
     return [
       {
         value: 'all' as LoanTab,
         label: t('tabs.all'),
-        total: emprestimos.length,
+        total: statusSummary?.all ?? 0,
         icon: <Layers className="h-5 w-5" />,
         tile: 'bg-lumi-primary/10 text-lumi-primary dark:bg-lumi-label/10 dark:text-lumi-label',
         ring: 'ring-lumi-primary',
@@ -320,7 +352,7 @@ export function EmprestimosPage() {
       {
         value: 'ativo' as LoanTab,
         label: t('tabs.active'),
-        total: countBy('ativo'),
+        total: statusSummary?.active ?? 0,
         icon: <CheckCircle2 className="h-5 w-5" />,
         tile: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10',
         ring: 'ring-emerald-400',
@@ -328,7 +360,7 @@ export function EmprestimosPage() {
       {
         value: 'atrasado' as LoanTab,
         label: t('tabs.overdue'),
-        total: countBy('atrasado'),
+        total: statusSummary?.overdue ?? 0,
         icon: <AlertTriangle className="h-5 w-5" />,
         tile: 'bg-red-100 text-red-600 dark:bg-red-500/10',
         ring: 'ring-red-400',
@@ -336,7 +368,7 @@ export function EmprestimosPage() {
       {
         value: 'vence-hoje' as LoanTab,
         label: t('tabs.due_today'),
-        total: countBy('vence-hoje'),
+        total: statusSummary?.dueToday ?? 0,
         icon: <Clock className="h-5 w-5" />,
         tile: 'bg-amber-100 text-amber-600 dark:bg-amber-500/10',
         ring: 'ring-amber-400',
@@ -344,26 +376,38 @@ export function EmprestimosPage() {
       {
         value: 'concluido' as LoanTab,
         label: t('tabs.completed'),
-        total: countBy('concluido'),
+        total: statusSummary?.completed ?? 0,
         icon: <PackageCheck className="h-5 w-5" />,
         tile: 'bg-gray-200 text-gray-600 dark:bg-gray-500/20 dark:text-gray-300',
         ring: 'ring-gray-400',
       },
     ];
-  }, [emprestimos, t]);
+  }, [statusSummary, t]);
 
-  const filteredEmprestimos = useMemo(
-    () =>
-      activeLoanTab === 'all' || activeLoanTab === 'solicitacoes'
-        ? emprestimos
-        : emprestimos.filter((item) => item.status === activeLoanTab),
-    [activeLoanTab, emprestimos],
-  );
+  // Clicar numa aba filtra a base inteira no servidor (não só a página): define o
+  // statusEmprestimo que a query envia e limpa a busca textual, como o painel de
+  // filtros já faz. A aba 'all' zera o filtro e volta à listagem completa.
+  const handleSelectTab = (tab: LoanTab) => {
+    setActiveLoanTab(tab);
+    setCurrentPage(1);
+    setTermoBusca('');
+    setFiltroAtivo('');
+    if (tab === 'all' || tab === 'solicitacoes') {
+      setFilterParams(filtroVazioObj);
+      setActiveFilters({});
+      return;
+    }
+    const status = statusPorAba[tab];
+    setFilterParams({ ...filtroVazioObj, statusEmprestimo: status });
+    setActiveFilters({ statusEmprestimo: status });
+  };
 
   const handleBusca = (event?: React.FormEvent) => {
     event?.preventDefault();
     if (!termoBusca.trim()) return;
     setCurrentPage(1);
+    setActiveLoanTab('all');
+    setFilterParams(filtroVazioObj);
     setActiveFilters({});
     setFiltroAtivo(termoBusca);
   };
@@ -373,19 +417,15 @@ export function EmprestimosPage() {
     setTermoBusca('');
     setFiltroAtivo('');
     setActiveFilters(filterParams);
+    // A aba destacada acompanha o status escolhido no painel (ou volta a 'all').
+    setActiveLoanTab(abaPorStatus(filterParams.statusEmprestimo));
     setIsFilterOpen(false);
   };
 
   const handleClearFilters = () => {
     setCurrentPage(1);
-    setFilterParams({
-      statusEmprestimo: '',
-      dataEmprestimo: '',
-      dataDevolucao: '',
-      tombo: '',
-      livroNome: '',
-      leitorNome: '',
-    });
+    setActiveLoanTab('all');
+    setFilterParams(filtroVazioObj);
     setActiveFilters({});
     setIsFilterOpen(false);
   };
@@ -462,10 +502,7 @@ export function EmprestimosPage() {
               key={badge.value}
               type="button"
               aria-pressed={active}
-              onClick={() => {
-                setActiveLoanTab(badge.value);
-                setCurrentPage(1);
-              }}
+              onClick={() => handleSelectTab(badge.value)}
               className={`flex items-center gap-3 rounded-xl border bg-white dark:bg-dark-card p-4 text-left transition hover:-translate-y-0.5 hover:shadow-card ${
                 active
                   ? `border-transparent ring-2 ${badge.ring}`
@@ -500,6 +537,9 @@ export function EmprestimosPage() {
             setTermoBusca('');
             setFiltroAtivo('');
             setCurrentPage(1);
+            setActiveLoanTab('all');
+            setFilterParams(filtroVazioObj);
+            setActiveFilters({});
           }}
           placeholder={t('search.placeholder')}
         />
@@ -580,14 +620,14 @@ export function EmprestimosPage() {
                     {t('error.load')}
                   </td>
                 </tr>
-              ) : filteredEmprestimos.length === 0 ? (
+              ) : emprestimos.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-12 text-center text-gray-400">
                     {t('common:empty')}
                   </td>
                 </tr>
               ) : (
-                filteredEmprestimos.map((emp) => {
+                emprestimos.map((emp) => {
                   const pill = statusPill(emp.status);
                   return (
                     <tr

@@ -146,6 +146,32 @@ export const buscarEmprestimosAvancado = async (
   };
 };
 
+export interface EmprestimoStatusSummary {
+  all: number;
+  active: number;
+  overdue: number;
+  dueToday: number;
+  completed: number;
+}
+
+/**
+ * Totais GLOBAIS por status para os cartões-aba. A listagem é paginada no
+ * servidor, então contar a partir da página carregada daria o total da página
+ * (ex.: 7), não o real (ex.: 164). Aqui o backend conta a base inteira.
+ */
+export const getEmprestimoStatusSummary =
+  async (): Promise<EmprestimoStatusSummary> => {
+    const response = await api.get('/api/loans/status-summary');
+    const data = response.data || {};
+    return {
+      all: data.all ?? 0,
+      active: data.active ?? 0,
+      overdue: data.overdue ?? 0,
+      dueToday: data.dueToday ?? 0,
+      completed: data.completed ?? 0,
+    };
+  };
+
 export const getContagemAtrasados = async (): Promise<number> => {
   const response = await api.get('/api/loans/overdue');
   return response.status === 204 || !response.data ? 0 : response.data.length;

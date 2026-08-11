@@ -4,6 +4,7 @@ import {
   cadastrarLeitor,
   excluirLeitor,
   buscarLeitorPorMatricula,
+  getLeitorPenaltySummary,
   type LeitorPayload,
 } from '../../services/readerService';
 import api from '../../services/api';
@@ -47,6 +48,22 @@ describe('readerService', () => {
     });
     expect(result.content[0].matricula).toBe('001');
     expect(result.content[0].nomeCompleto).toBe('Joao');
+  });
+
+  it('getLeitorPenaltySummary reads the global penalty-summary endpoint', async () => {
+    mockedApi.get.mockResolvedValue({
+      data: { noPenalty: 120, warning: 8, suspension: 3, block: 2 },
+    });
+
+    const result = await getLeitorPenaltySummary();
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/readers/penalty-summary');
+    expect(result).toEqual({
+      noPenalty: 120,
+      warning: 8,
+      suspension: 3,
+      block: 2,
+    });
   });
 
   it('cadastrarLeitor sends the v2 payload', async () => {

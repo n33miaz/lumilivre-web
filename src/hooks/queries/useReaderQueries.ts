@@ -2,6 +2,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import {
   buscarLeitoresParaAdmin,
   buscarLeitoresAvancado,
+  getLeitorPenaltySummary,
   type LeitorFilterParams,
   buscarLeitorPorMatricula,
 } from '../../services/readerService';
@@ -36,6 +37,19 @@ export function useLeitores(
       return buscarLeitoresParaAdmin(termoBusca, page, size, sort);
     },
     placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+/**
+ * Contadores globais por penalidade dos cartões. A chave começa com 'leitores'
+ * de propósito: as mutações de leitor invalidam por esse prefixo, então
+ * criar/editar/excluir já atualiza os contadores junto da lista.
+ */
+export function useLeitorPenaltySummary() {
+  return useQuery({
+    queryKey: ['leitores', 'penalty-summary'],
+    queryFn: getLeitorPenaltySummary,
     staleTime: 1000 * 60 * 5,
   });
 }

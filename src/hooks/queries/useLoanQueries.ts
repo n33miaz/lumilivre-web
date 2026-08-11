@@ -4,6 +4,7 @@ import {
   buscarEmprestimosAvancado,
   buscarEmprestimosAtivosEAtrasados,
   buscarRanking,
+  getEmprestimoStatusSummary,
   type EmprestimoFilterParams,
 } from '../../services/loanService';
 
@@ -29,6 +30,19 @@ export function useEmprestimos(
       return buscarEmprestimosPaginado(termoBusca, page, size, sort);
     },
     placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 1, // 1 minuto
+  });
+}
+
+/**
+ * Contadores globais por status dos cartões-aba. A chave começa com
+ * 'emprestimos' de propósito: as mutações de empréstimo invalidam por esse
+ * prefixo, então criar/devolver/excluir já atualiza os contadores junto da lista.
+ */
+export function useEmprestimoStatusSummary() {
+  return useQuery({
+    queryKey: ['emprestimos', 'status-summary'],
+    queryFn: getEmprestimoStatusSummary,
     staleTime: 1000 * 60 * 1, // 1 minuto
   });
 }

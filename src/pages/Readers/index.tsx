@@ -10,7 +10,10 @@ import { ReaderFilter } from '../../features/readers/ReaderFilter';
 import { ModalReaderDetails } from '../../features/readers/ReaderModalDetails';
 import { formatarNome } from '../../utils/formatters';
 import { useTablePageSize } from '../../hooks/useTablePageSize';
-import { useLeitores } from '../../hooks/queries/useReaderQueries';
+import {
+  useLeitores,
+  useLeitorPenaltySummary,
+} from '../../hooks/queries/useReaderQueries';
 import { useLibraryConfig } from '../../contexts/LibraryConfigContext';
 
 import { type ListaLeitor } from '../../services/readerService';
@@ -237,19 +240,11 @@ export function LeitoresPage() {
     }));
   }, [pageData]);
 
-  const statsCards = useMemo(() => {
-    const counters = {
-      'sem-penalidade': 0,
-      advertencia: 0,
-      suspensao: 0,
-      bloqueio: 0,
-      banimento: 0,
-    } as Record<StatusPenalidade, number>;
-    leitores.forEach((leitor) => {
-      counters[leitor.penalidadeStatus] =
-        (counters[leitor.penalidadeStatus] ?? 0) + 1;
-    });
+  // Contadores globais (server-side): antes contávamos a partir de `leitores`,
+  // que é só a página carregada, então os cartões mostravam o total da página.
+  const { data: penaltySummary } = useLeitorPenaltySummary();
 
+  const statsCards = useMemo(() => {
     return [
       {
         key: 'no_penalty',
@@ -257,7 +252,7 @@ export function LeitoresPage() {
         tileClass: 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600',
         ringClass: 'ring-emerald-400',
         label: t('legend.no_penalty'),
-        total: counters['sem-penalidade'],
+        total: penaltySummary?.noPenalty ?? 0,
         filterCode: '',
       },
       {
@@ -266,7 +261,7 @@ export function LeitoresPage() {
         tileClass: 'bg-amber-100 dark:bg-amber-500/10 text-amber-600',
         ringClass: 'ring-amber-400',
         label: t('legend.warning'),
-        total: counters.advertencia,
+        total: penaltySummary?.warning ?? 0,
         filterCode: 'ADVERTENCIA',
       },
       {
@@ -275,7 +270,7 @@ export function LeitoresPage() {
         tileClass: 'bg-orange-100 dark:bg-orange-500/10 text-orange-600',
         ringClass: 'ring-orange-400',
         label: t('legend.suspension'),
-        total: counters.suspensao,
+        total: penaltySummary?.suspension ?? 0,
         filterCode: 'SUSPENSAO',
       },
       {
@@ -284,11 +279,11 @@ export function LeitoresPage() {
         tileClass: 'bg-red-100 dark:bg-red-500/10 text-red-600',
         ringClass: 'ring-red-400',
         label: t('legend.block'),
-        total: counters.bloqueio + counters.banimento,
+        total: penaltySummary?.block ?? 0,
         filterCode: 'BLOQUEIO',
       },
     ];
-  }, [leitores, t]);
+  }, [penaltySummary, t]);
 
   const handleBadgeFilter = (code: string) => {
     const next = code === '' ? '' : penaltyBadge === code ? '' : code;

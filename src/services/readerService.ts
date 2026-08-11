@@ -76,6 +76,30 @@ export const getContagemLeitores = async (): Promise<number> => {
   return response.data.totalElements || 0;
 };
 
+export interface LeitorPenaltySummary {
+  noPenalty: number;
+  warning: number;
+  suspension: number;
+  block: number;
+}
+
+/**
+ * Totais GLOBAIS por penalidade para os cartões da tela de leitores. Como a lista
+ * é paginada no servidor, contar a partir da página daria só o total da página;
+ * aqui o backend conta a base inteira. "block" já agrega BLOQUEIO + BANIMENTO.
+ */
+export const getLeitorPenaltySummary =
+  async (): Promise<LeitorPenaltySummary> => {
+    const response = await api.get('/api/readers/penalty-summary');
+    const data = response.data || {};
+    return {
+      noPenalty: data.noPenalty ?? 0,
+      warning: data.warning ?? 0,
+      suspension: data.suspension ?? 0,
+      block: data.block ?? 0,
+    };
+  };
+
 export interface ListaLeitor {
   penalidade: string | null;
   matricula: string;
