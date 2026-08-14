@@ -93,13 +93,17 @@ void main() {
   float aspect = uResolution.x / max(uResolution.y, 1.0);
 
   vec2 toM = uMouse - vUv;
-  vec2 warpInput = vUv * 1.5 + uTime * 0.04;
+  // uTime * 0.08 (era 0.04): o fluxo ambiente do warp anda o dobro, para a malha
+  // ter movimento visível mesmo com o ponteiro parado.
+  vec2 warpInput = vUv * 1.5 + uTime * 0.08;
   vec2 w2 = vec2(
     fbm2(warpInput + toM * 0.5),
     fbm2(warpInput + vec2(3.7, -2.1) + toM * 0.5)
   ) - 0.5;
   float prox = exp(-dot(toM, toM) * 2.4);
-  float warpAmp = uWarp * (0.07 + 0.22 * prox);
+  // base 0.11 (era 0.07): a ondulação de repouso é perceptível, não só a que
+  // acompanha o cursor.
+  float warpAmp = uWarp * (0.11 + 0.22 * prox);
   vec2 uv = vUv + w2 * warpAmp;
 
   vec2 P = vec2((uv.x - 0.5) * aspect, uv.y - 0.5);
@@ -434,16 +438,20 @@ export function LoginMeshBackground({
     const start = performance.now();
     let lastNow = start;
 
+    // Amplitude e velocidade do orbital: subiram de 0.05/0.13 para 0.12/0.22.
+    // Com os valores antigos o palette se deslocava ~3/255 em dois segundos — a
+    // malha renderizava, mas o movimento era imperceptível, e o dono lia isso
+    // como "o fundo não pega a animação". `precision mediump` ainda arredonda
+    // deslocamentos minúsculos para zero em algumas GPUs, então o fluxo precisa
+    // ter margem para aparecer. Amplitude maior = fluxo claramente vivo.
+    const ORBIT_AMP = 0.12;
     const writeAnchors = (t: number) => {
-      // Always-on orbits with per-anchor speed/phase variety so the palette is
-      // perpetually, gently in motion (not a static gradient) — independent of
-      // the pointer. Larger amplitude = clearly visible "living" flow.
       for (let i = 0; i < 5; i++) {
-        const sp = 0.13 + i * 0.018; // slightly different speed per blob
+        const sp = 0.22 + i * 0.03; // velocidade um pouco diferente por blob
         const phaseBrand = i * 1.31;
-        const brandDx = reduceMotion ? 0 : Math.sin(t * sp + phaseBrand) * 0.05;
+        const brandDx = reduceMotion ? 0 : Math.sin(t * sp + phaseBrand) * ORBIT_AMP;
         const brandDy =
-          reduceMotion ? 0 : Math.cos(t * (sp + 0.05) + phaseBrand * 1.4) * 0.05;
+          reduceMotion ? 0 : Math.cos(t * (sp + 0.05) + phaseBrand * 1.4) * ORBIT_AMP;
         writeVec2(
           brandAnchorUniforms[i].value,
           BRAND.anchors[i][0] + brandDx,
@@ -451,9 +459,9 @@ export function LoginMeshBackground({
         );
 
         const phaseBack = (i + 5) * 1.31;
-        const backDx = reduceMotion ? 0 : Math.sin(t * sp + phaseBack) * 0.05;
+        const backDx = reduceMotion ? 0 : Math.sin(t * sp + phaseBack) * ORBIT_AMP;
         const backDy =
-          reduceMotion ? 0 : Math.cos(t * (sp + 0.05) + phaseBack * 1.4) * 0.05;
+          reduceMotion ? 0 : Math.cos(t * (sp + 0.05) + phaseBack * 1.4) * ORBIT_AMP;
         writeVec2(
           backAnchorUniforms[i].value,
           BACK_DARK.anchors[i][0] + backDx,

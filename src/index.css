@@ -519,34 +519,43 @@ input[type='date']::-webkit-calendar-picker-indicator {
       z-index: 0;
       pointer-events: none;
       background:
-        radial-gradient(40% 50% at 20% 25%, rgba(201, 100, 197, 0.30), transparent 60%),
-        radial-gradient(45% 55% at 82% 28%, rgba(118, 32, 117, 0.22), transparent 62%),
-        radial-gradient(52% 55% at 65% 85%, rgba(157, 77, 156, 0.26), transparent 62%),
-        radial-gradient(42% 48% at 25% 80%, rgba(94, 25, 93, 0.18), transparent 60%);
-      background-size: 200% 200%;
-      animation: authFlow 22s ease-in-out infinite alternate;
+        radial-gradient(45% 55% at 20% 25%, rgba(201, 100, 197, 0.42), transparent 60%),
+        radial-gradient(50% 60% at 82% 28%, rgba(118, 32, 117, 0.34), transparent 62%),
+        radial-gradient(55% 60% at 65% 85%, rgba(157, 77, 156, 0.38), transparent 62%),
+        radial-gradient(48% 52% at 25% 80%, rgba(94, 25, 93, 0.30), transparent 60%);
+      background-size: 220% 220%;
+      /* 14s e trajeto de 4 pontos: o fundo flui de forma perceptível quando é a
+         base (WebGL indisponível). Antes eram 22-26s num vai-e-volta de 2 pontos,
+         que o olho lê como parado — a origem do "quando está desativo fica feio". */
+      animation: authFlow 14s ease-in-out infinite;
     }
 
     .dark .login-shell::before,
     .dark .auth-shell::before {
       background:
-        radial-gradient(40% 50% at 20% 25%, rgba(118, 32, 117, 0.55), transparent 60%),
-        radial-gradient(45% 55% at 82% 28%, rgba(74, 20, 72, 0.55), transparent 62%),
-        radial-gradient(52% 55% at 65% 85%, rgba(94, 25, 93, 0.5), transparent 62%),
-        radial-gradient(42% 48% at 25% 80%, rgba(58, 15, 57, 0.5), transparent 60%);
-      background-size: 200% 200%;
+        radial-gradient(45% 55% at 20% 25%, rgba(138, 43, 135, 0.65), transparent 60%),
+        radial-gradient(50% 60% at 82% 28%, rgba(74, 20, 72, 0.6), transparent 62%),
+        radial-gradient(55% 60% at 65% 85%, rgba(94, 25, 93, 0.58), transparent 62%),
+        radial-gradient(48% 52% at 25% 80%, rgba(58, 15, 57, 0.55), transparent 60%);
+      background-size: 220% 220%;
     }
   }
 
   @keyframes authFlow {
     0% {
-      background-position: 0% 50%;
+      background-position: 0% 0%;
+    }
+    25% {
+      background-position: 100% 35%;
     }
     50% {
-      background-position: 100% 50%;
+      background-position: 65% 100%;
+    }
+    75% {
+      background-position: 20% 60%;
     }
     100% {
-      background-position: 50% 100%;
+      background-position: 0% 0%;
     }
   }
 
@@ -601,31 +610,35 @@ input[type='date']::-webkit-calendar-picker-indicator {
        form area). Overrides the soft single-column fallback above. */
     .login-shell::before {
       background:
-        radial-gradient(55% 75% at 22% 38%, #7a2378, transparent 70%),
-        radial-gradient(50% 65% at 6% 82%, #4a1448, transparent 72%),
-        radial-gradient(46% 58% at 34% 6%, #8b2b87, transparent 72%),
+        radial-gradient(60% 80% at 22% 38%, #8b2b87, transparent 70%),
+        radial-gradient(52% 68% at 6% 82%, #4a1448, transparent 72%),
+        radial-gradient(48% 60% at 34% 6%, #9d4d9c, transparent 72%),
         linear-gradient(
           to right,
-          #5e195d 0%,
-          #5e195d 42%,
+          #4a1448 0%,
+          #4a1448 42%,
           rgba(94, 25, 93, 0) 54%
         );
-      background-size: 150% 150%;
-      animation: authFlow 26s ease-in-out infinite alternate;
+      /* `background-size` POR CAMADA: os três blobs fluem (190%, andam com a
+         animação), mas a base escura da esquerda (a última camada, o linear) fica
+         em 100% — imóvel — para o texto branco do painel de marca nunca ficar
+         sobre fundo claro. Foi o que quebrou quando a animação movia tudo junto. */
+      background-size: 190% 190%, 190% 190%, 190% 190%, 100% 100%;
+      animation: authFlow 15s ease-in-out infinite;
     }
 
     .dark .login-shell::before {
       background:
-        radial-gradient(55% 75% at 22% 38%, #5e195d, transparent 70%),
-        radial-gradient(50% 65% at 6% 82%, #2a0c2a, transparent 72%),
-        radial-gradient(46% 58% at 34% 6%, #4a1448, transparent 72%),
+        radial-gradient(60% 80% at 22% 38%, #6d1f6b, transparent 70%),
+        radial-gradient(52% 68% at 6% 82%, #2a0c2a, transparent 72%),
+        radial-gradient(48% 60% at 34% 6%, #4a1448, transparent 72%),
         linear-gradient(
           to right,
-          #3a0f39 0%,
-          #3a0f39 42%,
+          #26082a 0%,
+          #26082a 42%,
           rgba(0, 0, 0, 0) 54%
         );
-      background-size: 150% 150%;
+      background-size: 190% 190%, 190% 190%, 190% 190%, 100% 100%;
     }
   }
 
