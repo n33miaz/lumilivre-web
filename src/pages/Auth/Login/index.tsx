@@ -213,9 +213,13 @@ export function LoginPage() {
     // nowrap` faz a largura mínima do conteúdo ser o texto inteiro. A coluna
     // `auto` obedecia e ficava com 368px num aparelho de 320px, empurrando o
     // cartão para fora da tela (o `overflow-hidden` escondia, em vez de rolar).
+    // Altura TRAVADA na viewport (`h-[100svh]`, não `min-h-screen`): assim cada
+    // coluna vira uma área de rolagem própria e o cartão nunca fica mais alto que
+    // a tela sem ter como rolar até ele. Era o defeito do zoom / resolução baixa —
+    // o cartão estourava a viewport e o topo ficava inacessível.
     <main
       className={`
-        login-shell login-enter relative min-h-screen grid grid-cols-1 select-none overflow-hidden lg:grid-cols-2
+        login-shell login-enter relative h-[100svh] grid grid-cols-1 select-none overflow-hidden lg:grid-cols-2
         ${isExiting ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
       `}
     >
@@ -237,7 +241,7 @@ export function LoginPage() {
 
       <section
         ref={brandPanelRef}
-        className="login-brand-panel relative z-10 hidden flex-col justify-between gap-12 overflow-hidden px-12 py-14 text-white lg:flex"
+        className="login-brand-panel relative z-10 hidden flex-col justify-between gap-12 overflow-x-hidden overflow-y-auto px-12 py-12 text-white lg:flex"
       >
         {/* Marca em linha, sobre um filete — o mesmo cabeçalho de ficha da
             landing, lido em negativo. O quadrado de vidro de 48px que embrulhava
@@ -362,17 +366,21 @@ export function LoginPage() {
         </div>
       </section>
 
-      <section className="login-form-panel relative z-10 flex min-h-screen items-center justify-center px-5 py-20 lg:px-10">
+      {/* O painel do formulário ROLA por dentro (altura da viewport, `overflow-y`),
+          e o wrapper interno usa `min-h-full` + centralização: cabe → centrado;
+          não cabe → cresce e rola a partir do topo, sem clipar. */}
+      <section className="login-form-panel relative z-10 h-full overflow-y-auto">
         {/* Mesmo material da ficha do formulário: papel opaco, borda de 1px e o
-            canto de 2px. Era vidro fosco a 80% — e vidro sobre uma malha que
-            muda de cor o tempo todo é justamente o que o contraste não
-            perdoa. Opaco, o roxo do idioma passa de 3,7:1 para 9,4:1 no claro,
+            canto de 2px. `fixed` (não `absolute`): fica preso ao canto da tela e
+            não rola junto com o formulário quando o cartão é mais alto que a
+            viewport. Opaco, o roxo do idioma passa de 3,7:1 para 9,4:1 no claro,
             e no escuro a pastilha vira a mesma tinta do cartão. */}
-        <div className="ficha-pastilha paper-surface absolute right-5 top-5 z-20 flex items-center gap-1 px-1.5 py-1">
+        <div className="ficha-pastilha paper-surface fixed right-5 top-5 z-20 flex items-center gap-1 px-1.5 py-1">
           <LocaleSwitcher />
           <ThemeToggle />
         </div>
 
+        <div className="flex min-h-full flex-col items-center justify-center px-5 py-8 lg:px-10 lg:py-12">
         <div className="w-full max-w-md">
           {/* Cabeçalho de celular/tablet: o painel de marca da esquerda não
               existe abaixo de `lg`, então o `h1` da tela mora aqui. Antes o logo
@@ -476,6 +484,7 @@ export function LoginPage() {
               </a>
             </div>
           </div>
+        </div>
         </div>
       </section>
     </main>

@@ -41,7 +41,10 @@ export function AuthShell({
   const showMesh = useMediaQuery('(min-width: 640px)');
 
   return (
-    <main className="auth-shell login-enter relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-16 select-none">
+    // Altura travada na viewport + rolagem interna: a mesma correção do login.
+    // Num zoom ou tela baixa, a ficha rola a partir do topo em vez de estourar a
+    // viewport e ficar com o cabeçalho inacessível.
+    <main className="auth-shell login-enter relative h-[100svh] overflow-hidden select-none">
       {showMesh && (
         <LoginMeshBackground
           isDark={isDark}
@@ -52,24 +55,28 @@ export function AuthShell({
       )}
 
       {/* Mesma pastilha do login: papel opaco, borda de 1px e canto de 2px, o
-          material da ficha logo abaixo. As quatro telas de acesso têm de mostrar
-          o mesmo canto superior direito. */}
-      <div className="ficha-pastilha paper-surface absolute right-5 top-5 z-10 flex items-center gap-1 px-1.5 py-1">
+          material da ficha logo abaixo. `fixed` para ficar presa ao canto da tela
+          e não rolar junto com a ficha. */}
+      <div className="ficha-pastilha paper-surface fixed right-5 top-5 z-20 flex items-center gap-1 px-1.5 py-1">
         <LocaleSwitcher />
         <ThemeToggle />
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="ficha ficha-elevada paper-surface bg-paper-50 px-6 pb-12 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
-          <AuthCardHeader kicker={kicker} title={title} subtitle={subtitle} />
+      <div className="relative z-10 h-full overflow-y-auto">
+        <div className="flex min-h-full flex-col items-center justify-center px-5 py-10">
+          <div className="w-full max-w-md">
+            <div className="ficha ficha-elevada paper-surface bg-paper-50 px-6 pb-12 pt-6 dark:bg-ink-900 sm:px-8 sm:pt-8">
+              <AuthCardHeader kicker={kicker} title={title} subtitle={subtitle} />
 
-          {children}
+              {children}
 
-          {footer && (
-            <div className="mt-7 border-t border-paper-300 pt-6 text-center dark:border-white/10">
-              {footer}
+              {footer && (
+                <div className="mt-7 border-t border-paper-300 pt-6 text-center dark:border-white/10">
+                  {footer}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </main>
