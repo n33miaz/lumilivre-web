@@ -4,9 +4,9 @@
   "table.column.position": "क्रम",
   "table.column.reader": "पाठक",
   "table.column.registration": "नामांकन",
-  "table.column.loans": "ऋण",
+  "table.column.loans": "निर्गम",
   "section.podium": "शीर्ष 3 का मंच",
-  "section.distribution": "ऋणों का वितरण",
+  "section.distribution": "निर्गमों का वितरण",
   "section.top_readers": "शीर्ष पाठक (समग्र)",
   "pie.by_course": "पाठ्यक्रम अनुसार",
   "pie.by_module": "मॉड्यूल अनुसार",
@@ -24,7 +24,7 @@
   "filter.all_shifts": "सभी पालियाँ",
   "chart.empty": "चुने गए फ़िल्टर से कोई पाठक नहीं मिला।",
   "tooltip.books": "किताबें",
-  "tooltip.total_loans": "कुल ऋण",
+  "tooltip.total_loans": "कुल निर्गम",
   "books_count": "{{count}} किताबें",
   "page.eyebrow": "सहभागिता"
 }
